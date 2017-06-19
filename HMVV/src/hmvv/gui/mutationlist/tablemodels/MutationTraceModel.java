@@ -1,7 +1,5 @@
 package hmvv.gui.mutationlist.tablemodels;
 
-import java.util.ArrayList;
-
 import hmvv.model.Mutation;
 
 public class MutationTraceModel extends CommonTableModel {
@@ -27,8 +25,51 @@ public class MutationTraceModel extends CommonTableModel {
 			"sampleID"
 	};
 
-	public MutationTraceModel(ArrayList<Mutation> mutations){
-		super(mutations);
+	public MutationTraceModel(MutationList mutationList){
+		super(mutationList);
+	}
+	
+	@Override
+	public final Object getValueAt(int row, int column) {
+		Mutation mutation = getMutation(row);
+		switch(column){
+		case 0:
+			return mutation.isReported();
+		case 1:
+			return mutation.getGene();
+		case 2:
+			return mutation.getExons();
+		case 3:
+			return mutation.getHGVSc();
+		case 4:
+			return mutation.getHGVSp();
+		case 5:
+			return mutation.getAltFreq();
+		case 6:
+			return mutation.getReadDP();
+		case 7:
+			return mutation.getAltReadDP();
+		case 8:
+			return mutation.getChr();
+		case 9:
+			return mutation.getPos();
+		case 10:
+			return mutation.getRef();
+		case 11:
+			return mutation.getAlt();
+		case 12:
+			return mutation.getLastName();
+		case 13:
+			return mutation.getFirstName();
+		case 14:
+			return mutation.getOrderNumber();
+		case 15:
+			return mutation.getAssay();
+		case 16:
+			return mutation.getSampleID();
+		default:
+			return "UNDEFINED";
+		}
 	}
 	
 	@Override

@@ -8,9 +8,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -24,26 +21,23 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.RowFilter;
-import javax.swing.RowSorter;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.RowSorterEvent;
-import javax.swing.event.RowSorterListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.gui.mutationlist.tablemodels.CoordinatesTableModel;
 import hmvv.gui.mutationlist.tablemodels.G1000TableModel;
+import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.mutationlist.tablemodels.SampleTableModel;
 import hmvv.gui.mutationlist.tables.BasicTable;
 import hmvv.gui.mutationlist.tables.ClinVarTable;
+import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.mutationlist.tables.CoordinatesTable;
 import hmvv.gui.mutationlist.tables.G1000Table;
 import hmvv.gui.mutationlist.tables.SampleTable;
@@ -54,9 +48,7 @@ import hmvv.model.Mutation;
 
 public class MutationListFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
-	
-	private ArrayList<Mutation> mutations;
-	
+		
 	private BasicTable basicTabTable;
 	private BasicTableModel basicTabTableModel;
 
@@ -72,11 +64,16 @@ public class MutationListFrame extends JFrame {
 	private SampleTable sampleTabTable;
 	private SampleTableModel sampleTabTableModel;
 	
+	private MutationList mutationList;
+	
 	private JPanel contentPane;
+	private JTabbedPane tabbedPane;
+	private CommonTable selectedTable;
 	
 	private JCheckBox rdbtnShowReportedOnly;
 	private JCheckBox rdbtnCosmic;
-	private JButton btnReport;
+	private JButton shortReportButton;
+	private JButton longReportButton;
 	private JButton btnReset;
 	private JButton btnExport;
 	
@@ -85,31 +82,27 @@ public class MutationListFrame extends JFrame {
 	private JTextField textMinRD;
 	private JTextField textOccuranceFrom;
 	
-	private TableRowSorter<BasicTableModel> sorter;
-	private List<RowFilter<BasicTableModel, Integer>> filters;
-	
 	/**
 	 * Create the frame.
 	 */
-	public MutationListFrame(Component parent, ArrayList<Mutation> mutations, String title) throws Exception{
-		super("Mutation List " + title);
-		this.mutations = mutations;
+	public MutationListFrame(Component parent, MutationList mutationList, String title) throws Exception{
+		super("Mutation List - " + title);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
 		
+		this.mutationList = mutationList;
+		
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
 		setContentPane(contentPane);
 		
 		constructFilterPanel();
 		
 		constructTabs();
-		constructListSelectionListener();
-		constructRowSorter();
 		layoutComponents();
-		createRowFilter();
+		createSortChangeListener();
 		setLocationRelativeTo(parent);
 		loadMissingDataAsynchronous();
 	}
@@ -119,28 +112,33 @@ public class MutationListFrame extends JFrame {
 		constructTextFieldFilters();
 		constructButtons();
 	}
-	
+
 	private void constructTabs(){
-		basicTabTableModel = new BasicTableModel(mutations);
+		basicTabTableModel = new BasicTableModel(mutationList);
 		basicTabTable = new BasicTable(basicTabTableModel);
+		basicTabTable.setAutoCreateRowSorter(true);
 		
-		coordinatesTabTableModel = new CoordinatesTableModel(mutations);
+		coordinatesTabTableModel = new CoordinatesTableModel(mutationList);
 		coordinatesTabTable = new CoordinatesTable(coordinatesTabTableModel);
+		coordinatesTabTable.setAutoCreateRowSorter(true);
 		
-		g1000TabTableModel = new G1000TableModel(mutations);
+		g1000TabTableModel = new G1000TableModel(mutationList);
 		g1000TabTable = new G1000Table(g1000TabTableModel);
+		g1000TabTable.setAutoCreateRowSorter(true);
 		
-		clinVarTabTableModel = new ClinVarTableModel(mutations);
+		clinVarTabTableModel = new ClinVarTableModel(mutationList);
 		clinVarTabTable = new ClinVarTable(clinVarTabTableModel);
-		
-		sampleTabTableModel = new SampleTableModel(mutations);
+		clinVarTabTable.setAutoCreateRowSorter(true);
+
+		sampleTabTableModel = new SampleTableModel(mutationList);
 		sampleTabTable = new SampleTable(sampleTabTableModel);
+		sampleTabTable.setAutoCreateRowSorter(true);
 	}
-	
+
 	private void constructCheckBoxFilters(){
 		ActionListener actionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sorter.sort();
+				applyRowFilters();
 			}
 		};
 		
@@ -156,13 +154,13 @@ public class MutationListFrame extends JFrame {
 	private void constructTextFieldFilters(){
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
-				sorter.sort();
+				applyRowFilters();
 			}
 			public void removeUpdate(DocumentEvent e) {
-				sorter.sort();
+				applyRowFilters();
 			}
 			public void insertUpdate(DocumentEvent e) {
-				sorter.sort();
+				applyRowFilters();
 			}
 		};
 		
@@ -184,9 +182,13 @@ public class MutationListFrame extends JFrame {
 	}
 	
 	private void constructButtons(){
-		btnReport = new JButton("Report");
-		btnReport.setToolTipText("Generate report for the mutations marked as reported");
-		btnReport.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		shortReportButton = new JButton("Short Report");
+		shortReportButton.setToolTipText("Generate a short report for the mutations marked as reported");
+		shortReportButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		
+		longReportButton = new JButton("Long Report");
+		longReportButton.setToolTipText("Generate a long report for the mutations marked as reported");
+		longReportButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		
 		btnReset = new JButton("Reset");
 		btnReset.setToolTipText("Clear all filters and reset table");
@@ -199,140 +201,68 @@ public class MutationListFrame extends JFrame {
 		ActionListener actionListener = new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(e.getSource() == btnReport){
-					showReportPanel();
+				if(e.getSource() == shortReportButton){
+					showShortReportFrame();
+				}else if(e.getSource() == longReportButton){
+					showLongReportFrame();
 				}else if(e.getSource() == btnReset){
 					reset();
 				}else if(e.getSource() == btnExport){
 					try{
 						exportTable();
 					}catch(IOException ex){
+						ex.printStackTrace();
 						JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
 					}
 				}
 			}
 		};
 		
-		btnReport.addActionListener(actionListener);
+		shortReportButton.addActionListener(actionListener);
+		longReportButton.addActionListener(actionListener);
 		btnReset.addActionListener(actionListener);
 		btnExport.addActionListener(actionListener);
 	}
 
-	private void showReportPanel(){
+	private void showShortReportFrame(){
 		try{
-			ArrayList<HashMap<String, String>> report = MutationReportGenerator.generateReport(basicTabTableModel, clinVarTabTableModel,
-				coordinatesTabTableModel, g1000TabTableModel, sampleTabTableModel);
-			ReportFrame reportPanel = new ReportFrame(report);
-			reportPanel.setVisible(true);
+			String report = MutationReportGenerator.generateShortReport(mutationList);
+			showReportFrame(report);
 		}catch(Exception e){
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}
 	}
-	private void constructListSelectionListener() {
-		ListSelectionListener listSelectionListener = new ListSelectionListener(){
-			private volatile boolean updating = false;
-			
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				if(updating){
-					return;
-				}
-				
-				int[] selected = null;
-				if(e.getSource() == basicTabTable.getSelectionModel()){
-					selected = basicTabTable.getSelectedRows();
-				}else if(e.getSource() == coordinatesTabTable.getSelectionModel()){
-					selected = coordinatesTabTable.getSelectedRows();
-				}else if(e.getSource() == g1000TabTable.getSelectionModel()){
-					selected = g1000TabTable.getSelectedRows();
-				}else if(e.getSource() == clinVarTabTable.getSelectionModel()){
-					selected = clinVarTabTable.getSelectedRows();
-				}else if(e.getSource() == sampleTabTable.getSelectionModel()){
-					selected = sampleTabTable.getSelectedRows();
-				}else{
-					return;
-				}
-				
-				updating = true;
-				basicTabTable.clearSelection();
-				basicTabTable.getSelectionModel().clearSelection();
-				
-				coordinatesTabTable.clearSelection();
-				coordinatesTabTable.getSelectionModel().clearSelection();
-
-				g1000TabTable.clearSelection();
-				g1000TabTable.getSelectionModel().clearSelection();
-
-				clinVarTabTable.clearSelection();
-				clinVarTabTable.getSelectionModel().clearSelection();
-
-				sampleTabTable.clearSelection();
-				sampleTabTable.getSelectionModel().clearSelection();
-				
-				for (int i : selected){
-					basicTabTable.addRowSelectionInterval(i, i);
-					coordinatesTabTable.addRowSelectionInterval(i, i);
-					g1000TabTable.addRowSelectionInterval(i, i);
-					clinVarTabTable.addRowSelectionInterval(i, i);
-					sampleTabTable.addRowSelectionInterval(i, i);
-				}
-				updating = false;
-			}
-		};
-		
-		basicTabTable.getSelectionModel().addListSelectionListener(listSelectionListener);
-		coordinatesTabTable.getSelectionModel().addListSelectionListener(listSelectionListener);
-		g1000TabTable.getSelectionModel().addListSelectionListener(listSelectionListener);
-		clinVarTabTable.getSelectionModel().addListSelectionListener(listSelectionListener);
-		sampleTabTable.getSelectionModel().addListSelectionListener(listSelectionListener);
+	
+	private void showLongReportFrame(){
+		try{
+			String report = MutationReportGenerator.generateLongReport(mutationList);
+			showReportFrame(report);
+		}catch(Exception e){
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, e.getMessage());
+		}
 	}
 	
-	private void constructRowSorter() {
-		sorter = new TableRowSorter<BasicTableModel>(basicTabTableModel);
-		basicTabTable.setRowSorter(sorter);
-		coordinatesTabTable.setRowSorter(sorter);
-		g1000TabTable.setRowSorter(sorter);
-		clinVarTabTable.setRowSorter(sorter);
-		sampleTabTable.setRowSorter(sorter);
-		
-		RowSorterListener rowSorterListener = new RowSorterListener() {
-			@Override
-			public void sorterChanged(RowSorterEvent e) {
-				if (RowSorterEvent.Type.SORT_ORDER_CHANGED == e.getType()) {
-					RowSorter<?> sorter = e.getSource();
-					basicTabTable.getRowSorter().setSortKeys(sorter.getSortKeys());
-					coordinatesTabTable.getRowSorter().setSortKeys(sorter.getSortKeys());
-					g1000TabTable.getRowSorter().setSortKeys(sorter.getSortKeys());
-					clinVarTabTable.getRowSorter().setSortKeys(sorter.getSortKeys());
-					sampleTabTable.getRowSorter().setSortKeys(sorter.getSortKeys());
-				}
-			}
-		};
-		sorter.addRowSorterListener(rowSorterListener);
+	private void showReportFrame(String report){
+		ReportFrame reportPanel = new ReportFrame(this, report);
+		reportPanel.setVisible(true);
 	}
-
+	
 	private void layoutComponents(){
-		JScrollPane basicTabScrollPane = new JScrollPane();
-		JScrollPane coordinatesTabScrollPane = new JScrollPane();
-		JScrollPane g1000TabScrollPane = new JScrollPane();
-		JScrollPane clinVarTabScrollPane = new JScrollPane();
-		JScrollPane sampleTabScrollPane = new JScrollPane();
-		basicTabScrollPane.setViewportView(basicTabTable);
-		coordinatesTabScrollPane.setViewportView(coordinatesTabTable);
-		g1000TabScrollPane.setViewportView(g1000TabTable);
-		clinVarTabScrollPane.setViewportView(clinVarTabTable);
-		sampleTabScrollPane.setViewportView(sampleTabTable);
+		JScrollPane basicTabScrollPane = new JScrollPane(basicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane coordinatesTabScrollPane = new JScrollPane(coordinatesTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane g1000TabScrollPane = new JScrollPane(g1000TabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane clinVarTabScrollPane = new JScrollPane(clinVarTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane sampleTabScrollPane = new JScrollPane(sampleTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Basic", null, basicTabScrollPane, null);
 		tabbedPane.addTab("Coordinates", null, coordinatesTabScrollPane, null);
 		tabbedPane.addTab("G1000", null, g1000TabScrollPane, null);
 		tabbedPane.addTab("ClinVar", null, clinVarTabScrollPane, null);
 		tabbedPane.addTab("Sample", null, sampleTabScrollPane, null);
-		coordinatesTabScrollPane.getVerticalScrollBar().setModel(basicTabScrollPane.getVerticalScrollBar().getModel());
-		g1000TabScrollPane.getVerticalScrollBar().setModel(basicTabScrollPane.getVerticalScrollBar().getModel());
-		clinVarTabScrollPane.getVerticalScrollBar().setModel(basicTabScrollPane.getVerticalScrollBar().getModel());
-		sampleTabScrollPane.getVerticalScrollBar().setModel(basicTabScrollPane.getVerticalScrollBar().getModel());
+		selectedTable = basicTabTable;
 		
 		JLabel variantFrequencyLabel = new JLabel("Variant Frequency (altFreq)");
 		variantFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -345,17 +275,15 @@ public class MutationListFrame extends JFrame {
 		JLabel occurenceLabel = new JLabel("Min occurence");
 		occurenceLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		
-		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-				gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-						.addGap(46)
+		GroupLayout groupLayout = new GroupLayout(contentPane);
+		groupLayout.setHorizontalGroup(
+				groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup()
 						.addComponent(rdbtnCosmic)
 						.addGap(28)
 						.addComponent(rdbtnShowReportedOnly, GroupLayout.PREFERRED_SIZE, 194, GroupLayout.PREFERRED_SIZE)
 						.addContainerGap(784, Short.MAX_VALUE))
-				.addGroup(gl_contentPane.createSequentialGroup()
-						.addGap(46)
+				.addGroup(groupLayout.createSequentialGroup()
 						.addComponent(variantFrequencyLabel)
 						.addGap(10)
 						.addComponent(textFreqFrom, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
@@ -364,39 +292,40 @@ public class MutationListFrame extends JFrame {
 						.addGap(6)
 						.addComponent(textVarFreqTo, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
 						.addGap(45)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup()
+						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(182)
 										.addComponent(textMinRD, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE))
 								.addComponent(minReadDepthLabel, GroupLayout.PREFERRED_SIZE, 175, GroupLayout.PREFERRED_SIZE))
 						.addGap(45)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addComponent(occurenceLabel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
-								.addGroup(gl_contentPane.createSequentialGroup()
+								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(105)
 										.addComponent(textOccuranceFrom, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE))))
-				.addGroup(gl_contentPane.createSequentialGroup()
+				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(884)
-						.addComponent(btnReport)
+						.addComponent(shortReportButton)
+						.addGap(18)
+						.addComponent(longReportButton)
 						.addGap(18)
 						.addComponent(btnReset, GroupLayout.PREFERRED_SIZE, 79, GroupLayout.PREFERRED_SIZE)
 						.addGap(18)
 						.addComponent(btnExport, GroupLayout.PREFERRED_SIZE, 79, GroupLayout.PREFERRED_SIZE))
-				.addGroup(gl_contentPane.createSequentialGroup()
-						.addGap(47)
+				.addGroup(groupLayout.createSequentialGroup()
 						.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 1158, Short.MAX_VALUE))
 				);
-		gl_contentPane.setVerticalGroup(
-				gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
-								.addGroup(gl_contentPane.createSequentialGroup()
+		groupLayout.setVerticalGroup(
+				groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(20)
-										.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 												.addComponent(rdbtnCosmic)
 												.addComponent(rdbtnShowReportedOnly, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
 										.addGap(18)
-										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+										.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 												.addComponent(variantFrequencyLabel)
 												.addComponent(textFreqFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(textVarFreqTo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -404,127 +333,62 @@ public class MutationListFrame extends JFrame {
 												.addComponent(minReadDepthLabel)
 												.addComponent(occurenceLabel)
 												.addComponent(textOccuranceFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-								.addGroup(gl_contentPane.createSequentialGroup()
+								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(66)
 										.addComponent(variantFrequencyToLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
 						.addGap(11)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(btnReport)
+						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+								.addComponent(shortReportButton)
+								.addComponent(longReportButton)
 								.addComponent(btnReset)
 								.addComponent(btnExport))
 						.addGap(6)
 						.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
 						.addGap(20))
 				);
-		contentPane.setLayout(gl_contentPane);
+		contentPane.setLayout(groupLayout);
 	}
 	
-	private void createRowFilter(){
-		filters = new ArrayList<RowFilter<BasicTableModel, Integer>>();
-
-		RowFilter<BasicTableModel, Integer> cosmicFilter = new RowFilter<BasicTableModel, Integer>(){
-			@Override
-			public boolean include(Entry<? extends BasicTableModel , ? extends Integer> entry) {
-				if(!rdbtnCosmic.isSelected()){
-					return true;
-				}
-				BasicTableModel model = entry.getModel();
-				int row = entry.getIdentifier();
-				Mutation mutation = model.getMutation(row);
-				if(mutation.getValue("cosmicID") == null){
-					return false;
-				}
-				String cosmicID = mutation.getValue("cosmicID").toString();
-				return !cosmicID.equals("");
-			}
-		};
-		filters.add(cosmicFilter);
-		
-		RowFilter<BasicTableModel, Integer> reportedFilter = new RowFilter<BasicTableModel, Integer>(){
-			@Override
-			public boolean include(Entry<? extends BasicTableModel, ? extends Integer> entry) {
-				if(!rdbtnShowReportedOnly.isSelected()){
-					return true;
-				}
-				BasicTableModel model = entry.getModel();
-				int row = entry.getIdentifier();
-				Mutation mutation = model.getMutation(row);
-				if(mutation.getValue("reported") == null){
-					return false;
-				}
-				return (Boolean)mutation.getValue("reported");
-			}
-		};
-		filters.add(reportedFilter);
-		
-		RowFilter<BasicTableModel, Integer> frequencyFilter = new RowFilter<BasicTableModel, Integer>(){
-			
-			private boolean includeHelper(Entry<? extends BasicTableModel, ? extends Integer> entry){
-				BasicTableModel model = entry.getModel();
-				int row = entry.getIdentifier();
-				Mutation mutation = model.getMutation(row);
-				
-				if(mutation.getValue("altFreq") != null){
-					double variantFrequency = Double.parseDouble(mutation.getValue("altFreq").toString());
-					
-					int varFreqFromInt = getNumber(textFreqFrom, 0);
-					if(varFreqFromInt > variantFrequency){
-						return false;
-					}
-					
-					int varFreqToInt = getNumber(textVarFreqTo, 100);
-					if(varFreqToInt < variantFrequency){
-						return false;
-					}
-				}
-
-				if(mutation.getValue("occurrence") != null){
-					try{
-						int occurrence = Integer.parseInt(mutation.getValue("occurrence").toString());
-						int occuranceFromInt = getNumber(textOccuranceFrom, 0);
-						if(occuranceFromInt > occurrence){
-							return false;
-						}
-					}catch(NumberFormatException exception){
-						//unable to parse. This is likely because the occurrence is still "Loading..."
-					}
-				}
-
-				if(mutation.getValue("readDP") != null){
-					int readDepth = Integer.parseInt(mutation.getValue("readDP").toString());
-					int minReadDepth = getNumber(textMinRD, 0);
-					if(minReadDepth > readDepth){
-						return false;
-					}
-				}
-				
-				return true;
-			}
-			
-			@Override
-			public boolean include(Entry<? extends BasicTableModel, ? extends Integer> entry) {
-				try{
-					return includeHelper(entry);
-				}catch(Exception e){
-					e.printStackTrace();
-					return true;//default to include
-				}
-			}
-		};
-		filters.add(frequencyFilter);
-		
-		try{
-			RowFilter<BasicTableModel, Integer> rf = RowFilter.andFilter(filters);
-			sorter.setRowFilter(rf);
-			basicTabTable.setRowSorter(sorter);
-			coordinatesTabTable.setRowSorter(sorter);
-			g1000TabTable.setRowSorter(sorter);
-			clinVarTabTable.setRowSorter(sorter);
-			sampleTabTable.setRowSorter(sorter);
-		}catch(Exception e1){
-			//return;
-		}
+	private void createSortChangeListener(){
+		tabbedPane.addChangeListener(new ChangeListener() {
+	        public void stateChanged(ChangeEvent e) {
+	        	int selectedIndex = tabbedPane.getSelectedIndex();
+	        	
+	        	int[] modelRowToViewRow = new int[selectedTable.getRowCount()];
+	        	for(int i = 0; i < selectedTable.getRowCount(); i++){
+	        		modelRowToViewRow[i] = selectedTable.convertRowIndexToView(i);
+	        	}
+	        	mutationList.sortModel(modelRowToViewRow);
+	        	selectedTable.getRowSorter().setSortKeys(null);
+	        	if(selectedIndex == 0){
+	        		selectedTable = basicTabTable;
+	        	}else if(selectedIndex == 1){
+	        		selectedTable = coordinatesTabTable;
+	        	}else if(selectedIndex == 2){
+	        		selectedTable = g1000TabTable;
+	        	}else if(selectedIndex == 3){
+	        		selectedTable = clinVarTabTable;
+	        	}else if(selectedIndex == 4){
+	        		selectedTable = sampleTabTable;
+	        	}else{
+	        		//undefined
+	        		return;
+	        	}
+	        	selectedTable.resizeColumnWidths();
+	        }
+	    });
 	}
+	
+	private void applyRowFilters(){
+		boolean includeCosmicOnly = rdbtnCosmic.isSelected();
+		boolean includeReportedOnly = rdbtnShowReportedOnly.isSelected();
+		int frequencyFrom =  getNumber(textFreqFrom, 0);
+		int frequencyTo = getNumber(textVarFreqTo, 100);
+		int minOccurence = getNumber(textOccuranceFrom, 0);
+		int minReadDepth = getNumber(textMinRD, 0);
+		mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth);
+	}
+	
 	private int getNumber(JTextField field, Integer defaultInt){
 		String value = field.getText();
 		Integer valueInt = null;
@@ -542,19 +406,12 @@ public class MutationListFrame extends JFrame {
 
 	private void reset(){
 		rdbtnCosmic.setSelected(false);
-		rdbtnShowReportedOnly.setSelected(false);
-		sorter.setRowFilter(null);
-		
+		rdbtnShowReportedOnly.setSelected(false);		
 		textFreqFrom.setText("");
 		textVarFreqTo.setText("");
 		textMinRD.setText("");
 		textOccuranceFrom.setText("");
-		
-		basicTabTable.setRowSorter(sorter);
-		coordinatesTabTable.setRowSorter(sorter);
-		g1000TabTable.setRowSorter(sorter);
-		clinVarTabTable.setRowSorter(sorter);
-		sampleTabTable.setRowSorter(sorter);
+		applyRowFilters();
 	}
 
 	private void exportTable() throws IOException{
@@ -574,8 +431,7 @@ public class MutationListFrame extends JFrame {
 		
 		int returnValue = saveAs.showSaveDialog(this);
 		if(returnValue == JFileChooser.APPROVE_OPTION){
-			MutationReportGenerator.exportReport(saveAs.getSelectedFile(), basicTabTableModel,
-					clinVarTabTableModel, coordinatesTabTableModel, g1000TabTableModel, sampleTabTableModel);
+			MutationReportGenerator.exportReport(saveAs.getSelectedFile(), basicTabTableModel, clinVarTabTableModel, coordinatesTabTableModel, g1000TabTableModel, sampleTabTableModel);
 		}
 	}
 	
@@ -596,14 +452,25 @@ public class MutationListFrame extends JFrame {
 			}
 		});
 		
+		String tooltip = "Disabled while cosmic data is loading";
 		rdbtnCosmic.setEnabled(false);
-		rdbtnCosmic.setToolTipText("Disabled while cosmic data is loading");
+		rdbtnCosmic.setToolTipText(tooltip);
+		rdbtnShowReportedOnly.setEnabled(false);
+		rdbtnShowReportedOnly.setToolTipText(tooltip);
+		btnReset.setEnabled(false);
+		btnReset.setToolTipText(tooltip);
+		textFreqFrom.setEditable(false);
+		textFreqFrom.setToolTipText(tooltip);
+		textVarFreqTo.setEditable(false);
+		textVarFreqTo.setToolTipText(tooltip);
+		textMinRD.setEditable(false);
+		textMinRD.setToolTipText(tooltip);
 		textOccuranceFrom.setEditable(false);
-		textOccuranceFrom.setToolTipText("Disabled while cosmic data is loading");
-		final Thread one = createExtraMutationDataThread(mutations, 0, 4);
-		final Thread two = createExtraMutationDataThread(mutations, 1, 4);
-		final Thread three = createExtraMutationDataThread(mutations, 2, 4);
-		final Thread four = createExtraMutationDataThread(mutations, 3, 4);
+		textOccuranceFrom.setToolTipText(tooltip);
+		final Thread one = createExtraMutationDataThread(0, 4);
+		final Thread two = createExtraMutationDataThread(1, 4);
+		final Thread three = createExtraMutationDataThread(2, 4);
+		final Thread four = createExtraMutationDataThread(3, 4);
 		
 		Thread waitingThread = new Thread(new Runnable(){
 			@Override
@@ -616,6 +483,16 @@ public class MutationListFrame extends JFrame {
 				}catch(Exception e){}
 				rdbtnCosmic.setEnabled(true);
 				rdbtnCosmic.setToolTipText("");
+				rdbtnShowReportedOnly.setEnabled(true);
+				rdbtnShowReportedOnly.setToolTipText("");
+				btnReset.setEnabled(true);
+				btnReset.setToolTipText("");
+				textFreqFrom.setEditable(true);
+				textFreqFrom.setToolTipText("");
+				textVarFreqTo.setEditable(true);
+				textVarFreqTo.setToolTipText("");
+				textMinRD.setEditable(true);
+				textMinRD.setToolTipText("");
 				textOccuranceFrom.setEditable(true);
 				textOccuranceFrom.setToolTipText("");
 			}
@@ -623,39 +500,31 @@ public class MutationListFrame extends JFrame {
 		waitingThread.start();
 	}
 	
-	private Thread createExtraMutationDataThread(ArrayList<Mutation> mutations, int startIndex, int incrementIndex){
+	private Thread createExtraMutationDataThread(int startIndex, int incrementIndex){
 		Thread missingDataThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
-				getExtraMutationData(mutations, startIndex, incrementIndex);
+				getExtraMutationData(startIndex, incrementIndex);
 			}
 		});
 		missingDataThread.start();
 		return missingDataThread;
 	}
-
+	
 	private volatile boolean isWindowClosed;
-	private void getExtraMutationData(ArrayList<Mutation> mutations, int startIndex, int incrementIndex){
-		for(int index = startIndex; index < mutations.size(); index += incrementIndex){
+	private void getExtraMutationData(int startIndex, int incrementIndex){
+		for(int index = startIndex; index < basicTabTableModel.getRowCount(); index += incrementIndex){
 			if(isWindowClosed){
 				return;
 			}
-			Mutation mutation = mutations.get(index);
+			
 			try{
+				Mutation mutation = basicTabTableModel.getMutation(index);
 				String cosmicID = DatabaseCommands.getCosmicID(mutation);
 				int count = DatabaseCommands.getOccurrenceCount(mutation);
-
-				//because we created each model with the same ArrayList, we only have to update it here
-				//TODO don't hardcode these key values
-				mutations.get(index).addData("occurrence", count);
-				mutations.get(index).addData("cosmicID", cosmicID);
-				
-				basicTabTableModel.fireTableRowsUpdated(index, index);
-				coordinatesTabTableModel.fireTableRowsUpdated(index, index);
-				g1000TabTableModel.fireTableRowsUpdated(index, index);
-				clinVarTabTableModel.fireTableRowsUpdated(index, index);
-				sampleTabTableModel.fireTableRowsUpdated(index, index);
+				basicTabTableModel.updateModel(index, cosmicID, count);
 			}catch(Exception e){
+				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
 			}
 		}

@@ -28,7 +28,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.DocumentFilter;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tables.BasicTable;
+import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
@@ -37,7 +37,7 @@ import hmvv.model.Annotation;
 public class AnnotationFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
-	private BasicTable parent;
+	private CommonTable parent;
 	
 	private JPanel contentPanel;
 	private JButton okButton;
@@ -61,7 +61,7 @@ public class AnnotationFrame extends JFrame {
 	/**
 	 * Create the dialog.
 	 */
-	public AnnotationFrame(Boolean readOnly, Annotation annotation, BasicTable parent) {
+	public AnnotationFrame(Boolean readOnly, Annotation annotation, CommonTable parent) {
 		super("Annotation");
 		this.readOnly = readOnly;
 		this.currentAnnotation = annotation;

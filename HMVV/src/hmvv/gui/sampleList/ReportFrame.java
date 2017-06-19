@@ -1,13 +1,14 @@
 package hmvv.gui.sampleList;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -19,6 +20,9 @@ import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
+import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.MutationListFrame;
+
 public class ReportFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
@@ -27,58 +31,57 @@ public class ReportFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ReportFrame(ArrayList<HashMap<String, String>> report) {
-		this.setTitle("Generate Report");
+	public ReportFrame(MutationListFrame parent, String report) {
+		super("Variant Report");
+		
+		Rectangle bounds = GUICommonTools.getBounds(parent);
+		setSize((int)(bounds.width*.50), (int)(bounds.height*.70));
+		
+		setLocationRelativeTo(parent);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 911, 785);
+		setAlwaysOnTop(true);	
+		
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBorder(new EmptyBorder(15, 15, 15, 15));
+		contentPane.setLayout(new BorderLayout());
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
-		JTextArea textArea = new JTextArea();
+		
+		JTextArea textArea = new JTextArea(report);
 		textArea.addMouseListener(new ContextMenuMouseListener());
-		for(int i=0; i< report.size(); i++){
-			HashMap<String, String> record = report.get(i);
-			System.out.println(record.get("Name"));
-			textArea.append("Name: " + record.get("Name") + "\n");
-			textArea.append("OrderNumber: " + record.get("OrderNumber") + "\n");
-			textArea.append("Mutation Info: " + record.get("Mutation") + "\n");
-			textArea.append("Coordinate: " + record.get("Coordinate") + "\n");
-			//textArea.append("Genotype: " + record.get("Genotype") + "\n");
-			textArea.append("dbSNP ID: " + record.get("dbSNP") + "\n");
-			textArea.append("Cosmic ID: " + record.get("Cosmic") + "\n");
-			textArea.append("Occurance: " + record.get("Occurance") + "\n");
-			textArea.append("Somatic: " + record.get("Somatic") + "\n");
-			textArea.append("Classification: " + record.get("Classification") + "\n");
-			textArea.append("Curation Note: " + record.get("Curation") + "\n" + "\n");
-		}
-		JButton btnSaveAsFile = new JButton("Save As File");
-		btnSaveAsFile.addActionListener(new ActionListener(){
-
+		textArea.setLineWrap(true);
+		textArea.setWrapStyleWord(true);
+		
+		JButton saveAsButton = new JButton("Save As File");
+		saveAsButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 		            exportReport(textArea.getText());
 		        } catch (IOException ex) {
-		        	JOptionPane.showMessageDialog(null, ex.getMessage());
+		        	JOptionPane.showMessageDialog(parent, ex.getMessage());
 		        }
 			}
-			
 		});
-		btnSaveAsFile.setBounds(616, 56, 130, 23);
-		contentPane.add(btnSaveAsFile);
+		
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new GridLayout(1,0));
+		buttonPanel.add(new JPanel());
+		buttonPanel.add(new JPanel());
+		buttonPanel.add(new JPanel());
+		buttonPanel.add(new JPanel());
+		buttonPanel.add(new JPanel());
+		buttonPanel.add(saveAsButton);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(47, 136, 803, 569);
 		scrollPane.setViewportView(textArea);
-		contentPane.add(scrollPane);
-		
+		contentPane.add(buttonPanel, BorderLayout.NORTH);
+		contentPane.add(scrollPane, BorderLayout.CENTER);
 	}
 	
 	private void exportReport(String text) throws IOException{
-		JFileChooser SaveAs = new JFileChooser();
-		SaveAs.setAcceptAllFileFilterUsed(false);
-		SaveAs.addChoosableFileFilter(new FileFilter(){
+		JFileChooser saveAsFileChooser = new JFileChooser();
+		saveAsFileChooser.setAcceptAllFileFilterUsed(false);
+		saveAsFileChooser.addChoosableFileFilter(new FileFilter(){
 			@Override
 			public boolean accept(File file) {
 				return file.isDirectory() || file.getName().endsWith(".txt");
@@ -89,9 +92,9 @@ public class ReportFrame extends JFrame {
 				return ".txt file";
 			}			
 		});
-		int returnValue = SaveAs.showOpenDialog(SaveAs);
+		int returnValue = saveAsFileChooser.showOpenDialog(saveAsFileChooser);
 		if(returnValue == JFileChooser.APPROVE_OPTION){
-			File fileName = SaveAs.getSelectedFile();
+			File fileName = saveAsFileChooser.getSelectedFile();
 			if(!fileName.getName().endsWith(".txt")){
 				fileName = new File(fileName.toString() + ".txt");
 			}

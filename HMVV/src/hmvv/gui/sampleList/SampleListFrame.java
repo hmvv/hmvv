@@ -1,8 +1,6 @@
 package hmvv.gui.sampleList;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -21,6 +19,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -31,11 +32,15 @@ import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
+import hmvv.gui.CustomColumn;
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.HMVVTableCellRenderer;
+import hmvv.gui.adminFrames.CreateAssay;
+import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.mutationlist.MutationListFrame;
+import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.model.Mutation;
@@ -46,12 +51,17 @@ public class SampleListFrame extends JFrame {
 
 	private JTextField textRunID;
 	private TableRowSorter<SampleListTableModel> sorter;
-
+	
+	//Menu
+	private JMenuBar menuBar;
+	private JMenu adminMenu;
+	private JMenuItem enterSampleMenuItem;
+	private JMenuItem newAssayMenuItem;
+	
 	//Table
 	private JTable table;
 	private SampleListTableModel tableModel;
 	private JScrollPane tableScrollPane;
-	
 	
 	//Buttons
 	private JButton sampleSearchButton;
@@ -65,6 +75,8 @@ public class SampleListFrame extends JFrame {
 
 	private JComboBox<String> assayComboBox;
 
+	private CustomColumn[] customColumns;
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -75,19 +87,55 @@ public class SampleListFrame extends JFrame {
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.90), (int)(bounds.height*.90));
 
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		customColumns = CustomColumn.getCustomColumnArray(samples.size(), 0, 14, 16, 17);
+		createMenu();
 		createComponents();
 		layoutComponents();
 		activateComponents();
 		setLocationRelativeTo(parent);
 	}
 	
+	private void createMenu(){
+		menuBar = new JMenuBar();
+		adminMenu = new JMenu("Admin");
+		enterSampleMenuItem = new JMenuItem("Enter Sample");
+		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
+		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
+		
+		menuBar.add(adminMenu);
+		adminMenu.add(enterSampleMenuItem);
+		adminMenu.add(newAssayMenuItem);
+		setJMenuBar(menuBar);
+		
+		ActionListener listener = new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource() == enterSampleMenuItem){
+					EnterSample sampleEnter = new EnterSample(SampleListFrame.this);
+					sampleEnter.setVisible(true);
+				}else if(e.getSource() == newAssayMenuItem){
+					if(SSHConnection.isSuperUser()){
+						CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
+						createAssay.setVisible(true);
+					}else{
+						JOptionPane.showMessageDialog(SampleListFrame.this, "Only authorized users can create an assay");
+					}
+				}
+			}
+		};
+		
+		enterSampleMenuItem.addActionListener(listener);
+		newAssayMenuItem.addActionListener(listener);
+	}
+	
 	private void createComponents(){
 		table = new JTable(tableModel);
 		
-		table.setDefaultRenderer(Object.class, new TableCellRenderer());
-		table.setDefaultRenderer(Integer.class, new TableCellRenderer());
+		table.setDefaultRenderer(Object.class, new HMVVTableCellRenderer(customColumns));
+		table.setDefaultRenderer(Integer.class, new HMVVTableCellRenderer(customColumns));
 		table.setAutoCreateRowSorter(true);
 		
 		sorter = new TableRowSorter<SampleListTableModel>(tableModel);
@@ -196,12 +244,8 @@ public class SampleListFrame extends JFrame {
 		table.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				Point p = e.getPoint();
-				if((table.columnAtPoint (p) == 0) || (table.columnAtPoint (p) == 14) || (table.columnAtPoint (p) == 16) || (table.columnAtPoint (p) == 17) ){
-					table.setCursor (Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				}else{
-					table.setCursor (Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				}
+				int column = table.columnAtPoint(e.getPoint());
+				table.setCursor(customColumns[column].cursor);
 			}
 		});
 		
@@ -283,6 +327,7 @@ public class SampleListFrame extends JFrame {
 				handleEditSampleClick();
 			}
 		}catch (Exception e){
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}
 	}
@@ -292,13 +337,13 @@ public class SampleListFrame extends JFrame {
 		ArrayList<Mutation> mutations = DatabaseCommands.getMutationDataByID(currentSample.ID);
 		
 		for(Mutation m : mutations){
-			m.addData("cosmicID", "LOADING...");
-			m.addData("occurrence", "LOADING...");
+			m.setCosmicID("LOADING...");
 		}
 		
 		String header = currentSample.getLastName() + "," + currentSample.getFirstName() +
 				" (runID = " + currentSample.runID + ", sampleID = " + currentSample.sampleID + ", callerID = " + currentSample.callerID + ")";
-		MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutations, header);
+		MutationList mutationList = new MutationList(mutations);
+		MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationList, header);
 		mutationListFrame.setVisible(true);
 	}
 
@@ -453,8 +498,9 @@ public class SampleListFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try{
 					ArrayList<Mutation> mutations = searchMutation.getMutationSearchResults();
-					MutationListFrame mutationList = new MutationListFrame(SampleListFrame.this, mutations, "Search Result");
-					mutationList.setVisible(true);
+					MutationList mutationSearchList = new MutationList(mutations);
+					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationSearchList, "Search Result");
+					mutationListFrame.setVisible(true);
 					searchMutation.dispose();
 				}catch(Exception ex){
 					JOptionPane.showMessageDialog(SampleListFrame.this, ex.getMessage());
@@ -496,20 +542,5 @@ public class SampleListFrame extends JFrame {
 			return "";
 		}
 		return (table.getModel().getValueAt(row, column)).toString();
-	}
-	
-	private class TableCellRenderer extends DefaultTableCellRenderer {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			if ((column == 0) || (column == 14) || (column == 16) || (column == 17)) {
-				c.setForeground(Color.BLUE);
-			} else{
-				c.setForeground(Color.BLACK);
-			}
-			return c;
-		}
 	}
 }

@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -170,7 +169,7 @@ public class DatabaseCommands {
 				+ " t2.type, t2.genotype, t2.altFreq, t2.readDP, t2.altReadDP, "
 				+ " t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq,"
-				+ " t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc,t2.pubmed,"
+				+ " t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t2.sampleID, t7.updateStat"
 				+ " from ngs.data as t2"
 				+ " left join ngs.g1000 as t4"
@@ -220,7 +219,7 @@ public class DatabaseCommands {
 	 */
 	public static int getOccurrenceCount(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String assay = mutation.getValue("assay").toString();
+		String assay = mutation.getAssay();
 		String query = "select count(*) as occurrence from ngs.data"
 				+ " where genotype != 'No Call' and chr = ? and pos = ? and ref = ? and alt = ? and assay = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -242,12 +241,12 @@ public class DatabaseCommands {
 	}
 	
 	public static ArrayList<Mutation> getMatchingMutations(Mutation mutation) throws Exception{
-		String chr = mutation.getValue("chr").toString();
-		String pos = mutation.getValue("pos").toString();
-		String ref = mutation.getValue("ref").toString();
-		String alt = mutation.getValue("alt").toString();
+		String chr = mutation.getChr();
+		String pos = mutation.getPos();
+		String ref = mutation.getRef();
+		String alt = mutation.getAlt();
 		Integer posInt = Integer.parseInt(pos);
-		String assay = mutation.getValue("assay").toString();
+		String assay = mutation.getAssay();
 		
 		CallableStatement callableStatement = databaseConnection.prepareCall("{call getDataByCoordinate(?,?,?,?,?)}");
 		callableStatement.setString(1, chr);
@@ -332,72 +331,133 @@ public class DatabaseCommands {
 	
 	private static ArrayList<Mutation> makeModel(ResultSet rs) throws Exception{
 		ArrayList<Mutation> mutations = new ArrayList<Mutation>();
-
-		ResultSetMetaData rsmt = rs.getMetaData();
-		int colCount = rsmt.getColumnCount();
-		String[] columnNames = new String[colCount];
-		
-		for(int i = 0; i < colCount; i++){
-			columnNames[i] = rsmt.getColumnName(i+1);
-			//TODO don't hack this these column names
-			if (columnNames[i].equals("updateStat")){
-				columnNames[i] = "annotation";
-			}
-			if (columnNames[i].equals("occurance")){
-				columnNames[i] = "occurrence";
-			}
-		}
 		
 		while(rs.next()){
 			Mutation mutation = new Mutation();
-			for(int i = 0; i < colCount; i++){
-				String value = rs.getString(i+1);
-				if(columnNames[i].equals("reported")){
-					//Sets "reported" to true if the value in the database is not 0
-					mutation.addData(columnNames[i], Integer.parseInt(value) != 0);
-				}else if (columnNames[i].equals("annotation")){
-					//TODO don't hack this one column's value
-					Object parseValue = parseValue(value);
-					if(parseValue == null){
-						mutation.addData(columnNames[i], "Enter");
-					}else{
-						mutation.addData(columnNames[i], "Annotation");
-					}
-				}else{
-					mutation.addData(columnNames[i], parseValue(value));
-				}
+			
+			//common
+			boolean reported = Integer.parseInt(rs.getString("reported")) != 0;
+			String gene = rs.getString("gene");
+			String exons = rs.getString("exons");
+			String HGVSc = rs.getString("HGVSc");
+			String HGVSp = rs.getString("HGVSp");
+			mutation.setReported(reported);
+			mutation.setGene(gene);
+			mutation.setExons(exons);
+			mutation.setHGVSc(HGVSc);
+			mutation.setHGVSp(HGVSp);			
+			
+			//basic
+			String dbSNPID = rs.getString("dbSNPID");
+			
+			String type = rs.getString("type");
+			String genotype = rs.getString("genotype");
+			Double altFreq = parseDouble(rs.getString("altFreq"));
+			Integer readDP = parseInt(rs.getString("readDP"));
+			Integer altReadDP = parseInt(rs.getString("altReadDP"));
+			String annotation = rs.getString("updateStat");
+			if(annotation == null){
+				annotation = "Enter";
+			}else{
+				annotation = "Annotation";
 			}
+			mutation.setDbSNPID(dbSNPID);
+			
+			mutation.setType(type);
+			mutation.setGenotype(genotype);
+			mutation.setAltFreq(altFreq);
+			mutation.setReadDP(readDP);
+			mutation.setAltReadDP(altReadDP);
+			
+			mutation.setAnnotation(annotation);
+			
+			//ClinVar
+			String origin = rs.getString("origin");
+			String clinicalAllele = rs.getString("clinicalAllele");
+			String clinicalSig = rs.getString("clinicalSig");
+			String clinicalAcc = rs.getString("clinicalAcc");
+			String pubmed = rs.getString("pubmed");
+			mutation.setOrigin(origin);
+			mutation.setClinicalAllele(clinicalAllele);
+			mutation.setClinicalSig(clinicalSig);
+			mutation.setClinicalAcc(clinicalAcc);
+			mutation.setPubmed(pubmed);
+						
+			//Coordinates
+			String chr = rs.getString("chr");
+			String pos = rs.getString("pos");
+			String ref = rs.getString("ref");
+			String alt = rs.getString("alt");
+			String consequence = rs.getString("Consequence");
+			String sift = rs.getString("Sift");
+			String polyPhen = rs.getString("PolyPhen");
+			mutation.setChr(chr);
+			mutation.setPos(pos);
+			mutation.setRef(ref);
+			mutation.setAlt(alt);
+			mutation.setConsequence(consequence);
+			mutation.setSift(sift);
+			mutation.setPolyPhen(polyPhen);
+						
+			//G1000
+			Integer altCount = parseInt(rs.getString("altCount"));
+			Integer totalCount = parseInt(rs.getString("totalCount"));
+			Double altGlobalFreq = parseDouble(rs.getString("altGlobalFreq"));
+			Double americanFreq = parseDouble(rs.getString("americanFreq"));
+			Double asianFreq = parseDouble(rs.getString("asianFreq"));
+			Double afrFreq = parseDouble(rs.getString("afrFreq"));
+			Double eurFreq = parseDouble(rs.getString("eurFreq"));
+			mutation.setAltCount(altCount);
+			mutation.setTotalCount(totalCount);
+			mutation.setAltGlobalFreq(altGlobalFreq);
+			mutation.setAmericanFreq(americanFreq);
+			mutation.setAsianFreq(asianFreq);
+			mutation.setAfricanFreq(afrFreq);
+			mutation.setEurFreq(eurFreq);
+			
+			//Sample
+			String lastName = rs.getString("lastName");
+			String firstName = rs.getString("firstName");
+			String orderNumber = rs.getString("orderNumber");
+			String assay = rs.getString("assay");
+			Integer sampleID = parseInt(rs.getString("sampleID"));
+			mutation.setLastName(lastName);
+			mutation.setFirstName(firstName);
+			mutation.setOrderNumber(orderNumber);
+			mutation.setAssay(assay);
+			mutation.setSampleID(sampleID);
+			
+			//extra data
+			//TODO Don't treat these fields in a special way
+			try{
+				String cosmicID = rs.getString("cosmicID");//TODO Remove this?
+				mutation.setCosmicID(cosmicID);
+			}catch(Exception e){}
+			
+			try{
+				Integer occurrence = parseInt(rs.getString("occurance"));//TODO Remove this? Also, fix spelling in database
+				mutation.setOccurrence(occurrence);
+			}catch(Exception e){}
+			
 			mutations.add(mutation);
 		}
 		return mutations;
 	}
 	
-	private static Object parseValue(Object value){
-		if(value == null){
+	private static Double parseDouble(String input){
+		try{
+			return Double.parseDouble(input);
+		}catch(Exception e){
 			return null;
 		}
-		
-		String stringVal = value.toString();
-		
-		if(stringVal.equals("true")){
-			return true;
-		}
-		if(stringVal.equals("false")){
-			return false;
-		}
-		if(stringVal.toLowerCase().equals("null")){
+	}
+	
+	private static Integer parseInt(String input){
+		try{
+			return Integer.parseInt(input);
+		}catch(Exception e){
 			return null;
 		}
-		
-		try{
-			return Integer.parseInt(stringVal);
-		}catch(Exception e){}
-		
-		try{
-			return Double.parseDouble(stringVal);
-		}catch(Exception e){}
-		
-		return stringVal;
 	}
 	
 	/**
@@ -411,12 +471,12 @@ public class DatabaseCommands {
 	 * @param alt
 	 * @throws SQLException
 	 */
-	public static void updateReportedStatus(boolean setToReported, String sampleID, Coordinate coordinate) throws SQLException{
+	public static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		String reported = (setToReported) ? "1" : "0";
 		PreparedStatement updateStatement = databaseConnection.prepareStatement(
 				"update ngs.data set reported = ? where sampleID = ? and chr = ? and pos = ? and ref = ? and alt = ?");
 		updateStatement.setString(1, reported);
-		updateStatement.setString(2, sampleID);
+		updateStatement.setString(2, sampleID.toString());
 		updateStatement.setString(3, coordinate.getChr());
 		updateStatement.setString(4, coordinate.getPos());
 		updateStatement.setString(5, coordinate.getRef());

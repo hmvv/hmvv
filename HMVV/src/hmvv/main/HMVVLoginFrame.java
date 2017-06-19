@@ -1,6 +1,5 @@
 package hmvv.main;
 
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -16,8 +15,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.adminFrames.CreateAssay;
-import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
@@ -29,9 +26,6 @@ public class HMVVLoginFrame extends JFrame {
 	private JTextField usernameTextField;
 	private JPasswordField passwordTextField;
 	private JButton loginButton;
-	private JButton enterSampleButton;
-	private JButton createAssayButton;
-	private JButton viewResultsButton;
 	
 	/**
 	 * Launch the application.
@@ -77,10 +71,6 @@ public class HMVVLoginFrame extends JFrame {
 		loginButton = new JButton("Login");
 		usernameTextField = new JTextField();
 		passwordTextField = new JPasswordField();
-		
-		enterSampleButton = new JButton("Enter Sample");
-		createAssayButton = new JButton();
-		viewResultsButton = new JButton("View Results");
 	}
 	
 	private void layoutLoginComponents(){
@@ -115,76 +105,12 @@ public class HMVVLoginFrame extends JFrame {
 		setLocation(bounds.width/2-getSize().width/2, bounds.height/2-getSize().height/2);
 	}
 	
-	private void layoutPostLoginComponents(){
-		panel.removeAll();
-		int xLocation = 125;
-		viewResultsButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		viewResultsButton.setBounds(xLocation, 20, 166, 68);
-		
-		enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		enterSampleButton.setBounds(xLocation, 115, 166, 68);
-		
-		createAssayButton.setLayout(new BorderLayout());
-		createAssayButton.setEnabled(SSHConnection.isSuperUser());
-		JLabel label1 = new JLabel("Create Assay");
-		label1.setHorizontalAlignment(JLabel.CENTER);
-		JLabel label2 = new JLabel("(Super User Only)");
-		label2.setHorizontalAlignment(JLabel.CENTER);
-		label1.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		label2.setFont(GUICommonTools.TAHOMA_BOLD_12);
-		createAssayButton.add(BorderLayout.NORTH, label1);
-		createAssayButton.add(BorderLayout.CENTER, label2);
-		
-		createAssayButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		createAssayButton.setBounds(xLocation, 210, 166, 68);
-		createAssayButton.setEnabled(SSHConnection.isSuperUser());
-		
-		panel.add(viewResultsButton);
-		panel.add(enterSampleButton);
-		panel.add(createAssayButton);
-		
-		panel.revalidate();
-		panel.repaint();
-	}
-	
 	private void activateComponents(){
 		loginButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				login();
 			}			
-		});
-		
-		viewResultsButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try{
-					SampleListFrame sampleList = new SampleListFrame(HMVVLoginFrame.this, DatabaseCommands.getSamplesByAssay("All"));
-					sampleList.setVisible(true);
-				}catch(Exception e){
-					JOptionPane.showMessageDialog(HMVVLoginFrame.this, e.getClass().toString() + " - " + e.getMessage());
-				}
-			}
-		});
-		
-		enterSampleButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				EnterSample sampleEnter = new EnterSample(HMVVLoginFrame.this);
-				sampleEnter.setVisible(true);
-			}
-		});
-		
-		createAssayButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(SSHConnection.isSuperUser()){
-					CreateAssay createAssay = new CreateAssay(HMVVLoginFrame.this);
-					createAssay.setVisible(true);
-				}else{
-					JOptionPane.showMessageDialog(HMVVLoginFrame.this, "Only authorized users can create an assay");
-				}
-			}
 		});
 	}
 	
@@ -210,6 +136,12 @@ public class HMVVLoginFrame extends JFrame {
 			return;
 		}
 		
-		layoutPostLoginComponents();
+		try{
+			SampleListFrame sampleList = new SampleListFrame(HMVVLoginFrame.this, DatabaseCommands.getSamplesByAssay("All"));
+			sampleList.setVisible(true);
+			dispose();
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(this, "Could not construct sample list (" + e.getMessage() + ")." + " Please contact the system administrator.");
+		}
 	}
 }

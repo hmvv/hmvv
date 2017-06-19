@@ -4,71 +4,83 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.gui.mutationlist.tablemodels.CoordinatesTableModel;
 import hmvv.gui.mutationlist.tablemodels.G1000TableModel;
+import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.mutationlist.tablemodels.SampleTableModel;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
+import hmvv.model.Mutation;
 
 public class MutationReportGenerator{
-	public static ArrayList<HashMap<String, String>> generateReport(BasicTableModel basicTable, ClinVarTableModel clinvarTable, CoordinatesTableModel coordinatesTable,
-			G1000TableModel g1000Table, SampleTableModel sampleTable) throws Exception{
-		ArrayList<HashMap<String, String>> report = new ArrayList<HashMap<String, String>>();
-
-		for(int i = 0; i<basicTable.getRowCount(); i++){
-			Boolean reported = Boolean.valueOf(basicTable.getValueAt(i, 0).toString());
-			if(reported){
-				HashMap<String, String> record = new HashMap<String, String>();
-				String lastName = "";
-				String firstName = "";
-				if(sampleTable.getValueAt(i, 5) != null){
-					lastName = sampleTable.getValueAt(i, 5).toString();
-				}
-				if(sampleTable.getValueAt(i, 6) != null){
-					firstName = sampleTable.getValueAt(i, 6).toString();
-				}
-				String name = lastName + "," + firstName;
-				String cDNA = String.valueOf(basicTable.getValueAt(i, 3));
-				String codon = String.valueOf(basicTable.getValueAt(i, 4));
-				String gene = String.valueOf(basicTable.getValueAt(i, 1));
-				String mutation = gene + ":" + cDNA + ";" + codon;
-				String dbSNP = String.valueOf(basicTable.getValueAt(i, 5));
-				String chr = (coordinatesTable.getValueAt(i, 5)).toString();
-				String pos = (coordinatesTable.getValueAt(i, 6)).toString();
-				String ref = (coordinatesTable.getValueAt(i, 7)).toString();
-				String alt = (coordinatesTable.getValueAt(i, 8)).toString();
-				
-				Coordinate coordinate = new Coordinate(chr, pos, ref, alt);
-				Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
-				
-				String orderNumber = "";
-				if(sampleTable.getValueAt(i, 7) != null){
-					orderNumber = sampleTable.getValueAt(i, 7).toString();
-				}
-				record.put("Name", name);
-				record.put("OrderNumber", orderNumber);
-				record.put("Mutation", mutation);
-				record.put("Coordinate", coordinate.getCoordinateAsString());
-				//record.put("Genotype", table1.getValueAt(i, 8).toString());
-				record.put("dbSNP", dbSNP);
-				record.put("Cosmic", String.valueOf(basicTable.getValueAt(i, 6)));
-				record.put("Occurance", String.valueOf(basicTable.getValueAt(i, 12)));
-				record.put("Somatic", annotation.getSomatic());
-				record.put("Classification", annotation.getClassification());
-				record.put("Curation", annotation.getCuration());
-				
-				report.add(record);
+	public static String generateLongReport(MutationList mutationList) throws Exception{
+		StringBuilder report = new StringBuilder(500);
+		for(int i = 0; i < mutationList.getMutationCount(); i++){
+			Mutation mutation = mutationList.getMutation(i);
+			if(!mutation.isReported()){
+				continue;
+			}
+			
+			
+			String name = mutation.getLastName() + ", " + mutation.getFirstName();
+			String cDNA = mutation.getHGVSc();
+			String codon = mutation.getHGVSp();
+			String gene = mutation.getGene();
+			String mutationText = gene + ":" + cDNA + ";" + codon;
+			String dbSNP = mutation.getDbSNPID();
+			Coordinate coordinate = mutation.getCoordinate();
+			Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
+			String orderNumber = mutation.getOrderNumber();
+			String genotype = mutation.getGenotype();
+			String cosmic = mutation.getCosmicID();
+			int occurrence = mutation.getOccurrence();
+			
+			report.append("Name: " + name + "\n");
+			report.append("OrderNumber: " + orderNumber + "\n");
+			report.append("Mutation Info: " + mutationText + "\n");
+			report.append("Coordinate: " + coordinate.getCoordinateAsString() + "\n");
+			report.append("Genotype: " + genotype + "\n");
+			report.append("dbSNP ID: " + dbSNP + "\n");
+			report.append("Cosmic ID: " +cosmic + "\n");
+			report.append("Occurence: " + occurrence + "\n");
+			if(annotation.isAnnotationSet()){
+				String somatic = annotation.getSomatic();
+				String classification = annotation.getClassification();
+				String curation = annotation.getCuration();
+				report.append("Somatic: " + somatic + "\n");
+				report.append("Classification: " + classification + "\n");
+				report.append("Curation Note: " + curation + "\n" + "\n");
 			}
 		}
 
-		return report;
+		return report.toString();
 	}
 
+	public static String generateShortReport(MutationList mutationList) throws Exception{
+		StringBuilder report = new StringBuilder(500);
+		for(int i = 0; i < mutationList.getMutationCount(); i++){
+			Mutation mutation = mutationList.getMutation(i);
+			if(!mutation.isReported()){
+				continue;
+			}
+			
+			String cDNA = mutation.getHGVSc();
+			String codon = mutation.getHGVSp();
+			String gene = mutation.getGene();
+			String mutationText = gene + ":" + cDNA + ";" + codon;
+			Coordinate coordinate = mutation.getCoordinate();
+			Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
+			String curation = annotation.getCuration();
+			
+			report.append("Mutation Info: " + mutationText + "\n");
+			report.append("Curation Note: " + curation + "\n" + "\n");
+		}
+
+		return report.toString();
+	}
+	
 	public static void exportReport(File outputFile, BasicTableModel basicTable, ClinVarTableModel clinvarTable, CoordinatesTableModel coordinatesTable,
 			G1000TableModel g1000Table, SampleTableModel sampleTable) throws IOException{
 		File fileName = outputFile;

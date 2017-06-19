@@ -1,34 +1,38 @@
 package hmvv.gui.mutationlist.tablemodels;
 
-import java.util.ArrayList;
-
 import javax.swing.table.AbstractTableModel;
-
 import hmvv.model.Mutation;
 
-public abstract class CommonTableModel extends AbstractTableModel {
+public abstract class CommonTableModel extends AbstractTableModel implements MutationListListener{
 	private static final long serialVersionUID = 1L;
 
-	protected ArrayList<Mutation> mutations;
+	protected MutationList mutationList;
 
-	public CommonTableModel(ArrayList<Mutation> mutations){
-		this.mutations = mutations;
+	public CommonTableModel(MutationList mutationList){
+		this.mutationList = mutationList;
+		mutationList.addListener(this);
 	}
-
-	public abstract String[] getColumnNames();
 	
 	public final Mutation getMutation(int row){
-		return mutations.get(row);
+		return mutationList.getMutation(row);
 	}
 	
-	public final void updateMutationData(int row, String key, Object value){
-		mutations.get(row).addData(key, value);
-		String[] columnNames = getColumnNames();
-		for(int column = 0; column < columnNames.length; column++){
-			if(columnNames[column].equals(key)){
-				fireTableCellUpdated(row, column);
-			}
-		}		
+	public void updateAnnotationText(String text, int row){
+		mutationList.updateAnnotationText(text, row);
+	}
+	
+	public void updateReportedStatus(boolean reported, int row){
+		mutationList.updateReportedStatus(reported, row);
+	}
+	
+	/**
+	 * Here we are assuming all tables have the reported field on column 0
+	 */
+	@Override
+	public void setValueAt(Object object, int row, int column){
+		if(column == 0){
+			updateReportedStatus((Boolean)object, row);
+		}
 	}
 	
 	@Override 
@@ -40,20 +44,37 @@ public abstract class CommonTableModel extends AbstractTableModel {
 	public final String getColumnName(int column) {
 		return getColumnNames()[column];
 	}
-
+	
 	@Override
 	public final int getColumnCount() {
 		return getColumnNames().length;
 	}
-
+	
 	@Override
 	public final int getRowCount() {
-		return mutations.size();
+		return mutationList.getMutationCount();
 	}
 
+	protected abstract String[] getColumnNames();
+	
 	@Override
-	public final Object getValueAt(int row, int column) {
-		return mutations.get(row).getValue(getColumnName(column));
+	public abstract Class<?> getColumnClass(int column);
+	
+	@Override
+	public abstract Object getValueAt(int row, int column);
+	
+	@Override
+	public void mutationUpdated(int index){
+		fireTableRowsUpdated(index, index);
 	}
-
+	
+	@Override
+	public void mutationListStructureChanged(){
+		fireTableStructureChanged();
+	}
+	
+	@Override
+	public void mutationDataChanged(){
+		fireTableDataChanged();
+	}
 }

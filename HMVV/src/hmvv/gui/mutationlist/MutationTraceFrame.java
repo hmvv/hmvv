@@ -2,7 +2,6 @@ package hmvv.gui.mutationlist;
 
 import java.awt.Component;
 import java.awt.Rectangle;
-import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -13,9 +12,10 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 
+import hmvv.gui.BooleanRenderer;
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.mutationlist.tablemodels.MutationTraceModel;
-import hmvv.model.Mutation;
 
 public class MutationTraceFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -24,9 +24,9 @@ public class MutationTraceFrame extends JFrame {
 	private JTable table;
 	private MutationTraceModel model;
 	
-	public MutationTraceFrame(Component parent, ArrayList<Mutation> mutations, String title) {
+	public MutationTraceFrame(Component parent, MutationList mutationList, String title) {
 		super(title);
-		this.model = new MutationTraceModel(mutations);
+		this.model = new MutationTraceModel(mutationList);
 		
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.80), (int)(bounds.height*.60));
@@ -52,7 +52,7 @@ public class MutationTraceFrame extends JFrame {
 	
 	private void layoutComponents(){
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.setDefaultRenderer(Boolean.class, new BooleanRenderer(false));
+		table.setDefaultRenderer(Boolean.class, new BooleanRenderer());
 		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
