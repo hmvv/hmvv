@@ -3,6 +3,7 @@ package hmvv.gui.mutationlist.tables;
 import java.util.ArrayList;
 
 import hmvv.gui.CustomColumn;
+import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.MutationTraceFrame;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
@@ -11,8 +12,8 @@ import hmvv.model.Mutation;
 public class BasicTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 	
-	public BasicTable(BasicTableModel model){
-		super(model);
+	public BasicTable(MutationListFrame parent, BasicTableModel model){
+		super(parent, model);
 	}
 	
 	@Override
@@ -47,7 +48,7 @@ public class BasicTable extends CommonTable{
 
 		ArrayList<Mutation> mutations = DatabaseCommands.getMatchingMutations(mutation);
 		MutationList matchingMutationList = new MutationList(mutations);
-		MutationTraceFrame mutationTrace = new MutationTraceFrame(this, matchingMutationList, "Mutation Trace");
+		MutationTraceFrame mutationTrace = new MutationTraceFrame(parent, matchingMutationList, "Mutation Trace");
 		mutationTrace.setVisible(true);
 	}
 }

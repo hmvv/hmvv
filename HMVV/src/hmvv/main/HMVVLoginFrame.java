@@ -4,7 +4,7 @@ import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.io.InputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -31,16 +31,14 @@ public class HMVVLoginFrame extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		File configFile = new File("config.ini");
-		if(!configFile.exists()){
-			configFile = new File("config-sample.ini");
-		}
-		if(!configFile.exists()){
-			JOptionPane.showMessageDialog(null, "Could not locate config.ini. Shutting down.");
+		InputStream configurationStream = HMVVLoginFrame.class.getResourceAsStream("/config.ini");
+		if(configurationStream == null){
+			JOptionPane.showMessageDialog(null, "Could not locate configuration file. Application must be compiled with a config.ini file. Shutting down.");
 			return;
 		}
+		
 		try {
-			Configurations.loadConfigurations(null, configFile);
+			Configurations.loadConfigurations(null, configurationStream);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage() + "\nShutting down.");
 			return;
@@ -137,7 +135,7 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try{
-			SampleListFrame sampleList = new SampleListFrame(HMVVLoginFrame.this, DatabaseCommands.getSamplesByAssay("All"));
+			SampleListFrame sampleList = new SampleListFrame(HMVVLoginFrame.this, DatabaseCommands.getAllSamples());
 			sampleList.setVisible(true);
 			dispose();
 		}catch(Exception e){

@@ -1,81 +1,58 @@
 package hmvv.gui.mutationlist;
 
-import java.awt.Component;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Rectangle;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 
-import hmvv.gui.BooleanRenderer;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.mutationlist.tablemodels.MutationTraceModel;
+import hmvv.gui.mutationlist.tables.MutationTraceTable;
 
 public class MutationTraceFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
-
-	private JPanel contentPane;
-	private JTable table;
+	
+	private MutationTraceTable table;
 	private MutationTraceModel model;
 	
-	public MutationTraceFrame(Component parent, MutationList mutationList, String title) {
+	public MutationTraceFrame(MutationListFrame parent, MutationList mutationList, String title) {
 		super(title);
 		this.model = new MutationTraceModel(mutationList);
+		table = new MutationTraceTable(parent, model);
+		table.setModel(model);
 		
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.80), (int)(bounds.height*.60));
-				
-		constructComponents();
+		setSize((int)(bounds.width*.85), (int)(bounds.height*.60));
+		
 		layoutComponents();
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setLocationRelativeTo(parent);
 	}
 	
-	private void constructComponents(){
-		table = new JTable(){
-			private static final long serialVersionUID = 1L;
-			
-			@Override 
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		};
-		table.setModel(model);
-	}
-	
 	private void layoutComponents(){
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.setDefaultRenderer(Boolean.class, new BooleanRenderer());
-		
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(table);
-		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-				gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-						.addGap(43)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 1066, Short.MAX_VALUE)
-						.addGap(36))
-				);
-		gl_contentPane.setVerticalGroup(
-				gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-						.addGap(84)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE)
-						.addGap(28))
-				);
-		contentPane.setLayout(gl_contentPane);
 		table.setAutoCreateRowSorter(true);
+		
+		JScrollPane scrollPane = new JScrollPane(table);
+		
+		BorderFactory.createLineBorder(Color.black, 5, true);
+		scrollPane.setBorder(BorderFactory.createLineBorder(Color.black));
+		
+		JPanel contentPanel = new JPanel();
+		int width = 15;
+		EmptyBorder emptyBorder = new EmptyBorder(width, width, width, width);
+		contentPanel.setBorder(emptyBorder);
+		
+		contentPanel.setLayout(new BorderLayout());
+		contentPanel.add(scrollPane, BorderLayout.CENTER);
+		setContentPane(contentPanel);
 	}
 }

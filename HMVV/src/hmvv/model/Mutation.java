@@ -51,6 +51,8 @@ public class Mutation {
 	private String orderNumber;
 	private String assay;
 	private Integer sampleID;
+	private String tumorSource;
+	private String tumorPercent;
 	
 	public Mutation(){
 		
@@ -366,5 +368,21 @@ public class Mutation {
 
 	public void setSampleID(Integer sampleID) {
 		this.sampleID = sampleID;
+	}
+
+	public String getTumorSource() {
+		return tumorSource;
+	}
+
+	public void setTumorSource(String tumorSource) {
+		this.tumorSource = tumorSource;
+	}
+
+	public String getTumorPercent() {
+		return tumorPercent;
+	}
+
+	public void setTumorPercent(String tumorPercent) {
+		this.tumorPercent = tumorPercent;
 	}
 }

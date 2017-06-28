@@ -170,7 +170,7 @@ public class DatabaseCommands {
 				+ " t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc, t2.pubmed,"
-				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t2.sampleID, t7.updateStat"
+				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID, t7.updateStat"
 				+ " from ngs.data as t2"
 				+ " left join ngs.g1000 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
@@ -178,8 +178,7 @@ public class DatabaseCommands {
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				+ " left join ngs.Samples as t1"
 				+ " on t2.sampleID = t1.ID"
-				+ " left join"
-				+ " ngs.annotation as t7"
+				+ " left join ngs.annotation as t7"
 				+ " on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt"
 				+ " where t2.sampleID = ?";
 		
@@ -241,33 +240,36 @@ public class DatabaseCommands {
 	}
 	
 	public static ArrayList<Mutation> getMatchingMutations(Mutation mutation) throws Exception{
-		String chr = mutation.getChr();
-		String pos = mutation.getPos();
-		String ref = mutation.getRef();
-		String alt = mutation.getAlt();
-		Integer posInt = Integer.parseInt(pos);
-		String assay = mutation.getAssay();
+		Coordinate coordinate = mutation.getCoordinate();
 		
-		CallableStatement callableStatement = databaseConnection.prepareCall("{call getDataByCoordinate(?,?,?,?,?)}");
-		callableStatement.setString(1, chr);
-		callableStatement.setInt(2, posInt);
-		callableStatement.setString(3, ref);
-		callableStatement.setString(4, alt);
-		callableStatement.setString(5, assay);
-		callableStatement.executeQuery();
-		ResultSet rs = callableStatement.executeQuery();
+		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp,"
+				+ " t2.altFreq, t2.readDP, t2.altReadDP, t2.chr, t2.pos, t2.ref, t2.alt, t2.sampleID, "
+				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent "
+				+ " from ngs.data as t2"
+				+ " left join ngs.Samples as t1"
+				+ " on t2.sampleID = t1.ID"
+				+ " where t2.genotype != ? and t1.assay = ? and t2.chr = ? and t2.pos = ? and t2.ref = ? and t2.alt = ?";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, "No Call");
+		preparedStatement.setString(2, mutation.getAssay());
+		preparedStatement.setString(3, coordinate.getChr());
+		preparedStatement.setString(4, coordinate.getPos());
+		preparedStatement.setString(5, coordinate.getRef());
+		preparedStatement.setString(6, coordinate.getAlt());
+		
+		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Mutation> mutations = makeModel(rs);
-		callableStatement.close();
+		preparedStatement.close();
 		return mutations;
 	}
 	
 	public static ArrayList<Mutation> getMutationDataByQuery(String assay, String orderNumber, String lastName, String firstName, String gene, String cosmicID, String cDNA, String codon) throws Exception{
 		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp, t2.dbSNPID, t3.cosmicID, " +
-				"t2.type, t2.genotype, t2.altFreq, t2.readDP, t2.altReadDP, t6.occurance, " +
+				"t2.type, t2.genotype, t2.altFreq, t2.readDP, t2.altReadDP, t6.occurrence, " +
 				"t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen, " +
 				"t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq, " +
 				"t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc,t2.pubmed, " +
-				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t2.sampleID, t7.updateStat as annotation " +
+				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID, t7.updateStat as annotation " +
 				"from " + 
 				"ngs.data as t2 left join " +
 				"ngs.cosmic as t3 " +
@@ -279,7 +281,7 @@ public class DatabaseCommands {
 				"left join ngs.Samples as t1 " +
 				"on t2.sampleID = t1.ID " +
 				"left join " +
-				"(select chr, pos, ref, alt, assay, count(*) as occurance from " + 
+				"(select chr, pos, ref, alt, assay, count(*) as occurrence from " + 
 				"(select chr, pos, ref, alt, assay, sampleID from ngs.data " +
 				"where genotype != 'No Call' " +
 				"group by chr, pos, ref, alt, assay, sampleID) as t7 " +
@@ -337,124 +339,90 @@ public class DatabaseCommands {
 			
 			//common
 			boolean reported = Integer.parseInt(rs.getString("reported")) != 0;
-			String gene = rs.getString("gene");
-			String exons = rs.getString("exons");
-			String HGVSc = rs.getString("HGVSc");
-			String HGVSp = rs.getString("HGVSp");
 			mutation.setReported(reported);
-			mutation.setGene(gene);
-			mutation.setExons(exons);
-			mutation.setHGVSc(HGVSc);
-			mutation.setHGVSp(HGVSp);			
+			mutation.setGene(getStringOrBlank(rs, "gene"));
+			mutation.setExons(getStringOrBlank(rs, "exons"));
+			mutation.setHGVSc(getStringOrBlank(rs, "HGVSc"));
+			mutation.setHGVSp(getStringOrBlank(rs, "HGVSp"));			
 			
 			//basic
-			String dbSNPID = rs.getString("dbSNPID");
+			mutation.setDbSNPID(getStringOrBlank(rs, "dbSNPID"));
+			mutation.setType(getStringOrBlank(rs, "type"));
+			mutation.setGenotype(getStringOrBlank(rs, "genotype"));
+			mutation.setAltFreq(getDoubleOrNull(rs, "altFreq"));
+			mutation.setReadDP(getIntegerOrNull(rs, "readDP"));
+			mutation.setAltReadDP(getIntegerOrNull(rs, "altReadDP"));
+			mutation.setCosmicID(getStringOrBlank(rs, "cosmicID"));
+			mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
 			
-			String type = rs.getString("type");
-			String genotype = rs.getString("genotype");
-			Double altFreq = parseDouble(rs.getString("altFreq"));
-			Integer readDP = parseInt(rs.getString("readDP"));
-			Integer altReadDP = parseInt(rs.getString("altReadDP"));
-			String annotation = rs.getString("updateStat");
-			if(annotation == null){
+			String annotation = getStringOrBlank(rs, "updateStat");
+			if(annotation == null || annotation.equals("")){
 				annotation = "Enter";
 			}else{
 				annotation = "Annotation";
 			}
-			mutation.setDbSNPID(dbSNPID);
-			
-			mutation.setType(type);
-			mutation.setGenotype(genotype);
-			mutation.setAltFreq(altFreq);
-			mutation.setReadDP(readDP);
-			mutation.setAltReadDP(altReadDP);
-			
 			mutation.setAnnotation(annotation);
 			
 			//ClinVar
-			String origin = rs.getString("origin");
-			String clinicalAllele = rs.getString("clinicalAllele");
-			String clinicalSig = rs.getString("clinicalSig");
-			String clinicalAcc = rs.getString("clinicalAcc");
-			String pubmed = rs.getString("pubmed");
-			mutation.setOrigin(origin);
-			mutation.setClinicalAllele(clinicalAllele);
-			mutation.setClinicalSig(clinicalSig);
-			mutation.setClinicalAcc(clinicalAcc);
-			mutation.setPubmed(pubmed);
+			mutation.setOrigin(getStringOrBlank(rs, "origin"));
+			mutation.setClinicalAllele(getStringOrBlank(rs, "clinicalAllele"));
+			mutation.setClinicalSig(getStringOrBlank(rs, "clinicalSig"));
+			mutation.setClinicalAcc(getStringOrBlank(rs, "clinicalAcc"));
+			mutation.setPubmed(getStringOrBlank(rs, "pubmed"));
 						
 			//Coordinates
-			String chr = rs.getString("chr");
-			String pos = rs.getString("pos");
-			String ref = rs.getString("ref");
-			String alt = rs.getString("alt");
-			String consequence = rs.getString("Consequence");
-			String sift = rs.getString("Sift");
-			String polyPhen = rs.getString("PolyPhen");
-			mutation.setChr(chr);
-			mutation.setPos(pos);
-			mutation.setRef(ref);
-			mutation.setAlt(alt);
-			mutation.setConsequence(consequence);
-			mutation.setSift(sift);
-			mutation.setPolyPhen(polyPhen);
+			mutation.setChr(getStringOrBlank(rs, "chr"));
+			mutation.setPos(getStringOrBlank(rs, "pos"));
+			mutation.setRef(getStringOrBlank(rs, "ref"));
+			mutation.setAlt(getStringOrBlank(rs, "alt"));
+			mutation.setConsequence(getStringOrBlank(rs, "Consequence"));
+			mutation.setSift(getStringOrBlank(rs, "Sift"));
+			mutation.setPolyPhen(getStringOrBlank(rs, "PolyPhen"));
 						
 			//G1000
-			Integer altCount = parseInt(rs.getString("altCount"));
-			Integer totalCount = parseInt(rs.getString("totalCount"));
-			Double altGlobalFreq = parseDouble(rs.getString("altGlobalFreq"));
-			Double americanFreq = parseDouble(rs.getString("americanFreq"));
-			Double asianFreq = parseDouble(rs.getString("asianFreq"));
-			Double afrFreq = parseDouble(rs.getString("afrFreq"));
-			Double eurFreq = parseDouble(rs.getString("eurFreq"));
-			mutation.setAltCount(altCount);
-			mutation.setTotalCount(totalCount);
-			mutation.setAltGlobalFreq(altGlobalFreq);
-			mutation.setAmericanFreq(americanFreq);
-			mutation.setAsianFreq(asianFreq);
-			mutation.setAfricanFreq(afrFreq);
-			mutation.setEurFreq(eurFreq);
+			mutation.setAltCount(getIntegerOrNull(rs, "altCount"));
+			mutation.setTotalCount(getIntegerOrNull(rs, "totalCount"));
+			mutation.setAltGlobalFreq(getDoubleOrNull(rs, "altGlobalFreq"));
+			mutation.setAmericanFreq(getDoubleOrNull(rs, "americanFreq"));
+			mutation.setAsianFreq(getDoubleOrNull(rs, "asianFreq"));
+			mutation.setAfricanFreq(getDoubleOrNull(rs, "afrFreq"));
+			mutation.setEurFreq(getDoubleOrNull(rs, "eurFreq"));
 			
 			//Sample
-			String lastName = rs.getString("lastName");
-			String firstName = rs.getString("firstName");
-			String orderNumber = rs.getString("orderNumber");
-			String assay = rs.getString("assay");
-			Integer sampleID = parseInt(rs.getString("sampleID"));
-			mutation.setLastName(lastName);
-			mutation.setFirstName(firstName);
-			mutation.setOrderNumber(orderNumber);
-			mutation.setAssay(assay);
-			mutation.setSampleID(sampleID);
-			
-			//extra data
-			//TODO Don't treat these fields in a special way
-			try{
-				String cosmicID = rs.getString("cosmicID");//TODO Remove this?
-				mutation.setCosmicID(cosmicID);
-			}catch(Exception e){}
-			
-			try{
-				Integer occurrence = parseInt(rs.getString("occurance"));//TODO Remove this? Also, fix spelling in database
-				mutation.setOccurrence(occurrence);
-			}catch(Exception e){}
+			mutation.setLastName(getStringOrBlank(rs, "lastName"));
+			mutation.setFirstName(getStringOrBlank(rs, "firstName"));
+			mutation.setOrderNumber(getStringOrBlank(rs, "orderNumber"));
+			mutation.setAssay(getStringOrBlank(rs, "assay"));
+			mutation.setSampleID(getIntegerOrNull(rs, "sampleID"));
+			mutation.setTumorSource(getStringOrBlank(rs, "tumorSource"));
+			mutation.setTumorPercent(getStringOrBlank(rs, "tumorPercent"));
 			
 			mutations.add(mutation);
 		}
 		return mutations;
 	}
 	
-	private static Double parseDouble(String input){
+	private static String getStringOrBlank(ResultSet rs, String columnLabel){
 		try{
-			return Double.parseDouble(input);
+			return rs.getString(columnLabel);
+		}catch(Exception e){
+			return "";
+		}
+	}
+	
+	private static Integer getIntegerOrNull(ResultSet rs, String columnLabel){
+		try{
+			String value = rs.getString(columnLabel);
+			return Integer.parseInt(value);
 		}catch(Exception e){
 			return null;
 		}
 	}
 	
-	private static Integer parseInt(String input){
+	private static Double getDoubleOrNull(ResultSet rs, String columnLabel){
 		try{
-			return Integer.parseInt(input);
+			String value = rs.getString(columnLabel);
+			return Double.parseDouble(value);
 		}catch(Exception e){
 			return null;
 		}
@@ -488,16 +456,16 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Sample Queries
 	 *************************************************************************/
-	public static ArrayList<Sample> getSamplesByAssay(String assay) throws Exception{
-		CallableStatement callableStatement = databaseConnection.prepareCall("{call getSample(?)}");
-		callableStatement.setString(1, assay);
-		ResultSet sampleResultSet = callableStatement.executeQuery();
+	public static ArrayList<Sample> getAllSamples() throws Exception{
+		String query = "select * from ngs.Samples order by ID desc";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
-		while(sampleResultSet.next()){
-			Sample s = getSample(sampleResultSet);
+		while(rs.next()){
+			Sample s = getSample(rs);
 			samples.add(s);
 		}
-		callableStatement.close();
+		preparedStatement.close();
 		return samples;
 	}
 	

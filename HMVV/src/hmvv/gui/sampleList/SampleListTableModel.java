@@ -15,6 +15,11 @@ public class SampleListTableModel extends AbstractTableModel{
 		super();
 		this.samples = samples;
 	}
+	
+	public void addSample(Sample sample){
+		samples.add(sample);
+		fireTableRowsInserted(samples.size()-1, samples.size()-1);
+	}
 
 	public Sample getSample(int row){
 		return samples.get(row);

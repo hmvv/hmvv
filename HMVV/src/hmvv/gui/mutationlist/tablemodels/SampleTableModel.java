@@ -15,7 +15,9 @@ public class SampleTableModel extends CommonTableModel {
 			"firstName",
 			"orderNumber",
 			"assay",
-			"sampleID"
+			"sampleID",
+			"Tumor Source",
+			"Tumor Percent"
 	};
 
 	public SampleTableModel(MutationList mutationList){
@@ -46,6 +48,10 @@ public class SampleTableModel extends CommonTableModel {
 			return mutation.getAssay();
 		case 9:
 			return mutation.getSampleID();
+		case 10:
+			return mutation.getTumorSource();
+		case 11:
+			return mutation.getTumorPercent();
 		default:
 			return "UNDEFINED";
 		}

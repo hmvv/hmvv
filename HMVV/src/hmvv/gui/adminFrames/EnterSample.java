@@ -1,6 +1,9 @@
 package hmvv.gui.adminFrames;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -18,6 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.io.SampleEnterCommands;
@@ -27,7 +31,7 @@ import hmvv.model.Sample;
 public class EnterSample extends JFrame {
 	private static final long serialVersionUID = 1L;
 
-	private JPanel contentPane;
+	private SampleListFrame parent;
 	private JTextField textRunID;
 	private JTextField textlastName;
 	private JTextField textFirstName;
@@ -36,77 +40,117 @@ public class EnterSample extends JFrame {
 	private JTextField textTumorSource;
 	private JTextField textPercent;
 	private JTextField textNote;
-	private String assay;
+	
 	private JComboBox<String> comboBoxAssay;
 	private JComboBox<String> comboBoxInstrument;
 	private JComboBox<String> comboBoxCoverage;
 	private JComboBox<String> comboBoxCaller;
 	private JComboBox<String> comboBoxSample;
 	
+	private JButton btnFindRun;
+	private JButton enterSampleButton;
+	private JButton cancelButton;
+	
 	/**
 	 * Create the frame.
 	 */
-	public EnterSample(Component parent) {
+	public EnterSample(SampleListFrame parent) {
 		super("Enter Sample");
+		this.parent = parent;
 		
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(null);
-		
-		setContentPane(contentPane);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 527, 571);
+		//setBounds(100, 100, 527, 571);
 		
 		createComponents();
+		layoutComponents();
+		activateComponents();
+		
+		try{
+			for(String assay : DatabaseCommands.getAllAssays()){
+				comboBoxAssay.addItem(assay);
+			}
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(parent, "Error getting Assays from database: " + e.getMessage());
+			return;
+		}
+		findInstrument();//initialize
+		
+		pack();
+		setAlwaysOnTop(true);
+		setResizable(false);
 		setLocationRelativeTo(parent);
 	}
 	
 	private void createComponents(){
-		try{
-			comboBoxAssay = new JComboBox<String>();
-			for(String assay : DatabaseCommands.getAllAssays()){
-				comboBoxAssay.addItem(assay);
-			}
-			comboBoxAssay.setBounds(196, 34, 213, 20);
-			contentPane.add(comboBoxAssay);
-			
-			comboBoxAssay.addItemListener(new ItemListener() {
-				public void itemStateChanged(ItemEvent e) {
-					assay = comboBoxAssay.getSelectedItem().toString();
-					findInstrument();
-				}
-			});
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(null, "Error getting Assays from database: " + e.getMessage());
-			return;
-		}
-		
-		JLabel lblAssay = new JLabel("Assay");
-		lblAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblAssay.setBounds(41, 34, 58, 17);
-		contentPane.add(lblAssay);
-
-		JLabel lblInstrument = new JLabel("Instrument");
-		lblInstrument.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblInstrument.setBounds(41, 69, 94, 17);
-		contentPane.add(lblInstrument);
-
+		comboBoxAssay = new JComboBox<String>();
 		comboBoxInstrument = new JComboBox<String>();
-		comboBoxInstrument.setBounds(196, 69, 213, 20);
-		contentPane.add(comboBoxInstrument);
-		findInstrument();
-		
-		JLabel lblRunid = new JLabel("RunID");
-		lblRunid.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblRunid.setBounds(41, 104, 94, 17);
-		contentPane.add(lblRunid);
-
 		textRunID = new JTextField();
-		textRunID.setBounds(196, 104, 100, 20);
-		contentPane.add(textRunID);
-		textRunID.setColumns(10);
+		btnFindRun = new JButton("Find Run");
+		comboBoxCoverage = new JComboBox<String>();
+		comboBoxCaller = new JComboBox<String>();
+		comboBoxSample = new JComboBox<String>();
+		textlastName = new JTextField();
+		textFirstName = new JTextField();
+		textOrderNumber = new JTextField();
+		textPathologyNumber = new JTextField();
+		textTumorSource = new JTextField();
+		textPercent = new JTextField();
+		textNote = new JTextField();
+		enterSampleButton = new JButton("Enter Sample");
+		enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		cancelButton = new JButton("Cancel");
+		cancelButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+	}
+
+	private void layoutComponents(){
+		JPanel runIDPanel = new JPanel();
+		GridLayout runIDGridLayout = new GridLayout(1,0);
+		runIDGridLayout.setHgap(10);
+		runIDPanel.setLayout(runIDGridLayout);
+		runIDPanel.add(textRunID);
+		runIDPanel.add(btnFindRun);
 		
-		JButton btnFindRun = new JButton("Find Run");
+		JPanel mainPanel = new JPanel();
+		GridLayout gridLayout = new GridLayout(0,1);
+		gridLayout.setVgap(10);
+		mainPanel.setLayout(gridLayout);
+		mainPanel.add(new RowPanel("Assay", comboBoxAssay));
+		mainPanel.add(new RowPanel("Instrument", comboBoxInstrument));
+		mainPanel.add(new RowPanel("RunID", runIDPanel));
+		mainPanel.add(new RowPanel("CoverageID", comboBoxCoverage));
+		mainPanel.add(new RowPanel("VariantCallerID", comboBoxCaller));
+		mainPanel.add(new RowPanel("SampleID", comboBoxSample));
+		mainPanel.add(new RowPanel("Last Name", textlastName));
+		mainPanel.add(new RowPanel("First Name", textFirstName));
+		mainPanel.add(new RowPanel("Order Number", textOrderNumber));
+		mainPanel.add(new RowPanel("Pathology Number", textPathologyNumber));
+		mainPanel.add(new RowPanel("Tumor Source", textTumorSource));
+		mainPanel.add(new RowPanel("Tumor Percent", textPercent));
+		mainPanel.add(new RowPanel("Note", textNote));
+		
+		JPanel southPanel = new JPanel();
+		GridLayout southGridLayout = new GridLayout(1,0);
+		southGridLayout.setHgap(30);
+		southPanel.setLayout(southGridLayout);
+		southPanel.add(enterSampleButton);
+		southPanel.add(cancelButton);
+		
+		JPanel contentPane = new JPanel();
+		contentPane.setLayout(new BorderLayout());
+		contentPane.add(mainPanel, BorderLayout.CENTER);
+		contentPane.add(southPanel, BorderLayout.SOUTH);
+		
+		contentPane.setBorder(new EmptyBorder(20, 35, 15, 35));
+		setContentPane(contentPane);
+	}
+	
+	private void activateComponents(){
+		comboBoxAssay.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				findInstrument();
+			}
+		});
+		
 		btnFindRun.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -117,25 +161,7 @@ public class EnterSample extends JFrame {
 				}
 			}
 		});
-		btnFindRun.setFont(GUICommonTools.TAHOMA_BOLD_11);
-		btnFindRun.setBounds(320, 104, 89, 20);
-		contentPane.add(btnFindRun);
-
-		JLabel lblCoverageid = new JLabel("CoverageID");
-		lblCoverageid.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblCoverageid.setBounds(41, 139, 94, 17);
-		contentPane.add(lblCoverageid);
-
-		JLabel lblVariantcallerid = new JLabel("VariantCallerID");
-		lblVariantcallerid.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblVariantcallerid.setBounds(41, 174, 120, 17);
-		contentPane.add(lblVariantcallerid);
-
-		comboBoxCoverage = new JComboBox<String>();
-		comboBoxCoverage.setBounds(196, 139, 213, 20);
-		contentPane.add(comboBoxCoverage);
-
-		comboBoxCaller = new JComboBox<String>();
+		
 		comboBoxCaller.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(comboBoxCaller.getSelectedItem() != null){
@@ -147,91 +173,8 @@ public class EnterSample extends JFrame {
 				}
 			}
 		});
-		comboBoxCaller.setBounds(196, 174, 213, 20);
-		contentPane.add(comboBoxCaller);
-
-		JLabel lblSampleid = new JLabel("SampleID");
-		lblSampleid.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblSampleid.setBounds(41, 209, 120, 17);
-		contentPane.add(lblSampleid);
-
-		comboBoxSample = new JComboBox<String>();
-		comboBoxSample.setBounds(196, 209, 213, 20);
-		contentPane.add(comboBoxSample);
-
-		JLabel lblLastName = new JLabel("Last Name");
-		lblLastName.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblLastName.setBounds(41, 244, 120, 17);
-		contentPane.add(lblLastName);
-
-		JLabel lblFirstName = new JLabel("First Name");
-		lblFirstName.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblFirstName.setBounds(41, 279, 120, 17);
-		contentPane.add(lblFirstName);
-
-		JLabel lblOrderNumber = new JLabel("Order Number");
-		lblOrderNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblOrderNumber.setBounds(41, 314, 120, 17);
-		contentPane.add(lblOrderNumber);
-
-		JLabel lblPathologyNumber = new JLabel("Pathology Number");
-		lblPathologyNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblPathologyNumber.setBounds(41, 349, 137, 17);
-		contentPane.add(lblPathologyNumber);
-
-		JLabel lblTumorSource = new JLabel("Tumor Source");
-		lblTumorSource.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblTumorSource.setBounds(41, 384, 137, 17);
-		contentPane.add(lblTumorSource);
-
-		JLabel lblTumorPercent = new JLabel("Tumor Percent");
-		lblTumorPercent.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblTumorPercent.setBounds(41, 419, 137, 17);
-		contentPane.add(lblTumorPercent);
-
-		JLabel lblNote = new JLabel("Note");
-		lblNote.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblNote.setBounds(41, 454, 137, 17);
-		contentPane.add(lblNote);
-
-		textlastName = new JTextField();
-		textlastName.setColumns(10);
-		textlastName.setBounds(196, 244, 213, 20);
-		contentPane.add(textlastName);
-
-		textFirstName = new JTextField();
-		textFirstName.setColumns(10);
-		textFirstName.setBounds(196, 279, 213, 20);
-		contentPane.add(textFirstName);
-
-		textOrderNumber = new JTextField();
-		textOrderNumber.setColumns(10);
-		textOrderNumber.setBounds(196, 314, 213, 20);
-		contentPane.add(textOrderNumber);
-
-		textPathologyNumber = new JTextField();
-		textPathologyNumber.setColumns(10);
-		textPathologyNumber.setBounds(196, 349, 213, 20);
-		contentPane.add(textPathologyNumber);
-
-		textTumorSource = new JTextField();
-		textTumorSource.setColumns(10);
-		textTumorSource.setBounds(196, 384, 213, 20);
-		contentPane.add(textTumorSource);
-
-		textPercent = new JTextField();
-		textPercent.setColumns(10);
-		textPercent.setBounds(196, 419, 213, 20);
-		contentPane.add(textPercent);
-
-		textNote = new JTextField();
-		textNote.setColumns(10);
-		textNote.setBounds(196, 454, 238, 20);
-		contentPane.add(textNote);
-
-		JButton btnNewButton = new JButton("Enter");
-		btnNewButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
-		btnNewButton.addActionListener(new ActionListener(){
+		
+		enterSampleButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try{
@@ -241,24 +184,18 @@ public class EnterSample extends JFrame {
 				}
 			}
 		});
-		btnNewButton.setBounds(138, 502, 89, 23);
-		contentPane.add(btnNewButton);
-
-		JButton btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(new ActionListener(){
+		
+		cancelButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				EnterSample.this.setVisible(false);
 			}
 
 		});
-		btnCancel.setFont(GUICommonTools.TAHOMA_BOLD_12);
-		btnCancel.setBounds(256, 502, 89, 23);
-		contentPane.add(btnCancel);
 	}
-
+	
 	private void findInstrument(){
-		assay = comboBoxAssay.getSelectedItem().toString();
+		String assay = comboBoxAssay.getSelectedItem().toString();
 		comboBoxInstrument.removeAllItems();
 		try {
 			for(String instrument : DatabaseCommands.getInstrumentsForAssay(assay)){
@@ -278,8 +215,9 @@ public class EnterSample extends JFrame {
 	private void findRun() throws Exception{
 		String instrument = comboBoxInstrument.getSelectedItem().toString();
 		String runID = textRunID.getText();
-		//For illumina
+		
 		if((instrument.equals("miseq")) || (instrument.equals("nextseq"))){
+			//For illumina
 			String command = String.format("ls /home/%sAnalysis/*_%s_*/*.amplicon.vep.parse.filter.txt", instrument, runID);
 			CommandResponse result = SSHConnection.executeCommandAndGetOutput(command);
 			ArrayList<String> sampleList = sampleListIllumina(result.response);
@@ -289,9 +227,8 @@ public class EnterSample extends JFrame {
 				removeAllItems();
 				JOptionPane.showMessageDialog(null, "There was a problem locating the run");
 			}
-		}
-		//For Ion
-		else{
+		}else{
+			//For Ion
 			String coverageCommand = String.format("ls -d /home/%sAnalysis/*%s/coverageAnalysis_out*", instrument, runID);
 			String variantCallerCommand = String.format("ls -d /home/%sAnalysis/*%s/variantCaller_out*", instrument, runID);
 			CommandResponse coverageResult = SSHConnection.executeCommandAndGetOutput(coverageCommand);
@@ -369,6 +306,7 @@ public class EnterSample extends JFrame {
 	private void enterData() throws Exception{
 		Sample sample = constructSampleFromTextFields();
 		SampleEnterCommands.enterData(sample);
+		parent.addSample(sample);
 		JOptionPane.showMessageDialog(this, "Success: Sample entered");
 	}
 	
@@ -398,5 +336,28 @@ public class EnterSample extends JFrame {
 		
 		return new Sample(ID, assay, instrument, lastName, firstName, orderNumber,
 				pathologyNumber, tumorSource, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy);
+	}
+	
+	private class RowPanel extends JPanel{
+		private static final long serialVersionUID = 1L;
+		private JLabel left;
+		private Component right;
+		
+		RowPanel(String label, Component right){
+			this.left = new JLabel(label);
+			this.right = right;
+			layoutComponents();
+		}
+		
+		private void layoutComponents(){
+			left.setFont(GUICommonTools.TAHOMA_BOLD_14);
+			left.setPreferredSize(new Dimension(150, 25));
+			
+			right.setPreferredSize(new Dimension(250, 25));
+			
+			setLayout(new BorderLayout());
+			add(left, BorderLayout.WEST);
+			add(right, BorderLayout.CENTER);
+		}
 	}
 }

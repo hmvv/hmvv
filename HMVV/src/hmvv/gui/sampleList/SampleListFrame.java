@@ -32,6 +32,9 @@ import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.CustomColumn;
@@ -85,11 +88,11 @@ public class SampleListFrame extends JFrame {
 		tableModel = new SampleListTableModel(samples);
 		
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.90), (int)(bounds.height*.90));
+		setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		customColumns = CustomColumn.getCustomColumnArray(samples.size(), 0, 14, 16, 17);
+		customColumns = CustomColumn.getCustomColumnArray(tableModel.getColumnCount(), 0, 14, 16, 17);
 		createMenu();
 		createComponents();
 		layoutComponents();
@@ -129,6 +132,10 @@ public class SampleListFrame extends JFrame {
 		
 		enterSampleMenuItem.addActionListener(listener);
 		newAssayMenuItem.addActionListener(listener);
+	}
+	
+	public void addSample(Sample sample){
+		tableModel.addSample(sample);
 	}
 	
 	private void createComponents(){
@@ -238,6 +245,31 @@ public class SampleListFrame extends JFrame {
 						.addGap(25))
 				);
 		getContentPane().setLayout(groupLayout);
+		
+		resizeColumnWidths();
+	}
+	
+	public void resizeColumnWidths() {
+	    TableColumnModel columnModel = table.getColumnModel();    
+	    
+	    for (int column = 0; column < table.getColumnCount(); column++) {
+	        TableColumn tableColumn = columnModel.getColumn(column);
+
+	        TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
+	        Component headerComp = headerRenderer.getTableCellRendererComponent(table, tableColumn.getHeaderValue(), false, false, 0, 0);
+	        
+	    	int minWidth = headerComp.getPreferredSize().width;
+	    	int maxWidth = 150;
+	    	
+	        int width = minWidth;
+	        for (int row = 0; row < table.getRowCount(); row++) {
+	            TableCellRenderer renderer = table.getCellRenderer(row, column);
+	            Component comp = table.prepareRenderer(renderer, row, column);
+	            width = Math.max(comp.getPreferredSize().width + 25 , width);
+	        }
+	        width = Math.min(maxWidth, width);
+	        columnModel.getColumn(column).setPreferredWidth(width);
+	    }
 	}
 	
 	private void activateComponents(){

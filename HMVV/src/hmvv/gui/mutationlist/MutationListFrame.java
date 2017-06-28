@@ -1,6 +1,10 @@
 package hmvv.gui.mutationlist;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,8 +13,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -70,17 +72,18 @@ public class MutationListFrame extends JFrame {
 	private JTabbedPane tabbedPane;
 	private CommonTable selectedTable;
 	
-	private JCheckBox rdbtnShowReportedOnly;
-	private JCheckBox rdbtnCosmic;
+	private JCheckBox reportedOnlyCheckbox;
+	private JCheckBox cosmicOnlyCheckbox;
 	private JButton shortReportButton;
 	private JButton longReportButton;
-	private JButton btnReset;
-	private JButton btnExport;
+	private JButton resetButton;
+	private JButton exportButton;
 	
 	private JTextField textFreqFrom;
 	private JTextField textVarFreqTo;
-	private JTextField textMinRD;
-	private JTextField textOccuranceFrom;
+	private JTextField minReadDepthTextField;
+	private JTextField occurenceFromTextField;
+	private JTextField maxPopulationFrequencyTextField;
 	
 	/**
 	 * Create the frame.
@@ -91,6 +94,7 @@ public class MutationListFrame extends JFrame {
 		
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
+		setMinimumSize(new Dimension(900, getHeight()/2));
 		
 		this.mutationList = mutationList;
 		
@@ -104,6 +108,8 @@ public class MutationListFrame extends JFrame {
 		layoutComponents();
 		createSortChangeListener();
 		setLocationRelativeTo(parent);
+		reset();
+		
 		loadMissingDataAsynchronous();
 	}
 	
@@ -115,23 +121,23 @@ public class MutationListFrame extends JFrame {
 
 	private void constructTabs(){
 		basicTabTableModel = new BasicTableModel(mutationList);
-		basicTabTable = new BasicTable(basicTabTableModel);
+		basicTabTable = new BasicTable(this, basicTabTableModel);
 		basicTabTable.setAutoCreateRowSorter(true);
 		
 		coordinatesTabTableModel = new CoordinatesTableModel(mutationList);
-		coordinatesTabTable = new CoordinatesTable(coordinatesTabTableModel);
+		coordinatesTabTable = new CoordinatesTable(this, coordinatesTabTableModel);
 		coordinatesTabTable.setAutoCreateRowSorter(true);
 		
 		g1000TabTableModel = new G1000TableModel(mutationList);
-		g1000TabTable = new G1000Table(g1000TabTableModel);
+		g1000TabTable = new G1000Table(this, g1000TabTableModel);
 		g1000TabTable.setAutoCreateRowSorter(true);
 		
 		clinVarTabTableModel = new ClinVarTableModel(mutationList);
-		clinVarTabTable = new ClinVarTable(clinVarTabTableModel);
+		clinVarTabTable = new ClinVarTable(this, clinVarTabTableModel);
 		clinVarTabTable.setAutoCreateRowSorter(true);
 
 		sampleTabTableModel = new SampleTableModel(mutationList);
-		sampleTabTable = new SampleTable(sampleTabTableModel);
+		sampleTabTable = new SampleTable(this, sampleTabTableModel);
 		sampleTabTable.setAutoCreateRowSorter(true);
 	}
 
@@ -142,13 +148,13 @@ public class MutationListFrame extends JFrame {
 			}
 		};
 		
-		rdbtnCosmic = new JCheckBox("Show Cosmic Only");
-		rdbtnCosmic.addActionListener(actionListener);
-		rdbtnCosmic.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		cosmicOnlyCheckbox = new JCheckBox("Show Cosmic Only");
+		cosmicOnlyCheckbox.addActionListener(actionListener);
+		cosmicOnlyCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		
-		rdbtnShowReportedOnly = new JCheckBox("Show Reported Only");
-		rdbtnShowReportedOnly.addActionListener(actionListener);
-		rdbtnShowReportedOnly.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		reportedOnlyCheckbox = new JCheckBox("Show Reported Only");
+		reportedOnlyCheckbox.addActionListener(actionListener);
+		reportedOnlyCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 	}
 	
 	private void constructTextFieldFilters(){
@@ -164,21 +170,26 @@ public class MutationListFrame extends JFrame {
 			}
 		};
 		
+		int textFieldColumnWidth = 5;
 		textFreqFrom = new JTextField();
 		textFreqFrom.getDocument().addDocumentListener(documentListener);
-		textFreqFrom.setColumns(10);
+		textFreqFrom.setColumns(textFieldColumnWidth);
 
 		textVarFreqTo = new JTextField();
 		textVarFreqTo.getDocument().addDocumentListener(documentListener);
-		textVarFreqTo.setColumns(10);
+		textVarFreqTo.setColumns(textFieldColumnWidth);
 		
-		textMinRD = new JTextField();
-		textMinRD.getDocument().addDocumentListener(documentListener);
-		textMinRD.setColumns(10);
+		minReadDepthTextField = new JTextField();
+		minReadDepthTextField.getDocument().addDocumentListener(documentListener);
+		minReadDepthTextField.setColumns(textFieldColumnWidth);
 		
-		textOccuranceFrom = new JTextField();
-		textOccuranceFrom.getDocument().addDocumentListener(documentListener);
-		textOccuranceFrom.setColumns(10);
+		occurenceFromTextField = new JTextField();
+		occurenceFromTextField.getDocument().addDocumentListener(documentListener);
+		occurenceFromTextField.setColumns(textFieldColumnWidth);
+		
+		maxPopulationFrequencyTextField = new JTextField();
+		maxPopulationFrequencyTextField.getDocument().addDocumentListener(documentListener);
+		maxPopulationFrequencyTextField.setColumns(textFieldColumnWidth);
 	}
 	
 	private void constructButtons(){
@@ -190,13 +201,13 @@ public class MutationListFrame extends JFrame {
 		longReportButton.setToolTipText("Generate a long report for the mutations marked as reported");
 		longReportButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		
-		btnReset = new JButton("Reset");
-		btnReset.setToolTipText("Clear all filters and reset table");
-		btnReset.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		resetButton = new JButton("Reset");
+		resetButton.setToolTipText("Clear all filters and reset table");
+		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 
-		btnExport = new JButton("Export");
-		btnExport.setToolTipText("Export the current table to file");
-		btnExport.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		exportButton = new JButton("Export");
+		exportButton.setToolTipText("Export the current table to file");
+		exportButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		
 		ActionListener actionListener = new ActionListener(){
 			@Override
@@ -205,9 +216,9 @@ public class MutationListFrame extends JFrame {
 					showShortReportFrame();
 				}else if(e.getSource() == longReportButton){
 					showLongReportFrame();
-				}else if(e.getSource() == btnReset){
+				}else if(e.getSource() == resetButton){
 					reset();
-				}else if(e.getSource() == btnExport){
+				}else if(e.getSource() == exportButton){
 					try{
 						exportTable();
 					}catch(IOException ex){
@@ -220,8 +231,8 @@ public class MutationListFrame extends JFrame {
 		
 		shortReportButton.addActionListener(actionListener);
 		longReportButton.addActionListener(actionListener);
-		btnReset.addActionListener(actionListener);
-		btnExport.addActionListener(actionListener);
+		resetButton.addActionListener(actionListener);
+		exportButton.addActionListener(actionListener);
 	}
 
 	private void showShortReportFrame(){
@@ -264,89 +275,78 @@ public class MutationListFrame extends JFrame {
 		tabbedPane.addTab("Sample", null, sampleTabScrollPane, null);
 		selectedTable = basicTabTable;
 		
-		JLabel variantFrequencyLabel = new JLabel("Variant Frequency (altFreq)");
-		variantFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		JPanel leftFilterPanel = new JPanel();
+		leftFilterPanel.setLayout(new GridLayout(0,1));
+		JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		checkboxPanel.add(cosmicOnlyCheckbox);
+		checkboxPanel.add(reportedOnlyCheckbox);
+		leftFilterPanel.add(checkboxPanel);
 		
-		JLabel variantFrequencyToLabel = new JLabel("To");
+		//variant frequency
+		JPanel populationFrequencyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel populationFrequencyLabel = new JLabel("Max Population Frequency (altGlobalFreq)");
+		populationFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		populationFrequencyPanel.add(populationFrequencyLabel);
+		populationFrequencyPanel.add(maxPopulationFrequencyTextField);
+		leftFilterPanel.add(populationFrequencyPanel);
+		leftFilterPanel.add(new JLabel(""));//take up a space so same number of elements as right filter panel
 		
+		JPanel rightFilterPanel = new JPanel();
+		rightFilterPanel.setLayout(new GridLayout(0,1));
+		
+		//min read depth and occurence filters
+		JPanel readDepthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JLabel minReadDepthLabel = new JLabel("Min Read Depth (readDP)");
 		minReadDepthLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		readDepthPanel.add(minReadDepthLabel);
+		readDepthPanel.add(minReadDepthTextField);
 		
-		JLabel occurenceLabel = new JLabel("Min occurence");
+		JLabel variantFrequencyLabel = new JLabel("Variant Frequency (altFreq)");
+		variantFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		JPanel frequencyLayoutPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		frequencyLayoutPanel.add(variantFrequencyLabel);
+		frequencyLayoutPanel.add(textFreqFrom);
+		frequencyLayoutPanel.add(new JLabel("To"));
+		frequencyLayoutPanel.add(textVarFreqTo);
+		
+		JPanel occurencePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel occurenceLabel = new JLabel("Min occurence (occurence)");
 		occurenceLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		occurencePanel.add(occurenceLabel);
+		occurencePanel.add(occurenceFromTextField);
 		
-		GroupLayout groupLayout = new GroupLayout(contentPane);
-		groupLayout.setHorizontalGroup(
-				groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-						.addComponent(rdbtnCosmic)
-						.addGap(28)
-						.addComponent(rdbtnShowReportedOnly, GroupLayout.PREFERRED_SIZE, 194, GroupLayout.PREFERRED_SIZE)
-						.addContainerGap(784, Short.MAX_VALUE))
-				.addGroup(groupLayout.createSequentialGroup()
-						.addComponent(variantFrequencyLabel)
-						.addGap(10)
-						.addComponent(textFreqFrom, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-						.addGap(6)
-						.addComponent(variantFrequencyToLabel, GroupLayout.PREFERRED_SIZE, 15, GroupLayout.PREFERRED_SIZE)
-						.addGap(6)
-						.addComponent(textVarFreqTo, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-						.addGap(45)
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup()
-										.addGap(182)
-										.addComponent(textMinRD, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE))
-								.addComponent(minReadDepthLabel, GroupLayout.PREFERRED_SIZE, 175, GroupLayout.PREFERRED_SIZE))
-						.addGap(45)
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addComponent(occurenceLabel, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
-								.addGroup(groupLayout.createSequentialGroup()
-										.addGap(105)
-										.addComponent(textOccuranceFrom, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE))))
-				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(884)
-						.addComponent(shortReportButton)
-						.addGap(18)
-						.addComponent(longReportButton)
-						.addGap(18)
-						.addComponent(btnReset, GroupLayout.PREFERRED_SIZE, 79, GroupLayout.PREFERRED_SIZE)
-						.addGap(18)
-						.addComponent(btnExport, GroupLayout.PREFERRED_SIZE, 79, GroupLayout.PREFERRED_SIZE))
-				.addGroup(groupLayout.createSequentialGroup()
-						.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 1158, Short.MAX_VALUE))
-				);
-		groupLayout.setVerticalGroup(
-				groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-								.addGroup(groupLayout.createSequentialGroup()
-										.addGap(20)
-										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(rdbtnCosmic)
-												.addComponent(rdbtnShowReportedOnly, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-										.addGap(18)
-										.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-												.addComponent(variantFrequencyLabel)
-												.addComponent(textFreqFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addComponent(textVarFreqTo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addComponent(textMinRD, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addComponent(minReadDepthLabel)
-												.addComponent(occurenceLabel)
-												.addComponent(textOccuranceFrom, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-								.addGroup(groupLayout.createSequentialGroup()
-										.addGap(66)
-										.addComponent(variantFrequencyToLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-						.addGap(11)
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addComponent(shortReportButton)
-								.addComponent(longReportButton)
-								.addComponent(btnReset)
-								.addComponent(btnExport))
-						.addGap(6)
-						.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
-						.addGap(20))
-				);
-		contentPane.setLayout(groupLayout);
+		rightFilterPanel.add(readDepthPanel);
+		rightFilterPanel.add(frequencyLayoutPanel);
+		rightFilterPanel.add(occurencePanel);
+
+		JPanel filterPanel = new JPanel();
+		filterPanel.setLayout(new GridLayout(1,0));
+		filterPanel.add(leftFilterPanel);
+		filterPanel.add(rightFilterPanel);
+		
+		//Buttons
+		JPanel buttonPanel = new JPanel();
+		GridLayout buttonPanelGridLayout = new GridLayout(0,1);
+		buttonPanelGridLayout.setVgap(5);
+		buttonPanel.setLayout(buttonPanelGridLayout);
+		buttonPanel.add(shortReportButton);
+		
+		buttonPanel.add(longReportButton);
+		buttonPanel.add(resetButton);
+		buttonPanel.add(exportButton);
+		
+		JPanel northPanel = new JPanel();
+		northPanel.setLayout(new BorderLayout());
+		northPanel.add(filterPanel, BorderLayout.CENTER);
+		northPanel.add(buttonPanel, BorderLayout.EAST);
+		
+		JPanel contentPane = new JPanel();
+		contentPane.setLayout(new BorderLayout());
+		contentPane.add(northPanel, BorderLayout.NORTH);
+		contentPane.add(tabbedPane, BorderLayout.CENTER);
+		
+		contentPane.setBorder(new EmptyBorder(15, 15, 15, 15));
+		setContentPane(contentPane);
 	}
 	
 	private void createSortChangeListener(){
@@ -380,13 +380,14 @@ public class MutationListFrame extends JFrame {
 	}
 	
 	private void applyRowFilters(){
-		boolean includeCosmicOnly = rdbtnCosmic.isSelected();
-		boolean includeReportedOnly = rdbtnShowReportedOnly.isSelected();
+		boolean includeCosmicOnly = cosmicOnlyCheckbox.isSelected();
+		boolean includeReportedOnly = reportedOnlyCheckbox.isSelected();
 		int frequencyFrom =  getNumber(textFreqFrom, 0);
 		int frequencyTo = getNumber(textVarFreqTo, 100);
-		int minOccurence = getNumber(textOccuranceFrom, 0);
-		int minReadDepth = getNumber(textMinRD, 0);
-		mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth);
+		int minOccurence = getNumber(occurenceFromTextField, 0);
+		int minReadDepth = getNumber(minReadDepthTextField, 0);
+		int maxPopulationFrequency = getNumber(maxPopulationFrequencyTextField, 100);
+		mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency);
 	}
 	
 	private int getNumber(JTextField field, Integer defaultInt){
@@ -405,12 +406,13 @@ public class MutationListFrame extends JFrame {
 	}
 
 	private void reset(){
-		rdbtnCosmic.setSelected(false);
-		rdbtnShowReportedOnly.setSelected(false);		
-		textFreqFrom.setText("");
-		textVarFreqTo.setText("");
-		textMinRD.setText("");
-		textOccuranceFrom.setText("");
+		cosmicOnlyCheckbox.setSelected(false);
+		reportedOnlyCheckbox.setSelected(false);		
+		textFreqFrom.setText("0");
+		textVarFreqTo.setText("100");
+		minReadDepthTextField.setText("100");
+		occurenceFromTextField.setText("0");
+		maxPopulationFrequencyTextField.setText("100");
 		applyRowFilters();
 	}
 
@@ -453,20 +455,22 @@ public class MutationListFrame extends JFrame {
 		});
 		
 		String tooltip = "Disabled while cosmic data is loading";
-		rdbtnCosmic.setEnabled(false);
-		rdbtnCosmic.setToolTipText(tooltip);
-		rdbtnShowReportedOnly.setEnabled(false);
-		rdbtnShowReportedOnly.setToolTipText(tooltip);
-		btnReset.setEnabled(false);
-		btnReset.setToolTipText(tooltip);
+		cosmicOnlyCheckbox.setEnabled(false);
+		cosmicOnlyCheckbox.setToolTipText(tooltip);
+		reportedOnlyCheckbox.setEnabled(false);
+		reportedOnlyCheckbox.setToolTipText(tooltip);
+		resetButton.setEnabled(false);
+		resetButton.setToolTipText(tooltip);
 		textFreqFrom.setEditable(false);
 		textFreqFrom.setToolTipText(tooltip);
 		textVarFreqTo.setEditable(false);
 		textVarFreqTo.setToolTipText(tooltip);
-		textMinRD.setEditable(false);
-		textMinRD.setToolTipText(tooltip);
-		textOccuranceFrom.setEditable(false);
-		textOccuranceFrom.setToolTipText(tooltip);
+		minReadDepthTextField.setEditable(false);
+		minReadDepthTextField.setToolTipText(tooltip);
+		occurenceFromTextField.setEditable(false);
+		occurenceFromTextField.setToolTipText(tooltip);
+		maxPopulationFrequencyTextField.setEditable(false);
+		maxPopulationFrequencyTextField.setToolTipText(tooltip);
 		final Thread one = createExtraMutationDataThread(0, 4);
 		final Thread two = createExtraMutationDataThread(1, 4);
 		final Thread three = createExtraMutationDataThread(2, 4);
@@ -481,20 +485,22 @@ public class MutationListFrame extends JFrame {
 					three.join();
 					four.join();
 				}catch(Exception e){}
-				rdbtnCosmic.setEnabled(true);
-				rdbtnCosmic.setToolTipText("");
-				rdbtnShowReportedOnly.setEnabled(true);
-				rdbtnShowReportedOnly.setToolTipText("");
-				btnReset.setEnabled(true);
-				btnReset.setToolTipText("");
+				cosmicOnlyCheckbox.setEnabled(true);
+				cosmicOnlyCheckbox.setToolTipText("");
+				reportedOnlyCheckbox.setEnabled(true);
+				reportedOnlyCheckbox.setToolTipText("");
+				resetButton.setEnabled(true);
+				resetButton.setToolTipText("");
 				textFreqFrom.setEditable(true);
 				textFreqFrom.setToolTipText("");
 				textVarFreqTo.setEditable(true);
 				textVarFreqTo.setToolTipText("");
-				textMinRD.setEditable(true);
-				textMinRD.setToolTipText("");
-				textOccuranceFrom.setEditable(true);
-				textOccuranceFrom.setToolTipText("");
+				minReadDepthTextField.setEditable(true);
+				minReadDepthTextField.setToolTipText("");
+				occurenceFromTextField.setEditable(true);
+				occurenceFromTextField.setToolTipText("");
+				maxPopulationFrequencyTextField.setEditable(true);
+				maxPopulationFrequencyTextField.setToolTipText("");
 			}
 		});
 		waitingThread.start();

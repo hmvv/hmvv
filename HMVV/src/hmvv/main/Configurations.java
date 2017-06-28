@@ -2,14 +2,14 @@ package hmvv.main;
 
 import java.awt.Component;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import javax.swing.JOptionPane;
 public class Configurations {
 
-	public static void loadConfigurations(Component parent, File file) throws Exception{
-		BufferedReader br = new BufferedReader(new FileReader(file));
+	public static void loadConfigurations(Component parent, InputStream configurationInputStream) throws Exception{
+		BufferedReader br = new BufferedReader(new InputStreamReader(configurationInputStream));
 		String line = null;
 		while((line = br.readLine()) != null){
 			if(line.equals("")){

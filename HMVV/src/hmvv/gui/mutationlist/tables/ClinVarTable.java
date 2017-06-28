@@ -1,6 +1,7 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.CustomColumn;
+import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.model.Mutation;
@@ -8,8 +9,8 @@ import hmvv.model.Mutation;
 public class ClinVarTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 	
-	public ClinVarTable(ClinVarTableModel model){
-		super(model);
+	public ClinVarTable(MutationListFrame parent, ClinVarTableModel model){
+		super(parent, model);
 	}
 	
 	@Override

@@ -101,7 +101,17 @@ public class MutationList {
 		return true;//default to true;
 	}
 	
-	private boolean includeMutation(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, Mutation mutation){
+	private boolean includePopulationFrequencyFilter(int maxPopulationFrequency, Mutation mutation){
+		if(mutation.getAltGlobalFreq() != null){
+			double populationFrequency = mutation.getAltGlobalFreq();
+			if(maxPopulationFrequency < populationFrequency){
+				return false;
+			}
+		}
+		return true;//default to true;
+	}
+	
+	private boolean includeMutation(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency, Mutation mutation){
 		if(!includeMutationCosmicFilter(includeCosmicOnly, mutation)){
 			return false;
 		}
@@ -117,10 +127,14 @@ public class MutationList {
 		if(!includeReadDepthFilter(minReadDepth, mutation)){
 			return false;
 		}
+		if(!includePopulationFrequencyFilter(maxPopulationFrequency, mutation)){
+			return false;
+		}
+		
 		return true;
 	}
 	
-	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth){
+	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency){
 		ArrayList<Mutation> allMutations = new ArrayList<Mutation>(mutations.size() + filteredMutations.size());
 		allMutations.addAll(mutations);
 		allMutations.addAll(filteredMutations);
@@ -128,7 +142,7 @@ public class MutationList {
 		ArrayList<Mutation> newFilteredMutations = new ArrayList<Mutation>();
 		for(int i = 0; i < allMutations.size(); i++){
 			Mutation mutation = allMutations.get(i);
-			if(!includeMutation(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, mutation)){				
+			if(!includeMutation(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, mutation)){				
 				newFilteredMutations.add(mutation);
 			}
 		}
