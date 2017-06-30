@@ -1,29 +1,33 @@
 package hmvv.gui.mutationlist.tablemodels;
 
+import java.util.ArrayList;
+
 import hmvv.model.Mutation;
 
 public class BasicTableModel extends CommonTableModel {
 	private static final long serialVersionUID = 1L;
 
-	private String[] columns = {
-			"reported",
-			"gene",
-			"exons",
-			"HGVSc",
-			"HGVSp",
-			"dbSNPID",
-			"cosmicID",
-			"type",
-			"genotype",
-			"altFreq",
-			"readDP",
-			"altReadDP",
-			"occurrence",
-			"annotation"
-	};
-
 	public BasicTableModel(MutationList mutationList){
 		super(mutationList);
+	}
+	
+	protected ArrayList<MutationTableModelColumn> constructColumns(){
+		ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
+		columns.add(MutationTableModelColumn.reportedColumn);
+		columns.add(MutationTableModelColumn.geneColumn);
+		columns.add(MutationTableModelColumn.exonsColumn);
+		columns.add(MutationTableModelColumn.HGVScColumn);
+		columns.add(MutationTableModelColumn.HGVSpColumn);
+		columns.add(MutationTableModelColumn.dbSNPIDColumn);
+		columns.add(MutationTableModelColumn.cosmicIDColumn);
+		columns.add(MutationTableModelColumn.typeColumn);
+		columns.add(MutationTableModelColumn.genotypeColumn);
+		columns.add(MutationTableModelColumn.altFreqColumn);
+		columns.add(MutationTableModelColumn.readDPColumn);
+		columns.add(MutationTableModelColumn.altReadDPColumn);
+		columns.add(MutationTableModelColumn.occurrenceColumn);
+		columns.add(MutationTableModelColumn.annotationColumn);
+		return columns;
 	}
 	
 	@Override
@@ -43,65 +47,5 @@ public class BasicTableModel extends CommonTableModel {
 	public void updateModel(int row, String cosmicID, int occurenceCount){
 		setValueAt(cosmicID, row, 6);
 		setValueAt(occurenceCount, row, 12);
-	}
-	
-	@Override
-	public final Object getValueAt(int row, int column) {
-		Mutation mutation = getMutation(row);
-		switch(column){
-		case 0:
-			return mutation.isReported();
-		case 1:
-			return mutation.getGene();
-		case 2:
-			return mutation.getExons();
-		case 3:
-			return mutation.getHGVSc();
-		case 4:
-			return mutation.getHGVSp();
-		case 5:
-			return mutation.getDbSNPID();
-		case 6:
-			return mutation.getCosmicID();
-		case 7:
-			return mutation.getType();
-		case 8:
-			return mutation.getGenotype();
-		case 9:
-			return mutation.getAltFreq();
-		case 10:
-			return mutation.getReadDP();
-		case 11:
-			return mutation.getAltReadDP();
-		case 12:
-			return mutation.getOccurrence();
-		case 13:
-			return mutation.getAnnotation();
-		default:
-			return "UNDEFINED";
-		}
-	}
-	
-	@Override
-	public Class<?> getColumnClass(int columnNo) {
-		switch (columnNo) {
-		case 0:
-			return Boolean.class;
-		case 9:
-			return Double.class;
-		case 10:
-			return Integer.class;
-		case 11:
-			return Integer.class;
-		case 12:
-			return Integer.class;
-		default:
-			return String.class;
-		}
-	}
-	
-	@Override
-	public String[] getColumnNames() {
-		return columns;
 	}
 }

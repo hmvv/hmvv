@@ -1,6 +1,6 @@
 package hmvv.gui.mutationlist.tables;
 
-import hmvv.gui.CustomColumn;
+import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.io.InternetCommands;
@@ -14,8 +14,8 @@ public class ClinVarTable extends CommonTable{
 	}
 	
 	@Override
-	protected CustomColumn[] constructCustomColumns(){
-		return CustomColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4, 8, 9);
+	protected HMVVTableColumn[] constructCustomColumns(){
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4, 8, 9);
 	}
 	
 	@Override

@@ -1,5 +1,7 @@
 package hmvv.gui.mutationlist.tablemodels;
 
+import java.util.ArrayList;
+
 import javax.swing.table.AbstractTableModel;
 import hmvv.model.Mutation;
 
@@ -7,11 +9,15 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 	private static final long serialVersionUID = 1L;
 
 	protected MutationList mutationList;
-
+	protected ArrayList<MutationTableModelColumn> columns;
+	
 	public CommonTableModel(MutationList mutationList){
 		this.mutationList = mutationList;
 		mutationList.addListener(this);
+		columns = constructColumns();
 	}
+	
+	protected abstract ArrayList<MutationTableModelColumn> constructColumns();
 	
 	public final Mutation getMutation(int row){
 		return mutationList.getMutation(row);
@@ -41,27 +47,34 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 	}
 	
 	@Override
-	public final String getColumnName(int column) {
-		return getColumnNames()[column];
-	}
-	
-	@Override
 	public final int getColumnCount() {
-		return getColumnNames().length;
+		return columns.size();
 	}
 	
 	@Override
 	public final int getRowCount() {
 		return mutationList.getMutationCount();
 	}
+	
+	@Override
+	public final String getColumnName(int column) {
+		return columns.get(column).title;
+	}
 
-	protected abstract String[] getColumnNames();
+	@Override
+	public  final Object getValueAt(int row, int column) {
+		Mutation mutation = mutationList.getMutation(row);
+		return columns.get(column).getValue(mutation);
+	}
+	
+	public String getColumnDescription(int column){
+		return columns.get(column).description;
+	}
 	
 	@Override
-	public abstract Class<?> getColumnClass(int column);
-	
-	@Override
-	public abstract Object getValueAt(int row, int column);
+	public final Class<?> getColumnClass(int column) {
+		return columns.get(column).columnClass;
+	}
 	
 	@Override
 	public void mutationUpdated(int index){

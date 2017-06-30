@@ -10,12 +10,13 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import hmvv.gui.BooleanRenderer;
-import hmvv.gui.CustomColumn;
+import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.HMVVTableCellRenderer;
 import hmvv.gui.mutationlist.AnnotationFrame;
 import hmvv.gui.mutationlist.MutationListFrame;
@@ -33,7 +34,7 @@ public abstract class CommonTable extends JTable{
 	protected MutationListFrame parent;
 	protected CommonTableModel model;
 	
-	private CustomColumn[] customColumns;
+	private HMVVTableColumn[] customColumns;
 	
 	public CommonTable(MutationListFrame parent, CommonTableModel model){
 		super();
@@ -49,11 +50,24 @@ public abstract class CommonTable extends JTable{
 		constructListeners();
 	}
 	
+	//Implement table header tool tips.
+	protected JTableHeader createDefaultTableHeader() {
+		return new JTableHeader(columnModel) {
+			private static final long serialVersionUID = 1L;
+			
+			public String getToolTipText(MouseEvent e) {
+				int index = table.columnAtPoint(e.getPoint());
+				int realIndex = table.convertColumnIndexToModel(index);
+				return model.getColumnDescription(realIndex);
+			}
+		};
+	}
+	
 	/**
 	 * Can be overwritten by subclasses to create different behaviors
 	 * @return
 	 */
-	protected abstract CustomColumn[] constructCustomColumns();
+	protected abstract HMVVTableColumn[] constructCustomColumns();
 	
 	private void constructListeners(){
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -62,7 +76,7 @@ public abstract class CommonTable extends JTable{
 				int column = columnAtPoint(e.getPoint());
 				int row = rowAtPoint(e.getPoint());
 				if(getValueAt(row, column) == null){
-					setCursor(CustomColumn.defaultColumn.cursor);
+					setCursor(HMVVTableColumn.defaultColumn.cursor);
 				}
 				setCursor(customColumns[column].cursor);
 			}

@@ -2,7 +2,7 @@ package hmvv.gui.mutationlist.tables;
 
 import java.util.ArrayList;
 
-import hmvv.gui.CustomColumn;
+import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.MutationTraceFrame;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
@@ -17,8 +17,8 @@ public class BasicTable extends CommonTable{
 	}
 	
 	@Override
-	protected CustomColumn[] constructCustomColumns(){
-		return CustomColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4, 5, 6, 12, 13);
+	protected HMVVTableColumn[] constructCustomColumns(){
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4, 5, 6, 12, 13);
 	}
 	
 	@Override
