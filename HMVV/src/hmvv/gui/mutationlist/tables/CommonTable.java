@@ -26,6 +26,7 @@ import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
+import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
 
 public abstract class CommonTable extends JTable{
@@ -237,16 +238,19 @@ public abstract class CommonTable extends JTable{
 		Coordinate coordinate = new Coordinate(chr, pos, ref, alt);
 		
 		Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
-
+		
+		String gene = mutation.getGene();
+		GeneAnnotation geneAnnotation = DatabaseCommands.getGeneAnnotation(gene);
+		
 		Boolean annotationAlreadyOpen = false;
-		if(annotation.getEditStatus().equals(Annotation.STATUS.open)){
+		if(annotation.getEditStatus().equals(Annotation.STATUS.open) || geneAnnotation.isLocked()){
 			annotationAlreadyOpen = true;
 			//TODO consider allowing user to override the lock in situations where the previous user didn't properly release the lock
 			JOptionPane.showMessageDialog(this, "You or someone else is working on this mutation, open in read only mode");
 		}
 		
 		boolean readOnly = annotationAlreadyOpen || !SSHConnection.isSuperUser();
-		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, annotation, this);
+		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotation, annotation, this, parent);
 		editAnnotation.setVisible(true);
 	}
 	

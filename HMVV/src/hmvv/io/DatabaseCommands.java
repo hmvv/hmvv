@@ -13,6 +13,7 @@ import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
+import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
@@ -584,6 +585,21 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Annotation Queries
 	 *************************************************************************/
+	public static GeneAnnotation getGeneAnnotation(String gene) throws Exception{
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select curation, locked from ngs.GeneAnnotation where gene = ?");
+		selectStatement.setString(1, gene);
+		ResultSet rs = selectStatement.executeQuery();
+		if(rs.next()){
+			String curation = rs.getString(1);
+			boolean locked = rs.getBoolean(2);
+			return new GeneAnnotation(gene, curation, locked);
+		}else{
+			GeneAnnotation geneAnnotation = new GeneAnnotation(gene, "", false);
+			createGeneAnnotation(geneAnnotation);
+			return geneAnnotation;
+		}
+	}
+	
 	public static Annotation getAnnotation(Coordinate coordinate) throws Exception{
 		PreparedStatement selectStatement = databaseConnection.prepareStatement("select classification, curation, somatic, updateStat, status from ngs.annotation where chr = ? and pos = ? and ref = ? and alt = ?");
 		selectStatement.setString(1, coordinate.getChr());
@@ -622,6 +638,15 @@ public class DatabaseCommands {
 		}
 	}
 	
+	public static void createGeneAnnotation(GeneAnnotation geneAnnotation) throws Exception{
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into ngs.GeneAnnotation(gene, curation, locked) values(?, ?, ?)");
+		updateStatement.setString(1, geneAnnotation.getGene());
+		updateStatement.setString(2, geneAnnotation.getCuration());
+		updateStatement.setBoolean(3, geneAnnotation.isLocked());
+		updateStatement.executeUpdate();
+		updateStatement.close();
+	}
+	
 	public static void createAnnotation(Annotation annotation) throws Exception{
 		Coordinate coordinate = annotation.getCoordinate();
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into ngs.annotation(chr, pos, ref, alt, status) values(?, ?, ?, ?, ?)");
@@ -647,6 +672,26 @@ public class DatabaseCommands {
 		updateStatement.setString(6, coordinate.getPos());
 		updateStatement.setString(7, coordinate.getRef());
 		updateStatement.setString(8, coordinate.getAlt());
+		updateStatement.executeUpdate();
+		updateStatement.close();
+	}
+	
+	public static void setGeneAnnotationCuration(GeneAnnotation geneAnnotation) throws Exception{
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.GeneAnnotation set"
+				+ " curation = ? "
+				+ " where gene = ?");
+		updateStatement.setString(1, geneAnnotation.getCuration());
+		updateStatement.setString(2, geneAnnotation.getGene());
+		updateStatement.executeUpdate();
+		updateStatement.close();
+	}
+	
+	public static void setGeneAnnotationLock(GeneAnnotation geneAnnotation) throws Exception{
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.GeneAnnotation set"
+				+ " locked = ?"
+				+ " where gene = ?");
+		updateStatement.setBoolean(1, geneAnnotation.isLocked());
+		updateStatement.setString(2, geneAnnotation.getGene());
 		updateStatement.executeUpdate();
 		updateStatement.close();
 	}
