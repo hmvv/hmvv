@@ -2,6 +2,7 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
+import hmvv.io.DatabaseCommands;
 import hmvv.model.Mutation;
 
 public class MutationList {
@@ -69,6 +70,17 @@ public class MutationList {
 		return mutation.isReported();
 	}
 	
+	private boolean includeNormalPairFilter(boolean includeNormalPair, Mutation mutation) throws Exception {	
+		if(!includeNormalPair){
+			return true;
+		}
+		boolean hasNormalPair = DatabaseCommands.getPairedNormalMutations(mutation);
+		if(hasNormalPair){
+			return false;
+		}
+		return true;
+	}
+	
 	private boolean includeVariantFilter(int frequencyFrom, int frequencyTo, Mutation mutation){
 		double variantFrequency = mutation.getAltFreq();
 		if(frequencyFrom > variantFrequency){
@@ -111,11 +123,14 @@ public class MutationList {
 		return true;//default to true;
 	}
 	
-	private boolean includeMutation(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency, Mutation mutation){
+	private boolean includeMutation(boolean includeCosmicOnly, boolean includeReportedOnly, boolean includeNormalPair, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency, Mutation mutation) throws Exception{
 		if(!includeMutationCosmicFilter(includeCosmicOnly, mutation)){
 			return false;
 		}
 		if(!includeReportedFilter(includeReportedOnly, mutation)){
+			return false;
+		}
+		if(!includeNormalPairFilter(includeNormalPair, mutation)){
 			return false;
 		}
 		if(!includeVariantFilter(frequencyFrom, frequencyTo, mutation)){
@@ -134,7 +149,7 @@ public class MutationList {
 		return true;
 	}
 	
-	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency){
+	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, boolean includeNormalPair, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency) throws Exception{
 		ArrayList<Mutation> allMutations = new ArrayList<Mutation>(mutations.size() + filteredMutations.size());
 		allMutations.addAll(mutations);
 		allMutations.addAll(filteredMutations);
@@ -142,7 +157,7 @@ public class MutationList {
 		ArrayList<Mutation> newFilteredMutations = new ArrayList<Mutation>();
 		for(int i = 0; i < allMutations.size(); i++){
 			Mutation mutation = allMutations.get(i);
-			if(!includeMutation(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, mutation)){				
+			if(!includeMutation(includeCosmicOnly, includeReportedOnly, includeNormalPair, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, mutation)){				
 				newFilteredMutations.add(mutation);
 			}
 		}

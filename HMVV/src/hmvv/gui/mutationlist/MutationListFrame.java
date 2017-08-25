@@ -74,6 +74,7 @@ public class MutationListFrame extends JFrame {
 	
 	private JCheckBox reportedOnlyCheckbox;
 	private JCheckBox cosmicOnlyCheckbox;
+	private JCheckBox filterNomalCheckbox;
 	private JButton shortReportButton;
 	private JButton longReportButton;
 	private JButton resetButton;
@@ -144,7 +145,12 @@ public class MutationListFrame extends JFrame {
 	private void constructCheckBoxFilters(){
 		ActionListener actionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				applyRowFilters();
+				try {
+					applyRowFilters();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		};
 		
@@ -155,18 +161,37 @@ public class MutationListFrame extends JFrame {
 		reportedOnlyCheckbox = new JCheckBox("Show Reported Only");
 		reportedOnlyCheckbox.addActionListener(actionListener);
 		reportedOnlyCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		
+		filterNomalCheckbox = new JCheckBox("Filter Normal Pair");
+		filterNomalCheckbox.addActionListener(actionListener);
+		filterNomalCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 	}
 	
 	private void constructTextFieldFilters(){
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
-				applyRowFilters();
+				try {
+					applyRowFilters();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 			public void removeUpdate(DocumentEvent e) {
-				applyRowFilters();
+				try {
+					applyRowFilters();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 			public void insertUpdate(DocumentEvent e) {
-				applyRowFilters();
+				try {
+					applyRowFilters();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		};
 		
@@ -217,7 +242,12 @@ public class MutationListFrame extends JFrame {
 				}else if(e.getSource() == longReportButton){
 					showLongReportFrame();
 				}else if(e.getSource() == resetButton){
-					reset();
+					try {
+						reset();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}else if(e.getSource() == exportButton){
 					try{
 						exportTable();
@@ -280,6 +310,10 @@ public class MutationListFrame extends JFrame {
 		JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
+		
+		if(mutationList.getMutation(0).getAssay().equals("exome")){
+			checkboxPanel.add(filterNomalCheckbox);
+		}
 		leftFilterPanel.add(checkboxPanel);
 		
 		//variant frequency
@@ -379,15 +413,16 @@ public class MutationListFrame extends JFrame {
 	    });
 	}
 	
-	private void applyRowFilters(){
+	private void applyRowFilters() throws Exception{
 		boolean includeCosmicOnly = cosmicOnlyCheckbox.isSelected();
 		boolean includeReportedOnly = reportedOnlyCheckbox.isSelected();
+		boolean includeNormalPair = filterNomalCheckbox.isSelected();
 		int frequencyFrom =  getNumber(textFreqFrom, 0);
 		int frequencyTo = getNumber(textVarFreqTo, 100);
 		int minOccurence = getNumber(occurenceFromTextField, 0);
 		int minReadDepth = getNumber(minReadDepthTextField, 0);
 		int maxPopulationFrequency = getNumber(maxPopulationFrequencyTextField, 100);
-		mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency);
+		mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, includeNormalPair, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency);
 	}
 	
 	private int getNumber(JTextField field, Integer defaultInt){
@@ -405,9 +440,10 @@ public class MutationListFrame extends JFrame {
 		return valueInt;
 	}
 
-	private void reset(){
+	private void reset() throws Exception{
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);		
+		filterNomalCheckbox.setSelected(false);
 		textFreqFrom.setText("0");
 		textVarFreqTo.setText("100");
 		minReadDepthTextField.setText("100");
@@ -459,6 +495,8 @@ public class MutationListFrame extends JFrame {
 		cosmicOnlyCheckbox.setToolTipText(tooltip);
 		reportedOnlyCheckbox.setEnabled(false);
 		reportedOnlyCheckbox.setToolTipText(tooltip);
+		filterNomalCheckbox.setEnabled(false);
+		filterNomalCheckbox.setToolTipText(tooltip);
 		resetButton.setEnabled(false);
 		resetButton.setToolTipText(tooltip);
 		textFreqFrom.setEditable(false);
@@ -489,6 +527,8 @@ public class MutationListFrame extends JFrame {
 				cosmicOnlyCheckbox.setToolTipText("");
 				reportedOnlyCheckbox.setEnabled(true);
 				reportedOnlyCheckbox.setToolTipText("");
+				filterNomalCheckbox.setEnabled(true);
+				filterNomalCheckbox.setToolTipText("");
 				resetButton.setEnabled(true);
 				resetButton.setToolTipText("");
 				textFreqFrom.setEditable(true);

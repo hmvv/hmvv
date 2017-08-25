@@ -141,6 +141,41 @@ public class DatabaseCommands {
 		return assays;
 	}
 	
+	public static String getPairedNormal(int tumorID) throws Exception{
+		String normalID = "";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from ngs.numorNormalPair where tumorID = ?");
+		preparedStatement.setInt(1, tumorID);
+		ResultSet rs = preparedStatement.executeQuery();
+		while(rs.next()){
+			normalID = rs.getString(1);
+		}
+		return normalID;
+	}
+	
+	public static boolean getPairedNormalMutations(Mutation mutation) throws Exception{
+		String query = "select exists (select * from ngs.data where sampleID=(select normalID from ngs.tumorNormalPair where tumorID = ?) and gene = ? and chr=? and pos = ? and ref = ? and alt = ?)";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setInt(1, mutation.getSampleID());
+		preparedStatement.setString(2, mutation.getGene());
+		preparedStatement.setString(3, mutation.getChr());
+		preparedStatement.setString(4, mutation.getPos());
+		preparedStatement.setString(5, mutation.getRef());
+		preparedStatement.setString(6, mutation.getAlt());
+		ResultSet rs = preparedStatement.executeQuery();
+		if(rs.next()){
+			int count = rs.getInt(1);
+			preparedStatement.close();
+			if(count >= 1){
+				return true;
+			}else{
+				return false;
+			}
+		}else{
+			preparedStatement.close();
+			return false;
+		}
+	}
+	
 	public static ArrayList<String> getInstrumentsForAssay(String assay) throws Exception{
 		ArrayList<String> instruments = new ArrayList<String>();
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instrument from ngs.assays where assay = ?");
