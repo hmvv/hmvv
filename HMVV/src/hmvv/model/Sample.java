@@ -2,7 +2,7 @@ package hmvv.model;
 
 public class Sample {
 	
-	public final int ID;
+	public int ID;
 	public final String assay;
 	public final String instrument;
 	public final String runID;
@@ -39,6 +39,14 @@ public class Sample {
 		this.runDate = notNull(runDate);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
+	}
+	
+	public int getID(){
+		return ID;
+	}
+	
+	public void setID(int id){
+		this.ID = id;
 	}
 	
 	private String notNull(String testString){

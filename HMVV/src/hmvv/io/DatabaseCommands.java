@@ -94,6 +94,11 @@ public class DatabaseCommands {
 		String ID = "";
 		while(rsFindID.next()){
 			ID = rsFindID.getString(1);
+			try{
+				sample.setID(Integer.parseInt(ID));
+			}catch(Exception e){
+				throw new Exception("ID Assigned by database is not an integer: " + ID);
+			}
 			count += 1;
 		}
 		if(count == 0){
