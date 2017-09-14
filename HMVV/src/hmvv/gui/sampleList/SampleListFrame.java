@@ -118,7 +118,7 @@ public class SampleListFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == enterSampleMenuItem){
-					EnterSample sampleEnter = new EnterSample(SampleListFrame.this);
+					EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 					sampleEnter.setVisible(true);
 				}else if(e.getSource() == newAssayMenuItem){
 					if(SSHConnection.isSuperUser()){
