@@ -147,6 +147,25 @@ public class DatabaseCommands {
 		return assays;
 	}
 	
+	private static int getPairedNormal(int tumorID) throws Exception{
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from ngs.tumorNormalPair where tumorID = ?");
+		preparedStatement.setInt(1, tumorID);
+		ResultSet rs = preparedStatement.executeQuery();
+		if(rs.next()){
+			return rs.getInt(1);
+		}
+		return -1;
+	}
+	
+	public static ArrayList<Mutation> getPairedNormalMutations(int ID) throws Exception{
+		int normalID = getPairedNormal(ID);
+		if(normalID == -1){
+			return null;
+		}else{
+			return getMutationDataByID(normalID);
+		}
+	}
+	
 	public static ArrayList<String> getInstrumentsForAssay(String assay) throws Exception{
 		ArrayList<String> instruments = new ArrayList<String>();
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instrument from ngs.assays where assay = ?");

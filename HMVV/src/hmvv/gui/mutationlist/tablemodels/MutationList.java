@@ -2,12 +2,14 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
+import hmvv.io.DatabaseCommands;
 import hmvv.model.Mutation;
 
 public class MutationList {
 	private ArrayList<Mutation> mutations;
 	private ArrayList<Mutation> filteredMutations;
 	private ArrayList<MutationListListener> listeners;
+	private ArrayList<Mutation> mutationsInNormalPair;
 	
 	public MutationList(ArrayList<Mutation> mutations){
 		this.mutations = mutations;
@@ -134,16 +136,35 @@ public class MutationList {
 		return true;
 	}
 	
-	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency){
+	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, boolean filterNormalPair, int normalPairSampleID, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency) throws Exception{
 		ArrayList<Mutation> allMutations = new ArrayList<Mutation>(mutations.size() + filteredMutations.size());
 		allMutations.addAll(mutations);
 		allMutations.addAll(filteredMutations);
-		
+
+		if(mutationsInNormalPair == null && filterNormalPair){
+			mutationsInNormalPair = DatabaseCommands.getPairedNormalMutations(normalPairSampleID);
+			if(mutationsInNormalPair == null){
+				mutationsInNormalPair = new ArrayList<Mutation>();//empty array list because no normal was identified
+			}
+		}
+
 		ArrayList<Mutation> newFilteredMutations = new ArrayList<Mutation>();
+		
 		for(int i = 0; i < allMutations.size(); i++){
 			Mutation mutation = allMutations.get(i);
+
 			if(!includeMutation(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, mutation)){				
 				newFilteredMutations.add(mutation);
+				continue;
+			}
+			
+			if(filterNormalPair){
+				for(Mutation m : mutationsInNormalPair){
+					if(m.getCoordinate().equals(mutation.getCoordinate())){
+						newFilteredMutations.add(mutation);
+						break;
+					}
+				}
 			}
 		}
 		allMutations.removeAll(newFilteredMutations);

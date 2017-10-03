@@ -33,4 +33,13 @@ public class Coordinate {
 		return String.format("%s:%s %s->%s", chr, pos, ref, alt);
 	}
 	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof Coordinate){
+			Coordinate other = (Coordinate)o;
+			return chr.equals(other.chr) && pos.equals(other.pos) && ref.equals(other.ref) && alt.equals(other.alt);
+		}
+		return false;
+	}
+	
 }
