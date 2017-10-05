@@ -27,17 +27,13 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 		mutationList.updateAnnotationText(text, row);
 	}
 	
-	public void updateReportedStatus(boolean reported, int row){
-		mutationList.updateReportedStatus(reported, row);
-	}
-	
 	/**
 	 * Here we are assuming all tables have the reported field on column 0
 	 */
 	@Override
 	public void setValueAt(Object object, int row, int column){
 		if(column == 0){
-			updateReportedStatus((Boolean)object, row);
+			mutationList.updateReportedStatus((Boolean)object, row);
 		}
 	}
 	
@@ -89,5 +85,13 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 	@Override
 	public void mutationDataChanged(){
 		fireTableDataChanged();
+	}
+	
+	/**
+	 * Here we are assuming the tables have the reported field on column 0
+	 */
+	@Override
+	public void mutationReportedStatusChanged(int index){
+		fireTableCellUpdated(index, 0);
 	}
 }

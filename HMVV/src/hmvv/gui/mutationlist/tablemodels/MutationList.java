@@ -34,7 +34,7 @@ public class MutationList {
 	public void updateReportedStatus(boolean reported, int index){
 		Mutation mutation = getMutation(index);
 		mutation.setReported(reported);
-		notifyRowUpdated(index);
+		notifyReportedStatusChanged(index);
 	}
 	
 	public void sortModel(int[] newOrder){
@@ -178,6 +178,12 @@ public class MutationList {
 	
 	public int getMutationCount() {
 		return mutations.size();
+	}
+	
+	private void notifyReportedStatusChanged(int index){
+		for(MutationListListener listener : listeners){
+			listener.mutationReportedStatusChanged(index);
+		}
 	}
 	
 	private void notifyRowUpdated(int index){
