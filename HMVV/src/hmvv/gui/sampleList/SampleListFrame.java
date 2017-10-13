@@ -32,12 +32,13 @@ import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
-import hmvv.gui.CustomColumn;
+import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.HMVVTableCellRenderer;
 import hmvv.gui.adminFrames.CreateAssay;
@@ -78,7 +79,7 @@ public class SampleListFrame extends JFrame {
 
 	private JComboBox<String> assayComboBox;
 
-	private CustomColumn[] customColumns;
+	private HMVVTableColumn[] customColumns;
 	
 	/**
 	 * Initialize the contents of the frame.
@@ -92,7 +93,7 @@ public class SampleListFrame extends JFrame {
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		customColumns = CustomColumn.getCustomColumnArray(tableModel.getColumnCount(), 0, 14, 16, 17);
+		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), 0, 14, 16, 17);
 		createMenu();
 		createComponents();
 		layoutComponents();
@@ -137,10 +138,25 @@ public class SampleListFrame extends JFrame {
 	public void addSample(Sample sample){
 		tableModel.addSample(sample);
 	}
-	
+
 	private void createComponents(){
-		table = new JTable(tableModel);
-		
+		table = new JTable(tableModel){
+			private static final long serialVersionUID = 1L;
+
+			//Implement table header tool tips.
+			protected JTableHeader createDefaultTableHeader() {
+				return new JTableHeader(columnModel) {
+					private static final long serialVersionUID = 1L;
+
+					public String getToolTipText(MouseEvent e) {
+						int index = table.columnAtPoint(e.getPoint());
+						int realIndex = table.convertColumnIndexToModel(index);
+						return tableModel.getColumnDescription(realIndex);
+					}
+				};
+			}
+		};
+
 		table.setDefaultRenderer(Object.class, new HMVVTableCellRenderer(customColumns));
 		table.setDefaultRenderer(Integer.class, new HMVVTableCellRenderer(customColumns));
 		table.setAutoCreateRowSorter(true);

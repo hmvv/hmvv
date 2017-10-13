@@ -1,7 +1,9 @@
 package hmvv.gui.mutationlist;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +13,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -20,8 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.border.TitledBorder;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
@@ -33,38 +35,42 @@ import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.model.Annotation;
+import hmvv.model.GeneAnnotation;
+import hmvv.model.Mutation;
 
 public class AnnotationFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private CommonTable parent;
 	
-	private JPanel contentPanel;
 	private JButton okButton;
 	private JButton cancelButton;
 	
 	private JComboBox<String> pathogenicityComboBox;
 	private JComboBox<String> mutationTypeComboBox;
 	
+	private JTextArea geneAnnotationTextArea;
 	private JTextArea annotationTextArea;
 	private int maxCharacters = 5000;
 	private DefaultStyledDocument defaultStyledDocument;
 	
 	private JLabel historyLabel;
-	private JLabel labelCoordinateInfo;
 	
 	private Boolean readOnly;
 	
 	private Annotation currentAnnotation;
-	private JLabel lblNewLabel;
+	private GeneAnnotation geneAnnotation;
+	private Mutation mutation;
 	
 	/**
 	 * Create the dialog.
 	 */
-	public AnnotationFrame(Boolean readOnly, Annotation annotation, CommonTable parent) {
-		super("Annotation");
+	public AnnotationFrame(Boolean readOnly, Mutation mutation, GeneAnnotation geneAnnotation, Annotation annotation, CommonTable parent, MutationListFrame mutationListFrame) {
+		super("Annotation - " + mutation.getGene() + " - " + annotation.getCoordinate().getCoordinateAsString());
+		this.mutation = mutation;
 		this.readOnly = readOnly;
 		this.currentAnnotation = annotation;
+		this.geneAnnotation = geneAnnotation;
 		this.parent = parent;
 		
 		createComponents();
@@ -72,17 +78,21 @@ public class AnnotationFrame extends JFrame {
 		activateComponents();
 		
 		if(readOnly){
-			setTitle("Annotation (read only)");
+			setTitle("Annotation (read only) - " + mutation.getGene() + " - " + annotation.getCoordinate().getCoordinateAsString());
+			geneAnnotationTextArea.setEditable(false);
 			annotationTextArea.setEditable(false);
 			pathogenicityComboBox.setEnabled(false);
 			mutationTypeComboBox.setEnabled(false);
 		}
 		
+		pack();
+		setResizable(false);
+		setLocationRelativeTo(mutationListFrame);
 		openRecord();
 	}
 
 	private void createComponents(){
-		contentPanel = new JPanel();
+		Dimension textAreaDimension = new Dimension(400,400);
 		
 		pathogenicityComboBox = new JComboBox<String>();
 		pathogenicityComboBox.addItem("Not set");
@@ -100,87 +110,125 @@ public class AnnotationFrame extends JFrame {
 		mutationTypeComboBox.addItem("Unknown");
 		mutationTypeComboBox.setSelectedItem(currentAnnotation.getSomatic());
 
+		
+		geneAnnotationTextArea = new JTextArea();
+		geneAnnotationTextArea.setWrapStyleWord(true);
+		geneAnnotationTextArea.setLineWrap(true);
+		geneAnnotationTextArea.setText(geneAnnotation.getCuration());
+		geneAnnotationTextArea.setPreferredSize(textAreaDimension);
+		
 		annotationTextArea = new JTextArea();
 		annotationTextArea.setWrapStyleWord(true);
 		annotationTextArea.setLineWrap(true);
 		annotationTextArea.setText(currentAnnotation.getCuration());
+		annotationTextArea.setPreferredSize(textAreaDimension);
 		
 		historyLabel = new JLabel(currentAnnotation.getUpdateStatus());
-		labelCoordinateInfo = new JLabel("New label");
-
+		
 		okButton = new JButton("OK");
 		getRootPane().setDefaultButton(okButton);
 
 		cancelButton = new JButton("Cancel");
 		cancelButton.setActionCommand("Cancel");
 
-		lblNewLabel = new JLabel(maxCharacters + " characters remaining");
 		defaultStyledDocument = new DefaultStyledDocument();
 
 		//annotationTextArea.setDocument(defaultStyledDocument);
-
-		labelCoordinateInfo.setText(currentAnnotation.getCoordinate().getCoordinateAsString());
 	}
 
 	private void layoutComponents(){
-		setBounds(100, 100, 554, 504);
-		getContentPane().setLayout(new BorderLayout());
-
+		JPanel contentPanel = new JPanel();
+		setContentPane(contentPanel);
+		
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		contentPanel.setLayout(null);
-
-		pathogenicityComboBox.setBounds(193, 65, 198, 26);
-		contentPanel.add(pathogenicityComboBox);
-
-		mutationTypeComboBox.setBounds(191, 115, 200, 28);
-		contentPanel.add(mutationTypeComboBox);
-
-		JLabel lblClassification = new JLabel("Classification");
-		lblClassification.setBounds(49, 66, 102, 21);
-		lblClassification.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		contentPanel.add(lblClassification);
-
-		JLabel lblSomatic = new JLabel("Somatic");
-		lblSomatic.setBounds(49, 117, 102, 21);
-		lblSomatic.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		contentPanel.add(lblSomatic);
-
-		JLabel lblAnnotation = new JLabel("Annotation");
-		lblAnnotation.setBounds(49, 224, 102, 21);
-		lblAnnotation.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		contentPanel.add(lblAnnotation);
-
-		lblNewLabel.setBounds(352, 407, 176, 14);
-
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(169, 190, 328, 206);
-		scrollPane.setViewportView(annotationTextArea);
-		contentPanel.add(scrollPane);
-
-		contentPanel.add(lblNewLabel);
-
-		JLabel lblMaxCharacters = new JLabel("Max " + maxCharacters + " characters");
-		lblMaxCharacters.setBounds(31, 256, 141, 14);
-		contentPanel.add(lblMaxCharacters);
-
-		historyLabel.setBounds(20, 401, 258, 26);
-		contentPanel.add(historyLabel);
-
+		contentPanel.setLayout(new BorderLayout());
+		
+		JPanel itemPanel = new JPanel();
+		GridLayout itemPanelGridLayout = new GridLayout(0,1);
+		itemPanelGridLayout.setVgap(45);
+		itemPanel.setLayout(itemPanelGridLayout);
+		
+		//blank space
+		itemPanel.add(new JLabel());
+		
+		//Gene
+		JLabel geneLabel = new JLabel("Gene");
+		geneLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		JPanel genePanel = new JPanel();
+		genePanel.setLayout(new GridLayout(1,0));
+		genePanel.add(geneLabel);
+		JLabel geneLabelText = new JLabel(mutation.getGene());
+		geneLabelText.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		genePanel.add(geneLabelText);
+		itemPanel.add(genePanel);
+				
+		//Coordinate
 		JLabel lblCoordinate = new JLabel("Coordinate");
 		lblCoordinate.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblCoordinate.setBounds(49, 23, 102, 21);
-		contentPanel.add(lblCoordinate);
+		JPanel coordinatePanel = new JPanel();
+		coordinatePanel.setLayout(new GridLayout(1,0));
+		coordinatePanel.add(lblCoordinate);
+		JLabel lblCoordinateText = new JLabel(currentAnnotation.getCoordinate().getCoordinateAsString());
+		lblCoordinateText.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		coordinatePanel.add(lblCoordinateText);
+		itemPanel.add(coordinatePanel);
+		
+		//Classification
+		JLabel lblClassification = new JLabel("Classification");
+		lblClassification.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		JPanel classificationPanel = new JPanel();
+		classificationPanel.setLayout(new GridLayout(1,0));
+		classificationPanel.add(lblClassification);
+		classificationPanel.add(pathogenicityComboBox);
+		itemPanel.add(classificationPanel);
+		
+		//Somatic
+		JLabel lblSomatic = new JLabel("Somatic");
+		lblSomatic.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		JPanel somaticPanel = new JPanel();
+		somaticPanel.setLayout(new GridLayout(1,0));
+		somaticPanel.add(lblSomatic);
+		somaticPanel.add(mutationTypeComboBox);
+		itemPanel.add(somaticPanel);
+		
+		//blank space
+		itemPanel.add(new JLabel());
+		itemPanel.add(new JLabel());
+		
+		JPanel textAreaPanel = new JPanel();
+		//Annotation
+		JPanel annotationPanel = new JPanel();
+		annotationPanel.setLayout(new GridLayout(1,0));
+		JScrollPane annotationScrollPane = new JScrollPane();
+		annotationScrollPane.setViewportView(annotationTextArea);
+		TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation (5000 characters max)");
+		annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
+		annotationScrollPane.setBorder(annotationBorder);
+		annotationPanel.add(annotationScrollPane);
+		textAreaPanel.add(annotationPanel);
 
-		labelCoordinateInfo.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		labelCoordinateInfo.setBounds(193, 23, 198, 19);
-		contentPanel.add(labelCoordinateInfo);
-
+		//GeneAnnotation
+		JPanel geneAnnotationPanel = new JPanel();
+		geneAnnotationPanel.setLayout(new GridLayout(1,0));
+		JScrollPane geneScrollPane = new JScrollPane();
+		geneScrollPane.setViewportView(geneAnnotationTextArea);
+		TitledBorder geneAnnotationBorder = BorderFactory.createTitledBorder("" + mutation.getGene() + " Annotation (5000 characters max)");
+		geneAnnotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
+		geneAnnotationPanel.setBorder(geneAnnotationBorder);
+		geneAnnotationPanel.add(geneScrollPane);
+		textAreaPanel.add(geneAnnotationPanel);
+		
+		//JLabel lblMaxCharacters = new JLabel("Max " + maxCharacters + " characters");
+		
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		getContentPane().add(buttonPane, BorderLayout.SOUTH);
+		buttonPane.add(historyLabel);
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);
+		
+		contentPanel.add(itemPanel, BorderLayout.WEST);
+		contentPanel.add(textAreaPanel, BorderLayout.CENTER);
+		contentPanel.add(buttonPane, BorderLayout.SOUTH);
 	}
 
 	private void activateComponents(){
@@ -208,26 +256,6 @@ public class AnnotationFrame extends JFrame {
 		});
 
 		defaultStyledDocument.setDocumentFilter(new DocumentSizeFilter(maxCharacters));
-		defaultStyledDocument.addDocumentListener(new DocumentListener(){
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				update();
-			}
-
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				update();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				update();
-			}
-
-			private void update(){
-				lblNewLabel.setText((maxCharacters - defaultStyledDocument.getLength()) + " characters remaining");
-			}
-		});
 
 		annotationTextArea.addMouseListener(new ContextMenuMouseListener());
 
@@ -244,6 +272,9 @@ public class AnnotationFrame extends JFrame {
 		try {
 			if(!readOnly){
 				DatabaseCommands.setAnnotationStatus(Annotation.STATUS.open, currentAnnotation);
+				
+				geneAnnotation.setLocked(true);
+				DatabaseCommands.setGeneAnnotationLock(geneAnnotation);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
@@ -254,6 +285,9 @@ public class AnnotationFrame extends JFrame {
 		try {
 			if(!readOnly){
 				DatabaseCommands.setAnnotationStatus(Annotation.STATUS.close, currentAnnotation);
+				
+				geneAnnotation.setLocked(false);
+				DatabaseCommands.setGeneAnnotationLock(geneAnnotation);
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, e);
@@ -279,8 +313,11 @@ public class AnnotationFrame extends JFrame {
 		if(!currentAnnotation.isAnnotationSet()){
 			DatabaseCommands.deleteAnnotation(currentAnnotation);
 		}else{
-			DatabaseCommands.updateAnnotation(currentAnnotation);			
+			DatabaseCommands.updateAnnotation(currentAnnotation);
 		}
+		
+		geneAnnotation.setCuration(geneAnnotationTextArea.getText());
+		DatabaseCommands.setGeneAnnotationCuration(geneAnnotation);
 	}
 
 	private String getUpdateStatus(){

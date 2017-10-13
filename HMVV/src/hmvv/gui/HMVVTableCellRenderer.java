@@ -8,9 +8,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class HMVVTableCellRenderer extends DefaultTableCellRenderer {
 	private static final long serialVersionUID = 1L;
 
-	private final CustomColumn[] customColumns;
+	private final HMVVTableColumn[] customColumns;
 	
-	public HMVVTableCellRenderer(CustomColumn[] customColumns){
+	public HMVVTableCellRenderer(HMVVTableColumn[] customColumns){
 		this.customColumns = customColumns;
 	}
 	

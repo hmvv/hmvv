@@ -10,12 +10,13 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import hmvv.gui.BooleanRenderer;
-import hmvv.gui.CustomColumn;
+import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.HMVVTableCellRenderer;
 import hmvv.gui.mutationlist.AnnotationFrame;
 import hmvv.gui.mutationlist.MutationListFrame;
@@ -25,6 +26,7 @@ import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
+import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
 
 public abstract class CommonTable extends JTable{
@@ -33,7 +35,7 @@ public abstract class CommonTable extends JTable{
 	protected MutationListFrame parent;
 	protected CommonTableModel model;
 	
-	private CustomColumn[] customColumns;
+	private HMVVTableColumn[] customColumns;
 	
 	public CommonTable(MutationListFrame parent, CommonTableModel model){
 		super();
@@ -49,11 +51,24 @@ public abstract class CommonTable extends JTable{
 		constructListeners();
 	}
 	
+	//Implement table header tool tips.
+	protected JTableHeader createDefaultTableHeader() {
+		return new JTableHeader(columnModel) {
+			private static final long serialVersionUID = 1L;
+			
+			public String getToolTipText(MouseEvent e) {
+				int index = table.columnAtPoint(e.getPoint());
+				int realIndex = table.convertColumnIndexToModel(index);
+				return model.getColumnDescription(realIndex);
+			}
+		};
+	}
+	
 	/**
 	 * Can be overwritten by subclasses to create different behaviors
 	 * @return
 	 */
-	protected abstract CustomColumn[] constructCustomColumns();
+	protected abstract HMVVTableColumn[] constructCustomColumns();
 	
 	private void constructListeners(){
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -62,7 +77,7 @@ public abstract class CommonTable extends JTable{
 				int column = columnAtPoint(e.getPoint());
 				int row = rowAtPoint(e.getPoint());
 				if(getValueAt(row, column) == null){
-					setCursor(CustomColumn.defaultColumn.cursor);
+					setCursor(HMVVTableColumn.defaultColumn.cursor);
 				}
 				setCursor(customColumns[column].cursor);
 			}
@@ -223,16 +238,19 @@ public abstract class CommonTable extends JTable{
 		Coordinate coordinate = new Coordinate(chr, pos, ref, alt);
 		
 		Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
-
+		
+		String gene = mutation.getGene();
+		GeneAnnotation geneAnnotation = DatabaseCommands.getGeneAnnotation(gene);
+		
 		Boolean annotationAlreadyOpen = false;
-		if(annotation.getEditStatus().equals(Annotation.STATUS.open)){
+		if(annotation.getEditStatus().equals(Annotation.STATUS.open) || geneAnnotation.isLocked()){
 			annotationAlreadyOpen = true;
 			//TODO consider allowing user to override the lock in situations where the previous user didn't properly release the lock
 			JOptionPane.showMessageDialog(this, "You or someone else is working on this mutation, open in read only mode");
 		}
 		
 		boolean readOnly = annotationAlreadyOpen || !SSHConnection.isSuperUser();
-		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, annotation, this);
+		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotation, annotation, this, parent);
 		editAnnotation.setVisible(true);
 	}
 	

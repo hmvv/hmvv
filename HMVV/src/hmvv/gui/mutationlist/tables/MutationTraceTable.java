@@ -1,6 +1,6 @@
 package hmvv.gui.mutationlist.tables;
 
-import hmvv.gui.CustomColumn;
+import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
 
@@ -17,8 +17,8 @@ public class MutationTraceTable extends CommonTable{
 	}
 	
 	@Override
-	protected CustomColumn[] constructCustomColumns() {
-		return CustomColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4);
+	protected HMVVTableColumn[] constructCustomColumns() {
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4);
 	}
 
 	@Override
