@@ -32,6 +32,7 @@ public class SampleSearchFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	private JTextField textOrderNumber;
+	private JTextField textPathNumber;
 	private JTextField textlastName;
 	private JTextField textfirstName;
 	private DatePicker datePickerFrom;
@@ -48,17 +49,17 @@ public class SampleSearchFrame extends JFrame {
 		super("Sample Search");
 		JPanel contentPanel = new JPanel();
 		
-		setBounds(100, 100, 438, 318);
+		setBounds(100, 100, 438, 348);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
 		datePickerFrom = new DatePicker();
-		datePickerFrom.setBounds(140, 158, 183, 25);
+		datePickerFrom.setBounds(140, 188, 183, 25);
 		contentPanel.add(datePickerFrom);
 		
 		datePickerTo = new DatePicker();
-		datePickerTo.setBounds(140, 201, 183, 25);
+		datePickerTo.setBounds(140, 231, 183, 25);
 		contentPanel.add(datePickerTo);
 		
 		contentPanel.setLayout(null);
@@ -81,39 +82,51 @@ public class SampleSearchFrame extends JFrame {
 			textOrderNumber.setColumns(10);
 		}
 		{
+			JLabel lblPathNumber = new JLabel("Path Number");
+			lblPathNumber.setBounds(43, 99, 100, 17);
+			lblPathNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
+			contentPanel.add(lblPathNumber);
+		}
+		{
+			textPathNumber = new JTextField();
+			textPathNumber.setBounds(140, 97, 259, 20);
+			contentPanel.add(textPathNumber);
+			textPathNumber.setColumns(10);
+		}
+		{
 			JLabel lblLastName = new JLabel("Last Name");
-			lblLastName.setBounds(62, 99, 73, 17);
+			lblLastName.setBounds(62, 129, 73, 17);
 			lblLastName.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblLastName);
 		}
 		{
 			textlastName = new JTextField();
-			textlastName.setBounds(140, 97, 259, 20);
+			textlastName.setBounds(140, 127, 259, 20);
 			contentPanel.add(textlastName);
 			textlastName.setColumns(10);
 		}
 		{
 			JLabel lblFirstName = new JLabel("First Name");
-			lblFirstName.setBounds(61, 129, 74, 17);
+			lblFirstName.setBounds(61, 159, 74, 17);
 			lblFirstName.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblFirstName);
 		}
 		{
 			textfirstName = new JTextField();
-			textfirstName.setBounds(140, 127, 259, 20);
+			textfirstName.setBounds(140, 157, 259, 20);
 			contentPanel.add(textfirstName);
 			textfirstName.setColumns(10);
 		}
 		{
 			JLabel lblRunDate = new JLabel("Run Date");
-			lblRunDate.setBounds(21, 177, 64, 17);
+			lblRunDate.setBounds(21, 207, 64, 17);
 			lblRunDate.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblRunDate);
 		}
 		{
 			JLabel lblTo = new JLabel("TO");
 			lblTo.setFont(GUICommonTools.TAHOMA_BOLD_13);
-			lblTo.setBounds(95, 201, 27, 17);
+			lblTo.setBounds(95, 231, 27, 17);
 			contentPanel.add(lblTo);
 		}
 
@@ -134,7 +147,7 @@ public class SampleSearchFrame extends JFrame {
 
 		JLabel lblFrom = new JLabel("FROM");
 		lblFrom.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblFrom.setBounds(95, 158, 35, 17);
+		lblFrom.setBounds(95, 188, 35, 17);
 		contentPanel.add(lblFrom);
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -177,6 +190,7 @@ public class SampleSearchFrame extends JFrame {
 			}
 		};
 		textOrderNumber.getDocument().addDocumentListener(documentListener);
+		textPathNumber.getDocument().addDocumentListener(documentListener);
 		textlastName.getDocument().addDocumentListener(documentListener);
 		textfirstName.getDocument().addDocumentListener(documentListener);
 		datePickerFrom.addDateChangeListener(dateChangeListener);
@@ -185,7 +199,7 @@ public class SampleSearchFrame extends JFrame {
 	}
 	
 	private void updateOkButton(){
-		if(textOrderNumber.getText().length() == 0 && textlastName.getText().length() == 0 && textfirstName.getText().length() == 0){
+		if(textOrderNumber.getText().length() == 0 && textPathNumber.getText().length() == 0 && textlastName.getText().length() == 0 && textfirstName.getText().length() == 0){
 			if(datePickerFrom.getText().length() == 0 && datePickerTo.getText().length() == 0){
 				okButton.setEnabled(false);
 			}else{
@@ -205,6 +219,11 @@ public class SampleSearchFrame extends JFrame {
 		
 		String orderNumber = textOrderNumber.getText();
 		if(exclude(orderNumber, sample.getOrderNumber())){
+			return false;
+		}
+		
+		String pathNumber = textPathNumber.getText();
+		if(exclude(pathNumber, sample.getPathNumber())){
 			return false;
 		}
 		
