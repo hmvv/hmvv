@@ -110,6 +110,17 @@ public class SSHConnection {
 		return httpFile;
 	}
 
+	public static String findIlluminaNextseqSample(String instrument, String runID, String sampleID){
+		instrument = "nextSeq_heme";
+		String runFile = null;
+		String command = String.format("ls /home/%s/*_%s_*/%s*.sort.bam", instrument, runID,sampleID);
+		runFile = SSHConnection.sendCommand(command);
+		String original = String.format("/home/%s/", instrument);
+		String replace = String.format("http://" + Configurations.SSH_SERVER_ADDRESS + "/%s/", instrument);
+		String httpFile = runFile.replace(original, replace);	
+		return httpFile;
+	}
+	
 	public static String findIlluminaSample(String instrument, String runID, String sampleID){
 		String runFile = null;
 		String command = String.format("ls /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s*.bam", instrument, runID,sampleID);

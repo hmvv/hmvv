@@ -575,6 +575,8 @@ public class SampleListFrame extends JFrame {
 				httpFile = SSHConnection.findPGMSample(runID, sampleID, callerID);
 			}else if(instrument.equals("proton")){
 				httpFile = SSHConnection.findProtonSample(runID, sampleID, callerID);
+			}else if(instrument.equals("nextseq")){
+				httpFile = SSHConnection.findIlluminaNextseqSample(instrument, runID, sampleID);
 			}else{
 				httpFile = SSHConnection.findIlluminaSample(instrument, runID, sampleID);
 			}
