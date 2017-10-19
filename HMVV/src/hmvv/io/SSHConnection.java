@@ -111,9 +111,19 @@ public class SSHConnection {
 	}
 	
 	public static String findIlluminaNextseqSample(String instrument, String runID, String sampleID){
-		instrument = "nextSeq_heme";
 		String runFile = null;
-		String command = String.format("ls /home/%s/*_%s_*/%s*.sort.bam", instrument, runID, sampleID);
+		String command = String.format("ls /home/%s/*_%s_*/*_bam/%s*.sort.bam", instrument, runID,sampleID);
+		runFile = SSHConnection.sendCommand(command);
+		String original = String.format("/home/%s/", instrument);
+		String replace = String.format("http://" + Configurations.SSH_SERVER_ADDRESS + "/%s/", instrument);
+		String httpFile = runFile.replace(original, replace);	
+		return httpFile;
+	}
+	
+	public static String findIlluminaExomeSample(String instrument, String runID, String sampleID){
+		instrument = "nextSeq_heme";//TODO This is a hack. Come up with a better way
+		String runFile = null;
+		String command = String.format("ls /home/%s/*_%s_*/%s*.sort.bam | head -1", instrument, runID,sampleID);//TODO the head -1 hack is due to our test environment
 		runFile = SSHConnection.sendCommand(command);
 		String original = String.format("/home/%s/", instrument);
 		String replace = String.format("http://" + Configurations.SSH_SERVER_ADDRESS + "/%s/", instrument);
