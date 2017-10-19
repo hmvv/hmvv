@@ -569,6 +569,7 @@ public class SampleListFrame extends JFrame {
 			String runID = getValueNotNull(selectedModel[i], 9);
 			String sampleID = getValueNotNull(selectedModel[i], 10);
 			String callerID = getValueNotNull(selectedModel[i], 12);
+			String assay = getValueNotNull(selectedModel[i], 1);
 			String instrument = getValueNotNull(selectedModel[i], 2);
 			String httpFile = null;
 			if(instrument.equals("pgm")){
@@ -580,6 +581,7 @@ public class SampleListFrame extends JFrame {
 			}else{
 				httpFile = SSHConnection.findIlluminaSample(instrument, runID, sampleID);
 			}
+			
 			String response = SSHConnection.loadFileIntoIGV(this, httpFile);
 			if(!response.equals("")){
 				JOptionPane.showMessageDialog(this, response);
