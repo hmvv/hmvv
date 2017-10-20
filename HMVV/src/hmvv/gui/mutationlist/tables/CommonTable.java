@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -196,9 +197,9 @@ public abstract class CommonTable extends JTable{
 
 	protected void searchCosmic(){
 		Mutation mutation = getSelectedMutation();
-		String cosmic = mutation.getCosmicID();
-		if(!cosmic.equals("")){
-			InternetCommands.searchCosmic(cosmic);
+		ArrayList<String> cosmic = mutation.getCosmicID();
+		if(cosmic.size() > 0){
+			InternetCommands.searchCosmic(cosmic);			
 		}
 	}
 	

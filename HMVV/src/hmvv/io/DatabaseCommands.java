@@ -1,5 +1,7 @@
 package hmvv.io;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import javax.xml.bind.DatatypeConverter;
 
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
@@ -216,26 +220,27 @@ public class DatabaseCommands {
 	}
 	
 	/**
-	 * Acquires the cosmicID from the database. If it isn't found, null is returned
+	 * Acquires the cosmicID from the database. If it isn't found, an empty array is returned
 	 */
-	public static String getCosmicID(Mutation mutation) throws Exception{
+	public static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String query = "select cosmicID from cosmic where chr = ? and pos = ? and ref = ? and alt = ?";
+		String refMD5 = getMD5(coordinate.getRef());
+		String altMD5 = getMD5(coordinate.getAlt());
+	    
+		String query = "select cosmicID from cosmic_grch37v82 where chr = ? and pos = ? and refMD5 = ? and altMD5 = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
-		preparedStatement.setString(3, coordinate.getRef());
-		preparedStatement.setString(4, coordinate.getAlt());
+		preparedStatement.setString(3, refMD5);
+		preparedStatement.setString(4, altMD5);
 		ResultSet rs = preparedStatement.executeQuery();
-		//TODO do we need to handle multiple rows? Can a chr/pos/ref/alt match multiple cosmicIDs, especially different versions of the cosmic database?
-		if(rs.next()){
+		ArrayList<String> cosmicIDs = new ArrayList<String>();
+		while(rs.next()){
 			String result = rs.getString(1);
-			preparedStatement.close();
-			return result;
-		}else{
-			rs.close();
-			return null;
+			cosmicIDs.add(result);
 		}
+		rs.close();
+		return cosmicIDs;
 	}
 	
 	/**
@@ -297,7 +302,7 @@ public class DatabaseCommands {
 				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID, t7.updateStat as annotation " +
 				"from " + 
 				"ngs.data as t2 left join " +
-				"ngs.cosmic as t3 " +
+				"ngs.cosmic_grch37v82 as t3 " +
 				"on t2.chr = t3.chr and t2.pos = t3.pos and t2.ref = t3.ref and t2.alt = t3.alt " +
 				"left join ngs.g1000 as t4 " +
 				"on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt " +
@@ -741,5 +746,12 @@ public class DatabaseCommands {
 		updateStatement.setString(4, coordinate.getAlt());
 		updateStatement.executeUpdate();
 		updateStatement.close();
+	}
+	
+	private static String getMD5(String source) throws NoSuchAlgorithmException{
+		MessageDigest md = MessageDigest.getInstance("MD5");
+	    md.update(source.getBytes());
+	    byte[] digest = md.digest();
+	    return DatatypeConverter.printHexBinary(digest).toLowerCase();
 	}
 }

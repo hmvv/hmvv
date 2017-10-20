@@ -30,22 +30,11 @@ public class BasicTableModel extends CommonTableModel {
 		return columns;
 	}
 	
-	@Override
-	public final void setValueAt(Object object, int row, int column){
-		super.setValueAt(object, row, column);
-		if(column == 6){
-			Mutation mutation = getMutation(row);
-			mutation.setCosmicID((String)object);
-			fireTableCellUpdated(row, column);
-		}else if(column == 12){
-			Mutation mutation = getMutation(row);
-			mutation.setOccurrence((Integer)object);
-			fireTableCellUpdated(row, column);
-		}
-	}
-	
-	public void updateModel(int row, String cosmicID, int occurenceCount){
-		setValueAt(cosmicID, row, 6);
-		setValueAt(occurenceCount, row, 12);
+	public void updateModel(int row, ArrayList<String> cosmicIDs, int occurenceCount){
+		Mutation mutation = getMutation(row);
+		mutation.setCosmicID(cosmicIDs);
+		mutation.setOccurrence(occurenceCount);
+		fireTableCellUpdated(row, 6);
+		fireTableCellUpdated(row, 12);
 	}
 }
