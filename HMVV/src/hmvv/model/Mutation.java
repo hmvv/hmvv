@@ -1,5 +1,7 @@
 package hmvv.model;
 
+import java.util.ArrayList;
+
 public class Mutation {
 	
 	//common
@@ -11,7 +13,7 @@ public class Mutation {
 	
 	//basic
 	private String dbSNPID;
-	private String cosmicID;
+	private ArrayList<String> cosmicIDs;
 	private String type;
 	private String genotype;
 	private Double altFreq;
@@ -114,12 +116,28 @@ public class Mutation {
 		this.dbSNPID = dbSNPID;
 	}
 
-	public String getCosmicID() {
-		return cosmicID;
+	public ArrayList<String> getCosmicID() {
+		return cosmicIDs;
+	}
+	
+	public String cosmicIDsToString(String separator){
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < cosmicIDs.size(); i++){
+			sb.append(cosmicIDs.get(i));
+			if(i+1 < cosmicIDs.size()){
+				sb.append(separator);
+			}
+		}
+		return sb.toString();
 	}
 
+	public void setCosmicID(ArrayList<String> cosmicID) {
+		this.cosmicIDs = cosmicID;
+	}
+	
 	public void setCosmicID(String cosmicID) {
-		this.cosmicID = cosmicID;
+		this.cosmicIDs = new ArrayList<String>();
+		this.cosmicIDs.add(cosmicID);
 	}
 
 	public String getType() {

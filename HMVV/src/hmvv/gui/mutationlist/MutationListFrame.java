@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -509,10 +510,8 @@ public class MutationListFrame extends JFrame {
 		occurenceFromTextField.setToolTipText(tooltip);
 		maxPopulationFrequencyTextField.setEditable(false);
 		maxPopulationFrequencyTextField.setToolTipText(tooltip);
-		final Thread one = createExtraMutationDataThread(0, 4);
-		final Thread two = createExtraMutationDataThread(1, 4);
-		final Thread three = createExtraMutationDataThread(2, 4);
-		final Thread four = createExtraMutationDataThread(3, 4);
+		final Thread one = createExtraMutationDataThread(0, 2);
+		final Thread two = createExtraMutationDataThread(1, 2);
 		
 		Thread waitingThread = new Thread(new Runnable(){
 			@Override
@@ -520,8 +519,6 @@ public class MutationListFrame extends JFrame {
 				try{
 					one.join();
 					two.join();
-					three.join();
-					four.join();
 				}catch(Exception e){}
 				cosmicOnlyCheckbox.setEnabled(true);
 				cosmicOnlyCheckbox.setToolTipText("");
@@ -566,9 +563,9 @@ public class MutationListFrame extends JFrame {
 			
 			try{
 				Mutation mutation = basicTabTableModel.getMutation(index);
-				String cosmicID = DatabaseCommands.getCosmicID(mutation);
+				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
 				int count = DatabaseCommands.getOccurrenceCount(mutation);
-				basicTabTableModel.updateModel(index, cosmicID, count);
+				basicTabTableModel.updateModel(index, cosmicIDs, count);
 			}catch(Exception e){
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");

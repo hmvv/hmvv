@@ -60,7 +60,7 @@ public class MutationList {
 		if(mutation.getCosmicID() == null){
 			return false;
 		}
-		return !mutation.getCosmicID().equals("");
+		return !(mutation.getCosmicID().size() == 0);
 	}
 	
 	private boolean includeReportedFilter(boolean includeReportedOnly, Mutation mutation){

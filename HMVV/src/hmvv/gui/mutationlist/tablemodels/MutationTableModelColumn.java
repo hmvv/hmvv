@@ -40,7 +40,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn cosmicIDColumn = new MutationTableModelColumn("Hyperlink to the variant in the COSMIC database.",
 			"cosmicID",
 			String.class,
-			(Mutation mutation) -> mutation.getCosmicID());
+			(Mutation mutation) -> mutation.cosmicIDsToString(","));
 	
 	public static final MutationTableModelColumn typeColumn = new MutationTableModelColumn("Variant type, including snv, deletion, insertion, indel.",
 			"type",

@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
@@ -54,11 +55,7 @@ public class InternetCommands {
 		}
 	}
 
-	public static void searchCosmic(String commaSeparatedCosmicIDs){
-		String[] cosmicIDs = commaSeparatedCosmicIDs.split(",");
-		if(cosmicIDs == null){
-			return;
-		}
+	public static void searchCosmic(ArrayList<String> cosmicIDs){
 		for(String cosmicID : cosmicIDs){
 			String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
 			try {

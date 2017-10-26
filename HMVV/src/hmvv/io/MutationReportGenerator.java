@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.gui.mutationlist.tablemodels.CoordinatesTableModel;
@@ -34,7 +35,7 @@ public class MutationReportGenerator{
 			Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
 			String orderNumber = mutation.getOrderNumber();
 			String genotype = mutation.getGenotype();
-			String cosmic = mutation.getCosmicID();
+			String cosmicIDs = mutation.cosmicIDsToString(",");
 			int occurrence = mutation.getOccurrence();
 			
 			report.append("Name: " + name + "\n");
@@ -43,7 +44,7 @@ public class MutationReportGenerator{
 			report.append("Coordinate: " + coordinate.getCoordinateAsString() + "\n");
 			report.append("Genotype: " + genotype + "\n");
 			report.append("dbSNP ID: " + dbSNP + "\n");
-			report.append("Cosmic ID: " +cosmic + "\n");
+			report.append("Cosmic IDs: " + cosmicIDs + "\n");
 			report.append("Occurence: " + occurrence + "\n");
 			if(annotation.isAnnotationSet()){
 				String somatic = annotation.getSomatic();
@@ -57,7 +58,7 @@ public class MutationReportGenerator{
 
 		return report.toString();
 	}
-
+	
 	public static String generateShortReport(MutationList mutationList) throws Exception{
 		StringBuilder report = new StringBuilder(500);
 		for(int i = 0; i < mutationList.getMutationCount(); i++){

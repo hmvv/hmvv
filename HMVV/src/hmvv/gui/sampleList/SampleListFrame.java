@@ -118,7 +118,7 @@ public class SampleListFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == enterSampleMenuItem){
-					EnterSample sampleEnter = new EnterSample(SampleListFrame.this);
+					EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 					sampleEnter.setVisible(true);
 				}else if(e.getSource() == newAssayMenuItem){
 					if(SSHConnection.isSuperUser()){
@@ -569,7 +569,6 @@ public class SampleListFrame extends JFrame {
 			String runID = getValueNotNull(selectedModel[i], 9);
 			String sampleID = getValueNotNull(selectedModel[i], 10);
 			String callerID = getValueNotNull(selectedModel[i], 12);
-			String assay = getValueNotNull(selectedModel[i], 1);
 			String instrument = getValueNotNull(selectedModel[i], 2);
 			String httpFile = null;
 			if(instrument.equals("pgm")){
@@ -577,7 +576,7 @@ public class SampleListFrame extends JFrame {
 			}else if(instrument.equals("proton")){
 				httpFile = SSHConnection.findProtonSample(runID, sampleID, callerID);
 			}else if(instrument.equals("nextseq")){
-				httpFile = SSHConnection.findIlluminaNextseqSample(instrument, runID, sampleID);
+				httpFile = SSHConnection.findIlluminaNextseqSample(runID, sampleID);
 			}else{
 				httpFile = SSHConnection.findIlluminaSample(instrument, runID, sampleID);
 			}
