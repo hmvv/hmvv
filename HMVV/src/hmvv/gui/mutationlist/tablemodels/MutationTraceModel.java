@@ -28,7 +28,7 @@ public class MutationTraceModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.firstNameColumn);
 		columns.add(MutationTableModelColumn.orderNumberColumn);
 		columns.add(MutationTableModelColumn.assayColumn);
-		columns.add(MutationTableModelColumn.sampleIDColumn);
+		columns.add(MutationTableModelColumn.IDColumn);
 		return columns;
 	}
 }

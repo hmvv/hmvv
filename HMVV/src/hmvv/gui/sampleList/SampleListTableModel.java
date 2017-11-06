@@ -112,6 +112,19 @@ public class SampleListTableModel extends AbstractTableModel{
 				(Sample sample) -> "edit"));
 	}
 	
+	public Sample getSample(String runID, String coverageID, String variantCallerID, String sampleID){
+		for(Sample s : samples){
+			//only check sampleID because the coverageID and variantCallerID can be blank depending on the instrument
+			if(s.runID.equals("") || s.sampleID.equals("")){
+				continue;
+			}
+			if(s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleID.equals(sampleID)){
+				return s;
+			}
+		}
+		return null;
+	}
+	
 	public void addSample(Sample sample){
 		samples.add(sample);
 		fireTableRowsInserted(samples.size()-1, samples.size()-1);

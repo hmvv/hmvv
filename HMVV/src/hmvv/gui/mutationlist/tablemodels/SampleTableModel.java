@@ -20,7 +20,7 @@ public class SampleTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.firstNameColumn);
 		columns.add(MutationTableModelColumn.orderNumberColumn);
 		columns.add(MutationTableModelColumn.assayColumn);
-		columns.add(MutationTableModelColumn.sampleIDColumn);
+		columns.add(MutationTableModelColumn.IDColumn);
 		columns.add(MutationTableModelColumn.tumorSourceColumn);
 		columns.add(MutationTableModelColumn.tumorPercentColumn);
 		return columns;

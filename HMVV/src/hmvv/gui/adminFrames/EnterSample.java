@@ -22,6 +22,7 @@ import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
+import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.io.SampleEnterCommands;
@@ -51,15 +52,16 @@ public class EnterSample extends JFrame {
 	private JButton enterSampleButton;
 	private JButton cancelButton;
 	
+	private SampleListTableModel sampleListTableModel;
 	/**
 	 * Create the frame.
 	 */
-	public EnterSample(SampleListFrame parent) {
+	public EnterSample(SampleListFrame parent, SampleListTableModel sampleListTableModel) {
 		super("Enter Sample");
 		this.parent = parent;
+		this.sampleListTableModel = sampleListTableModel;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		//setBounds(100, 100, 527, 571);
 		
 		createComponents();
 		layoutComponents();
@@ -190,8 +192,41 @@ public class EnterSample extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				EnterSample.this.setVisible(false);
 			}
-
 		});
+		
+		comboBoxSample.addItemListener(new ItemListener(){
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				sampleIDSelectionChanged();
+			}
+		});
+		
+		sampleIDSelectionChanged();
+	}
+	
+	private void sampleIDSelectionChanged(){
+		String runId = textRunID.getText();
+		String coverageID = (String)comboBoxCoverage.getSelectedItem();
+		String variantCallerID = (String)comboBoxCaller.getSelectedItem();
+		String sampleID = (String)comboBoxSample.getSelectedItem();
+		
+		if(runId.equals("") || sampleID == null){
+			updateFields("", "", "", "", "", "", "", false);
+			return;
+		}
+		
+		if(coverageID == null)
+			coverageID = "";
+		if(variantCallerID == null)
+			variantCallerID = "";
+		
+		
+		Sample sample = sampleListTableModel.getSample(runId, coverageID, variantCallerID, sampleID);
+		if(sample != null){
+			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
+		}else{
+			updateFields("", "", "", "", "", "", "", true);
+		}
 	}
 	
 	private void findInstrument(){
@@ -216,6 +251,13 @@ public class EnterSample extends JFrame {
 		String instrument = comboBoxInstrument.getSelectedItem().toString();
 		String runID = textRunID.getText();
 		
+		try{
+			Integer.parseInt(runID);
+		}catch(Exception e){
+			JOptionPane.showMessageDialog(this, "Run ID must be an integer.");
+			return;
+		}
+		
 		if((instrument.equals("miseq")) || (instrument.equals("nextseq"))){
 			//For illumina
 			String command = String.format("ls /home/%sAnalysis/*_%s_*/*.amplicon.vep.parse.filter.txt", instrument, runID);
@@ -225,7 +267,8 @@ public class EnterSample extends JFrame {
 				fillSample(sampleList);
 			}else{
 				removeAllItems();
-				JOptionPane.showMessageDialog(null, "There was a problem locating the run");
+				JOptionPane.showMessageDialog(this, "There was a problem locating the run");
+				sampleIDSelectionChanged();
 			}
 		}else{
 			//For Ion
@@ -239,7 +282,8 @@ public class EnterSample extends JFrame {
 				fillAnalysis(coverageID, variantCallerID);
 			}else{
 				removeAllItems();
-				JOptionPane.showMessageDialog(null, "There was a problem locating the run");
+				JOptionPane.showMessageDialog(this, "There was a problem locating the run");
+				sampleIDSelectionChanged();
 			}
 		}
 	}
@@ -303,11 +347,34 @@ public class EnterSample extends JFrame {
 		return IDlist;
 	}
 	
+	private void updateFields(String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String note, boolean editable){
+		textlastName.setText(lastName);
+		textFirstName.setText(firstName);
+		textOrderNumber.setText(orderNumber);
+		textPathologyNumber.setText(pathologyNumber);
+		textTumorSource.setText(tumorSource);
+		textPercent.setText(tumorPercent);
+		textNote.setText(note);
+		
+		textlastName.setEditable(editable);
+		textFirstName.setEditable(editable);
+		textOrderNumber.setEditable(editable);
+		textPathologyNumber.setEditable(editable);
+		textTumorSource.setEditable(editable);
+		textPercent.setEditable(editable);
+		textNote.setEditable(editable);
+		
+		enterSampleButton.setEnabled(editable);
+	}
+	
 	private void enterData() throws Exception{
 		Sample sample = constructSampleFromTextFields();
 		SampleEnterCommands.enterData(sample);
 		parent.addSample(sample);
 		JOptionPane.showMessageDialog(this, "Success: Sample entered");
+		
+		//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
+		updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
 	}
 	
 	private Sample constructSampleFromTextFields() throws Exception{

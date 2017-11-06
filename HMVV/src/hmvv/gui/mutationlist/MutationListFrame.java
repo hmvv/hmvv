@@ -67,11 +67,18 @@ public class MutationListFrame extends JFrame {
 	private SampleTable sampleTabTable;
 	private SampleTableModel sampleTabTableModel;
 	
+	private JScrollPane basicTabScrollPane;
+	private JScrollPane coordinatesTabScrollPane;
+	private JScrollPane g1000TabScrollPane;
+	private JScrollPane clinVarTabScrollPane;
+	private JScrollPane sampleTabScrollPane;
+	
 	private MutationList mutationList;
 	
 	private JPanel contentPane;
 	private JTabbedPane tabbedPane;
 	private CommonTable selectedTable;
+	private JScrollPane selectedScrollPane;
 	
 	private JCheckBox reportedOnlyCheckbox;
 	private JCheckBox cosmicOnlyCheckbox;
@@ -90,7 +97,7 @@ public class MutationListFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public MutationListFrame(Component parent, MutationList mutationList, String title) throws Exception{
+	public MutationListFrame(Component parent, MutationList mutationList, String title){
 		super("Mutation List - " + title);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
@@ -146,12 +153,7 @@ public class MutationListFrame extends JFrame {
 	private void constructCheckBoxFilters(){
 		ActionListener actionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				try {
-					applyRowFilters();
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				applyRowFilters();
 			}
 		};
 		
@@ -171,28 +173,13 @@ public class MutationListFrame extends JFrame {
 	private void constructTextFieldFilters(){
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
-				try {
-					applyRowFilters();
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				applyRowFilters();
 			}
 			public void removeUpdate(DocumentEvent e) {
-				try {
-					applyRowFilters();
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				applyRowFilters();
 			}
 			public void insertUpdate(DocumentEvent e) {
-				try {
-					applyRowFilters();
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				applyRowFilters();
 			}
 		};
 		
@@ -243,12 +230,7 @@ public class MutationListFrame extends JFrame {
 				}else if(e.getSource() == longReportButton){
 					showLongReportFrame();
 				}else if(e.getSource() == resetButton){
-					try {
-						reset();
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					reset();
 				}else if(e.getSource() == exportButton){
 					try{
 						exportTable();
@@ -292,11 +274,11 @@ public class MutationListFrame extends JFrame {
 	}
 	
 	private void layoutComponents(){
-		JScrollPane basicTabScrollPane = new JScrollPane(basicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		JScrollPane coordinatesTabScrollPane = new JScrollPane(coordinatesTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		JScrollPane g1000TabScrollPane = new JScrollPane(g1000TabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		JScrollPane clinVarTabScrollPane = new JScrollPane(clinVarTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		JScrollPane sampleTabScrollPane = new JScrollPane(sampleTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		basicTabScrollPane = new JScrollPane(basicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		coordinatesTabScrollPane = new JScrollPane(coordinatesTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		g1000TabScrollPane = new JScrollPane(g1000TabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		clinVarTabScrollPane = new JScrollPane(clinVarTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		sampleTabScrollPane = new JScrollPane(sampleTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Basic", null, basicTabScrollPane, null);
@@ -304,7 +286,9 @@ public class MutationListFrame extends JFrame {
 		tabbedPane.addTab("G1000", null, g1000TabScrollPane, null);
 		tabbedPane.addTab("ClinVar", null, clinVarTabScrollPane, null);
 		tabbedPane.addTab("Sample", null, sampleTabScrollPane, null);
+		
 		selectedTable = basicTabTable;
+		selectedScrollPane = basicTabScrollPane;
 		
 		JPanel leftFilterPanel = new JPanel();
 		leftFilterPanel.setLayout(new GridLayout(0,1));
@@ -312,7 +296,7 @@ public class MutationListFrame extends JFrame {
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
 		
-		if(mutationList.getMutation(0).getAssay().equals("exome")){
+		if(mutationList.getMutationCount() > 1 && mutationList.getMutation(0).getAssay().equals("exome")){
 			checkboxPanel.add(filterNomalCheckbox);
 		}
 		leftFilterPanel.add(checkboxPanel);
@@ -395,35 +379,49 @@ public class MutationListFrame extends JFrame {
 	        	}
 	        	mutationList.sortModel(modelRowToViewRow);
 	        	selectedTable.getRowSorter().setSortKeys(null);
+	        	int currentVerticalScrollValue = selectedScrollPane.getVerticalScrollBar().getValue();
 	        	if(selectedIndex == 0){
 	        		selectedTable = basicTabTable;
+	        		selectedScrollPane = basicTabScrollPane;
 	        	}else if(selectedIndex == 1){
 	        		selectedTable = coordinatesTabTable;
+	        		selectedScrollPane = coordinatesTabScrollPane;
 	        	}else if(selectedIndex == 2){
 	        		selectedTable = g1000TabTable;
+	        		selectedScrollPane = g1000TabScrollPane;
 	        	}else if(selectedIndex == 3){
 	        		selectedTable = clinVarTabTable;
+	        		selectedScrollPane = clinVarTabScrollPane;
 	        	}else if(selectedIndex == 4){
 	        		selectedTable = sampleTabTable;
+	        		selectedScrollPane = sampleTabScrollPane;
 	        	}else{
 	        		//undefined
 	        		return;
 	        	}
+	        	
+	        	selectedScrollPane.getVerticalScrollBar().setValue(currentVerticalScrollValue);
 	        	selectedTable.resizeColumnWidths();
 	        }
 	    });
 	}
 	
-	private void applyRowFilters() throws Exception{
+	private void applyRowFilters(){
 		boolean includeCosmicOnly = cosmicOnlyCheckbox.isSelected();
 		boolean includeReportedOnly = reportedOnlyCheckbox.isSelected();
-		boolean includeNormalPair = filterNomalCheckbox.isSelected();
+		boolean filterNormalPair = filterNomalCheckbox.isSelected();
+		int sampleID = (mutationList.getMutationCount() > 0) ? mutationList.getMutation(0).getSampleID() : -1;
 		int frequencyFrom =  getNumber(textFreqFrom, 0);
 		int frequencyTo = getNumber(textVarFreqTo, 100);
 		int minOccurence = getNumber(occurenceFromTextField, 0);
 		int minReadDepth = getNumber(minReadDepthTextField, 0);
 		int maxPopulationFrequency = getNumber(maxPopulationFrequencyTextField, 100);
-		mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, includeNormalPair, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency);
+		
+		try {
+			mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, filterNormalPair, sampleID, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Error applying filter:" + e.getMessage());
+		}
 	}
 	
 	private int getNumber(JTextField field, Integer defaultInt){
@@ -441,7 +439,7 @@ public class MutationListFrame extends JFrame {
 		return valueInt;
 	}
 
-	private void reset() throws Exception{
+	private void reset(){
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);		
 		filterNomalCheckbox.setSelected(false);

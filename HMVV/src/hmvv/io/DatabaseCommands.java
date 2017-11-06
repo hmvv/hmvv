@@ -98,6 +98,11 @@ public class DatabaseCommands {
 		String ID = "";
 		while(rsFindID.next()){
 			ID = rsFindID.getString(1);
+			try{
+				sample.setID(Integer.parseInt(ID));
+			}catch(Exception e){
+				throw new Exception("ID Assigned by database is not an integer: " + ID);
+			}
 			count += 1;
 		}
 		if(count == 0){
@@ -146,38 +151,22 @@ public class DatabaseCommands {
 		return assays;
 	}
 	
-	public static String getPairedNormal(int tumorID) throws Exception{
-		String normalID = "";
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from ngs.numorNormalPair where tumorID = ?");
+	private static int getPairedNormal(int tumorID) throws Exception{
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from ngs.tumorNormalPair where tumorID = ?");
 		preparedStatement.setInt(1, tumorID);
 		ResultSet rs = preparedStatement.executeQuery();
-		while(rs.next()){
-			normalID = rs.getString(1);
+		if(rs.next()){
+			return rs.getInt(1);
 		}
-		return normalID;
+		return -1;
 	}
 	
-	public static boolean getPairedNormalMutations(Mutation mutation) throws Exception{
-		String query = "select exists (select * from ngs.data where sampleID=(select normalID from ngs.tumorNormalPair where tumorID = ?) and gene = ? and chr=? and pos = ? and ref = ? and alt = ?)";
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		preparedStatement.setInt(1, mutation.getSampleID());
-		preparedStatement.setString(2, mutation.getGene());
-		preparedStatement.setString(3, mutation.getChr());
-		preparedStatement.setString(4, mutation.getPos());
-		preparedStatement.setString(5, mutation.getRef());
-		preparedStatement.setString(6, mutation.getAlt());
-		ResultSet rs = preparedStatement.executeQuery();
-		if(rs.next()){
-			int count = rs.getInt(1);
-			preparedStatement.close();
-			if(count >= 1){
-				return true;
-			}else{
-				return false;
-			}
+	public static ArrayList<Mutation> getPairedNormalMutations(int ID) throws Exception{
+		int normalID = getPairedNormal(ID);
+		if(normalID == -1){
+			return null;
 		}else{
-			preparedStatement.close();
-			return false;
+			return getMutationDataByID(normalID);
 		}
 	}
 	

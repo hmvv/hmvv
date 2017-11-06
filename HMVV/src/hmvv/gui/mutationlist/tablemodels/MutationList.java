@@ -9,6 +9,7 @@ public class MutationList {
 	private ArrayList<Mutation> mutations;
 	private ArrayList<Mutation> filteredMutations;
 	private ArrayList<MutationListListener> listeners;
+	private ArrayList<Mutation> mutationsInNormalPair;
 	
 	public MutationList(ArrayList<Mutation> mutations){
 		this.mutations = mutations;
@@ -33,7 +34,7 @@ public class MutationList {
 	public void updateReportedStatus(boolean reported, int index){
 		Mutation mutation = getMutation(index);
 		mutation.setReported(reported);
-		notifyRowUpdated(index);
+		notifyReportedStatusChanged(index);
 	}
 	
 	public void sortModel(int[] newOrder){
@@ -68,17 +69,6 @@ public class MutationList {
 			return true;
 		}
 		return mutation.isReported();
-	}
-	
-	private boolean includeNormalPairFilter(boolean includeNormalPair, Mutation mutation) throws Exception {	
-		if(!includeNormalPair){
-			return true;
-		}
-		boolean hasNormalPair = DatabaseCommands.getPairedNormalMutations(mutation);
-		if(hasNormalPair){
-			return false;
-		}
-		return true;
 	}
 	
 	private boolean includeVariantFilter(int frequencyFrom, int frequencyTo, Mutation mutation){
@@ -123,14 +113,11 @@ public class MutationList {
 		return true;//default to true;
 	}
 	
-	private boolean includeMutation(boolean includeCosmicOnly, boolean includeReportedOnly, boolean includeNormalPair, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency, Mutation mutation) throws Exception{
+	private boolean includeMutation(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency, Mutation mutation){
 		if(!includeMutationCosmicFilter(includeCosmicOnly, mutation)){
 			return false;
 		}
 		if(!includeReportedFilter(includeReportedOnly, mutation)){
-			return false;
-		}
-		if(!includeNormalPairFilter(includeNormalPair, mutation)){
 			return false;
 		}
 		if(!includeVariantFilter(frequencyFrom, frequencyTo, mutation)){
@@ -149,16 +136,35 @@ public class MutationList {
 		return true;
 	}
 	
-	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, boolean includeNormalPair, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency) throws Exception{
+	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, boolean filterNormalPair, int normalPairSampleID, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency) throws Exception{
 		ArrayList<Mutation> allMutations = new ArrayList<Mutation>(mutations.size() + filteredMutations.size());
 		allMutations.addAll(mutations);
 		allMutations.addAll(filteredMutations);
-		
+
+		if(mutationsInNormalPair == null && filterNormalPair){
+			mutationsInNormalPair = DatabaseCommands.getPairedNormalMutations(normalPairSampleID);
+			if(mutationsInNormalPair == null){
+				mutationsInNormalPair = new ArrayList<Mutation>();//empty array list because no normal was identified
+			}
+		}
+
 		ArrayList<Mutation> newFilteredMutations = new ArrayList<Mutation>();
+		
 		for(int i = 0; i < allMutations.size(); i++){
 			Mutation mutation = allMutations.get(i);
-			if(!includeMutation(includeCosmicOnly, includeReportedOnly, includeNormalPair, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, mutation)){				
+
+			if(!includeMutation(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, mutation)){				
 				newFilteredMutations.add(mutation);
+				continue;
+			}
+			
+			if(filterNormalPair){
+				for(Mutation m : mutationsInNormalPair){
+					if(m.getCoordinate().equals(mutation.getCoordinate())){
+						newFilteredMutations.add(mutation);
+						break;
+					}
+				}
 			}
 		}
 		allMutations.removeAll(newFilteredMutations);
@@ -172,6 +178,12 @@ public class MutationList {
 	
 	public int getMutationCount() {
 		return mutations.size();
+	}
+	
+	private void notifyReportedStatusChanged(int index){
+		for(MutationListListener listener : listeners){
+			listener.mutationReportedStatusChanged(index);
+		}
 	}
 	
 	private void notifyRowUpdated(int index){
