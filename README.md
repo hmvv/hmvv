@@ -23,11 +23,11 @@ tar -zxvf mysqldump.zip.gz
 
 Load the data into your database:
 
-mysql -u username -p database_name < schema.sql
+mysql -u username -p ngs < schema.sql
 
-mysql -u username -p database_name < cosmic_grch37v82_coordinates.sql
+mysql -u username -p ngs < cosmic_grch37v82_coordinates.sql
 
-mysql -u username -p database_name < cosmic_grch37v82_identifiers.sql
+mysql -u username -p ngs < cosmic_grch37v82_identifiers.sql
 
 # Set up your linux server
 Setup your file structure to match that indicated by the constructCommandArray() method in hmvv/io/SampleEnterCommands.java.
