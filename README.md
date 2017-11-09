@@ -15,6 +15,8 @@ Rezip the unzipped files after making the change to config.ini. Change the file 
 
 # Set up your mysql tables
 
+create a database named ngs
+
 Download the latest mysqldump.zip.gz from https://github.com/hmvv/hmvv/releases
 
 Decompress the archive with
