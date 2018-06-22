@@ -38,7 +38,11 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try {
-			Configurations.loadConfigurations(null, configurationStream);
+			boolean useLiveEnviroment = true;
+			if(args.length > 0) {
+				useLiveEnviroment = !args[0].equals("test");
+			}
+			Configurations.loadConfigurations(null, configurationStream, useLiveEnviroment);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage() + "\nShutting down.");
 			return;

@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
@@ -175,7 +176,12 @@ public class SSHConnection {
 					break;
 				}
 			}
-			return new CommandResponse(result, channel.getExitStatus());
+			
+			ArrayList<String> responseLines = new ArrayList<String>();
+			for(String s : result.toString().split("\\r?\\n")) {
+				responseLines.add(s);
+			}
+			return new CommandResponse(responseLines, channel.getExitStatus());
 		}finally {
 			if (channel != null) {
 				channel.disconnect();

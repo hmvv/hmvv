@@ -20,6 +20,8 @@ public class Sample {
 	private String tumorPercent;
 	private String note;
 	
+	private String analysisStatus;
+	
 	public Sample(int ID, String assay, String instrument, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleID,
 			String coverageID, String callerID, String runDate, String note, String enteredBy) {
@@ -39,6 +41,7 @@ public class Sample {
 		this.runDate = notNull(runDate);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
+		this.analysisStatus = "Completed";//default to Completed
 	}
 	
 	public int getID(){
@@ -107,5 +110,26 @@ public class Sample {
 
 	public void setNote(String note) {
 		this.note = note;
+	}
+	
+
+	public void setAnalysisStatus(String analysisStatus) {
+		this.analysisStatus = analysisStatus;
+	}
+	
+	public String getAnalysisStatus() {
+		return analysisStatus;
+	}
+	
+	public boolean isAnalysisCompleted() {
+		return analysisStatus.equals("Completed");
+	}
+	
+	public boolean isAnalysisRunning() {
+		return analysisStatus.equals("Running");
+	}
+	
+	public boolean isAnalysisQueued() {
+		return analysisStatus.equals("Queued");
 	}
 }

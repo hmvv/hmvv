@@ -52,7 +52,91 @@ public class DatabaseCommands {
 	 * Insert Data Command
 	 *************************************************************************/
 	//TODO Consider using a transaction statement
-	public static void insertDataIntoDatabase(String dataFile, String ampliconFile, Integer totalAmpliconCount, Integer failedAmpliconCount, Sample sample) throws Exception{
+//	public static void insertDataIntoDatabase(String dataFile, String ampliconFile, Integer totalAmpliconCount, Integer failedAmpliconCount, Sample sample) throws Exception{
+//		String assay = sample.assay;
+//		String instrument = sample.instrument;
+//		String lastName = sample.getLastName();
+//		String firstName = sample.getFirstName();
+//		String orderNumber = sample.getOrderNumber();
+//		String pathologyNumber = sample.getPathNumber();
+//		String tumorSource = sample.getTumorSource();
+//		String tumorPercent = sample.getTumorPercent();
+//		String runID = sample.runID;
+//		String sampleID = sample.sampleID;
+//		String coverageID = sample.coverageID;//no coverageID on nextseq
+//		String variantCallerID = sample.callerID;//no variant caller on nextseq
+//		String runDate = sample.runDate;
+//		String note = sample.getNote();
+//		String enteredBy = sample.enteredBy;
+//
+//		String checkSample = String.format("select * from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
+//
+//		//enter sample
+//		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
+//		ResultSet rsCheckSample = pstCheckSample.executeQuery();
+//		Integer sampleCount = 0;
+//		while(rsCheckSample.next()){
+//			sampleCount += 1;
+//		}
+//		if(sampleCount != 0){
+//			throw new Exception("Error1: Supplied sample exists in database; data not entered");
+//		}
+//		
+//		String enterSample = String.format("insert into Samples "
+//				+ "(assay, instrument, lastName, firstName, orderNumber, pathNumber, tumorPercent, runID, sampleID, coverageID, callerID, runDate, note, enteredBy, tumorSource) "
+//				+ "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+//				assay, instrument, lastName, firstName, orderNumber, pathologyNumber, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy, tumorSource);
+//		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
+//		pstEnterSample.executeUpdate();
+//
+//		//get ID
+//		String findID = String.format("select ID from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
+//
+//		PreparedStatement pstFindID = databaseConnection.prepareStatement(findID);
+//		ResultSet rsFindID = pstFindID.executeQuery();
+//		Integer count = 0;
+//		String ID = "";
+//		while(rsFindID.next()){
+//			ID = rsFindID.getString(1);
+//			try{
+//				sample.setID(Integer.parseInt(ID));
+//			}catch(Exception e){
+//				throw new Exception("ID Assigned by database is not an integer: " + ID);
+//			}
+//			count += 1;
+//		}
+//		if(count == 0){
+//			throw new Exception("Error2: Problem locating the entered sample; data not entered");
+//		}
+//
+//		//enter amplicon counts
+//		String enterAmpliconCount = String.format("insert into ampliconCount values (%s, %d, %d)", ID, totalAmpliconCount, failedAmpliconCount);
+//		PreparedStatement pstEnterAmpliconCount = databaseConnection.prepareStatement(enterAmpliconCount);
+//		pstEnterAmpliconCount.executeUpdate();
+//		
+//		//enter variant data
+//		String enterData = String.format("load data infile '%s' into table data ignore 1 lines "
+//				+ "(gene, exons, chr, pos, ref, alt, genotype, type, quality, altFreq, readDP, altReadDP, Consequence, sift, PolyPhen, HGVSc, HGVSp, dbSNPID, pubmed)"
+//				+ " set sampleID = '%s', assay = '%s'", dataFile, ID, assay);
+//		PreparedStatement pstEnterData = databaseConnection.prepareStatement(enterData);
+//		pstEnterData.executeUpdate();
+//		
+//		if((sample.instrument.equals("pgm")) || (sample.instrument.equals("proton"))){
+//			//enter failed amplicon data
+//			String enterAmplicon = String.format("load data infile '%s' into table amplicon "
+//					+ "(ampliconName, ampliconCov) set sampleID = '%s', assay = '%s'", ampliconFile, ID, assay);
+//			PreparedStatement pstEnterAmplicon = databaseConnection.prepareStatement(enterAmplicon);
+//			pstEnterAmplicon.executeUpdate();
+//		}else{
+//			//enter failed amplicon data
+//			String enterAmplicon = String.format("load data infile '%s' into table amplicon ignore 1 lines "//Skip first line, which contains the sample headers
+//					+ "(ampliconName, ampliconCov) set sampleID = '%s', assay = '%s'", ampliconFile, ID, assay);
+//			PreparedStatement pstEnterAmplicon = databaseConnection.prepareStatement(enterAmplicon);
+//			pstEnterAmplicon.executeUpdate();
+//		}
+//	}
+	
+	public static void insertDataIntoDatabase(Sample sample) throws Exception{
 		String assay = sample.assay;
 		String instrument = sample.instrument;
 		String lastName = sample.getLastName();
@@ -69,7 +153,7 @@ public class DatabaseCommands {
 		String note = sample.getNote();
 		String enteredBy = sample.enteredBy;
 
-		String checkSample = String.format("select * from ngs.Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
+		String checkSample = String.format("select * from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
 
 		//enter sample
 		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
@@ -77,12 +161,13 @@ public class DatabaseCommands {
 		Integer sampleCount = 0;
 		while(rsCheckSample.next()){
 			sampleCount += 1;
+			break;
 		}
 		if(sampleCount != 0){
-			throw new Exception("Error1: Supplied sample exists in database; data not entered");
+			throw new Exception("Error: Supplied sample exists in database; data not entered");
 		}
 		
-		String enterSample = String.format("insert into ngs.Samples "
+		String enterSample = String.format("insert into Samples "
 				+ "(assay, instrument, lastName, firstName, orderNumber, pathNumber, tumorPercent, runID, sampleID, coverageID, callerID, runDate, note, enteredBy, tumorSource) "
 				+ "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
 				assay, instrument, lastName, firstName, orderNumber, pathologyNumber, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy, tumorSource);
@@ -90,7 +175,7 @@ public class DatabaseCommands {
 		pstEnterSample.executeUpdate();
 
 		//get ID
-		String findID = String.format("select ID from ngs.Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
+		String findID = String.format("select ID from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
 
 		PreparedStatement pstFindID = databaseConnection.prepareStatement(findID);
 		ResultSet rsFindID = pstFindID.executeQuery();
@@ -108,32 +193,12 @@ public class DatabaseCommands {
 		if(count == 0){
 			throw new Exception("Error2: Problem locating the entered sample; data not entered");
 		}
-
-		//enter amplicon counts
-		String enterAmpliconCount = String.format("insert into ngs.ampliconCount values (%s, %d, %d)", ID, totalAmpliconCount, failedAmpliconCount);
-		PreparedStatement pstEnterAmpliconCount = databaseConnection.prepareStatement(enterAmpliconCount);
-		pstEnterAmpliconCount.executeUpdate();
 		
-		//enter variant data
-		String enterData = String.format("load data infile '%s' into table ngs.data ignore 1 lines "
-				+ "(gene, exons, chr, pos, ref, alt, genotype, type, quality, altFreq, readDP, altReadDP, Consequence, sift, PolyPhen, HGVSc, HGVSp, dbSNPID, pubmed)"
-				+ " set sampleID = '%s', assay = '%s'", dataFile, ID, assay);
-		PreparedStatement pstEnterData = databaseConnection.prepareStatement(enterData);
-		pstEnterData.executeUpdate();
-		
-		if((sample.instrument.equals("pgm")) || (sample.instrument.equals("proton"))){
-			//enter failed amplicon data
-			String enterAmplicon = String.format("load data infile '%s' into table ngs.amplicon "
-					+ "(ampliconName, ampliconCov) set sampleID = '%s', assay = '%s'", ampliconFile, ID, assay);
-			PreparedStatement pstEnterAmplicon = databaseConnection.prepareStatement(enterAmplicon);
-			pstEnterAmplicon.executeUpdate();
-		}else{
-			//enter failed amplicon data
-			String enterAmplicon = String.format("load data infile '%s' into table ngs.amplicon ignore 1 lines "//Skip first line, which contains the sample headers
-					+ "(ampliconName, ampliconCov) set sampleID = '%s', assay = '%s'", ampliconFile, ID, assay);
-			PreparedStatement pstEnterAmplicon = databaseConnection.prepareStatement(enterAmplicon);
-			pstEnterAmplicon.executeUpdate();
-		}
+		String queueSample = String.format("insert into SampleAnalysisQueue "
+				+ "(sampleID, status) VALUES ('%s', 'Queued')",
+				ID);
+		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
+		pstQueueSample.executeUpdate();
 	}
 	
 	/* ************************************************************************
@@ -141,7 +206,7 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	public static ArrayList<String> getAllAssays() throws Exception{
 		ArrayList<String> assays = new ArrayList<String>();
-		String getAssay = "select distinct assay from ngs.assays";
+		String getAssay = "select distinct assay from assays";
 		PreparedStatement pst = databaseConnection.prepareStatement(getAssay);
 		ResultSet rs = pst.executeQuery();
 		while(rs.next()){
@@ -152,7 +217,7 @@ public class DatabaseCommands {
 	}
 	
 	private static int getPairedNormal(int tumorID) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from ngs.tumorNormalPair where tumorID = ?");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from tumorNormalPair where tumorID = ?");
 		preparedStatement.setInt(1, tumorID);
 		ResultSet rs = preparedStatement.executeQuery();
 		if(rs.next()){
@@ -172,7 +237,7 @@ public class DatabaseCommands {
 	
 	public static ArrayList<String> getInstrumentsForAssay(String assay) throws Exception{
 		ArrayList<String> instruments = new ArrayList<String>();
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instrument from ngs.assays where assay = ?");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instrument from assays where assay = ?");
 		preparedStatement.setString(1, assay);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
@@ -183,7 +248,7 @@ public class DatabaseCommands {
 	}
 	
 	public static void createAssay(String instrument, String assay) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("insert into ngs.assays values (?, ?)");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("insert into assays values (?, ?)");
 		preparedStatement.setString(1, assay);
 		preparedStatement.setString(2, instrument);
 		preparedStatement.executeUpdate();
@@ -200,14 +265,14 @@ public class DatabaseCommands {
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID, t7.updateStat"
-				+ " from ngs.data as t2"
-				+ " left join ngs.g1000 as t4"
+				+ " from data as t2"
+				+ " left join g1000 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
-				+ " left join ngs.clinvar as t5"
+				+ " left join clinvar as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
-				+ " left join ngs.Samples as t1"
+				+ " left join Samples as t1"
 				+ " on t2.sampleID = t1.ID"
-				+ " left join ngs.annotation as t7"
+				+ " left join annotation as t7"
 				+ " on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt"
 				+ " where t2.sampleID = ?";
 		
@@ -249,7 +314,7 @@ public class DatabaseCommands {
 	public static int getOccurrenceCount(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
 		String assay = mutation.getAssay();
-		String query = "select count(*) as occurrence from ngs.data"
+		String query = "select count(*) as occurrence from data"
 				+ " where genotype != 'No Call' and chr = ? and pos = ? and ref = ? and alt = ? and assay = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
@@ -275,8 +340,8 @@ public class DatabaseCommands {
 		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp,"
 				+ " t2.altFreq, t2.readDP, t2.altReadDP, t2.chr, t2.pos, t2.ref, t2.alt, t2.sampleID, "
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent "
-				+ " from ngs.data as t2"
-				+ " left join ngs.Samples as t1"
+				+ " from data as t2"
+				+ " left join Samples as t1"
 				+ " on t2.sampleID = t1.ID"
 				+ " where t2.genotype != ? and t1.assay = ? and t2.chr = ? and t2.pos = ? and t2.ref = ? and t2.alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -301,24 +366,24 @@ public class DatabaseCommands {
 				"t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc,t2.pubmed, " +
 				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID, t7.updateStat as annotation " +
 				"from " + 
-				"ngs.data as t2 left join " +
-				"ngs.cosmic_grch37v82 as t3 " +
+				"data as t2 left join " +
+				"cosmic_grch37v82 as t3 " +
 				"on t2.chr = t3.chr and t2.pos = t3.pos and t2.ref = t3.ref and t2.alt = t3.alt " +
-				"left join ngs.g1000 as t4 " +
+				"left join g1000 as t4 " +
 				"on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt " +
-				"left join ngs.clinvar as t5 " +
+				"left join clinvar as t5 " +
 				"on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt " +
-				"left join ngs.Samples as t1 " +
+				"left join Samples as t1 " +
 				"on t2.sampleID = t1.ID " +
 				"left join " +
 				"(select chr, pos, ref, alt, assay, count(*) as occurrence from " + 
-				"(select chr, pos, ref, alt, assay, sampleID from ngs.data " +
+				"(select chr, pos, ref, alt, assay, sampleID from data " +
 				"where genotype != 'No Call' " +
 				"group by chr, pos, ref, alt, assay, sampleID) as t7 " +
 				"group by chr,pos,ref,alt, assay " +
 				") as t6 " +
 				"on t2.chr = t6.chr and t2.pos = t6.pos and t2.ref = t6.ref and t2.alt = t6.alt and t2.assay = t6.assay " + 
-				"left join ngs.annotation as t7 " + 
+				"left join annotation as t7 " + 
 				"on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt ";
 		String whereClause = "";
 		
@@ -472,7 +537,7 @@ public class DatabaseCommands {
 	public static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		String reported = (setToReported) ? "1" : "0";
 		PreparedStatement updateStatement = databaseConnection.prepareStatement(
-				"update ngs.data set reported = ? where sampleID = ? and chr = ? and pos = ? and ref = ? and alt = ?");
+				"update data set reported = ? where sampleID = ? and chr = ? and pos = ? and ref = ? and alt = ?");
 		updateStatement.setString(1, reported);
 		updateStatement.setString(2, sampleID.toString());
 		updateStatement.setString(3, coordinate.getChr());
@@ -487,7 +552,7 @@ public class DatabaseCommands {
 	 * Sample Queries
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
-		String query = "select * from ngs.Samples order by ID desc";
+		String query = "select * from Samples left join SampleAnalysisQueue on Samples.ID = SampleAnalysisQueue.sampleID order by ID desc";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
@@ -500,7 +565,7 @@ public class DatabaseCommands {
 	}
 	
 	private static Sample getSample(ResultSet row) throws SQLException{
-		return new Sample(
+		Sample sample = new Sample(
 				Integer.parseInt(row.getString("ID")),
 				row.getString("assay"),
 				row.getString("instrument"),
@@ -518,6 +583,12 @@ public class DatabaseCommands {
 				row.getString("note"),
 				row.getString("enteredBy")
 				);
+		
+		String status = row.getString("status");
+		if(status != null) {
+			sample.setAnalysisStatus(status);
+		}
+		return sample;
 	}
 	
 	public static Sample getSample(int ID) throws Exception{
@@ -549,7 +620,7 @@ public class DatabaseCommands {
 	}
 	
 	public static void updateSampleNote(int ID, String newNote) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.Samples set note = ? where ID = ?");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update Samples set note = ? where ID = ?");
 		updateStatement.setString(1, newNote);
 		updateStatement.setString(2, ""+ID);
 		updateStatement.executeUpdate();
@@ -557,7 +628,7 @@ public class DatabaseCommands {
 	}
 	
 	public static void updateSample(Sample sample) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.Samples set lastName = ?, firstName = ?, orderNumber = ?, pathNumber = ?, "
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update Samples set lastName = ?, firstName = ?, orderNumber = ?, pathNumber = ?, "
 				+ "tumorSource = ?, tumorPercent = ?, note = ? where ID = ?");
 		updateStatement.setString(1, sample.getLastName());
 		updateStatement.setString(2, sample.getFirstName());
@@ -595,7 +666,7 @@ public class DatabaseCommands {
 			return ampliconCount;
 		}
 		updateStatement.close();
-		return null;
+		throw new Exception("No amplicon data found in the database");
 	}
 	
 	public static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
@@ -615,7 +686,7 @@ public class DatabaseCommands {
 	 * Annotation Queries
 	 *************************************************************************/
 	public static GeneAnnotation getGeneAnnotation(String gene) throws Exception{
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select curation, locked from ngs.GeneAnnotation where gene = ?");
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select curation, locked from GeneAnnotation where gene = ?");
 		selectStatement.setString(1, gene);
 		ResultSet rs = selectStatement.executeQuery();
 		if(rs.next()){
@@ -630,7 +701,7 @@ public class DatabaseCommands {
 	}
 	
 	public static Annotation getAnnotation(Coordinate coordinate) throws Exception{
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select classification, curation, somatic, updateStat, status from ngs.annotation where chr = ? and pos = ? and ref = ? and alt = ?");
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select classification, curation, somatic, updateStat, status from annotation where chr = ? and pos = ? and ref = ? and alt = ?");
 		selectStatement.setString(1, coordinate.getChr());
 		selectStatement.setString(2, coordinate.getPos());
 		selectStatement.setString(3, coordinate.getRef());
@@ -668,7 +739,7 @@ public class DatabaseCommands {
 	}
 	
 	public static void createGeneAnnotation(GeneAnnotation geneAnnotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into ngs.GeneAnnotation(gene, curation, locked) values(?, ?, ?)");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into GeneAnnotation(gene, curation, locked) values(?, ?, ?)");
 		updateStatement.setString(1, geneAnnotation.getGene());
 		updateStatement.setString(2, geneAnnotation.getCuration());
 		updateStatement.setBoolean(3, geneAnnotation.isLocked());
@@ -678,7 +749,7 @@ public class DatabaseCommands {
 	
 	public static void createAnnotation(Annotation annotation) throws Exception{
 		Coordinate coordinate = annotation.getCoordinate();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into ngs.annotation(chr, pos, ref, alt, status) values(?, ?, ?, ?, ?)");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into annotation(chr, pos, ref, alt, status) values(?, ?, ?, ?, ?)");
 		updateStatement.setString(1, coordinate.getChr());
 		updateStatement.setString(2, coordinate.getPos());
 		updateStatement.setString(3, coordinate.getRef());
@@ -690,7 +761,7 @@ public class DatabaseCommands {
 	
 	public static void updateAnnotation(Annotation annotation) throws Exception{
 		Coordinate coordinate = annotation.getCoordinate();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.annotation set"
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update annotation set"
 				+ " classification= ? , somatic = ? , curation = ? , updateStat = ?"
 				+ " where chr = ? and pos = ? and ref = ? and alt = ?");
 		updateStatement.setString(1, annotation.getClassification());
@@ -706,7 +777,7 @@ public class DatabaseCommands {
 	}
 	
 	public static void setGeneAnnotationCuration(GeneAnnotation geneAnnotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.GeneAnnotation set"
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update GeneAnnotation set"
 				+ " curation = ? "
 				+ " where gene = ?");
 		updateStatement.setString(1, geneAnnotation.getCuration());
@@ -716,7 +787,7 @@ public class DatabaseCommands {
 	}
 	
 	public static void setGeneAnnotationLock(GeneAnnotation geneAnnotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.GeneAnnotation set"
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update GeneAnnotation set"
 				+ " locked = ?"
 				+ " where gene = ?");
 		updateStatement.setBoolean(1, geneAnnotation.isLocked());
@@ -727,7 +798,7 @@ public class DatabaseCommands {
 	
 	public static void setAnnotationStatus(Annotation.STATUS status, Annotation annotation) throws Exception{
 		Coordinate coordinate = annotation.getCoordinate();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update ngs.annotation set status= ? where chr = ? and pos = ? and ref = ? and alt = ?");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update annotation set status= ? where chr = ? and pos = ? and ref = ? and alt = ?");
 		updateStatement.setString(1, status.toString());
 		updateStatement.setString(2, coordinate.getChr());
 		updateStatement.setString(3, coordinate.getPos());
@@ -738,7 +809,7 @@ public class DatabaseCommands {
 	}
 	
 	public static void deleteAnnotation(Annotation annotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("delete from ngs.annotation where chr = ? and pos = ? and ref = ? and alt = ?");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("delete from annotation where chr = ? and pos = ? and ref = ? and alt = ?");
 		Coordinate coordinate = annotation.getCoordinate();
 		updateStatement.setString(1, coordinate.getChr());
 		updateStatement.setString(2, coordinate.getPos());

@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import javax.swing.JOptionPane;
 public class Configurations {
 
-	public static void loadConfigurations(Component parent, InputStream configurationInputStream) throws Exception{
+	public static void loadConfigurations(Component parent, InputStream configurationInputStream, boolean useLiveEnviroment) throws Exception{
 		BufferedReader br = new BufferedReader(new InputStreamReader(configurationInputStream));
 		String line = null;
 		while((line = br.readLine()) != null){
@@ -34,7 +34,13 @@ public class Configurations {
 					READ_WRITE_CREDENTIALS[0] = lineSplit[0];
 					READ_WRITE_CREDENTIALS[1] = lineSplit[1];
 				}else if(variableName.startsWith("DATABASE_NAME")){
-					DATABASE_NAME = variableValue;
+					if(useLiveEnviroment) {
+						DATABASE_NAME = variableValue;
+					}
+				}else if(variableName.startsWith("TEST_DATABASE_NAME")){
+					if(!useLiveEnviroment) {
+						DATABASE_NAME = variableValue;
+					}
 				}else if(variableName.startsWith("DATABASE_PORT")){
 					DATABASE_PORT = Integer.parseInt(variableValue);
 				}else if(variableName.startsWith("SUPER_USER_GROUP")){
@@ -81,7 +87,14 @@ public class Configurations {
 		if(message.length() > 0){
 			throw new Exception("The following were not present in the configuration file: " + message);
 		}
+		USE_LIVE_ENVIRONMENT = useLiveEnviroment;
 	}
+	
+	/*
+	 * Global configurations
+	 */
+	public static boolean USE_LIVE_ENVIRONMENT;
+	
 	/*
 	 * Database configurations
 	 */
@@ -89,7 +102,7 @@ public class Configurations {
 	public static String[] READ_WRITE_CREDENTIALS;
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
-
+	
 	/*
 	 * User configurations
 	 */

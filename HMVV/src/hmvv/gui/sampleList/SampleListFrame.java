@@ -1,5 +1,6 @@
 package hmvv.gui.sampleList;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -40,7 +41,6 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.HMVVTableCellRenderer;
 import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.mutationlist.MutationListFrame;
@@ -144,6 +144,7 @@ public class SampleListFrame extends JFrame {
 			private static final long serialVersionUID = 1L;
 
 			//Implement table header tool tips.
+			@Override
 			protected JTableHeader createDefaultTableHeader() {
 				return new JTableHeader(columnModel) {
 					private static final long serialVersionUID = 1L;
@@ -155,10 +156,20 @@ public class SampleListFrame extends JFrame {
 					}
 				};
 			}
+			
+			@Override
+			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
+				Component c = super.prepareRenderer(renderer, row, column);
+				c.setForeground(customColumns[column].color);
+				if(!tableModel.getSample(row).isAnalysisQueued()) {
+					c.setBackground(Color.CYAN);
+				}else if(!tableModel.getSample(row).isAnalysisRunning()) {
+					c.setBackground(Color.YELLOW);
+				}
+				return c;
+			}
 		};
-
-		table.setDefaultRenderer(Object.class, new HMVVTableCellRenderer(customColumns));
-		table.setDefaultRenderer(Integer.class, new HMVVTableCellRenderer(customColumns));
+		
 		table.setAutoCreateRowSorter(true);
 		
 		sorter = new TableRowSorter<SampleListTableModel>(tableModel);

@@ -18,7 +18,6 @@ import javax.swing.table.TableColumnModel;
 
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.HMVVTableCellRenderer;
 import hmvv.gui.mutationlist.AnnotationFrame;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
@@ -104,10 +103,14 @@ public abstract class CommonTable extends JTable{
 	
 	protected abstract void handleMouseClick(int column) throws Exception;
 	
+	@Override
+	public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
+		Component c = super.prepareRenderer(renderer, row, column);
+		c.setForeground(customColumns[column].color);
+		return c;
+	}
+	
 	private void constructRenderers(){
-		HMVVTableCellRenderer renderer = new HMVVTableCellRenderer(customColumns);
-		setDefaultRenderer(Object.class, renderer);
-		setDefaultRenderer(Integer.class, renderer);
 		setDefaultRenderer(Boolean.class, new BooleanRenderer());
 	}
 	

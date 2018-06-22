@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Comparator;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -248,6 +248,7 @@ public class EnterSample extends JFrame {
 	}
 	
 	private void findRun() throws Exception{
+		String assay = comboBoxAssay.getSelectedItem().toString();
 		String instrument = comboBoxInstrument.getSelectedItem().toString();
 		String runID = textRunID.getText();
 		
@@ -258,47 +259,61 @@ public class EnterSample extends JFrame {
 			return;
 		}
 		
-		if((instrument.equals("miseq")) || (instrument.equals("nextseq"))){
-			//For illumina
-			String command = String.format("ls /home/%sAnalysis/*_%s_*/*.amplicon.vep.parse.filter.txt", instrument, runID);
+		//TODO Is the approach for each of these the best? Consider parsing sample list json files where present.
+		if(instrument.equals("miseq") || instrument.equals("nextseq")){
+			String command = String.format("cat /home/%s/*_%s_*/SampleSheet.csv", instrument, runID);
 			CommandResponse result = SSHConnection.executeCommandAndGetOutput(command);
-			ArrayList<String> sampleList = sampleListIllumina(result.response);
-			if(result.exitStatus == 0){
-				fillSample(sampleList);
-			}else{
-				removeAllItems();
-				JOptionPane.showMessageDialog(this, "There was a problem locating the run");
-				sampleIDSelectionChanged();
-			}
-		}else{
-			//For Ion
-			String coverageCommand = String.format("ls -d /home/%sAnalysis/*%s/coverageAnalysis_out*", instrument, runID);
-			String variantCallerCommand = String.format("ls -d /home/%sAnalysis/*%s/variantCaller_out*", instrument, runID);
+			ArrayList<String> sampleList = sampleListIllumina(result.responseLines);
+			fillSampleCommon(result, sampleList);
+		}else if(instrument.equals("pgm") || instrument.equals("proton")){
+			String coverageCommand = String.format("ls /home/%s/*_%s/plugin_out/ | grep coverageAnalysis", instrument, runID);
+			String variantCallerCommand = String.format("ls /home/%s/*_%s/plugin_out/ | grep variantCaller_out", instrument, runID);
 			CommandResponse coverageResult = SSHConnection.executeCommandAndGetOutput(coverageCommand);
 			CommandResponse variantCallerResult = SSHConnection.executeCommandAndGetOutput(variantCallerCommand);
-			ArrayList<String> coverageID = getAnalysisID(coverageResult.response);
-			ArrayList<String> variantCallerID = getAnalysisID(variantCallerResult.response);
+			ArrayList<String> coverageID = coverageResult.responseLines;
+			ArrayList<String> variantCallerID = variantCallerResult.responseLines;
+			
 			if(coverageResult.exitStatus == 0 && variantCallerResult.exitStatus == 0){
 				fillAnalysis(coverageID, variantCallerID);
+				//Don't have to fillSample because the comboBox listener will fire, and fillSampleIon will be called
 			}else{
 				removeAllItems();
 				JOptionPane.showMessageDialog(this, "There was a problem locating the run");
 				sampleIDSelectionChanged();
 			}
+		}else {
+			throw new Exception(String.format("Unsupported instrument/assay combination (%s,%s)", instrument, assay));
 		}
 	}
-
+	
+	private void fillSampleCommon(CommandResponse result, ArrayList<String> sampleList) {
+		if(result.exitStatus == 0){
+			fillSample(sampleList);
+		}else{
+			removeAllItems();
+			JOptionPane.showMessageDialog(this, "There was a problem locating the run");
+			sampleIDSelectionChanged();
+		}
+	}
+	
 	private void fillSampleIon() throws Exception{
 		String instrument = comboBoxInstrument.getSelectedItem().toString();
 		String runID = textRunID.getText();
 		String variantCallerID = comboBoxCaller.getSelectedItem().toString();
-		String sampleIDCommand = String.format("ls -d /home/%sAnalysis/*%s/%s/*", instrument, runID, variantCallerID);
+		String sampleIDCommand = String.format("ls /home/%s/*_%s/plugin_out/%s/ -F | grep / | grep Ion", instrument, runID, variantCallerID);
 		CommandResponse sampleIDResult = SSHConnection.executeCommandAndGetOutput(sampleIDCommand);
 		if(sampleIDResult.exitStatus == 0){
-			ArrayList<String> sampleID = getAnalysisID(sampleIDResult.response);
+			ArrayList<String> sampleID = sampleIDResult.responseLines;
 			comboBoxSample.removeAllItems();
+			
+			sampleID.sort(new Comparator<String>() {
+				@Override
+				public int compare(String arg0, String arg1) {
+					return arg0.compareTo(arg1);
+				}
+			});
 			for(int i =0; i < sampleID.size(); i++){
-				comboBoxSample.addItem(sampleID.get(i));
+				comboBoxSample.addItem(sampleID.get(i).replaceAll("/", ""));
 			}
 		}else{
 			removeAllItems();
@@ -323,28 +338,28 @@ public class EnterSample extends JFrame {
 			comboBoxCaller.addItem(variantCallerID.get(i));
 		}
 	}
-
-	private ArrayList<String> sampleListIllumina(StringBuilder result){
-		String resultString = result.toString();
-		ArrayList<String> sampleList = new ArrayList<String>();
-		ArrayList<String> list = new ArrayList<String>(Arrays.asList(resultString.split("\\r?\\n")));
-		for(int i =0; i < list.size(); i++){
-			String fileName = list.get(i).replaceAll("^.*/", "");
-			String sample = fileName.replaceAll("\\..*", "");
-			sampleList.add(sample);
+	
+	private ArrayList<String> sampleListIllumina(ArrayList<String> responseLines){
+		ArrayList<String> sampleList = new ArrayList<String>();		
+		boolean samplesFound = false;
+		for(int i = 0; i < responseLines.size(); i++){
+			String fileName = responseLines.get(i).split(",")[0];
+			if(fileName.equals("Sample_ID")) {
+				samplesFound = true;
+				continue;
+			}
+			if(!samplesFound) {
+				continue;
+			}
+			sampleList.add(fileName);
 		}
+		sampleList.sort(new Comparator<String>() {
+			@Override
+			public int compare(String arg0, String arg1) {
+				return arg0.compareTo(arg1);
+			}
+		});
 		return sampleList;
-	}
-
-	private ArrayList<String> getAnalysisID(StringBuilder result){
-		ArrayList<String> IDlist = new ArrayList<String>();
-		String resultString = result.toString();
-		ArrayList<String> list = new ArrayList<String>(Arrays.asList(resultString.split("\\r?\\n")));
-		for(int i =0; i < list.size(); i++){
-			String dirName = list.get(i).replaceAll("^.*/", "");
-			IDlist.add(dirName);
-		}
-		return IDlist;
 	}
 	
 	private void updateFields(String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String note, boolean editable){

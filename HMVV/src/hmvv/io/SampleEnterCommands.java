@@ -1,7 +1,6 @@
 package hmvv.io;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import hmvv.model.CommandResponse;
 import hmvv.model.Sample;
@@ -20,7 +19,7 @@ public class SampleEnterCommands {
 		ArrayList<String> dateList = new ArrayList<String>();
 		String dateString = "";
 		if(dateResult.exitStatus == 0){
-			dateList = parseServerResult(dateResult.response);
+			dateList = dateResult.responseLines;
 			if(dateList.size() == 1){
 				dateString = dateList.get(0);
 				return dateString;
@@ -32,29 +31,40 @@ public class SampleEnterCommands {
 		}
 	}
 	
+	//TODO code this somewhere else. Shell pipeline???
+//	public static void enterData(Sample sample) throws Exception{
+//		if(sample.getLastName().equals("") || sample.getFirstName().equals("") || sample.getOrderNumber().equals("")){
+//			throw new Exception("firstName, lastName and orderNumber are required");
+//		}
+//		
+//		String[] commands = constructCommandArray(sample);
+//		
+//		//Find variant result file
+//		ArrayList<String> dataFileList = findVariantFile(commands[0]);
+//		//find total amplicon number
+//		ArrayList<String> totalAmplicon = findTotalAmpliconNumber(commands[1]);
+//		//find amplicon file
+//		ArrayList<String> ampliconFileList = findAmpliconFile(commands[2]);
+//		//find failed amplicon number
+//		ArrayList<String> failedAmpliconCountList = findFailedAmpliconNumber(commands[3]);
+//
+//		//Gather data
+//		String dataFile = dataFileList.get(0);
+//		String ampliconFile = ampliconFileList.get(0);
+//		Integer totalAmpliconCount = Integer.parseInt(totalAmplicon.get(0)) - 1;
+//		Integer failedAmpliconCount = Integer.parseInt(failedAmpliconCountList.get(0)) - 1;
+//		
+//		DatabaseCommands.insertDataIntoDatabase(dataFile, ampliconFile, totalAmpliconCount, failedAmpliconCount, sample);
+//	}
+	
+	
 	public static void enterData(Sample sample) throws Exception{
 		if(sample.getLastName().equals("") || sample.getFirstName().equals("") || sample.getOrderNumber().equals("")){
 			throw new Exception("firstName, lastName and orderNumber are required");
 		}
+		DatabaseCommands.insertDataIntoDatabase(sample);
 		
-		String[] commands = constructCommandArray(sample);
-		
-		//Find variant result file
-		ArrayList<String> dataFileList = findVariantFile(commands[0]);
-		//find total amplicon number
-		ArrayList<String> totalAmplicon = findTotalAmpliconNumber(commands[1]);
-		//find amplicon file
-		ArrayList<String> ampliconFileList = findAmpliconFile(commands[2]);
-		//find failed amplicon number
-		ArrayList<String> failedAmpliconCountList = findFailedAmpliconNumber(commands[3]);
-
-		//Gather data
-		String dataFile = dataFileList.get(0);
-		String ampliconFile = ampliconFileList.get(0);
-		Integer totalAmpliconCount = Integer.parseInt(totalAmplicon.get(0)) - 1;
-		Integer failedAmpliconCount = Integer.parseInt(failedAmpliconCountList.get(0)) - 1;
-		
-		DatabaseCommands.insertDataIntoDatabase(dataFile, ampliconFile, totalAmpliconCount, failedAmpliconCount, sample);
+		//TODO Launch Pipeline here
 	}
 	
 	private static String[] constructCommandArray(Sample sample){
@@ -95,7 +105,7 @@ public class SampleEnterCommands {
 		CommandResponse result = SSHConnection.executeCommandAndGetOutput(command);
 		ArrayList<String> dataFileList = new ArrayList<String>();
 		if(result.exitStatus == 0){
-			dataFileList = parseServerResult(result.response);
+			dataFileList = result.responseLines;
 		}else{
 			throw new Exception("Error6: There was a problem locating sample file; data not entered");
 		}
@@ -110,7 +120,7 @@ public class SampleEnterCommands {
 		CommandResponse ampliconResult = SSHConnection.executeCommandAndGetOutput(command);
 		ArrayList<String> ampliconFileList = new ArrayList<String>();
 		if(ampliconResult.exitStatus == 0){
-			ampliconFileList = parseServerResult(ampliconResult.response);
+			ampliconFileList = ampliconResult.responseLines;
 		}else{
 			throw new Exception("Error4: There was a problem locating amplicon file; data not entered");
 		}
@@ -125,7 +135,7 @@ public class SampleEnterCommands {
 		CommandResponse totalAmpliconResult = SSHConnection.executeCommandAndGetOutput(command);
 		ArrayList<String> totalAmplicon = new ArrayList<String>();
 		if(totalAmpliconResult.exitStatus == 0){
-			totalAmplicon = parseServerResult(totalAmpliconResult.response);
+			totalAmplicon = totalAmpliconResult.responseLines;
 		}else{
 			throw new Exception("Error9: Problem locating amplicon file, data not entered");
 		}
@@ -139,7 +149,7 @@ public class SampleEnterCommands {
 		CommandResponse failedAmpliconCountResult = SSHConnection.executeCommandAndGetOutput(command);
 		ArrayList<String> failedAmpliconCountList = new ArrayList<String>();
 		if(failedAmpliconCountResult.exitStatus == 0){
-			failedAmpliconCountList = parseServerResult(failedAmpliconCountResult.response);
+			failedAmpliconCountList = failedAmpliconCountResult.responseLines;
 		}else{
 			throw new Exception("Error4: There was a problem locating failed amplicon file; data not entered");
 		}
@@ -147,11 +157,5 @@ public class SampleEnterCommands {
 			throw new Exception("Error5: Only 1 file should be present for the sample; data not entered");
 		}
 		return failedAmpliconCountList;
-	}
-
-	private static ArrayList<String> parseServerResult(StringBuilder result){
-		String resultString = result.toString();
-		ArrayList<String> list = new ArrayList<String>(Arrays.asList(resultString.split("\\r?\\n")));
-		return list;
 	}
 }
