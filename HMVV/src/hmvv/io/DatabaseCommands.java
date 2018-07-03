@@ -51,90 +51,6 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Insert Data Command
 	 *************************************************************************/
-	//TODO Consider using a transaction statement
-//	public static void insertDataIntoDatabase(String dataFile, String ampliconFile, Integer totalAmpliconCount, Integer failedAmpliconCount, Sample sample) throws Exception{
-//		String assay = sample.assay;
-//		String instrument = sample.instrument;
-//		String lastName = sample.getLastName();
-//		String firstName = sample.getFirstName();
-//		String orderNumber = sample.getOrderNumber();
-//		String pathologyNumber = sample.getPathNumber();
-//		String tumorSource = sample.getTumorSource();
-//		String tumorPercent = sample.getTumorPercent();
-//		String runID = sample.runID;
-//		String sampleID = sample.sampleID;
-//		String coverageID = sample.coverageID;//no coverageID on nextseq
-//		String variantCallerID = sample.callerID;//no variant caller on nextseq
-//		String runDate = sample.runDate;
-//		String note = sample.getNote();
-//		String enteredBy = sample.enteredBy;
-//
-//		String checkSample = String.format("select * from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
-//
-//		//enter sample
-//		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
-//		ResultSet rsCheckSample = pstCheckSample.executeQuery();
-//		Integer sampleCount = 0;
-//		while(rsCheckSample.next()){
-//			sampleCount += 1;
-//		}
-//		if(sampleCount != 0){
-//			throw new Exception("Error1: Supplied sample exists in database; data not entered");
-//		}
-//		
-//		String enterSample = String.format("insert into Samples "
-//				+ "(assay, instrument, lastName, firstName, orderNumber, pathNumber, tumorPercent, runID, sampleID, coverageID, callerID, runDate, note, enteredBy, tumorSource) "
-//				+ "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-//				assay, instrument, lastName, firstName, orderNumber, pathologyNumber, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy, tumorSource);
-//		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
-//		pstEnterSample.executeUpdate();
-//
-//		//get ID
-//		String findID = String.format("select ID from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
-//
-//		PreparedStatement pstFindID = databaseConnection.prepareStatement(findID);
-//		ResultSet rsFindID = pstFindID.executeQuery();
-//		Integer count = 0;
-//		String ID = "";
-//		while(rsFindID.next()){
-//			ID = rsFindID.getString(1);
-//			try{
-//				sample.setID(Integer.parseInt(ID));
-//			}catch(Exception e){
-//				throw new Exception("ID Assigned by database is not an integer: " + ID);
-//			}
-//			count += 1;
-//		}
-//		if(count == 0){
-//			throw new Exception("Error2: Problem locating the entered sample; data not entered");
-//		}
-//
-//		//enter amplicon counts
-//		String enterAmpliconCount = String.format("insert into ampliconCount values (%s, %d, %d)", ID, totalAmpliconCount, failedAmpliconCount);
-//		PreparedStatement pstEnterAmpliconCount = databaseConnection.prepareStatement(enterAmpliconCount);
-//		pstEnterAmpliconCount.executeUpdate();
-//		
-//		//enter variant data
-//		String enterData = String.format("load data infile '%s' into table data ignore 1 lines "
-//				+ "(gene, exons, chr, pos, ref, alt, genotype, type, quality, altFreq, readDP, altReadDP, Consequence, sift, PolyPhen, HGVSc, HGVSp, dbSNPID, pubmed)"
-//				+ " set sampleID = '%s', assay = '%s'", dataFile, ID, assay);
-//		PreparedStatement pstEnterData = databaseConnection.prepareStatement(enterData);
-//		pstEnterData.executeUpdate();
-//		
-//		if((sample.instrument.equals("pgm")) || (sample.instrument.equals("proton"))){
-//			//enter failed amplicon data
-//			String enterAmplicon = String.format("load data infile '%s' into table amplicon "
-//					+ "(ampliconName, ampliconCov) set sampleID = '%s', assay = '%s'", ampliconFile, ID, assay);
-//			PreparedStatement pstEnterAmplicon = databaseConnection.prepareStatement(enterAmplicon);
-//			pstEnterAmplicon.executeUpdate();
-//		}else{
-//			//enter failed amplicon data
-//			String enterAmplicon = String.format("load data infile '%s' into table amplicon ignore 1 lines "//Skip first line, which contains the sample headers
-//					+ "(ampliconName, ampliconCov) set sampleID = '%s', assay = '%s'", ampliconFile, ID, assay);
-//			PreparedStatement pstEnterAmplicon = databaseConnection.prepareStatement(enterAmplicon);
-//			pstEnterAmplicon.executeUpdate();
-//		}
-//	}
 	
 	public static void insertDataIntoDatabase(Sample sample) throws Exception{
 		String assay = sample.assay;
@@ -152,7 +68,9 @@ public class DatabaseCommands {
 		String runDate = sample.runDate;
 		String note = sample.getNote();
 		String enteredBy = sample.enteredBy;
-
+        
+		String environment ="test";
+		
 		String checkSample = String.format("select * from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
 
 		//enter sample
@@ -194,11 +112,17 @@ public class DatabaseCommands {
 			throw new Exception("Error2: Problem locating the entered sample; data not entered");
 		}
 		
-		String queueSample = String.format("insert into SampleAnalysisQueue "
-				+ "(sampleID, status) VALUES ('%s', 'Queued')",
-				ID);
+		coverageID = sample.coverageID.split("\\.")[1]; //get number only
+		variantCallerID = sample.callerID.split("\\.")[1];
+		
+		String queueSample = String.format("INSERT INTO sampleAnalysisQueue " 
+		  + "(runID,sampleID, coverageID, vcallerID, assayID,instrumentID,environmentID, timeSubmitted)"
+		   +	" VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', now() )",
+		   Integer.parseInt(runID),sampleID, coverageID, variantCallerID, assay,instrument, environment);
+		
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.executeUpdate();
+
 	}
 	
 	/* ************************************************************************
@@ -552,7 +476,8 @@ public class DatabaseCommands {
 	 * Sample Queries
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
-		String query = "select * from Samples left join SampleAnalysisQueue on Samples.ID = SampleAnalysisQueue.sampleID order by ID desc";
+//		String query = "select * from Samples left join SampleAnalysisQueue on Samples.ID = SampleAnalysisQueue.sampleID order by ID desc";
+		String query = "select * from Samples order by ID desc";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
@@ -584,7 +509,10 @@ public class DatabaseCommands {
 				row.getString("enteredBy")
 				);
 		
-		String status = row.getString("status");
+//		String status = row.getString("status");
+		
+		String status = "status";
+		
 		if(status != null) {
 			sample.setAnalysisStatus(status);
 		}

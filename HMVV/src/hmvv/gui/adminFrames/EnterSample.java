@@ -216,9 +216,9 @@ public class EnterSample extends JFrame {
 		}
 		
 		if(coverageID == null)
-			coverageID = "";
+			coverageID = "out.na";
 		if(variantCallerID == null)
-			variantCallerID = "";
+			variantCallerID = "out.na";
 		
 		
 		Sample sample = sampleListTableModel.getSample(runId, coverageID, variantCallerID, sampleID);
