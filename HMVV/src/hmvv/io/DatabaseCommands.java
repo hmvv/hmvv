@@ -193,12 +193,6 @@ public class DatabaseCommands {
 		if(count == 0){
 			throw new Exception("Error2: Problem locating the entered sample; data not entered");
 		}
-		
-		String queueSample = String.format("insert into SampleAnalysisQueue "
-				+ "(sampleID, status) VALUES ('%s', 'Queued')",
-				ID);
-		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
-		pstQueueSample.executeUpdate();
 	}
 	
 	/* ************************************************************************
@@ -552,7 +546,7 @@ public class DatabaseCommands {
 	 * Sample Queries
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
-		String query = "select * from Samples left join SampleAnalysisQueue on Samples.ID = SampleAnalysisQueue.sampleID order by ID desc";
+		String query = "select * from Samples order by ID desc";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
@@ -583,11 +577,6 @@ public class DatabaseCommands {
 				row.getString("note"),
 				row.getString("enteredBy")
 				);
-		
-		String status = row.getString("status");
-		if(status != null) {
-			sample.setAnalysisStatus(status);
-		}
 		return sample;
 	}
 	

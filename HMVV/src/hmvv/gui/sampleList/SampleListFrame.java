@@ -161,11 +161,12 @@ public class SampleListFrame extends JFrame {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				c.setForeground(customColumns[column].color);
-				if(!tableModel.getSample(row).isAnalysisQueued()) {
-					c.setBackground(Color.CYAN);
-				}else if(!tableModel.getSample(row).isAnalysisRunning()) {
-					c.setBackground(Color.YELLOW);
-				}
+				//TODO set color based on status?
+				//if(!tableModel.getSample(row).isAnalysisQueued()) {
+				//	c.setBackground(Color.CYAN);
+				//}else if(!tableModel.getSample(row).isAnalysisRunning()) {
+				//	c.setBackground(Color.YELLOW);
+				//}
 				return c;
 			}
 		};
