@@ -78,7 +78,17 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn annotationColumn = new MutationTableModelColumn("The text entered by the pathologist to generate the clinical laboratory report.",
 			"annotation",
 			String.class,
-			(Mutation mutation) -> mutation.getAnnotation());
+			(Mutation mutation) -> mutation.getAnnotationObject().getDisplayText());
+	
+	public static final MutationTableModelColumn somaticColumn = new MutationTableModelColumn("The somatic designation as entered by the pathologist in the annotation report.",
+			"somatic",
+			String.class,
+			(Mutation mutation) -> mutation.getAnnotationObject().getSomaticDisplayText());
+	
+	public static final MutationTableModelColumn classificationColumn = new MutationTableModelColumn("The classification designation as entered by the pathologist in the annotation report.",
+			"classification",
+			String.class,
+			(Mutation mutation) -> mutation.getAnnotationObject().getClassificationDisplayText());
 	
 	public static final MutationTableModelColumn originColumn = new MutationTableModelColumn("",//TODO Find this
 			"origin",

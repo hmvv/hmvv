@@ -27,6 +27,8 @@ public class BasicTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.altReadDPColumn);
 		columns.add(MutationTableModelColumn.occurrenceColumn);
 		columns.add(MutationTableModelColumn.annotationColumn);
+		columns.add(MutationTableModelColumn.somaticColumn);
+		columns.add(MutationTableModelColumn.classificationColumn);
 		return columns;
 	}
 	

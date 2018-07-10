@@ -20,7 +20,7 @@ public class Mutation {
 	private Integer readDP;
 	private Integer altReadDP;
 	private Integer occurrence;
-	private String annotation;
+	private Annotation annotationObject;
 	
 	//ClinVar
 	private String origin;
@@ -186,14 +186,6 @@ public class Mutation {
 
 	public void setOccurrence(Integer occurrence) {
 		this.occurrence = occurrence;
-	}
-
-	public String getAnnotation() {
-		return annotation;
-	}
-
-	public void setAnnotation(String annotation) {
-		this.annotation = annotation;
 	}
 
 	public String getOrigin() {
@@ -402,5 +394,13 @@ public class Mutation {
 
 	public void setTumorPercent(String tumorPercent) {
 		this.tumorPercent = tumorPercent;
+	}
+	
+	public Annotation getAnnotationObject() {
+		return annotationObject;
+	}
+	
+	public void setAnnotationObject(Annotation annotationObject) {
+		this.annotationObject = annotationObject;
 	}
 }

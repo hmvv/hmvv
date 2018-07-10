@@ -25,12 +25,6 @@ public class MutationList {
 		return mutations.get(index);
 	}
 	
-	public void updateAnnotationText(String text, int index){
-		Mutation mutation = getMutation(index);
-		mutation.setAnnotation(text);
-		notifyRowUpdated(index);
-	}
-	
 	public void updateReportedStatus(boolean reported, int index){
 		Mutation mutation = getMutation(index);
 		mutation.setReported(reported);

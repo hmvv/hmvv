@@ -68,6 +68,28 @@ public class Annotation {
 		return editStatus;
 	}
 	
+	public String getSomaticDisplayText() {
+		if(somatic.equals("Not set")) {
+			return "";
+		}
+		return somatic;
+	}
+	
+	public String getClassificationDisplayText() {
+		if(classification.equals("Not set")) {
+			return "";
+		}
+		return classification;
+	}
+	
+	public String getDisplayText() {
+		if(curation.trim().length() == 0) {
+			return "Enter";
+		}else {
+			return "Annotation";
+		}
+	}
+	
 	public boolean isAnnotationSet(){
 		if(!classification.equals("Not set")){
 			return true;
