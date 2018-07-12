@@ -46,8 +46,11 @@ import hmvv.gui.mutationlist.tables.G1000Table;
 import hmvv.gui.mutationlist.tables.SampleTable;
 import hmvv.gui.sampleList.ReportFrame;
 import hmvv.io.DatabaseCommands;
+import hmvv.io.IGVConnection;
 import hmvv.io.MutationReportGenerator;
+import hmvv.io.SSHConnection;
 import hmvv.model.Mutation;
+import hmvv.model.Sample;
 
 public class MutationListFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -74,6 +77,7 @@ public class MutationListFrame extends JFrame {
 	private JScrollPane sampleTabScrollPane;
 	
 	private MutationList mutationList;
+	private Sample sample;
 	
 	private JPanel contentPane;
 	private JTabbedPane tabbedPane;
@@ -87,6 +91,7 @@ public class MutationListFrame extends JFrame {
 	private JButton longReportButton;
 	private JButton resetButton;
 	private JButton exportButton;
+	private JButton loadIGVButton;
 	
 	private JTextField textFreqFrom;
 	private JTextField textVarFreqTo;
@@ -97,14 +102,54 @@ public class MutationListFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public MutationListFrame(Component parent, MutationList mutationList, String title){
-		super("Mutation List - " + title);
+	public MutationListFrame(Component parent, Sample sample, MutationList mutationList){
+		this(parent, sample, mutationList, "");
+		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() +
+				" (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ", callerID = " + sample.callerID + ")";
+		setTitle(title);
+		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
 		setMinimumSize(new Dimension(900, getHeight()/2));
 		
+		this.sample = sample;
+		this.mutationList = mutationList;
+		
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
+		setContentPane(contentPane);
+		
+		constructFilterPanel();
+		
+		constructTabs();
+		layoutComponents();
+		createSortChangeListener();
+		setLocationRelativeTo(parent);
+		reset();
+		
+		loadMissingDataAsynchronous();
+	}
+	
+	/**
+	 * Constructs the MutationListFrame without a sample (currently used for the SearchResult function).
+	 * @param parent
+	 * @param mutationList
+	 */
+	public MutationListFrame(Component parent, MutationList mutationList){
+		this(parent, null, mutationList, "Search Result");
+	}
+	
+	private MutationListFrame(Component parent, Sample sample, MutationList mutationList, String title){
+		super(title);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		
+		Rectangle bounds = GUICommonTools.getBounds(parent);
+		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
+		setMinimumSize(new Dimension(900, getHeight()/2));
+		
+		this.sample = sample;
 		this.mutationList = mutationList;
 		
 		contentPane = new JPanel();
@@ -222,6 +267,13 @@ public class MutationListFrame extends JFrame {
 		exportButton.setToolTipText("Export the current table to file");
 		exportButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		
+		loadIGVButton = new JButton("Load IGV");
+		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
+		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		if(sample == null) {
+			loadIGVButton.setEnabled(false);//If no sample provided, this object is for the search results display.
+		}
+		
 		ActionListener actionListener = new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -238,6 +290,19 @@ public class MutationListFrame extends JFrame {
 						ex.printStackTrace();
 						JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
 					}
+				}else if(e.getSource() == loadIGVButton) {
+					new Thread(new Runnable() {
+						public void run() {
+							try{
+								if(sample == null) {
+									throw new Exception("No sample was provided. Please contact developer to debug this error.");
+								}
+								loadIGV();
+							}catch(Exception ex){
+								JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
+							}
+						}
+					}).start();
 				}
 			}
 		};
@@ -246,6 +311,7 @@ public class MutationListFrame extends JFrame {
 		longReportButton.addActionListener(actionListener);
 		resetButton.addActionListener(actionListener);
 		exportButton.addActionListener(actionListener);
+		loadIGVButton.addActionListener(actionListener);
 	}
 
 	private void showShortReportFrame(){
@@ -353,6 +419,7 @@ public class MutationListFrame extends JFrame {
 		buttonPanel.add(longReportButton);
 		buttonPanel.add(resetButton);
 		buttonPanel.add(exportButton);
+		buttonPanel.add(loadIGVButton);
 		
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
@@ -567,6 +634,31 @@ public class MutationListFrame extends JFrame {
 			}catch(Exception e){
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+			}
+		}
+	}
+	
+	private void loadIGV() throws Exception{
+		String runID = sample.runID;
+		String sampleID = sample.sampleID;
+		String callerID = sample.callerID;
+		String instrument =  sample.instrument;
+		String httpFile = null;
+		if(instrument.equals("pgm")){
+			httpFile = SSHConnection.findPGMSample(runID, sampleID, callerID);
+		}else if(instrument.equals("proton")){
+			httpFile = SSHConnection.findProtonSample(runID, sampleID, callerID);
+		}else if(instrument.equals("nextseq")){
+			httpFile = SSHConnection.findIlluminaNextseqSample(runID, sampleID);
+		}else{
+			httpFile = SSHConnection.findIlluminaSample(instrument, runID, sampleID);
+		}
+		
+		String response = IGVConnection.loadFileIntoIGV(this, httpFile);
+		if(!response.equals("")){
+			JOptionPane.showMessageDialog(this, response);
+			if(response.equals("OK")) {
+				loadIGVButton.setEnabled(false);
 			}
 		}
 	}

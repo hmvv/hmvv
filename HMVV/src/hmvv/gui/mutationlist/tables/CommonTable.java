@@ -97,7 +97,6 @@ public abstract class CommonTable extends JTable{
 					}
 					handleMouseClick(column);
 				}catch(Exception e){
-					e.printStackTrace();
 					JOptionPane.showMessageDialog(CommonTable.this, e.getMessage());
 				}
 			}

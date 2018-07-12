@@ -71,8 +71,7 @@ public class SampleListFrame extends JFrame {
 	private JButton sampleSearchButton;
 	private JButton resetButton;
 	private JButton mutationSearchButton;
-	private JButton loadIGVButton;
-
+	
 	//Labels
 	private JLabel lblChooseAnAssay;
 	private JLabel lblRunid;
@@ -205,10 +204,6 @@ public class SampleListFrame extends JFrame {
 		mutationSearchButton = new JButton("Mutation Search");
 		mutationSearchButton.setToolTipText("Open mutation search window");
 		mutationSearchButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
-
-		loadIGVButton = new JButton("Load IGV");
-		loadIGVButton.setToolTipText("Load the selected sample into IGV. IGV needs to be already opened");
-		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		
 		lblChooseAnAssay = new JLabel("Choose an assay");
 		lblChooseAnAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -240,9 +235,7 @@ public class SampleListFrame extends JFrame {
 						.addComponent(resetButton)
 						.addGap(18)
 						.addComponent(mutationSearchButton)
-						.addGap(18)
-						.addComponent(loadIGVButton)
-						.addGap(127))
+						.addGap(145))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE)
@@ -262,7 +255,6 @@ public class SampleListFrame extends JFrame {
 								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(25)
 										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(loadIGVButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(mutationSearchButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(sampleSearchButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(resetButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
@@ -344,17 +336,6 @@ public class SampleListFrame extends JFrame {
 			}
 		});
 		
-		loadIGVButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try{
-					loadIGV();
-				}catch(Exception ex){
-					JOptionPane.showMessageDialog(SampleListFrame.this, ex.getMessage());
-				}
-			}
-		});
-		
 		textRunID.getDocument().addDocumentListener(new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
 				refilterTable();
@@ -400,10 +381,8 @@ public class SampleListFrame extends JFrame {
 			m.setCosmicID("LOADING...");
 		}
 		
-		String header = currentSample.getLastName() + "," + currentSample.getFirstName() +
-				" (runID = " + currentSample.runID + ", sampleID = " + currentSample.sampleID + ", callerID = " + currentSample.callerID + ")";
 		MutationList mutationList = new MutationList(mutations);
-		MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationList, header);
+		MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
 		mutationListFrame.setVisible(true);
 	}
 
@@ -559,7 +538,8 @@ public class SampleListFrame extends JFrame {
 				try{
 					ArrayList<Mutation> mutations = searchMutation.getMutationSearchResults();
 					MutationList mutationSearchList = new MutationList(mutations);
-					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationSearchList, "Search Result");
+					//MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationSearchList, "Search Result");
+					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, null, mutationSearchList);
 					mutationListFrame.setVisible(true);
 					searchMutation.dispose();
 				}catch(Exception ex){
@@ -567,43 +547,5 @@ public class SampleListFrame extends JFrame {
 				}
 			}
 		});
-	}
-
-	private void loadIGV() throws Exception{
-		int[] selectedView = table.getSelectedRows();
-		int[] selectedModel = new int[selectedView.length];
-		if(selectedView.length == 0){
-			JOptionPane.showMessageDialog(this, "Please select/highlight at least one sample");
-			return;
-		}
-		for(int i = 0; i < selectedView.length; i++){
-			selectedModel[i] = table.convertRowIndexToModel(selectedView[i]);
-			String runID = getValueNotNull(selectedModel[i], 9);
-			String sampleID = getValueNotNull(selectedModel[i], 10);
-			String callerID = getValueNotNull(selectedModel[i], 12);
-			String instrument = getValueNotNull(selectedModel[i], 2);
-			String httpFile = null;
-			if(instrument.equals("pgm")){
-				httpFile = SSHConnection.findPGMSample(runID, sampleID, callerID);
-			}else if(instrument.equals("proton")){
-				httpFile = SSHConnection.findProtonSample(runID, sampleID, callerID);
-			}else if(instrument.equals("nextseq")){
-				httpFile = SSHConnection.findIlluminaNextseqSample(runID, sampleID);
-			}else{
-				httpFile = SSHConnection.findIlluminaSample(instrument, runID, sampleID);
-			}
-			
-			String response = SSHConnection.loadFileIntoIGV(this, httpFile);
-			if(!response.equals("")){
-				JOptionPane.showMessageDialog(this, response);
-			}
-		}
-	}
-
-	private String getValueNotNull(int row, int column){
-		if(table.getModel().getValueAt(row, column) == null){
-			return "";
-		}
-		return (table.getModel().getValueAt(row, column)).toString();
 	}
 }

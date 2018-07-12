@@ -90,6 +90,11 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(Mutation mutation) -> mutation.getAnnotationObject().getClassificationDisplayText());
 	
+	public static final MutationTableModelColumn gotoIGVColumn = new MutationTableModelColumn("Link to load the variant coordinate into IGV.",
+			"IGV",
+			String.class,
+			(Mutation mutation) -> mutation.getChr() + ":" + mutation.getPos());
+	
 	public static final MutationTableModelColumn originColumn = new MutationTableModelColumn("",//TODO Find this
 			"origin",
 			String.class,
