@@ -59,7 +59,11 @@ public abstract class CommonTable extends JTable{
 			public String getToolTipText(MouseEvent e) {
 				int index = table.columnAtPoint(e.getPoint());
 				int realIndex = table.convertColumnIndexToModel(index);
-				return model.getColumnDescription(realIndex);
+				if(realIndex >= 0) {
+					return model.getColumnDescription(realIndex);					
+				}else {
+					return "";
+				}
 			}
 		};
 	}
@@ -93,7 +97,6 @@ public abstract class CommonTable extends JTable{
 					}
 					handleMouseClick(column);
 				}catch(Exception e){
-					e.printStackTrace();
 					JOptionPane.showMessageDialog(CommonTable.this, e.getMessage());
 				}
 			}
@@ -235,22 +238,21 @@ public abstract class CommonTable extends JTable{
 
 	protected void handleAnnotationClick() throws Exception{
 		Mutation mutation = getSelectedMutation();
-		String chr = mutation.getChr();
-		String pos = mutation.getPos();
-		String ref = mutation.getRef();
-		String alt = mutation.getAlt();
-		Coordinate coordinate = new Coordinate(chr, pos, ref, alt);
-		
-		Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
+		Annotation annotation = mutation.getAnnotationObject();
 		
 		String gene = mutation.getGene();
 		GeneAnnotation geneAnnotation = DatabaseCommands.getGeneAnnotation(gene);
 		
 		Boolean annotationAlreadyOpen = false;
 		if(annotation.getEditStatus().equals(Annotation.STATUS.open) || geneAnnotation.isLocked()){
-			annotationAlreadyOpen = true;
-			//TODO consider allowing user to override the lock in situations where the previous user didn't properly release the lock
-			JOptionPane.showMessageDialog(this, "You or someone else is working on this mutation, open in read only mode");
+			int selectionValue = JOptionPane.showConfirmDialog(this, "This annotation is currently locked. Would you like to unlock it?");
+			if(selectionValue == JOptionPane.CANCEL_OPTION) {
+				return;
+			}else if(selectionValue == JOptionPane.YES_OPTION) {
+				annotationAlreadyOpen = false;
+			}else if(selectionValue == JOptionPane.NO_OPTION) {
+				annotationAlreadyOpen = true;
+			}
 		}
 		
 		boolean readOnly = annotationAlreadyOpen || !SSHConnection.isSuperUser();
@@ -262,11 +264,7 @@ public abstract class CommonTable extends JTable{
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
 		CommonTableModel model = (CommonTableModel)getModel();
-		if(annotation.isAnnotationSet()){
-			model.updateAnnotationText("Annotation", modelRow);
-		}else{
-			model.updateAnnotationText("Enter", modelRow);
-		}
+		model.mutationUpdated(modelRow);
 	}
 	
 	/**

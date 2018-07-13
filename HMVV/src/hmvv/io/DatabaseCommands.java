@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
 import javax.xml.bind.DatatypeConverter;
 
 import hmvv.main.Configurations;
@@ -206,7 +205,7 @@ public class DatabaseCommands {
 				+ " t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc, t2.pubmed,"
-				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID, t7.updateStat"
+				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID "
 				+ " from data as t2"
 				+ " left join g1000 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
@@ -214,8 +213,6 @@ public class DatabaseCommands {
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				+ " left join Samples as t1"
 				+ " on t2.sampleID = t1.ID"
-				+ " left join annotation as t7"
-				+ " on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt"
 				+ " where t2.sampleID = ?";
 		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -306,7 +303,7 @@ public class DatabaseCommands {
 				"t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen, " +
 				"t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq, " +
 				"t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc,t2.pubmed, " +
-				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID, t7.updateStat as annotation " +
+				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID " +
 				"from " + 
 				"data as t2 left join " +
 				"cosmic_grch37v82 as t3 " +
@@ -324,9 +321,7 @@ public class DatabaseCommands {
 				"group by chr, pos, ref, alt, assay, sampleID) as t7 " +
 				"group by chr,pos,ref,alt, assay " +
 				") as t6 " +
-				"on t2.chr = t6.chr and t2.pos = t6.pos and t2.ref = t6.ref and t2.alt = t6.alt and t2.assay = t6.assay " + 
-				"left join annotation as t7 " + 
-				"on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt ";
+				"on t2.chr = t6.chr and t2.pos = t6.pos and t2.ref = t6.ref and t2.alt = t6.alt and t2.assay = t6.assay ";
 		String whereClause = "";
 		
 		if(!assay.equals("All")){
@@ -392,14 +387,6 @@ public class DatabaseCommands {
 			mutation.setCosmicID(getStringOrBlank(rs, "cosmicID"));
 			mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
 			
-			String annotation = getStringOrBlank(rs, "updateStat");
-			if(annotation == null || annotation.equals("")){
-				annotation = "Enter";
-			}else{
-				annotation = "Annotation";
-			}
-			mutation.setAnnotation(annotation);
-			
 			//ClinVar
 			mutation.setOrigin(getStringOrBlank(rs, "origin"));
 			mutation.setClinicalAllele(getStringOrBlank(rs, "clinicalAllele"));
@@ -434,6 +421,9 @@ public class DatabaseCommands {
 			mutation.setTumorSource(getStringOrBlank(rs, "tumorSource"));
 			mutation.setTumorPercent(getStringOrBlank(rs, "tumorPercent"));
 			
+			Annotation annotationObject = getAnnotation(mutation.getCoordinate());
+			mutation.setAnnotationObject(annotationObject);
+			
 			mutations.add(mutation);
 		}
 		return mutations;
@@ -441,6 +431,9 @@ public class DatabaseCommands {
 	
 	private static String getStringOrBlank(ResultSet rs, String columnLabel){
 		try{
+			if( rs.getString(columnLabel) == null) {
+				return "";
+			}
 			return rs.getString(columnLabel);
 		}catch(Exception e){
 			return "";
@@ -494,7 +487,6 @@ public class DatabaseCommands {
 	 * Sample Queries
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
-//		String query = "select * from Samples left join SampleAnalysisQueue on Samples.ID = SampleAnalysisQueue.sampleID order by ID desc";
 		String query = "select * from Samples order by ID desc";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -526,7 +518,6 @@ public class DatabaseCommands {
 				row.getString("note"),
 				row.getString("enteredBy")
 				);
-
 		return sample;
 	}
 	

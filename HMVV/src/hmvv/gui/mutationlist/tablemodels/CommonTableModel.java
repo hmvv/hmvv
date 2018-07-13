@@ -23,10 +23,6 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 		return mutationList.getMutation(row);
 	}
 	
-	public void updateAnnotationText(String text, int row){
-		mutationList.updateAnnotationText(text, row);
-	}
-	
 	/**
 	 * Here we are assuming all tables have the reported field on column 0
 	 */

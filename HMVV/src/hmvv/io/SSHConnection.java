@@ -1,14 +1,8 @@
 package hmvv.io;
 
-
-import java.awt.Component;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.ConnectException;
-import java.net.Socket;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -186,36 +180,6 @@ public class SSHConnection {
 		}finally {
 			if (channel != null) {
 				channel.disconnect();
-			}
-		}
-	}
-    
-	/**
-	 * 
-	 * @param parent
-	 * @param file
-	 * @return the response from the successful load process
-	 * @throws Exception if the load did not work properly
-	 */
-	public static String loadFileIntoIGV(Component parent, String file) throws Exception{
-		int igvLoadPort = 60151;
-		String igvLoadHost = "localhost";
-		
-		Socket socket = null;
-		try{
-			socket = new Socket(igvLoadHost, igvLoadPort);
-			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-			out.println("load " + file);
-			String response = in.readLine();
-			return response;
-		}catch(ConnectException e1){
-			throw new Exception("Sample not loaded. Please make sure IGV is running before trying load a sample.");
-		}finally{
-			if(socket != null){
-				try {
-					socket.close();
-				} catch (IOException e) {}
 			}
 		}
 	}
