@@ -10,20 +10,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Enumeration;
 
-import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
@@ -32,7 +26,6 @@ import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.io.SampleEnterCommands;
-import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
 import hmvv.model.Sample;
 
@@ -60,6 +53,7 @@ public class EnterSample extends JFrame {
 	private JButton cancelButton;
 	
 	private SampleListTableModel sampleListTableModel;
+	
 	/**
 	 * Create the frame.
 	 */
@@ -212,8 +206,6 @@ public class EnterSample extends JFrame {
 				
 		
 		sampleIDSelectionChanged();
-			
-		
 	}
 	
 	private void sampleIDSelectionChanged(){
@@ -399,9 +391,7 @@ public class EnterSample extends JFrame {
 	}
 	
 	private void enterData() throws Exception{
-		
 		Sample sample = constructSampleFromTextFields();
-		
 		SampleEnterCommands.enterData(sample);
 		parent.addSample(sample);
 		
@@ -433,18 +423,14 @@ public class EnterSample extends JFrame {
 			variantCallerID = comboBoxCaller.getSelectedItem().toString();
 		}
 		
-		
 		String runDate = SampleEnterCommands.getDateString(instrument, runID);
 		String note = textNote.getText();
 		String enteredBy = SSHConnection.getUserName();
 		
 		if(lastName.equals("") || firstName.equals("") || orderNumber.equals("") ){
-			System.out.println("error");
 			throw new Exception("firstName, lastName, orderNumber are required");
-		}
-		else {
-		
-		return new Sample(ID, assay, instrument, lastName, firstName, orderNumber,
+		}else {
+			return new Sample(ID, assay, instrument, lastName, firstName, orderNumber,
 				pathologyNumber, tumorSource, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy);
 		}
 	}
@@ -471,5 +457,4 @@ public class EnterSample extends JFrame {
 			add(right, BorderLayout.CENTER);
 		}
 	}
-    
 }

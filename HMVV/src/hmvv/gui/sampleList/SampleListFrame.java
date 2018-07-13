@@ -1,6 +1,5 @@
 package hmvv.gui.sampleList;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -48,7 +47,6 @@ import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
-import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
@@ -121,28 +119,28 @@ public class SampleListFrame extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(e.getSource() == enterSampleMenuItem){
-					EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
-					sampleEnter.setVisible(true);
-				}else if(e.getSource() == monitorPipelinesItem){
-					try {
+				try {
+					
+					if(e.getSource() == enterSampleMenuItem){
+						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
+						sampleEnter.setVisible(true);
+					}else if(e.getSource() == monitorPipelinesItem){
 						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
 						monitorpipelines.setVisible(true);
-					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+					}else if(e.getSource() == newAssayMenuItem){
+						if(SSHConnection.isSuperUser()){
+							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
+							createAssay.setVisible(true);
+						}else{
+							JOptionPane.showMessageDialog(SampleListFrame.this, "Only authorized users can create an assay");
+						}
 					}
-						
-				}else if(e.getSource() == newAssayMenuItem){
-					if(SSHConnection.isSuperUser()){
-						CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
-						createAssay.setVisible(true);
-					}else{
-						JOptionPane.showMessageDialog(SampleListFrame.this, "Only authorized users can create an assay");
-					}
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
 				}
 			}
 		};
-		
+
 		enterSampleMenuItem.addActionListener(listener);
 		newAssayMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
