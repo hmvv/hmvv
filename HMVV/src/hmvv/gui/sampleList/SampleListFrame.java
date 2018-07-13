@@ -43,10 +43,12 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.EnterSample;
+import hmvv.gui.adminFrames.MonitorPipelines;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
@@ -60,6 +62,7 @@ public class SampleListFrame extends JFrame {
 	private JMenuBar menuBar;
 	private JMenu adminMenu;
 	private JMenuItem enterSampleMenuItem;
+	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
 	
 	//Table
@@ -104,11 +107,13 @@ public class SampleListFrame extends JFrame {
 		menuBar = new JMenuBar();
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
+		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
 		
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
+		adminMenu.add(monitorPipelinesItem);
 		adminMenu.add(newAssayMenuItem);
 		setJMenuBar(menuBar);
 		
@@ -119,6 +124,14 @@ public class SampleListFrame extends JFrame {
 				if(e.getSource() == enterSampleMenuItem){
 					EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 					sampleEnter.setVisible(true);
+				}else if(e.getSource() == monitorPipelinesItem){
+					try {
+						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
+						monitorpipelines.setVisible(true);
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+					}
+						
 				}else if(e.getSource() == newAssayMenuItem){
 					if(SSHConnection.isSuperUser()){
 						CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -132,6 +145,7 @@ public class SampleListFrame extends JFrame {
 		
 		enterSampleMenuItem.addActionListener(listener);
 		newAssayMenuItem.addActionListener(listener);
+		monitorPipelinesItem.addActionListener(listener);
 	}
 	
 	public void addSample(Sample sample){
@@ -160,6 +174,7 @@ public class SampleListFrame extends JFrame {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				c.setForeground(customColumns[column].color);
+
 				//TODO set color based on status?
 				//if(!tableModel.getSample(row).isAnalysisQueued()) {
 				//	c.setBackground(Color.CYAN);
@@ -538,7 +553,6 @@ public class SampleListFrame extends JFrame {
 				try{
 					ArrayList<Mutation> mutations = searchMutation.getMutationSearchResults();
 					MutationList mutationSearchList = new MutationList(mutations);
-					//MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationSearchList, "Search Result");
 					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, null, mutationSearchList);
 					mutationListFrame.setVisible(true);
 					searchMutation.dispose();

@@ -10,14 +10,20 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Enumeration;
 
+import javax.swing.AbstractButton;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
@@ -26,6 +32,7 @@ import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.io.SampleEnterCommands;
+import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
 import hmvv.model.Sample;
 
@@ -98,6 +105,7 @@ public class EnterSample extends JFrame {
 		textTumorSource = new JTextField();
 		textPercent = new JTextField();
 		textNote = new JTextField();
+		
 		enterSampleButton = new JButton("Enter Sample");
 		enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		cancelButton = new JButton("Cancel");
@@ -129,6 +137,7 @@ public class EnterSample extends JFrame {
 		mainPanel.add(new RowPanel("Tumor Source", textTumorSource));
 		mainPanel.add(new RowPanel("Tumor Percent", textPercent));
 		mainPanel.add(new RowPanel("Note", textNote));
+		
 		
 		JPanel southPanel = new JPanel();
 		GridLayout southGridLayout = new GridLayout(1,0);
@@ -200,8 +209,11 @@ public class EnterSample extends JFrame {
 				sampleIDSelectionChanged();
 			}
 		});
+				
 		
 		sampleIDSelectionChanged();
+			
+		
 	}
 	
 	private void sampleIDSelectionChanged(){
@@ -215,10 +227,10 @@ public class EnterSample extends JFrame {
 			return;
 		}
 		
-		if(coverageID == null)
-			coverageID = "";
-		if(variantCallerID == null)
-			variantCallerID = "";
+		if(coverageID == null || coverageID.equals(""))
+			coverageID = "out.na";
+		if(variantCallerID == null || variantCallerID.equals(""))
+			variantCallerID = "out.na";
 		
 		
 		Sample sample = sampleListTableModel.getSample(runId, coverageID, variantCallerID, sampleID);
@@ -227,6 +239,7 @@ public class EnterSample extends JFrame {
 		}else{
 			updateFields("", "", "", "", "", "", "", true);
 		}
+		
 	}
 	
 	private void findInstrument(){
@@ -305,7 +318,6 @@ public class EnterSample extends JFrame {
 		if(sampleIDResult.exitStatus == 0){
 			ArrayList<String> sampleID = sampleIDResult.responseLines;
 			comboBoxSample.removeAllItems();
-			
 			sampleID.sort(new Comparator<String>() {
 				@Override
 				public int compare(String arg0, String arg1) {
@@ -337,6 +349,7 @@ public class EnterSample extends JFrame {
 		for(int i =0; i < variantCallerID.size(); i++){
 			comboBoxCaller.addItem(variantCallerID.get(i));
 		}
+		
 	}
 	
 	private ArrayList<String> sampleListIllumina(ArrayList<String> responseLines){
@@ -379,13 +392,19 @@ public class EnterSample extends JFrame {
 		textPercent.setEditable(editable);
 		textNote.setEditable(editable);
 		
+		
 		enterSampleButton.setEnabled(editable);
+        
+		
 	}
 	
 	private void enterData() throws Exception{
+		
 		Sample sample = constructSampleFromTextFields();
+		
 		SampleEnterCommands.enterData(sample);
 		parent.addSample(sample);
+		
 		JOptionPane.showMessageDialog(this, "Success: Sample entered");
 		
 		//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
@@ -404,20 +423,30 @@ public class EnterSample extends JFrame {
 		String tumorPercent = textPercent.getText();
 		String runID = textRunID.getText();
 		String sampleID = comboBoxSample.getSelectedItem().toString();
-		String coverageID = "";
+		
+		String coverageID = ".na";
 		if(comboBoxCoverage.getSelectedItem() != null){
 			coverageID = comboBoxCoverage.getSelectedItem().toString();
 		}
-		String variantCallerID = "";
+		String variantCallerID = ".na";
 		if(comboBoxCaller.getSelectedItem() != null){
 			variantCallerID = comboBoxCaller.getSelectedItem().toString();
 		}
+		
+		
 		String runDate = SampleEnterCommands.getDateString(instrument, runID);
 		String note = textNote.getText();
 		String enteredBy = SSHConnection.getUserName();
 		
+		if(lastName.equals("") || firstName.equals("") || orderNumber.equals("") ){
+			System.out.println("error");
+			throw new Exception("firstName, lastName, orderNumber are required");
+		}
+		else {
+		
 		return new Sample(ID, assay, instrument, lastName, firstName, orderNumber,
 				pathologyNumber, tumorSource, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy);
+		}
 	}
 	
 	private class RowPanel extends JPanel{
@@ -442,4 +471,5 @@ public class EnterSample extends JFrame {
 			add(right, BorderLayout.CENTER);
 		}
 	}
+    
 }

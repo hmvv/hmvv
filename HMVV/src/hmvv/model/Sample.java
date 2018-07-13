@@ -97,15 +97,15 @@ public class Sample {
 		return tumorPercent;
 	}
 
-	public void setTumorPercent(String tumorPercent) {
-		this.tumorPercent = tumorPercent;
-	}
-
 	public String getNote() {
 		return note;
 	}
 
 	public void setNote(String note) {
 		this.note = note;
+	}
+	
+	public void setTumorPercent(String tumorPercent) {
+		this.tumorPercent = tumorPercent;
 	}
 }
