@@ -38,11 +38,7 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try {
-			boolean useLiveEnviroment = true;
-			if(args.length > 0) {
-				useLiveEnviroment = !args[0].equals("test");
-			}
-			Configurations.loadConfigurations(null, configurationStream, useLiveEnviroment);
+			Configurations.loadConfigurations(null, configurationStream);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage() + "\nShutting down.");
 			return;
@@ -119,6 +115,7 @@ public class HMVVLoginFrame extends JFrame {
 	private void login(){
 		String userName= usernameTextField.getText();
 		String passwd = new String(passwordTextField.getPassword());
+		
 		
 		try{
 			SSHConnection.connect(userName, passwd);

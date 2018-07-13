@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
 import javax.xml.bind.DatatypeConverter;
 
 import hmvv.main.Configurations;
@@ -19,6 +20,7 @@ import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
+import hmvv.model.Pipeline;
 import hmvv.model.Sample;
 
 public class DatabaseCommands {
@@ -53,6 +55,7 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	
 	public static void insertDataIntoDatabase(Sample sample) throws Exception{
+		
 		String assay = sample.assay;
 		String instrument = sample.instrument;
 		String lastName = sample.getLastName();
@@ -69,11 +72,9 @@ public class DatabaseCommands {
 		String note = sample.getNote();
 		String enteredBy = sample.enteredBy;
         
-		String environment ="test";
 		
+		//check if sample is already present in data
 		String checkSample = String.format("select * from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
-
-		//enter sample
 		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
 		ResultSet rsCheckSample = pstCheckSample.executeQuery();
 		Integer sampleCount = 0;
@@ -85,13 +86,17 @@ public class DatabaseCommands {
 			throw new Exception("Error: Supplied sample exists in database; data not entered");
 		}
 		
+	
 		String enterSample = String.format("insert into Samples "
 				+ "(assay, instrument, lastName, firstName, orderNumber, pathNumber, tumorPercent, runID, sampleID, coverageID, callerID, runDate, note, enteredBy, tumorSource) "
-				+ "values ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+				+ "values ('%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
 				assay, instrument, lastName, firstName, orderNumber, pathologyNumber, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy, tumorSource);
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
 		pstEnterSample.executeUpdate();
-
+        
+		System.out.println(assay+ "  " + instrument+"  " + lastName+"  " + firstName+ "  " +orderNumber + "  " +pathologyNumber + "  " +tumorPercent + "  " +runID + "  " +sampleID + "  " +coverageID + "  " +variantCallerID + "  " +runDate +  "  " +note + "  " +enteredBy + "  " +tumorSource);
+		
+		
 		//get ID
 		String findID = String.format("select ID from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
 
@@ -112,14 +117,27 @@ public class DatabaseCommands {
 			throw new Exception("Error2: Problem locating the entered sample; data not entered");
 		}
 		
+		
+		// put sample in a queue to start pipeline
 		coverageID = sample.coverageID.split("\\.")[1]; //get number only
 		variantCallerID = sample.callerID.split("\\.")[1];
+		Integer newSampleID = sample.getID(); // new ID created by database in Sample table 
+		String environment=null;
+		
+		
+		if (Configurations.DATABASE_NAME.equals("test")){
+			
+			environment = "test";
+		}else if (Configurations.DATABASE_NAME.equals("ngs")){
+		
+			environment = "live";
+		}
 		
 		String queueSample = String.format("INSERT INTO sampleAnalysisQueue " 
-		  + "(runID,sampleID, coverageID, vcallerID, assayID,instrumentID,environmentID, timeSubmitted)"
-		   +	" VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', now() )",
-		   Integer.parseInt(runID),sampleID, coverageID, variantCallerID, assay,instrument, environment);
-		
+		  + "(ID,runID,sampleID, coverageID, vcallerID, assayID,instrumentID,environmentID, timeSubmitted)"
+		   +	" VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now() )",
+		   newSampleID,runID,sampleID, coverageID, variantCallerID, assay,instrument, environment);
+
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.executeUpdate();
 
@@ -508,14 +526,7 @@ public class DatabaseCommands {
 				row.getString("note"),
 				row.getString("enteredBy")
 				);
-		
-//		String status = row.getString("status");
-		
-		String status = "status";
-		
-		if(status != null) {
-			sample.setAnalysisStatus(status);
-		}
+
 		return sample;
 	}
 	
@@ -753,4 +764,139 @@ public class DatabaseCommands {
 	    byte[] digest = md.digest();
 	    return DatatypeConverter.printHexBinary(digest).toLowerCase();
 	}
+
+	/* ************************************************************************
+	 * Monitor Pipelines Queries
+	 *************************************************************************/
+	
+	private static Pipeline getPipeline(ResultSet row) throws SQLException{
+		Pipeline pipeline = new Pipeline(
+				row.getInt("queueID"),
+				row.getString("runID"),
+				row.getString("sampleID"),
+				row.getString("assayID"),
+				row.getString("instrumentID"),
+				row.getString("environmentID"),				
+				row.getString("plstatus"),
+				row.getString("timeUpdated"),
+				""
+				);
+		
+		pipeline.setProgress(calculateProgress(pipeline));
+		
+		return pipeline;
+	}
+	
+	public static ArrayList<Pipeline> getAllPipelines() throws Exception{
+		String query = "select t3.queueID, t3.runID, t3.sampleID, t3.assayID, t3.instrumentID, t3.environmentID, t2.plStatus, t2.timeUpdated " +
+				"from sampleAnalysisQueue as t3 " +
+				"left join ( " +
+				  "select pipelineStatusID, queueID, plStatus, timeUpdated " +
+				  "from pipelineStatus  " +
+				  "where pipelineStatusID in " +
+				  "(select  max(pipelineStatusID) " +
+				  "from pipelineStatus " + 
+				  "group by queueID) ) as t2 " +
+				"on t3.queueID = t2.queueID " +
+				"order by t3.queueID" ;
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		ResultSet rs = preparedStatement.executeQuery();
+		ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();
+		
+		System.out.println(pipelines.size());
+		
+
+		while(rs.next()){
+				Pipeline p = getPipeline(rs);
+				pipelines.add(p);
+			}
+		preparedStatement.close();
+		
+		return pipelines;
+	}
+	
+	public static String getPipelineDetail(int queueID) throws Exception{
+		
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select plStatus, timeUpdated from pipelineStatus where queueID= ? ");
+		preparedStatement.setInt(1, queueID);
+
+		ResultSet rs = preparedStatement.executeQuery();
+        
+		String history="";
+		while(rs.next()){
+			    
+			    history += rs.getString("plStatus") + "     " + rs.getString("timeUpdated").substring(0, 16) + "\n";
+			}
+		preparedStatement.close();
+		
+		return history;
+	}
+	
+	private static String calculateProgress(Pipeline pipeline){
+		
+		// TODO - need to think better way of doing this
+		
+		String progress=null;
+		
+		String status= pipeline.getStatus();
+		
+       if (status.equals("pipelineCompleted")){
+			
+			return "Complete";
+		}
+		
+		else if ( pipeline.getInstrumentID().equals("proton") || pipeline.getInstrumentID().equals("pgm") ||pipeline.getInstrumentID().equals("miseq")) {
+			
+			
+
+			if (status.equals("started") || status.equals("queued") ) {
+				
+				progress="0/3";
+				
+			}
+			else if (status.equals("bedtools")) {
+				
+				progress="1/3";
+				
+			}
+			else if (status.equals("vep") || status.equals("parseVEP")) {
+				progress="2/3";
+			}
+			else if (status.equals("addingAnalysis")) {
+				progress="3/3";
+			}
+		}
+		else if  ( pipeline.getAssayID().equals("heme") || pipeline.getInstrumentID().equals("nextseq")) {
+			
+			
+
+			if (status.equals("started") || status.equals("queued")) {
+				
+				progress="0/5";
+				
+			}
+			else if (status.equals("bcl2fastq")) {
+				
+				progress="1/5";
+				
+			}
+			else if (status.equals("varscanPE")) {
+				progress="2/5";
+			}
+			else if (status.equals("bedtools")) {
+				
+				progress="3/5";
+				
+			}
+			else if (status.equals("vep")) {
+				progress="4/5";
+			}
+			else if (status.equals("samtools")) {
+				progress="5/5";
+			}
+		}
+
+		return progress;
+	}
+	
 }

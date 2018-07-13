@@ -20,11 +20,10 @@ public class Sample {
 	private String tumorPercent;
 	private String note;
 	
-	private String analysisStatus;
 	
 	public Sample(int ID, String assay, String instrument, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleID,
-			String coverageID, String callerID, String runDate, String note, String enteredBy) {
+			String coverageID, String callerID, String runDate, String note,  String enteredBy) {
 		this.ID = ID;
 		this.assay = notNull(assay);
 		this.instrument = notNull(instrument);
@@ -41,7 +40,6 @@ public class Sample {
 		this.runDate = notNull(runDate);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
-		this.analysisStatus = "Completed";//default to Completed
 	}
 	
 	public int getID(){
@@ -100,10 +98,6 @@ public class Sample {
 		return tumorPercent;
 	}
 
-	public void setTumorPercent(String tumorPercent) {
-		this.tumorPercent = tumorPercent;
-	}
-
 	public String getNote() {
 		return note;
 	}
@@ -111,25 +105,7 @@ public class Sample {
 	public void setNote(String note) {
 		this.note = note;
 	}
-	
-
-	public void setAnalysisStatus(String analysisStatus) {
-		this.analysisStatus = analysisStatus;
-	}
-	
-	public String getAnalysisStatus() {
-		return analysisStatus;
-	}
-	
-	public boolean isAnalysisCompleted() {
-		return analysisStatus.equals("Completed");
-	}
-	
-	public boolean isAnalysisRunning() {
-		return analysisStatus.equals("Running");
-	}
-	
-	public boolean isAnalysisQueued() {
-		return analysisStatus.equals("Queued");
+	public void setTumorPercent(String tumorPercent) {
+		this.tumorPercent = tumorPercent;
 	}
 }
