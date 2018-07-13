@@ -40,13 +40,14 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.HMVVTableCellRenderer;
 import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.EnterSample;
+import hmvv.gui.adminFrames.MonitorPipelines;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
@@ -60,6 +61,7 @@ public class SampleListFrame extends JFrame {
 	private JMenuBar menuBar;
 	private JMenu adminMenu;
 	private JMenuItem enterSampleMenuItem;
+	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
 	
 	//Table
@@ -105,11 +107,13 @@ public class SampleListFrame extends JFrame {
 		menuBar = new JMenuBar();
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
+		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
 		
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
+		adminMenu.add(monitorPipelinesItem);
 		adminMenu.add(newAssayMenuItem);
 		setJMenuBar(menuBar);
 		
@@ -120,6 +124,15 @@ public class SampleListFrame extends JFrame {
 				if(e.getSource() == enterSampleMenuItem){
 					EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 					sampleEnter.setVisible(true);
+				}else if(e.getSource() == monitorPipelinesItem){
+					
+					try {
+						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
+						monitorpipelines.setVisible(true);
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+					}
+						
 				}else if(e.getSource() == newAssayMenuItem){
 					if(SSHConnection.isSuperUser()){
 						CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -133,6 +146,7 @@ public class SampleListFrame extends JFrame {
 		
 		enterSampleMenuItem.addActionListener(listener);
 		newAssayMenuItem.addActionListener(listener);
+		monitorPipelinesItem.addActionListener(listener);
 	}
 	
 	public void addSample(Sample sample){
@@ -144,6 +158,7 @@ public class SampleListFrame extends JFrame {
 			private static final long serialVersionUID = 1L;
 
 			//Implement table header tool tips.
+			@Override
 			protected JTableHeader createDefaultTableHeader() {
 				return new JTableHeader(columnModel) {
 					private static final long serialVersionUID = 1L;
@@ -155,10 +170,15 @@ public class SampleListFrame extends JFrame {
 					}
 				};
 			}
+			
+			@Override
+			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
+				Component c = super.prepareRenderer(renderer, row, column);
+				c.setForeground(customColumns[column].color);
+				return c;
+			}
 		};
-
-		table.setDefaultRenderer(Object.class, new HMVVTableCellRenderer(customColumns));
-		table.setDefaultRenderer(Integer.class, new HMVVTableCellRenderer(customColumns));
+		
 		table.setAutoCreateRowSorter(true);
 		
 		sorter = new TableRowSorter<SampleListTableModel>(tableModel);

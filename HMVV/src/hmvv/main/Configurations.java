@@ -34,7 +34,7 @@ public class Configurations {
 					READ_WRITE_CREDENTIALS[0] = lineSplit[0];
 					READ_WRITE_CREDENTIALS[1] = lineSplit[1];
 				}else if(variableName.startsWith("DATABASE_NAME")){
-					DATABASE_NAME = variableValue;
+						DATABASE_NAME = variableValue;
 				}else if(variableName.startsWith("DATABASE_PORT")){
 					DATABASE_PORT = Integer.parseInt(variableValue);
 				}else if(variableName.startsWith("SUPER_USER_GROUP")){
@@ -82,6 +82,12 @@ public class Configurations {
 			throw new Exception("The following were not present in the configuration file: " + message);
 		}
 	}
+	
+	/*
+	 * Global configurations
+	 */
+	//public static boolean USE_LIVE_ENVIRONMENT;
+	
 	/*
 	 * Database configurations
 	 */
@@ -89,7 +95,7 @@ public class Configurations {
 	public static String[] READ_WRITE_CREDENTIALS;
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
-
+	
 	/*
 	 * User configurations
 	 */

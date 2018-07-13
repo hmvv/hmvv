@@ -20,9 +20,10 @@ public class Sample {
 	private String tumorPercent;
 	private String note;
 	
+	
 	public Sample(int ID, String assay, String instrument, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleID,
-			String coverageID, String callerID, String runDate, String note, String enteredBy) {
+			String coverageID, String callerID, String runDate, String note,  String enteredBy) {
 		this.ID = ID;
 		this.assay = notNull(assay);
 		this.instrument = notNull(instrument);
@@ -97,15 +98,14 @@ public class Sample {
 		return tumorPercent;
 	}
 
-	public void setTumorPercent(String tumorPercent) {
-		this.tumorPercent = tumorPercent;
-	}
-
 	public String getNote() {
 		return note;
 	}
 
 	public void setNote(String note) {
 		this.note = note;
+	}
+	public void setTumorPercent(String tumorPercent) {
+		this.tumorPercent = tumorPercent;
 	}
 }
