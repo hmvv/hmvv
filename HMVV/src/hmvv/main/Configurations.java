@@ -105,4 +105,13 @@ public class Configurations {
 	public static String SSH_SERVER_ADDRESS;
 	public static Integer SSH_PORT;
 	public static String SSH_FORWARDING_HOST;
+	
+	//TODO improve the way this decision is made
+	public static String getEnvironment() {
+		if(DATABASE_NAME.equals("ngs")){
+			return "live";
+		}else{
+			return "test";
+		}
+	}
 }

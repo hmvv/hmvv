@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -45,6 +46,9 @@ public class AnnotationFrame extends JFrame {
 	
 	private JButton okButton;
 	private JButton cancelButton;
+	
+	private JButton btnhistoryGA;
+	private JButton btnhistoryA;
 	
 	private JComboBox<String> pathogenicityComboBox;
 	private JComboBox<String> mutationTypeComboBox;
@@ -110,6 +114,10 @@ public class AnnotationFrame extends JFrame {
 		mutationTypeComboBox.addItem("Unknown");
 		mutationTypeComboBox.setSelectedItem(currentAnnotation.getSomatic());
 
+		
+		btnhistoryGA = new JButton("Previous");
+		btnhistoryA = new JButton("Previous");
+		
 		
 		geneAnnotationTextArea = new JTextArea();
 		geneAnnotationTextArea.setWrapStyleWord(true);
@@ -198,24 +206,32 @@ public class AnnotationFrame extends JFrame {
 		JPanel textAreaPanel = new JPanel();
 		//Annotation
 		JPanel annotationPanel = new JPanel();
-		annotationPanel.setLayout(new GridLayout(1,0));
+		annotationPanel.setLayout(new BoxLayout(annotationPanel, BoxLayout.Y_AXIS));
 		JScrollPane annotationScrollPane = new JScrollPane();
 		annotationScrollPane.setViewportView(annotationTextArea);
 		TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation (5000 characters max)");
 		annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
 		annotationScrollPane.setBorder(annotationBorder);
 		annotationPanel.add(annotationScrollPane);
+		JPanel historyPanelA = new JPanel();
+		historyPanelA.setLayout(new FlowLayout(FlowLayout.LEFT));
+		historyPanelA.add(btnhistoryA);
+		annotationPanel.add(historyPanelA);
 		textAreaPanel.add(annotationPanel);
-
+		
 		//GeneAnnotation
 		JPanel geneAnnotationPanel = new JPanel();
-		geneAnnotationPanel.setLayout(new GridLayout(1,0));
+		geneAnnotationPanel.setLayout(new BoxLayout(geneAnnotationPanel, BoxLayout.Y_AXIS));
 		JScrollPane geneScrollPane = new JScrollPane();
 		geneScrollPane.setViewportView(geneAnnotationTextArea);
 		TitledBorder geneAnnotationBorder = BorderFactory.createTitledBorder("" + mutation.getGene() + " Annotation (5000 characters max)");
 		geneAnnotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
 		geneAnnotationPanel.setBorder(geneAnnotationBorder);
 		geneAnnotationPanel.add(geneScrollPane);
+		JPanel historyPanelGA = new JPanel();
+		historyPanelGA.setLayout(new FlowLayout(FlowLayout.LEFT));
+		historyPanelGA.add(btnhistoryGA);
+		geneAnnotationPanel.add(historyPanelGA);
 		textAreaPanel.add(geneAnnotationPanel);
 		
 		//JLabel lblMaxCharacters = new JLabel("Max " + maxCharacters + " characters");
@@ -255,6 +271,26 @@ public class AnnotationFrame extends JFrame {
 			}
 		});
 
+		
+		btnhistoryGA.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+		});
+
+		
+		btnhistoryA.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+		});
+
+		
+		
+		
+		
 		defaultStyledDocument.setDocumentFilter(new DocumentSizeFilter(maxCharacters));
 
 		annotationTextArea.addMouseListener(new ContextMenuMouseListener());

@@ -59,6 +59,7 @@ public class InternetCommands {
 		for(String cosmicID : cosmicIDs){
 			String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
 			try {
+				//TODO should we default to v37 human genome?
 				browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?id=" + cosmicIDNumber);
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, e.getMessage());

@@ -45,11 +45,13 @@ public class SampleSearchFrame extends JFrame {
 	/**
 	 * Create the dialog.
 	 */
-	public SampleSearchFrame() {
+	public SampleSearchFrame(SampleListFrame parent) {
 		super("Sample Search");
 		JPanel contentPanel = new JPanel();
 		
 		setBounds(100, 100, 438, 348);
+		setLocationRelativeTo(parent);
+		
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -20,6 +21,7 @@ import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
+import hmvv.model.PipelineStatus;
 import hmvv.model.Sample;
 
 public class DatabaseCommands {
@@ -114,17 +116,19 @@ public class DatabaseCommands {
 	}
 
 	private static void queueSampleForPipelineAnalysis(Sample sample) throws Exception{
-		String coverageID = sample.coverageID.split("\\.")[1]; //get number only
-		String variantCallerID = sample.callerID.split("\\.")[1];
-		String environment = null;
-
-		//TODO improve the way this decision is made
-		if (Configurations.DATABASE_NAME.equals("test")){
-			environment = "test";
-		}else if (Configurations.DATABASE_NAME.equals("ngs")){
-			environment = "live";
+		
+		String coverageID = "na";
+		if(sample.coverageID.contains(".")) {
+			coverageID = sample.coverageID.split("\\.")[1]; //get number only			
 		}
-
+		
+		String variantCallerID = "na";
+		if(sample.callerID.contains(".")) {
+			variantCallerID = sample.callerID.split("\\.")[1]; //get number only			
+		}
+		
+		String environment = Configurations.getEnvironment();
+		
 		String queueSample = String.format("INSERT INTO sampleAnalysisQueue " 
 				+ "(ID, runID, sampleID, coverageID, vcallerID, assayID,instrumentID,environmentID, timeSubmitted)"
 				+	" VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now() )",
@@ -132,6 +136,7 @@ public class DatabaseCommands {
 
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.executeUpdate();
+		
 	}
 
 	/* ************************************************************************
@@ -222,7 +227,7 @@ public class DatabaseCommands {
 		Coordinate coordinate = mutation.getCoordinate();
 		String refMD5 = getMD5(coordinate.getRef());
 		String altMD5 = getMD5(coordinate.getAlt());
-
+		//TODO upgrade to latest COSMIC database
 		String query = "select cosmicID from cosmic_grch37v82 where chr = ? and pos = ? and refMD5 = ? and altMD5 = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
@@ -593,11 +598,11 @@ public class DatabaseCommands {
 
 	public static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select assay, ampliconName, ampliconCov from amplicon where sampleID = ?");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, ampliconCov from amplicon where sampleID = ?");
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		while(getSampleResult.next()){
-			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString(1), getSampleResult.getString(2), getSampleResult.getString(3));
+			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString(1), getSampleResult.getString(2));
 			amplicons.add(amplicon);
 		}
 		updateStatement.close();
@@ -790,17 +795,40 @@ public class DatabaseCommands {
 		return pipelines;
 	}
 
-	public static String getPipelineDetail(int queueID) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select plStatus, timeUpdated from pipelineStatus where queueID = ? ");
+	public static ArrayList<PipelineStatus> getPipelineDetail(int queueID) throws Exception{
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select pipelineStatusID, plStatus, timeUpdated from pipelineStatus where queueID = ? ");
 		preparedStatement.setInt(1, queueID);
 		ResultSet rs = preparedStatement.executeQuery();
+		ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
 		
-		String history = "";
 		while(rs.next()){
-			history += rs.getString("plStatus") + "     " + rs.getString("timeUpdated").substring(0, 16) + "\n";
+			int pipelineStatusID = rs.getInt("pipelineStatusID");
+			String plStatusString = rs.getString("plStatus");
+			Date timeUpdated = rs.getTimestamp("timeUpdated");
+			
+			PipelineStatus pipelineStatus = new PipelineStatus(pipelineStatusID, queueID, plStatusString, timeUpdated);
+			rows.add(pipelineStatus);
 		}
 		preparedStatement.close();
 
-		return history;
+		return rows;
+	}
+	
+	//TODO make this query more appropriate and generic
+	public static ArrayList<Amplicon> getAmpliconQCData() throws Exception{
+		String query = "select amplicon.sampleID, ampliconName, ampliconCov, ID, Samples.instrument, lastName"
+				+ " from amplicon join Samples on amplicon.sampleID = Samples.ID"
+				+ " where lastName like 'Horizon%' and ampliconCov != 0 and amplicon.assay != 'neuro' and ampliconName like 'BCOR%'";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		ResultSet rs = preparedStatement.executeQuery();
+		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
+
+		while(rs.next()){
+			Amplicon amplicon = new Amplicon(rs.getInt(1), rs.getString(2), rs.getString(3));
+			amplicons.add(amplicon);
+		}
+		preparedStatement.close();
+
+		return amplicons;
 	}
 }

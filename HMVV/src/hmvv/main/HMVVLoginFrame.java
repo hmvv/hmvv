@@ -99,7 +99,7 @@ public class HMVVLoginFrame extends JFrame {
 		add(panel);
 		getRootPane().setDefaultButton(loginButton);
 		
-		Rectangle bounds = GUICommonTools.getBounds(this);
+		Rectangle bounds = GUICommonTools.getScreenBounds();
 		setLocation(bounds.width/2-getSize().width/2, bounds.height/2-getSize().height/2);
 	}
 	
@@ -113,9 +113,10 @@ public class HMVVLoginFrame extends JFrame {
 	}
 	
 	private void login(){
+		
 		String userName= usernameTextField.getText();
 		String passwd = new String(passwordTextField.getPassword());
-		
+
 		
 		try{
 			SSHConnection.connect(userName, passwd);

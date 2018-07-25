@@ -3,6 +3,7 @@ package hmvv.io;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -18,11 +19,11 @@ public class IGVConnection {
 	private BufferedReader in;
 	private PrintWriter out;
 	
-	private IGVConnection() throws Exception{
+	private IGVConnection(int soTimeout) throws Exception{
 		int igvLoadPort = 60151;
 		String igvLoadHost = "localhost";
 		connection = new Socket(igvLoadHost, igvLoadPort);
-		connection.setSoTimeout(10000);
+		connection.setSoTimeout(soTimeout);
 		out = new PrintWriter(connection.getOutputStream(), true);
 		in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 	}
@@ -35,8 +36,8 @@ public class IGVConnection {
 		}
 	}
 	
-	private static String executeCommand(String command) throws Exception{		
-		IGVConnection connection = new IGVConnection();
+	private static String executeCommand(String command, int soTimeout) throws Exception{		
+		IGVConnection connection = new IGVConnection(soTimeout);
 		try {
 			connection.out.println(command + "\n");
 			String response = connection.in.readLine();
@@ -55,15 +56,15 @@ public class IGVConnection {
 	 * @return the response from the successful load process
 	 * @throws Exception if the load did not work properly
 	 */
-	public static String loadFileIntoIGV(Component parent, String file) throws Exception{
+	public static String loadFileIntoIGV(Component parent, File file) throws Exception{
 		if(igvBusy.get()) {
 			return "Command ignored. Previous IGV command still in process.";
 		}
-				
+		
 		try{
 			igvBusy.set(true);
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			return executeCommand("load " + file + "\n" + "genome hg19");
+			return executeCommand("load " + file.getAbsolutePath() + "\n" + "genome hg19", 0);
 		}catch(ConnectException e){
 			throw new Exception("Sample not loaded. Please make sure IGV is running before trying load a sample.");
 		}finally {
@@ -78,9 +79,10 @@ public class IGVConnection {
 		}
 		
 		try{
+			int soTimeout = 10*1000;//10 seconds
 			igvBusy.set(true);
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			return executeCommand("goto " + coordinate.getChr() + ":" + coordinate.getPos());
+			return executeCommand("goto " + coordinate.getChr() + ":" + coordinate.getPos(), soTimeout);
 		}catch(ConnectException e1){
 			throw new Exception("Coordinate not loaded. Please make sure IGV is running.");
 		}finally {

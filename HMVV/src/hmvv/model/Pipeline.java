@@ -63,29 +63,42 @@ public class Pipeline {
 			return "Complete";
 		}else if ( getInstrumentID().equals("proton") || getInstrumentID().equals("pgm") || getInstrumentID().equals("miseq")) {
 			if (status.equals("started") || status.equals("queued") ) {
-				progress="0/3";
+				progress="0/4";
 			}else if (status.equals("bedtools")) {
-				progress="1/3";
-			}else if (status.equals("vep") || status.equals("parseVEP")) {
-				progress="2/3";
-			}else if (status.equals("addingAnalysis")) {
-				progress="3/3";
+				progress="1/4";
+			}else if (status.equals("VEP") || status.equals("parseVEP")) {
+				progress="2/4";
+			}else if (status.equals("UpdateDatabase")) {
+				progress="3/4";
+			}else if (status.equals("UpdatingDatabase")) {
+				progress="4/4";
+			}else if (status.startsWith("ERROR")) {
+				progress = "ERROR";
+				
 			}
 		}else if  ( getAssayID().equals("heme") || getInstrumentID().equals("nextseq")) {
 			if (status.equals("started") || status.equals("queued")) {
-				progress="0/5";
+				progress="0/6";
 			}else if (status.equals("bcl2fastq")) {
-				progress="1/5";
+				progress="1/6";
 			}else if (status.equals("varscanPE")) {
-				progress="2/5";
+				progress="2/6";
 			}else if (status.equals("bedtools")) {
-				progress="3/5";
-			}else if (status.equals("vep")) {
-				progress="4/5";
+				progress="3/6";
+			}else if (status.equals("VEP")) {
+				progress="4/6";
 			}else if (status.equals("samtools")) {
-				progress="5/5";
+				progress="5/6";
+			}else if (status.equals("UpdateDatabase")) {
+				progress="6/6";
+			}else if (status.equals("UpdatingDatabase")) {
+				progress="6/6";
+			}else if (status.startsWith("ERROR")) {
+				progress = "ERROR";
 			}
-		}
+		} 
+		
+		
 		return progress;
 	}
 }

@@ -10,6 +10,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -47,6 +49,7 @@ import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
@@ -62,6 +65,7 @@ public class SampleListFrame extends JFrame {
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
+	private JMenuItem qualityControlMenuItem;
 	
 	//Table
 	private JTable table;
@@ -84,14 +88,19 @@ public class SampleListFrame extends JFrame {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	public SampleListFrame(Component parent, ArrayList<Sample> samples) {
+	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) {
 		super("Sample List");
 		tableModel = new SampleListTableModel(samples);
 		
-		Rectangle bounds = GUICommonTools.getBounds(parent);
+		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
 		setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new WindowAdapter(){
+		    public void windowClosing(WindowEvent e){
+		    	SSHConnection.shutdown();
+		    }
+		});		
 		
 		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), 0, 14, 16, 17);
 		createMenu();
@@ -106,12 +115,14 @@ public class SampleListFrame extends JFrame {
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
+		qualityControlMenuItem = new JMenuItem("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
 		
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
+		adminMenu.add(qualityControlMenuItem);
 		adminMenu.add(newAssayMenuItem);
 		setJMenuBar(menuBar);
 		
@@ -127,6 +138,8 @@ public class SampleListFrame extends JFrame {
 					}else if(e.getSource() == monitorPipelinesItem){
 						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
 						monitorpipelines.setVisible(true);
+					}else if(e.getSource() == qualityControlMenuItem){
+						QualityControlFrame.showQCChart(SampleListFrame.this);
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -140,10 +153,11 @@ public class SampleListFrame extends JFrame {
 				}
 			}
 		};
-
+		
 		enterSampleMenuItem.addActionListener(listener);
 		newAssayMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
+		qualityControlMenuItem.addActionListener(listener);
 	}
 	
 	public void addSample(Sample sample){
@@ -516,7 +530,7 @@ public class SampleListFrame extends JFrame {
 	}
 
 	private void sampleSearchAction(){
-		SampleSearchFrame searchSample = new SampleSearchFrame();
+		SampleSearchFrame searchSample = new SampleSearchFrame(this);
 		searchSample.setVisible(true);
 
 		searchSample.addConfirmListener(new ActionListener() {
@@ -544,7 +558,7 @@ public class SampleListFrame extends JFrame {
 	}
 
 	private void mutationSearchAction(){
-		MutationSearchDialog searchMutation = new MutationSearchDialog();
+		MutationSearchDialog searchMutation = new MutationSearchDialog(this);
 		searchMutation.setVisible(true);
 		searchMutation.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

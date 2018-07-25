@@ -46,9 +46,11 @@ public class MutationSearchDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public MutationSearchDialog() {
+	public MutationSearchDialog(SampleListFrame parent) {
 		this.setTitle("Mutation Search");
 		setBounds(100, 100, 435, 382);
+		setLocationRelativeTo(parent);
+		
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

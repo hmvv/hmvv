@@ -1,15 +1,19 @@
 package hmvv.gui.adminFrames;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -17,16 +21,19 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.model.Pipeline;
+import hmvv.model.PipelineStatus;
 
-public class MonitorPipelines extends JFrame {
+public class MonitorPipelines extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,26 +50,44 @@ public class MonitorPipelines extends JFrame {
 	 * Create the frame.
 	 * @throws Exception 
 	 */
-	public MonitorPipelines(Component parent) throws Exception {
-		super("Monitor Pipelines");
+	public MonitorPipelines(SampleListFrame parent) throws Exception {
+		super(parent, "Monitor Pipelines");
 
 		tableModel = new MonitorPipelinesTableModel();
-		
+
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setModalityType(ModalityType.APPLICATION_MODAL);
 
 		createComponents();
 		layoutComponents();
 		activateComponents();
 		setLocationRelativeTo(parent);
-		
+
 		buildModelFromDatabase();
 	}
 
 	private void createComponents(){
-		table = new JTable(tableModel);
+		table = new JTable(tableModel) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
+				Component c = super.prepareRenderer(renderer, row, column);
+				int modelRow = table.convertRowIndexToModel(row);
+				String pipelineProgress = tableModel.getPipeline(modelRow).getProgress();
+				if(pipelineProgress.equals("ERROR")) {					
+					c.setBackground(new Color(255,51,51));
+				}else if(pipelineProgress.equals("Complete")) {					
+					c.setBackground(new Color(102,255,102));
+				}else {
+					c.setBackground(new Color(255,255,204));
+				}
+				return c;
+			}
+		};
 
 		table.setAutoCreateRowSorter(true);
 
@@ -109,7 +134,7 @@ public class MonitorPipelines extends JFrame {
 		resizeColumnWidths();
 	}
 
-	public void resizeColumnWidths() {
+	private void resizeColumnWidths() {
 		TableColumnModel columnModel = table.getColumnModel();    
 
 		for (int column = 0; column < table.getColumnCount(); column++) {
@@ -156,13 +181,14 @@ public class MonitorPipelines extends JFrame {
 			}
 		});
 	}
-	
+
 	private void buildModelFromDatabase() throws Exception {
 		tableModel.resetModel();
 		ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
 		for(Pipeline p : pipelines) {
 			tableModel.addPipeline(p);
 		}
+
 	}
 
 	public void addPipeline(Pipeline pipeline){
@@ -176,10 +202,63 @@ public class MonitorPipelines extends JFrame {
 	}
 
 	private void handlePipelineSelectionClick() throws Exception{
-		Pipeline currentPipeline= getCurrentlySelectedPipeline();
+		Pipeline currentPipeline = getCurrentlySelectedPipeline();
 		int queueID = currentPipeline.getQueueID();
 
-		String result = DatabaseCommands.getPipelineDetail(queueID);
-		JOptionPane.showMessageDialog(MonitorPipelines.this, result);
+		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(queueID);
+		
+		DefaultTableModel tableModel = new DefaultTableModel(){
+			private static final long serialVersionUID = 1L;
+			
+			private final SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/y H:m:ss");
+			
+			@Override 
+			public final boolean isCellEditable(int row, int column) {
+				return false;
+			}
+			
+			@Override
+			public final int getColumnCount() {
+				return 2;
+			}
+			
+			@Override
+			public final int getRowCount() {
+				return rows.size();
+			}
+			
+			@Override
+			public final String getColumnName(int column) {
+				if(column == 0) {
+					return "Pipeline Status";
+				}else {
+					return "Update Time";
+				}
+			}
+			
+			@Override
+			public  final Object getValueAt(int row, int column) {
+				PipelineStatus pipelineStatus = rows.get(row);
+				if(column == 0) {
+					return pipelineStatus.pipelineStatus;
+				}else {
+					return dateFormat.format(pipelineStatus.dateUpdated);
+				}
+			}
+			
+			@Override
+			public final Class<?> getColumnClass(int column) {
+				return String.class;
+			}
+		};
+		JTable table = new JTable(tableModel);
+		
+		JScrollPane tableSP = new JScrollPane(table);
+		tableSP.setPreferredSize(new Dimension(600,300));
+		
+		JOptionPane.showMessageDialog(this, tableSP,
+				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
+						currentPipeline.instrumentID, currentPipeline.assayID, currentPipeline.runID, currentPipeline.sampleID),
+				JOptionPane.INFORMATION_MESSAGE);
 	}
 }
