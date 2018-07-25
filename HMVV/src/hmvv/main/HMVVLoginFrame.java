@@ -47,8 +47,17 @@ public class HMVVLoginFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				HMVVLoginFrame window = new HMVVLoginFrame();
+				
 				window.setVisible(true);
 				window.setResizable(false);
+				
+				if(args.length == 2) {
+					String providedUsername = args[0];
+					String providedPassword = args[1];
+					window.usernameTextField.setText(providedUsername);
+					window.passwordTextField.setText(providedPassword);
+					window.loginButton.doClick();
+				}
 			}
 		});
 	}
