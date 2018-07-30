@@ -243,19 +243,7 @@ public abstract class CommonTable extends JTable{
 		String gene = mutation.getGene();
 		GeneAnnotation geneAnnotation = DatabaseCommands.getGeneAnnotation(gene);
 		
-		Boolean annotationAlreadyOpen = false;
-		if(annotation.getEditStatus().equals(Annotation.STATUS.open) || geneAnnotation.isLocked()){
-			int selectionValue = JOptionPane.showConfirmDialog(this, "This annotation is currently locked. Would you like to unlock it?");
-			if(selectionValue == JOptionPane.CANCEL_OPTION) {
-				return;
-			}else if(selectionValue == JOptionPane.YES_OPTION) {
-				annotationAlreadyOpen = false;
-			}else if(selectionValue == JOptionPane.NO_OPTION) {
-				annotationAlreadyOpen = true;
-			}
-		}
-		
-		boolean readOnly = annotationAlreadyOpen || !SSHConnection.isSuperUser();
+		boolean readOnly = !SSHConnection.isSuperUser();
 		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotation, annotation, this, parent);
 		editAnnotation.setVisible(true);
 	}

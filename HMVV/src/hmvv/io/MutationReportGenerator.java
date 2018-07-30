@@ -33,7 +33,6 @@ public class MutationReportGenerator{
 			String mutationText = gene + ":" + cDNA + ";" + codon;
 			String dbSNP = mutation.getDbSNPID();
 			Coordinate coordinate = mutation.getCoordinate();
-			Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
 			String orderNumber = mutation.getOrderNumber();
 			String genotype = mutation.getGenotype();
 			String cosmicIDs = mutation.cosmicIDsToString(",");
@@ -47,14 +46,7 @@ public class MutationReportGenerator{
 			report.append("dbSNP ID: " + dbSNP + "\n");
 			report.append("Cosmic IDs: " + cosmicIDs + "\n");
 			report.append("Occurence: " + occurrence + "\n");
-			if(annotation.isAnnotationSet()){
-				String somatic = annotation.getSomatic();
-				String classification = annotation.getClassification();
-				String curation = annotation.getCuration();
-				report.append("Somatic: " + somatic + "\n");
-				report.append("Classification: " + classification + "\n");
-				report.append("Curation Note: " + curation + "\n" + "\n");
-			}
+
 		}
 
 		return report.toString();

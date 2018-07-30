@@ -116,8 +116,6 @@ public class HMVVLoginFrame extends JFrame {
 		
 		String userName= usernameTextField.getText();
 		String passwd = new String(passwordTextField.getPassword());
-
-		
 		try{
 			SSHConnection.connect(userName, passwd);
 		} catch(Exception e){

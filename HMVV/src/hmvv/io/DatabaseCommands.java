@@ -613,137 +613,115 @@ public class DatabaseCommands {
 	 * Annotation Queries
 	 *************************************************************************/
 	public static GeneAnnotation getGeneAnnotation(String gene) throws Exception{
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select curation, locked from GeneAnnotation where gene = ?");
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select geneAnnotationID, gene, curation, enteredBy, enterDate from GeneAnnotation where gene = ? order by geneAnnotationID desc limit 1");
 		selectStatement.setString(1, gene);
 		ResultSet rs = selectStatement.executeQuery();
+		
+		Integer geneAnnotationID = null;
+		String curation = null;
+		String enteredBy = null;
+		String enterDate = null;
+		
 		if(rs.next()){
-			String curation = rs.getString(1);
-			boolean locked = rs.getBoolean(2);
-			return new GeneAnnotation(gene, curation, locked);
-		}else{
-			GeneAnnotation geneAnnotation = new GeneAnnotation(gene, "", false);
-			createGeneAnnotation(geneAnnotation);
-			return geneAnnotation;
+			geneAnnotationID = rs.getInt("geneAnnotationID");
+			curation = rs.getString("curation") ;
+			enteredBy = rs.getString("enteredBy") ;
+			enterDate = rs.getString("enterDate");
+		}else {
+			geneAnnotationID = 0;
+			curation = "";
+			enteredBy = "";
+			enterDate = "";
 		}
+		return new GeneAnnotation(geneAnnotationID, gene, curation, enteredBy, enterDate);
+	}
+	
+	
+	public static ArrayList<GeneAnnotation> getGeneAnnotationList(String gene) throws Exception{
+		ArrayList<GeneAnnotation>  geneannotations = new ArrayList<GeneAnnotation>() ;
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select geneAnnotationID, gene, curation, enteredBy, enterDate from GeneAnnotation where gene = ?");
+		selectStatement.setString(1, gene);
+		ResultSet rs = selectStatement.executeQuery();
+		while(rs.next()){
+			geneannotations.add(new GeneAnnotation(rs.getInt("geneAnnotationID") , rs.getString("gene") , rs.getString("curation") , rs.getString("enteredBy") , rs.getString("enterDate")));
+		}
+		return geneannotations;
 	}
 
 	public static Annotation getAnnotation(Coordinate coordinate) throws Exception{
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select classification, curation, somatic, updateStat, status from annotation where chr = ? and pos = ? and ref = ? and alt = ?");
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from annotation where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID desc limit 1");
 		selectStatement.setString(1, coordinate.getChr());
 		selectStatement.setString(2, coordinate.getPos());
 		selectStatement.setString(3, coordinate.getRef());
 		selectStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = selectStatement.executeQuery();
-		Integer n = 0;
+		Integer annotationID = null;
 		String classification = null;
 		String curation = null;
 		String somatic = null;
-		String updateStatus = null;
-		String editStatus = null;
-		while(rs.next()){
-			n += 1;
-			classification = rs.getString(1);
-			curation = rs.getString(2);
-			somatic = rs.getString(3);
-			updateStatus = rs.getString(4);
-			editStatus = rs.getString(5);
-
+		String enteredBy = null;
+		String enterDate = null;
+		if(rs.next()){
+			annotationID = rs.getInt("annotationID");
+			classification = rs.getString(2);
+			curation = rs.getString(3);
+			somatic = rs.getString(4);
+			enteredBy = rs.getString(5);
+			enterDate = rs.getString(6);	
+		}else{
+			if (annotationID == null)  annotationID = 0;
 			if(classification == null) classification = "";
 			if(curation == null) curation = "";
 			if(somatic == null) somatic = "";
-			if(updateStatus == null) updateStatus = "";
-			if(editStatus == null) editStatus = "";
+			if(enteredBy == null) enteredBy = "";
+			if(enterDate == null) enterDate = "";
 		}
-
-		selectStatement.close();
-		if(n != 0){
-			return new Annotation(coordinate, classification, curation, somatic, updateStatus, Annotation.STATUS.valueOf(editStatus));
-		}else{
-			Annotation annotation = new Annotation(coordinate, Annotation.STATUS.close);
-			createAnnotation(annotation);
-			return annotation;
+		return new Annotation(annotationID,coordinate, classification, curation,  somatic, enteredBy, enterDate);
+	}
+	
+	public static ArrayList<Annotation> getAnnotationList(Coordinate coordinate) throws Exception{
+		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from annotation where chr = ? and pos = ? and ref = ? and alt = ?");
+		selectStatement.setString(1, coordinate.getChr());
+		selectStatement.setString(2, coordinate.getPos());
+		selectStatement.setString(3, coordinate.getRef());
+		selectStatement.setString(4, coordinate.getAlt());
+		ResultSet rs = selectStatement.executeQuery();
+		while(rs.next()){
+			annotations.add(new Annotation(rs.getInt("annotationID"),coordinate, rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6)));
 		}
+		return annotations;
 	}
-
-	public static void createGeneAnnotation(GeneAnnotation geneAnnotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into GeneAnnotation(gene, curation, locked) values(?, ?, ?)");
-		updateStatement.setString(1, geneAnnotation.getGene());
-		updateStatement.setString(2, geneAnnotation.getCuration());
-		updateStatement.setBoolean(3, geneAnnotation.isLocked());
-		updateStatement.executeUpdate();
-		updateStatement.close();
-	}
-
-	public static void createAnnotation(Annotation annotation) throws Exception{
-		Coordinate coordinate = annotation.getCoordinate();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("insert into annotation(chr, pos, ref, alt, status) values(?, ?, ?, ?, ?)");
-		updateStatement.setString(1, coordinate.getChr());
-		updateStatement.setString(2, coordinate.getPos());
-		updateStatement.setString(3, coordinate.getRef());
-		updateStatement.setString(4, coordinate.getAlt());
-		updateStatement.setString(5, "open");
-		updateStatement.executeUpdate();
-		updateStatement.close();
-	}
-
-	public static void updateAnnotation(Annotation annotation) throws Exception{
-		Coordinate coordinate = annotation.getCoordinate();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update annotation set"
-				+ " classification= ? , somatic = ? , curation = ? , updateStat = ?"
-				+ " where chr = ? and pos = ? and ref = ? and alt = ?");
-		updateStatement.setString(1, annotation.getClassification());
-		updateStatement.setString(2, annotation.getSomatic());
-		updateStatement.setString(3, annotation.getCuration());
-		updateStatement.setString(4, annotation.getUpdateStatus());
-		updateStatement.setString(5, coordinate.getChr());
-		updateStatement.setString(6, coordinate.getPos());
-		updateStatement.setString(7, coordinate.getRef());
-		updateStatement.setString(8, coordinate.getAlt());
-		updateStatement.executeUpdate();
-		updateStatement.close();
-	}
-
+	
 	public static void setGeneAnnotationCuration(GeneAnnotation geneAnnotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update GeneAnnotation set"
-				+ " curation = ? "
-				+ " where gene = ?");
-		updateStatement.setString(1, geneAnnotation.getCuration());
-		updateStatement.setString(2, geneAnnotation.getGene());
-		updateStatement.executeUpdate();
-		updateStatement.close();
+		String gene = geneAnnotation.getGene();
+		String curation = geneAnnotation.getCuration();
+		String enteredBy = geneAnnotation.getEnteredBy();
+		String enterDate = geneAnnotation.getEnterDate();
+		String enterGeneAnnotation= String.format("insert into GeneAnnotation (gene, curation, enteredBy, enterDate) values ('%s', '%s', '%s', '%s')", gene, curation, enteredBy,enterDate);
+		PreparedStatement pstenterGeneAnnotation = databaseConnection.prepareStatement(enterGeneAnnotation);
+		pstenterGeneAnnotation.executeUpdate();
+		pstenterGeneAnnotation.close();
 	}
 
-	public static void setGeneAnnotationLock(GeneAnnotation geneAnnotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update GeneAnnotation set"
-				+ " locked = ?"
-				+ " where gene = ?");
-		updateStatement.setBoolean(1, geneAnnotation.isLocked());
-		updateStatement.setString(2, geneAnnotation.getGene());
-		updateStatement.executeUpdate();
-		updateStatement.close();
-	}
-
-	public static void setAnnotationStatus(Annotation.STATUS status, Annotation annotation) throws Exception{
+	public static void setAnnotationCuration(Annotation annotation) throws Exception{
 		Coordinate coordinate = annotation.getCoordinate();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update annotation set status= ? where chr = ? and pos = ? and ref = ? and alt = ?");
-		updateStatement.setString(1, status.toString());
-		updateStatement.setString(2, coordinate.getChr());
-		updateStatement.setString(3, coordinate.getPos());
-		updateStatement.setString(4, coordinate.getRef());
-		updateStatement.setString(5, coordinate.getAlt());
-		updateStatement.executeUpdate();
-		updateStatement.close();
-	}
-
-	public static void deleteAnnotation(Annotation annotation) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("delete from annotation where chr = ? and pos = ? and ref = ? and alt = ?");
-		Coordinate coordinate = annotation.getCoordinate();
-		updateStatement.setString(1, coordinate.getChr());
-		updateStatement.setString(2, coordinate.getPos());
-		updateStatement.setString(3, coordinate.getRef());
-		updateStatement.setString(4, coordinate.getAlt());
-		updateStatement.executeUpdate();
-		updateStatement.close();
+		String chr = coordinate.getChr();
+		String pos = coordinate.getPos();
+		String ref = coordinate.getRef();
+		String alt = coordinate.getAlt();
+		String classification = annotation.getClassification();
+		String curation = annotation.getCuration();
+		String somatic = annotation.getSomatic();
+		String enteredBy = annotation.getEnteredBy();
+		String enterDate = annotation.getEnterDate();
+		
+		String enterAnnotation= String.format("insert into annotation ( chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate) "
+				+ "values ('%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+				chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate);
+		PreparedStatement pstenterAnnotation = databaseConnection.prepareStatement(enterAnnotation);
+		pstenterAnnotation.executeUpdate();
+		pstenterAnnotation.close();
 	}
 
 	private static String getMD5(String source) throws NoSuchAlgorithmException{
@@ -818,7 +796,7 @@ public class DatabaseCommands {
 	public static ArrayList<Amplicon> getAmpliconQCData() throws Exception{
 		String query = "select amplicon.sampleID, ampliconName, ampliconCov, ID, Samples.instrument, lastName"
 				+ " from amplicon join Samples on amplicon.sampleID = Samples.ID"
-				+ " where lastName like 'Horizon%' and ampliconCov != 0 and amplicon.assay != 'neuro' and ampliconName like 'BCOR%'";
+				+ " where lastName like 'Horizon%' and ampliconCov != 0 and assay != 'neuro' and ampliconName like 'BCOR%'";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
