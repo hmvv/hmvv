@@ -2,28 +2,28 @@ package hmvv.model;
 
 public class Annotation {
 	
-	public enum STATUS{open,close};
-	
+	private Integer annotationID;
 	private Coordinate coordinate;
 	private String classification;
 	private String curation;
 	private String somatic;
-	private String updateStatus;
-	private STATUS editStatus;
+	private String enteredBy;
+	private String enterDate;
 	
-	public Annotation(Coordinate coordinate, String classification, String curation, String somatic, String updateStatus, STATUS editStatus) {
+	public Annotation(Integer  annotationID, Coordinate coordinate, String classification, String curation, String somatic, String enteredBy, String enterDate) {
+		this.annotationID = annotationID;
 		this.coordinate = coordinate;
 		this.classification = classification;
 		this.curation = curation;
 		this.somatic = somatic;
-		this.updateStatus = updateStatus;
-		this.editStatus = editStatus;
+		this.enteredBy = enteredBy;
+		this.enterDate = enterDate;
 	}
 	
-	public Annotation(Coordinate coordinate, STATUS editStatus) {
-		this(coordinate, "Not set", "", "Not set", "", editStatus);
+	public Annotation( Coordinate coordinate) {
+		this.coordinate = coordinate;
 	}
-
+	
 	public void setClassification(String classification) {
 		this.classification = classification;
 	}
@@ -36,14 +36,6 @@ public class Annotation {
 		this.somatic = somatic;
 	}
 
-	public void setUpdateStatus(String updateStatus) {
-		this.updateStatus = updateStatus;
-	}
-	
-	public void setEditStatus(STATUS editStatus){
-		this.editStatus = editStatus;
-	}
-	
 	public Coordinate getCoordinate(){
 		return coordinate;
 	}
@@ -60,14 +52,6 @@ public class Annotation {
 		return somatic;
 	}
 
-	public String getUpdateStatus() {
-		return updateStatus;
-	}
-	
-	public STATUS getEditStatus(){
-		return editStatus;
-	}
-	
 	public String getSomaticDisplayText() {
 		if(somatic.equals("Not set")) {
 			return "";
@@ -90,16 +74,19 @@ public class Annotation {
 		}
 	}
 	
-	public boolean isAnnotationSet(){
-		if(!classification.equals("Not set")){
-			return true;
-		}
-		if(!somatic.equals("Not set")){
-			return true;
-		}
-		if(!curation.equals("")){
-			return true;
-		}
-		return false;
+	public String getEnteredBy() {
+		return enteredBy;
+	}
+
+	public void setEnteredBy(String enteredBy) {
+		this.enteredBy = enteredBy;
+	}
+    
+	public String getEnterDate() {
+		return enterDate;
+	}
+
+	public void setEnterDate(String enterDate) {
+		this.enterDate = enterDate;
 	}
 }

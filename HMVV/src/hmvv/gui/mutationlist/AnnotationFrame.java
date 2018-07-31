@@ -1,16 +1,15 @@
 package hmvv.gui.mutationlist;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import javax.swing.BorderFactory;
@@ -46,9 +45,10 @@ public class AnnotationFrame extends JFrame {
 	
 	private JButton okButton;
 	private JButton cancelButton;
-	
-	private JButton btnhistoryGA;
-	private JButton btnhistoryA;
+	private JButton btnGeneAnnotationPrevious;
+	private JButton btnAnnotationPrevious;
+	private JButton btnGeneAnnotationNext;
+	private JButton btnAnnotationNext;
 	
 	private JComboBox<String> pathogenicityComboBox;
 	private JComboBox<String> mutationTypeComboBox;
@@ -58,24 +58,32 @@ public class AnnotationFrame extends JFrame {
 	private int maxCharacters = 5000;
 	private DefaultStyledDocument defaultStyledDocument;
 	
-	private JLabel historyLabel;
+	private JLabel historyLabelGeneAnnotation;
+	private JLabel historyLabelAnnotation;
 	
 	private Boolean readOnly;
+	private Integer currentGeneAnnotationIndex;
+	private Integer currentAnnotationIndex;
 	
 	private Annotation currentAnnotation;
 	private GeneAnnotation geneAnnotation;
+	private ArrayList<GeneAnnotation> geneannotations;
+	private ArrayList<Annotation> annotations;
 	private Mutation mutation;
 	
 	/**
 	 * Create the dialog.
+	 * @throws Exception 
 	 */
-	public AnnotationFrame(Boolean readOnly, Mutation mutation, GeneAnnotation geneAnnotation, Annotation annotation, CommonTable parent, MutationListFrame mutationListFrame) {
+	public AnnotationFrame(Boolean readOnly, Mutation mutation, GeneAnnotation geneAnnotation, Annotation annotation, CommonTable parent, MutationListFrame mutationListFrame) throws Exception {
 		super("Annotation - " + mutation.getGene() + " - " + annotation.getCoordinate().getCoordinateAsString());
 		this.mutation = mutation;
 		this.readOnly = readOnly;
 		this.currentAnnotation = annotation;
 		this.geneAnnotation = geneAnnotation;
 		this.parent = parent;
+		this.geneannotations = new ArrayList<GeneAnnotation>();
+		this.annotations = new ArrayList<Annotation>();
 		
 		createComponents();
 		layoutComponents();
@@ -87,6 +95,8 @@ public class AnnotationFrame extends JFrame {
 			annotationTextArea.setEditable(false);
 			pathogenicityComboBox.setEnabled(false);
 			mutationTypeComboBox.setEnabled(false);
+			geneAnnotationTextArea.setBackground(new Color(234,240,240));
+			annotationTextArea.setBackground(new Color(234,240,240));
 		}
 		
 		pack();
@@ -115,8 +125,10 @@ public class AnnotationFrame extends JFrame {
 		mutationTypeComboBox.setSelectedItem(currentAnnotation.getSomatic());
 
 		
-		btnhistoryGA = new JButton("Previous");
-		btnhistoryA = new JButton("Previous");
+		btnGeneAnnotationPrevious = new JButton("Previous");
+		btnAnnotationPrevious = new JButton("Previous");
+		btnGeneAnnotationNext = new JButton("Next");
+		btnAnnotationNext = new JButton("Next");
 		
 		
 		geneAnnotationTextArea = new JTextArea();
@@ -131,7 +143,8 @@ public class AnnotationFrame extends JFrame {
 		annotationTextArea.setText(currentAnnotation.getCuration());
 		annotationTextArea.setPreferredSize(textAreaDimension);
 		
-		historyLabel = new JLabel(currentAnnotation.getUpdateStatus());
+		historyLabelGeneAnnotation = new JLabel();
+		historyLabelAnnotation = new JLabel();
 		
 		okButton = new JButton("OK");
 		getRootPane().setDefaultButton(okButton);
@@ -139,9 +152,8 @@ public class AnnotationFrame extends JFrame {
 		cancelButton = new JButton("Cancel");
 		cancelButton.setActionCommand("Cancel");
 
-		defaultStyledDocument = new DefaultStyledDocument();
-
-		//annotationTextArea.setDocument(defaultStyledDocument);
+		defaultStyledDocument = new DefaultStyledDocument();	
+		
 	}
 
 	private void layoutComponents(){
@@ -215,7 +227,9 @@ public class AnnotationFrame extends JFrame {
 		annotationPanel.add(annotationScrollPane);
 		JPanel historyPanelA = new JPanel();
 		historyPanelA.setLayout(new FlowLayout(FlowLayout.LEFT));
-		historyPanelA.add(btnhistoryA);
+		historyPanelA.add(btnAnnotationPrevious);
+		historyPanelA.add(historyLabelAnnotation);
+		historyPanelA.add(btnAnnotationNext);
 		annotationPanel.add(historyPanelA);
 		textAreaPanel.add(annotationPanel);
 		
@@ -230,7 +244,9 @@ public class AnnotationFrame extends JFrame {
 		geneAnnotationPanel.add(geneScrollPane);
 		JPanel historyPanelGA = new JPanel();
 		historyPanelGA.setLayout(new FlowLayout(FlowLayout.LEFT));
-		historyPanelGA.add(btnhistoryGA);
+		historyPanelGA.add(btnGeneAnnotationPrevious);
+		historyPanelGA.add(historyLabelGeneAnnotation);
+		historyPanelGA.add(btnGeneAnnotationNext);
 		geneAnnotationPanel.add(historyPanelGA);
 		textAreaPanel.add(geneAnnotationPanel);
 		
@@ -238,7 +254,6 @@ public class AnnotationFrame extends JFrame {
 		
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		buttonPane.add(historyLabel);
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);
 		
@@ -257,8 +272,6 @@ public class AnnotationFrame extends JFrame {
 					parent.notifyAnnotationUpdated(currentAnnotation);
 				}catch(Exception e){
 					JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
-				}finally{
-					closeRecord();
 				}
 			}
 		});
@@ -266,68 +279,95 @@ public class AnnotationFrame extends JFrame {
 		cancelButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				closeRecord();
 				AnnotationFrame.this.dispose();
 			}
 		});
 
-		
-		btnhistoryGA.addActionListener(new ActionListener(){
+		btnGeneAnnotationPrevious.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
+			 try {
+				showGeneAnnotationPrevious();
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+			}
 			}
 		});
-
 		
-		btnhistoryA.addActionListener(new ActionListener(){
+		btnGeneAnnotationNext.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				
+			 try {
+				showGeneAnnotationNext();
+			 }catch (Exception e) {
+				JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+			 }
 			}
 		});
 
+		btnAnnotationPrevious.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				try {
+					showAnnotationPrevious();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+				}
+			}
+		});
 		
-		
-		
+		btnAnnotationNext.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+			 try {
+				showAnnotationNext();
+			 } catch (Exception e) {
+				JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+			 }
+		   }
+		});
 		
 		defaultStyledDocument.setDocumentFilter(new DocumentSizeFilter(maxCharacters));
 
 		annotationTextArea.addMouseListener(new ContextMenuMouseListener());
 
-		addWindowListener(new WindowAdapter(){
-			@Override
-			public void windowClosing(WindowEvent e){
-				//Called if the user clicks the "X" to close the window
-				closeRecord();
-			}
-		});
 	}
 
-	private void openRecord(){
-		try {
-			if(!readOnly){
-				DatabaseCommands.setAnnotationStatus(Annotation.STATUS.open, currentAnnotation);
-				
-				geneAnnotation.setLocked(true);
-				DatabaseCommands.setGeneAnnotationLock(geneAnnotation);
-			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
+	private void openRecord() throws Exception{
+		
+		
+		geneannotations = DatabaseCommands.getGeneAnnotationList(geneAnnotation.getGene());
+		annotations = DatabaseCommands.getAnnotationList(currentAnnotation.getCoordinate());
+		currentGeneAnnotationIndex = geneannotations.size() - 1; 
+		currentAnnotationIndex = annotations.size() - 1; 
+		
+		annotationTextArea.setText(currentAnnotation.getCuration());
+		historyLabelAnnotation.setText("Entered By: " + currentAnnotation.getEnteredBy()+"   Date: "+currentAnnotation.getEnterDate());
+		pathogenicityComboBox.setSelectedItem(currentAnnotation.getClassification());
+		mutationTypeComboBox.setSelectedItem(currentAnnotation.getSomatic());
+		
+		
+		geneAnnotationTextArea.setText(geneAnnotation.getCuration());
+		historyLabelGeneAnnotation.setText("Entered By: " + geneAnnotation.getEnteredBy()+"   Date: "+geneAnnotation.getEnterDate());
+		
+		btnAnnotationNext.setEnabled(false);
+		btnGeneAnnotationNext.setEnabled(false);
+		
+		if ( annotations.size() <= 1) { 
+			
+			btnAnnotationPrevious.setEnabled(false); 
 		}
-	}
+		
+		if ( geneannotations.size() <= 1) { 
+			
+			btnGeneAnnotationPrevious.setEnabled(false); 
+		}
 
-	private void closeRecord(){
-		try {
-			if(!readOnly){
-				DatabaseCommands.setAnnotationStatus(Annotation.STATUS.close, currentAnnotation);
-				
-				geneAnnotation.setLocked(false);
-				DatabaseCommands.setGeneAnnotationLock(geneAnnotation);
-			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e);
-		}
+	
 	}
 
 	private void updateRecord() throws Exception{
@@ -341,27 +381,98 @@ public class AnnotationFrame extends JFrame {
 			return;
 		}
 		
-		currentAnnotation.setClassification(pathogenicityComboBox.getSelectedItem().toString());
-		currentAnnotation.setSomatic(mutationTypeComboBox.getSelectedItem().toString());
-		currentAnnotation.setCuration(annotationTextArea.getText());
-		currentAnnotation.setUpdateStatus(getUpdateStatus());
-		
-		if(!currentAnnotation.isAnnotationSet()){
-			DatabaseCommands.deleteAnnotation(currentAnnotation);
-		}else{
-			DatabaseCommands.updateAnnotation(currentAnnotation);
+		if (! currentAnnotation.getCuration().equals(annotationTextArea.getText())) {
+			
+			currentAnnotation.setClassification(pathogenicityComboBox.getSelectedItem().toString());
+			currentAnnotation.setSomatic(mutationTypeComboBox.getSelectedItem().toString());
+			currentAnnotation.setCuration(annotationTextArea.getText());
+			currentAnnotation.setEnterDate(new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime()));
+			currentAnnotation.setEnteredBy(SSHConnection.getUserName());
+			DatabaseCommands.setAnnotationCuration(currentAnnotation);
 		}
 		
-		geneAnnotation.setCuration(geneAnnotationTextArea.getText());
-		DatabaseCommands.setGeneAnnotationCuration(geneAnnotation);
+		if ( ! geneAnnotation.getCuration().equals(geneAnnotationTextArea.getText())) {
+			
+			geneAnnotation.setCuration(geneAnnotationTextArea.getText());
+			geneAnnotation.setEnterDate(new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime()));
+			geneAnnotation.setEnteredBy(SSHConnection.getUserName());
+			DatabaseCommands.setGeneAnnotationCuration(geneAnnotation);
+		}
+		
+	}
+    
+	private void showGeneAnnotationPrevious() throws Exception{
+        
+		currentGeneAnnotationIndex = currentGeneAnnotationIndex - 1;
+        GeneAnnotation currentGeneAnnotation = geneannotations.get(currentGeneAnnotationIndex);
+        geneAnnotationTextArea.setText(currentGeneAnnotation.getCuration());
+        btnGeneAnnotationNext.setEnabled(true);
+		geneAnnotationTextArea.setEditable(false);
+		geneAnnotationTextArea.setBackground(new Color(234,240,240));
+		historyLabelGeneAnnotation.setText("Entered By: " + currentGeneAnnotation.getEnteredBy()+" Date: "+currentGeneAnnotation.getEnterDate());
+		
+			
+		if (currentGeneAnnotationIndex == 0) {
+			JOptionPane.showMessageDialog(this, "There is no previous gene annotation!");
+			btnGeneAnnotationPrevious.setEnabled(false);		
+		}	
+	
 	}
 
-	private String getUpdateStatus(){
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-		Calendar cal = Calendar.getInstance();
-		String date = dateFormat.format(cal.getTime());
-		String updateStatus = String.format("Last update: %s by %s", date, SSHConnection.getUserName());
-		return updateStatus;
+	private void showGeneAnnotationNext() throws Exception{
+		
+		currentGeneAnnotationIndex = currentGeneAnnotationIndex +1;
+        GeneAnnotation currentGeneAnnotation = geneannotations.get(currentGeneAnnotationIndex);
+        geneAnnotationTextArea.setText(currentGeneAnnotation.getCuration());
+        btnGeneAnnotationPrevious.setEnabled(true);
+		geneAnnotationTextArea.setEditable(false);
+		geneAnnotationTextArea.setBackground(new Color(234,240,240));
+		historyLabelGeneAnnotation.setText("Entered By: " + currentGeneAnnotation.getEnteredBy()+" Date: "+currentGeneAnnotation.getEnterDate());
+	
+		if ( currentGeneAnnotationIndex == geneannotations.size()-1) { 
+			btnGeneAnnotationNext.setEnabled(false);
+			geneAnnotationTextArea.setEditable(true);
+			geneAnnotationTextArea.setBackground(new Color(255,255,255));
+			JOptionPane.showMessageDialog(this, "This is the current gene annotation!");
+		}
+    }
+	
+	private void showAnnotationPrevious() throws Exception{
+		
+		currentAnnotationIndex = currentAnnotationIndex - 1;
+        Annotation currentannotation = annotations.get(currentAnnotationIndex);
+        annotationTextArea.setText(currentannotation.getCuration());
+        btnAnnotationNext.setEnabled(true);
+		annotationTextArea.setEditable(false);
+		annotationTextArea.setBackground(new Color(234,240,240));
+		historyLabelAnnotation.setText("Entered By: " + currentannotation.getEnteredBy()+" Date: "+currentannotation.getEnterDate());
+		
+			
+		if (currentAnnotationIndex == 0) {
+			JOptionPane.showMessageDialog(this, "There is no previous annotation!");
+			btnAnnotationPrevious.setEnabled(false);		
+		}	
+	
+	}
+
+	private void showAnnotationNext() throws Exception{
+		
+		currentAnnotationIndex = currentAnnotationIndex +1;
+        Annotation currentannotation = annotations.get(currentAnnotationIndex);
+        annotationTextArea.setText(currentannotation.getCuration());
+        btnAnnotationPrevious.setEnabled(true);
+		annotationTextArea.setEditable(false);
+		annotationTextArea.setBackground(new Color(234,240,240));
+		historyLabelAnnotation.setText("Entered By: " + currentannotation.getEnteredBy()+" Date: "+ currentannotation.getEnterDate());
+			
+		
+		if ( currentAnnotationIndex == annotations.size()-1) { 
+			btnAnnotationNext.setEnabled(false);
+			annotationTextArea.setEditable(true);
+			annotationTextArea.setBackground(new Color(255,255,255));
+			JOptionPane.showMessageDialog(this, "This is the current gene annotation!");
+		}
+        
 	}
 
 	private class DocumentSizeFilter extends DocumentFilter {
