@@ -237,14 +237,12 @@ public abstract class CommonTable extends JTable{
 	
 
 	protected void handleAnnotationClick() throws Exception{
-		Mutation mutation = getSelectedMutation();
-		Annotation annotation = mutation.getAnnotationObject();
-		
+		Mutation mutation = getSelectedMutation();		
 		String gene = mutation.getGene();
-		GeneAnnotation geneAnnotation = DatabaseCommands.getGeneAnnotation(gene);
+		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
 		
 		boolean readOnly = !SSHConnection.isSuperUser();
-		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotation, annotation, this, parent);
+		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotationHistory, this, parent);
 		editAnnotation.setVisible(true);
 	}
 	

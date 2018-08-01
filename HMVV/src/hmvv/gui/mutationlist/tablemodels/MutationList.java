@@ -180,6 +180,7 @@ public class MutationList {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void notifyRowUpdated(int index){
 		for(MutationListListener listener : listeners){
 			listener.mutationUpdated(index);
