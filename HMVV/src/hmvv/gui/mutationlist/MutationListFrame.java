@@ -543,15 +543,16 @@ public class MutationListFrame extends JFrame {
 		occurenceFromTextField.setToolTipText(tooltip);
 		maxPopulationFrequencyTextField.setEditable(false);
 		maxPopulationFrequencyTextField.setToolTipText(tooltip);
-		final Thread one = createExtraMutationDataThread(0, 2);
-		final Thread two = createExtraMutationDataThread(1, 2);
+//		final Thread one = createExtraMutationDataThread(0, 2);
+//		final Thread two = createExtraMutationDataThread(1, 2);
+		final Thread one = createExtraMutationDataThread(0, 1);
 		
 		Thread waitingThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
 				try{
 					one.join();
-					two.join();
+					//two.join();
 				}catch(Exception e){}
 				cosmicOnlyCheckbox.setEnabled(true);
 				cosmicOnlyCheckbox.setToolTipText("");

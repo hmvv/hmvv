@@ -1,7 +1,5 @@
 package hmvv.io;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,8 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-
-import javax.xml.bind.DatatypeConverter;
 
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
@@ -225,15 +221,12 @@ public class DatabaseCommands {
 	 */
 	public static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String refMD5 = getMD5(coordinate.getRef());
-		String altMD5 = getMD5(coordinate.getAlt());
-		//TODO upgrade to latest COSMIC database
-		String query = "select cosmicID from cosmic_grch37v82 where chr = ? and pos = ? and refMD5 = ? and altMD5 = ?";
+		String query = "select cosmicID from cosmic_grch37v85 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
-		preparedStatement.setString(3, refMD5);
-		preparedStatement.setString(4, altMD5);
+		preparedStatement.setString(3, coordinate.getRef());
+		preparedStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<String> cosmicIDs = new ArrayList<String>();
 		while(rs.next()){
@@ -674,13 +667,6 @@ public class DatabaseCommands {
 		pstEnterAnnotation.setTimestamp(9, new java.sql.Timestamp(annotation.enterDate.getTime()));
 		pstEnterAnnotation.executeUpdate();
 		pstEnterAnnotation.close();
-	}
-
-	private static String getMD5(String source) throws NoSuchAlgorithmException{
-		MessageDigest md = MessageDigest.getInstance("MD5");
-		md.update(source.getBytes());
-		byte[] digest = md.digest();
-		return DatatypeConverter.printHexBinary(digest).toLowerCase();
 	}
 
 	/* ************************************************************************
