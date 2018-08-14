@@ -1,6 +1,5 @@
 package hmvv.gui.adminFrames;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -8,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
@@ -28,24 +26,25 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.GUIPipelineProgress;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineStatus;
 
 public class MonitorPipelines extends JDialog {
-
+	
 	private static final long serialVersionUID = 1L;
-
+	
 	private JButton btnRefresh;
-
+	
 	private TableRowSorter<MonitorPipelinesTableModel> sorter;
-
+	
 	//Table
 	private JTable table;
 	private MonitorPipelinesTableModel tableModel;
 	private JScrollPane tableScrollPane;
-
+	
 	/**
 	 * Create the frame.
 	 * @throws Exception 
@@ -77,13 +76,11 @@ public class MonitorPipelines extends JDialog {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				int modelRow = table.convertRowIndexToModel(row);
-				String pipelineProgress = tableModel.getPipeline(modelRow).getProgress();
-				if(pipelineProgress.equals("ERROR")) {					
-					c.setBackground(new Color(255,51,51));
-				}else if(pipelineProgress.equals("Complete")) {					
-					c.setBackground(new Color(102,255,102));
-				}else {
-					c.setBackground(new Color(255,255,204));
+				GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgress(tableModel.getPipeline(modelRow));
+				if(pipelineProgress == GUIPipelineProgress.COMPLETE) {
+					c.setBackground(GUICommonTools.COMPLETE_COLOR);
+				}else {					
+					c.setBackground(pipelineProgress.displayColor);
 				}
 				return c;
 			}
@@ -188,11 +185,6 @@ public class MonitorPipelines extends JDialog {
 		for(Pipeline p : pipelines) {
 			tableModel.addPipeline(p);
 		}
-
-	}
-
-	public void addPipeline(Pipeline pipeline){
-		tableModel.addPipeline(pipeline);
 	}
 
 	private Pipeline getCurrentlySelectedPipeline(){
@@ -210,7 +202,7 @@ public class MonitorPipelines extends JDialog {
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
 			
-			private final SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/y H:m:ss");
+			
 			
 			@Override 
 			public final boolean isCellEditable(int row, int column) {
@@ -242,7 +234,7 @@ public class MonitorPipelines extends JDialog {
 				if(column == 0) {
 					return pipelineStatus.pipelineStatus;
 				}else {
-					return dateFormat.format(pipelineStatus.dateUpdated);
+					return GUICommonTools.extendedDateFormat.format(pipelineStatus.dateUpdated);
 				}
 			}
 			

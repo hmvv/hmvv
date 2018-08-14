@@ -42,6 +42,7 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.GUIPipelineProgress;
 import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.MonitorPipelines;
@@ -51,6 +52,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
+import hmvv.model.Pipeline;
 import hmvv.model.Sample;
 
 public class SampleListFrame extends JFrame {
@@ -85,6 +87,13 @@ public class SampleListFrame extends JFrame {
 
 	private HMVVTableColumn[] customColumns;
 	
+	//Asynchronous sample status updates
+	private Thread pipelineRefreshThread;
+	private final int secondsToSleep = 60;
+	private volatile long timeLastRefreshed = 0;
+	private volatile ArrayList<Pipeline> pipelines;
+	private volatile JMenuItem refreshLabel;
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -103,11 +112,59 @@ public class SampleListFrame extends JFrame {
 		});		
 		
 		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), 0, 14, 16, 17);
+		pipelines = new ArrayList<Pipeline>();//initialize as blank so that if setupPipelineRefreshThread() fails, the object is still instantiated
+		
 		createMenu();
 		createComponents();
 		layoutComponents();
 		activateComponents();
 		setLocationRelativeTo(parent);
+		
+		setupPipelineRefreshThread();
+	}
+	
+	private void setupPipelineRefreshThread() {
+		try {
+			pipelines = DatabaseCommands.getAllPipelines();
+		} catch (Exception e1) {
+			JOptionPane.showMessageDialog(this, "Database error getting pipeline status. Please contact the system administrator");
+			return;
+		}
+		
+		pipelineRefreshThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//loop forever (will exit when JFrame is closed).
+				while(true) {
+					long currentTimeInMillis = System.currentTimeMillis();
+					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
+						try {
+							pipelines = DatabaseCommands.getAllPipelines();
+							table.repaint();							
+							timeLastRefreshed = System.currentTimeMillis();
+						} catch (Exception e) {
+							// Silently fail? Don't want to spam user every interval.
+						}
+					}
+					
+					setRefreshLabelText();
+					
+					try {
+						Thread.sleep(1 * 1000);
+					} catch (InterruptedException e) {}
+				}
+			}
+		});
+		
+		pipelineRefreshThread.start();
+	}
+	
+	private void setRefreshLabelText() {
+		long currentTimeInMillis = System.currentTimeMillis();
+		long timeToRefresh = timeLastRefreshed + (1000 * secondsToSleep);
+		long diff = timeToRefresh - currentTimeInMillis;
+		long secondsRemaining = diff / 1000;
+		refreshLabel.setText("Status refresh in " + secondsRemaining + "s");
 	}
 	
 	private void createMenu(){
@@ -118,12 +175,17 @@ public class SampleListFrame extends JFrame {
 		qualityControlMenuItem = new JMenuItem("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
+		refreshLabel = new JMenuItem("");
+		refreshLabel.setEnabled(false);
 		
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
 		adminMenu.add(qualityControlMenuItem);
 		adminMenu.add(newAssayMenuItem);
+		adminMenu.addSeparator();
+		adminMenu.add(refreshLabel);
+		
 		setJMenuBar(menuBar);
 		
 		ActionListener listener = new ActionListener(){
@@ -162,8 +224,9 @@ public class SampleListFrame extends JFrame {
 	
 	public void addSample(Sample sample){
 		tableModel.addSample(sample);
+		pipelineRefreshThread.interrupt();
 	}
-
+	
 	private void createComponents(){
 		table = new JTable(tableModel){
 			private static final long serialVersionUID = 1L;
@@ -186,13 +249,15 @@ public class SampleListFrame extends JFrame {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				c.setForeground(customColumns[column].color);
-
-				//TODO set color based on status?
-				//if(!tableModel.getSample(row).isAnalysisQueued()) {
-				//	c.setBackground(Color.CYAN);
-				//}else if(!tableModel.getSample(row).isAnalysisRunning()) {
-				//	c.setBackground(Color.YELLOW);
-				//}
+				Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
+				for(Pipeline p : pipelines) {
+					if(currentSample.ID == p.sampleTableID) {
+						GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgress(p);
+						c.setBackground(pipelineProgress.displayColor);
+						break;
+					}
+				}
+				
 				return c;
 			}
 		};

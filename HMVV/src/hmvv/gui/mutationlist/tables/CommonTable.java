@@ -19,6 +19,7 @@ import javax.swing.table.TableColumnModel;
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
+import hmvv.gui.mutationlist.CosmicInfoPopup;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
 import hmvv.io.DatabaseCommands;
@@ -205,7 +206,12 @@ public abstract class CommonTable extends JTable{
 		Mutation mutation = getSelectedMutation();
 		ArrayList<String> cosmic = mutation.getCosmicID();
 		if(cosmic.size() > 0){
-			InternetCommands.searchCosmic(cosmic);			
+			try {
+				CosmicInfoPopup.handleCosmicClick(parent, cosmic);
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(parent, "Error locating Cosmic Info: " + e.getMessage());
+			}
 		}
 	}
 	
@@ -234,7 +240,6 @@ public abstract class CommonTable extends JTable{
 			.replaceAll("Ter", "X")
 			.replaceAll("Tyr", "Y");
 	}
-	
 
 	protected void handleAnnotationClick() throws Exception{
 		Mutation mutation = getSelectedMutation();		

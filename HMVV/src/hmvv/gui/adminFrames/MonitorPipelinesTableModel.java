@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
+import hmvv.gui.GUIPipelineProgress;
 import hmvv.model.Pipeline;
 
 public class MonitorPipelinesTableModel extends AbstractTableModel{
@@ -62,7 +63,7 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 		columns.add(new PipelineTableModelColumn("The pipeline progress", 
 				"progress", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.getProgress()));
+				(Pipeline pipeline) -> GUIPipelineProgress.getProgress(pipeline).getDisplayString()));
 	}
 
 	public Pipeline getPipeline(int row){

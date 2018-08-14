@@ -8,7 +8,6 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -71,7 +70,6 @@ public class AnnotationFrame extends JFrame {
 	
 	private final Color readOnlyColor = new Color(245,245,245);
 	private final Color readWriteColor = Color.WHITE;
-	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	/**
 	 * Create the dialog.
@@ -176,7 +174,7 @@ public class AnnotationFrame extends JFrame {
 	}
 	
 	private void setCommonAnnotationLabel(CommonAnnotation commonAnnotation, JLabel label) {
-		label.setText("Entered By: " + commonAnnotation.enteredBy + "   Date: " + dateFormat.format(commonAnnotation.enterDate));
+		label.setText("Entered By: " + commonAnnotation.enteredBy + "   Date: " + GUICommonTools.extendedDateFormat.format(commonAnnotation.enterDate));
 	}
 	
 	private void layoutComponents(){

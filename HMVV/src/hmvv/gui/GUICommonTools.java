@@ -1,5 +1,6 @@
 package hmvv.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GraphicsConfiguration;
@@ -8,17 +9,26 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.text.SimpleDateFormat;
 
 import javax.swing.JFrame;
 
 public class GUICommonTools {
-
+	public static final Color ERROR_COLOR = new Color(255,51,51);
+	public static final Color COMPLETE_COLOR = new Color(102,255,102);
+	public static final Color WHITE_COLOR = Color.WHITE;
+	public static final Color RUNNING_COLOR = new Color(255,255,204);
+	
 	public static Font TAHOMA_PLAIN_13 = new Font("Tahoma", Font.BOLD, 13);
 	
 	public static Font TAHOMA_BOLD_11 = new Font("Tahoma", Font.BOLD, 11);
 	public static Font TAHOMA_BOLD_12 = new Font("Tahoma", Font.BOLD, 12);
 	public static Font TAHOMA_BOLD_13 = new Font("Tahoma", Font.BOLD, 13);
 	public static Font TAHOMA_BOLD_14 = new Font("Tahoma", Font.BOLD, 14);
+	
+	//public static final SimpleDateFormat extendedDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final SimpleDateFormat extendedDateFormat = new SimpleDateFormat("M/d/y HH:mm:ss");
+	public static final SimpleDateFormat shortDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public static Rectangle getScreenBounds(Component parent){
 	    GraphicsConfiguration gc = parent.getGraphicsConfiguration();

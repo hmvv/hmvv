@@ -21,7 +21,7 @@ public class BasicTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.dbSNPIDColumn);
 		columns.add(MutationTableModelColumn.cosmicIDColumn);
 		columns.add(MutationTableModelColumn.typeColumn);
-		columns.add(MutationTableModelColumn.genotypeColumn);
+		columns.add(MutationTableModelColumn.variantClassificationColumn);
 		columns.add(MutationTableModelColumn.altFreqColumn);
 		columns.add(MutationTableModelColumn.readDPColumn);
 		columns.add(MutationTableModelColumn.altReadDPColumn);

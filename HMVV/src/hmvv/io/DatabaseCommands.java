@@ -19,6 +19,7 @@ import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineStatus;
 import hmvv.model.Sample;
+import hmvv.model.VariantPredictionClass;
 
 public class DatabaseCommands {
 
@@ -192,6 +193,7 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Mutation Queries
 	 *************************************************************************/
+	//TODO change database column name genotype to variantClassification
 	public static ArrayList<Mutation> getMutationDataByID(int ID) throws Exception{
 		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp, t2.dbSNPID,"
 				+ " t2.type, t2.genotype, t2.altFreq, t2.readDP, t2.altReadDP, "
@@ -235,6 +237,19 @@ public class DatabaseCommands {
 		}
 		rs.close();
 		return cosmicIDs;
+	}
+	
+	public static String getCosmicInfo(String cosmicID) throws Exception{
+		String query = "select info from cosmic_grch37v85 where cosmicID = ?";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, cosmicID);
+		ResultSet rs = preparedStatement.executeQuery();
+		String info = null;
+		if(rs.next()){
+			info = rs.getString("info");
+		}
+		rs.close();
+		return info;
 	}
 
 	/**
@@ -370,7 +385,9 @@ public class DatabaseCommands {
 			//basic
 			mutation.setDbSNPID(getStringOrBlank(rs, "dbSNPID"));
 			mutation.setType(getStringOrBlank(rs, "type"));
-			mutation.setGenotype(getStringOrBlank(rs, "genotype"));
+			VariantPredictionClass variantPredictionClass = VariantPredictionClass.createPredictionClass(getStringOrBlank(rs, "genotype"));
+			mutation.setVariantPredictionClass(variantPredictionClass);
+			
 			mutation.setAltFreq(getDoubleOrNull(rs, "altFreq"));
 			mutation.setReadDP(getIntegerOrNull(rs, "readDP"));
 			mutation.setAltReadDP(getIntegerOrNull(rs, "altReadDP"));
@@ -675,6 +692,7 @@ public class DatabaseCommands {
 	private static Pipeline getPipeline(ResultSet row) throws SQLException{
 		Pipeline pipeline = new Pipeline(
 				row.getInt("queueID"),
+				row.getInt("ID"),
 				row.getString("runID"),
 				row.getString("sampleID"),
 				row.getString("assayID"),
@@ -687,7 +705,7 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<Pipeline> getAllPipelines() throws Exception{
-		String query = "select t3.queueID, t3.runID, t3.sampleID, t3.assayID, t3.instrumentID, t3.environmentID, t2.plStatus, t2.timeUpdated " +
+		String query = "select t3.queueID, t3.ID, t3.runID, t3.sampleID, t3.assayID, t3.instrumentID, t3.environmentID, t2.plStatus, t2.timeUpdated " +
 				"from sampleAnalysisQueue as t3 " +
 				"left join ( " +
 				"select pipelineStatusID, queueID, plStatus, timeUpdated " +

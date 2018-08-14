@@ -5,7 +5,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.JButton;
@@ -239,12 +238,11 @@ public class SampleSearchFrame extends JFrame {
 			return false;
 		}
 		
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String dateStringFrom = datePickerFrom.getDateStringOrSuppliedString("NA");
 		if(!dateStringFrom.equals("NA")){
 			try {
-				Date filterDate = dateFormat.parse(dateStringFrom);
-				Date sampleDate = dateFormat.parse(sample.runDate);
+				Date filterDate = GUICommonTools.shortDateFormat.parse(dateStringFrom);
+				Date sampleDate = GUICommonTools.shortDateFormat.parse(sample.runDate);
 				if(filterDate.after(sampleDate)){
 					return false;
 				}
@@ -256,8 +254,8 @@ public class SampleSearchFrame extends JFrame {
 		String dateStringTo = datePickerTo.getDateStringOrSuppliedString("NA");
 		if(!dateStringTo.equals("NA")){
 			try {
-				Date filterDate = dateFormat.parse(dateStringTo);
-				Date sampleDate = dateFormat.parse(sample.runDate);
+				Date filterDate = GUICommonTools.shortDateFormat.parse(dateStringTo);
+				Date sampleDate = GUICommonTools.shortDateFormat.parse(sample.runDate);
 				if(filterDate.before(sampleDate)){
 					return false;
 				}

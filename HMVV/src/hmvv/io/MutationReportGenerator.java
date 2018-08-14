@@ -16,6 +16,7 @@ import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
+import hmvv.model.VariantPredictionClass;
 
 public class MutationReportGenerator{
 	public static String generateLongReport(MutationList mutationList) throws Exception{
@@ -35,7 +36,7 @@ public class MutationReportGenerator{
 			String dbSNP = mutation.getDbSNPID();
 			Coordinate coordinate = mutation.getCoordinate();
 			String orderNumber = mutation.getOrderNumber();
-			String genotype = mutation.getGenotype();
+			VariantPredictionClass variantPredictionClass = mutation.getVariantPredictionClass();
 			String cosmicIDs = mutation.cosmicIDsToString(",");
 			int occurrence = mutation.getOccurrence();
 			
@@ -43,7 +44,7 @@ public class MutationReportGenerator{
 			report.append("OrderNumber: " + orderNumber + "\n");
 			report.append("Mutation Info: " + mutationText + "\n");
 			report.append("Coordinate: " + coordinate.getCoordinateAsString() + "\n");
-			report.append("Genotype: " + genotype + "\n");
+			report.append("VariantPredictionClass: " + variantPredictionClass + "\n");
 			report.append("dbSNP ID: " + dbSNP + "\n");
 			report.append("Cosmic IDs: " + cosmicIDs + "\n");
 			report.append("Occurence: " + occurrence + "\n");

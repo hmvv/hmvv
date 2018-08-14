@@ -15,7 +15,7 @@ public class Mutation {
 	private String dbSNPID;
 	private ArrayList<String> cosmicIDs;
 	private String type;
-	private String genotype;
+	private VariantPredictionClass variantPredictionClass;
 	private Double altFreq;
 	private Integer readDP;
 	private Integer altReadDP;
@@ -148,12 +148,12 @@ public class Mutation {
 		this.type = type;
 	}
 
-	public String getGenotype() {
-		return genotype;
+	public VariantPredictionClass getVariantPredictionClass() {
+		return variantPredictionClass;
 	}
 
-	public void setGenotype(String genotype) {
-		this.genotype = genotype;
+	public void setVariantPredictionClass(VariantPredictionClass variantPredictionClass) {
+		this.variantPredictionClass = variantPredictionClass;
 	}
 
 	public Double getAltFreq() {

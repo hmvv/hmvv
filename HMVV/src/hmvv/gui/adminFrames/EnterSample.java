@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,7 +26,6 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
-import hmvv.io.SampleEnterCommands;
 import hmvv.model.Sample;
 
 public class EnterSample extends JDialog {
@@ -368,7 +368,7 @@ public class EnterSample extends JDialog {
 	
 	private void enterData() throws Exception{
 		Sample sample = constructSampleFromTextFields();
-		SampleEnterCommands.enterData(sample);
+		DatabaseCommands.insertDataIntoDatabase(sample);
 		parent.addSample(sample);
 		
 		JOptionPane.showMessageDialog(this, "Success: Sample entered");
@@ -399,7 +399,7 @@ public class EnterSample extends JDialog {
 			variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
 		}
 		
-		String runDate = SampleEnterCommands.getDateString(instrument, runID);
+		String runDate = GUICommonTools.shortDateFormat.format(Calendar.getInstance().getTime());
 		String note = textNote.getText();
 		String enteredBy = SSHConnection.getUserName();
 		
