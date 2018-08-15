@@ -223,7 +223,7 @@ public class DatabaseCommands {
 	 */
 	public static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String query = "select cosmicID from cosmic_grch37v85 where chr = ? and pos = ? and ref = ? and alt = ?";
+		String query = "select cosmicID from cosmic_grch37v86 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
@@ -240,7 +240,7 @@ public class DatabaseCommands {
 	}
 	
 	public static String getCosmicInfo(String cosmicID) throws Exception{
-		String query = "select info from cosmic_grch37v85 where cosmicID = ?";
+		String query = "select info from cosmic_grch37v86 where cosmicID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();

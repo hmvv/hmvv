@@ -138,13 +138,7 @@ public class SampleListFrame extends JFrame {
 				while(true) {
 					long currentTimeInMillis = System.currentTimeMillis();
 					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
-						try {
-							pipelines = DatabaseCommands.getAllPipelines();
-							table.repaint();							
-							timeLastRefreshed = System.currentTimeMillis();
-						} catch (Exception e) {
-							// Silently fail? Don't want to spam user every interval.
-						}
+						updatePipelinesASynch();
 					}
 					
 					setRefreshLabelText();
@@ -157,6 +151,16 @@ public class SampleListFrame extends JFrame {
 		});
 		
 		pipelineRefreshThread.start();
+	}
+	
+	private void updatePipelinesASynch() {
+		try {
+			pipelines = DatabaseCommands.getAllPipelines();
+			table.repaint();							
+			timeLastRefreshed = System.currentTimeMillis();
+		} catch (Exception e) {
+			// Silently fail. Don't want to spam user every interval.
+		}
 	}
 	
 	private void setRefreshLabelText() {
@@ -224,7 +228,7 @@ public class SampleListFrame extends JFrame {
 	
 	public void addSample(Sample sample){
 		tableModel.addSample(sample);
-		pipelineRefreshThread.interrupt();
+		updatePipelinesASynch();
 	}
 	
 	private void createComponents(){
