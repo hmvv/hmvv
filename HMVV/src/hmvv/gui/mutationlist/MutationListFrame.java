@@ -93,6 +93,7 @@ public class MutationListFrame extends JFrame {
 	private JButton longReportButton;
 	private JButton resetButton;
 	private JButton exportButton;
+	private JButton loadFilteredMutationsButton;
 	private LoadIGVButton loadIGVButton;
 	
 	private JTextField textFreqFrom;
@@ -241,6 +242,10 @@ public class MutationListFrame extends JFrame {
 		exportButton.setToolTipText("Export the current table to file");
 		exportButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		
+		loadFilteredMutationsButton = new JButton("Load Filtered Mutations");
+		loadFilteredMutationsButton.setToolTipText("Load Mutations that did not meet the quality filter metrics");
+		loadFilteredMutationsButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		
 		loadIGVButton = new LoadIGVButton();
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
 		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -261,7 +266,14 @@ public class MutationListFrame extends JFrame {
 					try{
 						exportTable();
 					}catch(IOException ex){
-						ex.printStackTrace();
+						JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
+					}
+				}else if(e.getSource() == loadFilteredMutationsButton){
+					//TODO make this a new Thread
+					try{
+						loadFilteredMutationsButton.setEnabled(false);
+						loadFilteredMutations();
+					}catch(Exception ex){
 						JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
 					}
 				}else if(e.getSource() == loadIGVButton) {
@@ -289,6 +301,7 @@ public class MutationListFrame extends JFrame {
 		longReportButton.addActionListener(actionListener);
 		resetButton.addActionListener(actionListener);
 		exportButton.addActionListener(actionListener);
+		loadFilteredMutationsButton.addActionListener(actionListener);
 		loadIGVButton.addActionListener(actionListener);
 	}
 
@@ -404,6 +417,7 @@ public class MutationListFrame extends JFrame {
 		buttonPanel.add(longReportButton);
 		buttonPanel.add(resetButton);
 		buttonPanel.add(exportButton);
+		buttonPanel.add(loadFilteredMutationsButton);
 		buttonPanel.add(loadIGVButton);
 		
 		JPanel northPanel = new JPanel();
@@ -525,6 +539,27 @@ public class MutationListFrame extends JFrame {
 		}
 	}
 	
+	private void loadFilteredMutations() throws Exception{
+		ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample.ID);
+		for(int i = 0; i < mutations.size(); i++) {
+			try{
+				Mutation mutation = mutations.get(i);
+				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
+				int count = DatabaseCommands.getOccurrenceCount(mutation);
+				
+				//can update here because basicTabTableModel.addFilteredMutation() adds to non-visible list of mutations
+				mutation.setCosmicID(cosmicIDs);
+				mutation.setOccurrence(count);
+				
+				basicTabTableModel.addFilteredMutation(mutation);
+			}catch(Exception e){
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+			}
+		}
+		applyRowFilters();
+	}
+	
 	/*
 	 * 
 	 * This section of the class handles the multi-threaded
@@ -639,9 +674,8 @@ public class MutationListFrame extends JFrame {
 				
 				//do this here since these mutations are not in the basicTabTableModel
 				mutation.setCosmicID(cosmicIDs);
-				mutation.setOccurrence(count);				
+				mutation.setOccurrence(count);
 			}catch(Exception e){
-				e.printStackTrace();
 				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
 			}
 		}

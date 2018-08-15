@@ -166,7 +166,7 @@ public class DatabaseCommands {
 		if(normalID == -1){
 			return null;
 		}else{
-			return getMutationDataByID(normalID);
+			return getUnfilteredMutationDataByID(normalID);
 		}
 	}
 
@@ -193,8 +193,16 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Mutation Queries
 	 *************************************************************************/
+	public static ArrayList<Mutation> getUnfilteredMutationDataByID(int ID) throws Exception{
+		return getMutationDataByID(ID, false);
+	}
+	
+	public static ArrayList<Mutation> getFilteredMutationDataByID(int ID) throws Exception{
+		return getMutationDataByID(ID, true);
+	}
+	
 	//TODO change database column name genotype to variantClassification
-	public static ArrayList<Mutation> getMutationDataByID(int ID) throws Exception{
+	private static ArrayList<Mutation> getMutationDataByID(int ID, boolean getFilteredData) throws Exception{
 		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp, t2.dbSNPID,"
 				+ " t2.type, t2.genotype, t2.altFreq, t2.readDP, t2.altReadDP, "
 				+ " t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen,"
@@ -208,8 +216,13 @@ public class DatabaseCommands {
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				+ " left join Samples as t1"
 				+ " on t2.sampleID = t1.ID"
-				+ " where t2.sampleID = ?";
-
+				+ " where t2.sampleID = ? ";
+		String where = "((t2.genotype = 'HIGH' or t2.genotype = 'MODERATE') and t2.altFreq >= 10 and t2.readDP >= 100)";
+		if(getFilteredData) {
+			where = " !" + where;
+		}
+		query = query + " and " + where;
+		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+ID);
 		ResultSet rs = preparedStatement.executeQuery();

@@ -471,7 +471,7 @@ public class SampleListFrame extends JFrame {
 
 	private void handleMutationClick() throws Exception{
 		Sample currentSample = getCurrentlySelectedSample();
-		ArrayList<Mutation> mutations = DatabaseCommands.getMutationDataByID(currentSample.ID);
+		ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.ID);
 		
 		for(Mutation m : mutations){
 			m.setCosmicID("LOADING...");
