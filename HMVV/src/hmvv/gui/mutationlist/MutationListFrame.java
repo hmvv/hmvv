@@ -103,6 +103,8 @@ public class MutationListFrame extends JFrame {
 	private JTextField maxPopulationFrequencyTextField;
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
 	
+	private volatile boolean isWindowClosed;
+	
 	/**
 	 * Create the frame.
 	 */
@@ -130,7 +132,15 @@ public class MutationListFrame extends JFrame {
 		layoutComponents();
 		createSortChangeListener();
 		setLocationRelativeTo(parent);
-		reset();
+		resetFilters();
+		
+		isWindowClosed = false;
+		addWindowListener(new WindowAdapter(){
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				isWindowClosed = true;
+			}
+		});
 		
 		loadMissingDataAsynchronous();
 	}
@@ -245,6 +255,7 @@ public class MutationListFrame extends JFrame {
 		loadFilteredMutationsButton = new JButton("Load Filtered Mutations");
 		loadFilteredMutationsButton.setToolTipText("Load Mutations that did not meet the quality filter metrics");
 		loadFilteredMutationsButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		loadFilteredMutationsButton.setEnabled(false);//this will be enabled after the unfiltered variant data is loaded
 		
 		loadIGVButton = new LoadIGVButton();
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
@@ -261,7 +272,7 @@ public class MutationListFrame extends JFrame {
 				}else if(e.getSource() == longReportButton){
 					showLongReportFrame();
 				}else if(e.getSource() == resetButton){
-					reset();
+					resetFilters();
 				}else if(e.getSource() == exportButton){
 					try{
 						exportTable();
@@ -269,13 +280,8 @@ public class MutationListFrame extends JFrame {
 						JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
 					}
 				}else if(e.getSource() == loadFilteredMutationsButton){
-					//TODO make this a new Thread
-					try{
-						loadFilteredMutationsButton.setEnabled(false);
-						loadFilteredMutations();
-					}catch(Exception ex){
-						JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
-					}
+					loadFilteredMutationsButton.setEnabled(false);
+					loadFilteredMutationsAsynchronous();
 				}else if(e.getSource() == loadIGVButton) {
 					new Thread(new Runnable() {
 						public void run() {
@@ -283,7 +289,6 @@ public class MutationListFrame extends JFrame {
 								if(sample == null) {
 									throw new Exception("No sample was provided. Please contact developer to debug this error.");
 								}
-								
 								loadIGVButton.setEnabled(false);
 								loadIGVAsynchronous();
 							}catch(Exception ex){
@@ -505,7 +510,7 @@ public class MutationListFrame extends JFrame {
 		return valueInt;
 	}
 
-	private void reset(){
+	private void resetFilters(){
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);		
 		filterNomalCheckbox.setSelected(false);
@@ -539,45 +544,8 @@ public class MutationListFrame extends JFrame {
 		}
 	}
 	
-	private void loadFilteredMutations() throws Exception{
-		ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample.ID);
-		for(int i = 0; i < mutations.size(); i++) {
-			try{
-				Mutation mutation = mutations.get(i);
-				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
-				int count = DatabaseCommands.getOccurrenceCount(mutation);
-				
-				//can update here because basicTabTableModel.addFilteredMutation() adds to non-visible list of mutations
-				mutation.setCosmicID(cosmicIDs);
-				mutation.setOccurrence(count);
-				
-				basicTabTableModel.addFilteredMutation(mutation);
-			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
-			}
-		}
-		applyRowFilters();
-	}
-	
-	/*
-	 * 
-	 * This section of the class handles the multi-threaded
-	 * interactions between database loading, GUI updating,
-	 * and window closing events. The goal is to keep the
-	 * GUI highly responsive to the user.
-	 * 
-	 */
-	private void loadMissingDataAsynchronous(){
-		isWindowClosed = false; 
-		addWindowListener(new WindowAdapter(){
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				isWindowClosed = true;
-			}
-		});
-		
-		String tooltip = "Disabled while cosmic data is loading";
+	private void disableInputForAsynchronousLoad() {
+		String tooltip = "Disabled while data is loading";
 		cosmicOnlyCheckbox.setEnabled(false);
 		cosmicOnlyCheckbox.setToolTipText(tooltip);
 		reportedOnlyCheckbox.setEnabled(false);
@@ -598,36 +566,60 @@ public class MutationListFrame extends JFrame {
 		maxPopulationFrequencyTextField.setToolTipText(tooltip);
 		predictionFilterComboBox.setEnabled(false);
 		predictionFilterComboBox.setToolTipText(tooltip);
-		
-		final Thread one = createExtraMutationDataThread();
-		
+	}
+	
+	private void enableInputAfterAsynchronousLoad() {
+		cosmicOnlyCheckbox.setEnabled(true);
+		cosmicOnlyCheckbox.setToolTipText("");
+		reportedOnlyCheckbox.setEnabled(true);
+		reportedOnlyCheckbox.setToolTipText("");
+		filterNomalCheckbox.setEnabled(true);
+		filterNomalCheckbox.setToolTipText("");
+		resetButton.setEnabled(true);
+		resetButton.setToolTipText("");
+		textFreqFrom.setEditable(true);
+		textFreqFrom.setToolTipText("");
+		textVarFreqTo.setEditable(true);
+		textVarFreqTo.setToolTipText("");
+		minReadDepthTextField.setEditable(true);
+		minReadDepthTextField.setToolTipText("");
+		occurenceFromTextField.setEditable(true);
+		occurenceFromTextField.setToolTipText("");
+		maxPopulationFrequencyTextField.setEditable(true);
+		maxPopulationFrequencyTextField.setToolTipText("");
+		predictionFilterComboBox.setEnabled(true);
+		predictionFilterComboBox.setToolTipText("");
+	}
+	/*
+	 * 
+	 * This section of the class handles the multi-threaded
+	 * interactions between database loading, GUI updating,
+	 * and window closing events. The goal is to keep the
+	 * GUI highly responsive to the user.
+	 * 
+	 */
+	private void loadMissingDataAsynchronous(){
+		disableInputForAsynchronousLoad();
+		Thread loadingThread = createExtraMutationDataThread();
+		createWaitingThread(loadingThread);
+	}
+	
+	private void loadFilteredMutationsAsynchronous() {
+		disableInputForAsynchronousLoad();
+		Thread loadingThread = createLoadFilteredMutationDataThread();
+		createWaitingThread(loadingThread);
+	}
+	
+	private void createWaitingThread(Thread loadingThread) {
 		Thread waitingThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
 				try{
-					one.join();
-					//two.join();
-				}catch(Exception e){}
-				cosmicOnlyCheckbox.setEnabled(true);
-				cosmicOnlyCheckbox.setToolTipText("");
-				reportedOnlyCheckbox.setEnabled(true);
-				reportedOnlyCheckbox.setToolTipText("");
-				filterNomalCheckbox.setEnabled(true);
-				filterNomalCheckbox.setToolTipText("");
-				resetButton.setEnabled(true);
-				resetButton.setToolTipText("");
-				textFreqFrom.setEditable(true);
-				textFreqFrom.setToolTipText("");
-				textVarFreqTo.setEditable(true);
-				textVarFreqTo.setToolTipText("");
-				minReadDepthTextField.setEditable(true);
-				minReadDepthTextField.setToolTipText("");
-				occurenceFromTextField.setEditable(true);
-				occurenceFromTextField.setToolTipText("");
-				maxPopulationFrequencyTextField.setEditable(true);
-				maxPopulationFrequencyTextField.setToolTipText("");
-				predictionFilterComboBox.setEnabled(true);
-				predictionFilterComboBox.setToolTipText("");
+					loadingThread.join();
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				enableInputAfterAsynchronousLoad();
 			}
 		});
 		waitingThread.start();
@@ -644,7 +636,6 @@ public class MutationListFrame extends JFrame {
 		return missingDataThread;
 	}
 	
-	private volatile boolean isWindowClosed;
 	private void getExtraMutationData(){
 		for(int index = 0; index < basicTabTableModel.getRowCount(); index++){
 			if(isWindowClosed){
@@ -679,6 +670,50 @@ public class MutationListFrame extends JFrame {
 				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
 			}
 		}
+		
+		loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data
+	}
+	
+	private Thread createLoadFilteredMutationDataThread(){
+		Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
+			@Override
+			public void run() {
+				getFilteredMutationData();
+			}
+		});
+		loadFilteredMutationDataThread.start();
+		return loadFilteredMutationDataThread;
+	}
+	
+	private void getFilteredMutationData() {
+		try{
+			loadFilteredMutationsButton.setText("Loading...");
+			ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample.ID);
+			for(int i = 0; i < mutations.size(); i++) {
+				if(isWindowClosed){
+					return;
+				}
+				loadFilteredMutationsButton.setText("Loading " + (i+1) + " of " + mutations.size());
+				try{
+					Mutation mutation = mutations.get(i);
+					ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
+					int count = DatabaseCommands.getOccurrenceCount(mutation);
+					
+					//can update here because basicTabTableModel.addFilteredMutation() adds to non-visible list of mutations
+					mutation.setCosmicID(cosmicIDs);
+					mutation.setOccurrence(count);
+					
+					basicTabTableModel.addFilteredMutation(mutation);
+				}catch(Exception e){
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+				}
+			}
+			applyRowFilters();
+		}catch(Exception ex){
+			JOptionPane.showMessageDialog(MutationListFrame.this, ex.getMessage());
+		}
+		loadFilteredMutationsButton.setText("Filtered mutations loaded");
 	}
 	
 	//TODO disable HTTP access to BAM files
