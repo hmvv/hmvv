@@ -53,7 +53,7 @@ public class EditSampleFrame extends JFrame {
 		lblId.setBounds(42, 40, 46, 14);
 		contentPane.add(lblId);
 
-		labelID1 = new JLabel("" + sample.ID);
+		labelID1 = new JLabel("" + sample.sampleID);
 		labelID1.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		labelID1.setBounds(207, 40, 81, 18);
 		contentPane.add(labelID1);
@@ -133,7 +133,7 @@ public class EditSampleFrame extends JFrame {
 		labelRunID1.setBounds(207, 131, 81, 18);
 		contentPane.add(labelRunID1);
 
-		labelSampleID1 = new JLabel(sample.sampleID);
+		labelSampleID1 = new JLabel(sample.sampleName);
 		labelSampleID1.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		labelSampleID1.setBounds(207, 161, 81, 18);
 		contentPane.add(labelSampleID1);

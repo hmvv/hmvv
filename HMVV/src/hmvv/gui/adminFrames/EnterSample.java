@@ -131,7 +131,7 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("RunID", runIDPanel));
 		mainPanel.add(new RowPanel("CoverageID", comboBoxCoverageIDList));
 		mainPanel.add(new RowPanel("VariantCallerID", comboBoxVariantCallerIDList));
-		mainPanel.add(new RowPanel("SampleID", comboBoxSample));
+		mainPanel.add(new RowPanel("SampleName", comboBoxSample));
 		mainPanel.add(new RowPanel("Last Name", textlastName));
 		mainPanel.add(new RowPanel("First Name", textFirstName));
 		mainPanel.add(new RowPanel("Order Number", textOrderNumber));
@@ -378,7 +378,7 @@ public class EnterSample extends JDialog {
 	}
 	
 	private Sample constructSampleFromTextFields() throws Exception{
-		int ID = -1;//This will be computed by the database when the sample is inserted
+		int sampleID = -1;//This will be computed by the database when the sample is inserted
 		String assay = comboBoxAssay.getSelectedItem().toString();
 		String instrument = comboBoxInstrument.getSelectedItem().toString();
 		String lastName = textlastName.getText();
@@ -388,7 +388,7 @@ public class EnterSample extends JDialog {
 		String tumorSource = textTumorSource.getText();
 		String tumorPercent = textPercent.getText();
 		String runID = textRunID.getText();
-		String sampleID = comboBoxSample.getSelectedItem().toString();
+		String sampleName = comboBoxSample.getSelectedItem().toString();
 		
 		String coverageID = "";
 		if(comboBoxCoverageIDList.getSelectedItem() != null){
@@ -406,8 +406,8 @@ public class EnterSample extends JDialog {
 		if(lastName.equals("") || firstName.equals("") || orderNumber.equals("") ){
 			throw new Exception("firstName, lastName, orderNumber are required");
 		}else {
-			return new Sample(ID, assay, instrument, lastName, firstName, orderNumber,
-				pathologyNumber, tumorSource, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy);
+			return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, note, enteredBy);
 		}
 	}
 	

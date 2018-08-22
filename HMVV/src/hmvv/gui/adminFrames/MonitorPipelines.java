@@ -11,15 +11,18 @@ import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.plaf.ProgressBarUI;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -77,11 +80,12 @@ public class MonitorPipelines extends JDialog {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				int modelRow = table.convertRowIndexToModel(row);
-				String pipelineProgress = tableModel.getPipeline(modelRow).getProgress();
-				if(pipelineProgress.equals("ERROR")) {					
-					c.setBackground(new Color(255,51,51));
-				}else if(pipelineProgress.equals("Complete")) {					
-					c.setBackground(new Color(102,255,102));
+				String pipelineStatus;
+				pipelineStatus = tableModel.getPipeline(modelRow).getStatus();
+				if(pipelineStatus.startsWith("ERROR")) {					
+					c.setBackground(new Color(255,204,204));
+				}else if(pipelineStatus.equals("pipelineCompleted")) {					
+					c.setBackground(new Color(204,255,204));
 				}else {
 					c.setBackground(new Color(255,255,204));
 				}
@@ -105,6 +109,9 @@ public class MonitorPipelines extends JDialog {
 
 		btnRefresh = new JButton("Refresh");
 		btnRefresh.setFont(GUICommonTools.TAHOMA_BOLD_12);
+		
+		TableColumn progressColumn = table.getColumnModel().getColumn(8);
+		progressColumn.setCellRenderer(new ProgressCellRenderer());
 	}
 
 	private void layoutComponents(){
@@ -258,7 +265,30 @@ public class MonitorPipelines extends JDialog {
 		
 		JOptionPane.showMessageDialog(this, tableSP,
 				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
-						currentPipeline.instrumentID, currentPipeline.assayID, currentPipeline.runID, currentPipeline.sampleID),
+						currentPipeline.instrumentID, currentPipeline.assayID, currentPipeline.runID, currentPipeline.sampleName),
 				JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public class ProgressCellRenderer extends JProgressBar implements TableCellRenderer {
+	    ProgressCellRenderer() {
+	        super(0, 100);
+	        setOpaque(true);
+	        setStringPainted(true);
+	        setBackground(Color.YELLOW);
+	        setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+	        setForeground(Color.GREEN.darker());
+	    }
+
+	    @Override
+	    public boolean isDisplayable() { 
+	        return true; 
+	    }
+
+	    @Override
+	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) { 
+	        this.setValue((int) value);
+	        this.setString(value.toString()+'%');
+	        return this;
+	    }
 	}
 }

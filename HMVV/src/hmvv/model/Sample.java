@@ -2,11 +2,11 @@ package hmvv.model;
 
 public class Sample {
 	
-	public int ID;
+	public int sampleID;
 	public final String assay;
 	public final String instrument;
 	public final String runID;
-	public final String sampleID;
+	public final String sampleName;
 	public final String coverageID;
 	public final String callerID;
 	public final String runDate;
@@ -20,10 +20,10 @@ public class Sample {
 	private String tumorPercent;
 	private String note;
 	
-	public Sample(int ID, String assay, String instrument, String lastName, String firstName, String orderNumber,
-			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleID,
+	public Sample(int sampleID, String assay, String instrument, String lastName, String firstName, String orderNumber,
+			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
 			String coverageID, String callerID, String runDate, String note, String enteredBy) {
-		this.ID = ID;
+		this.sampleID = sampleID;
 		this.assay = notNull(assay);
 		this.instrument = notNull(instrument);
 		this.lastName = notNull(lastName);
@@ -33,7 +33,7 @@ public class Sample {
 		this.tumorSource = notNull(tumorSource);
 		this.tumorPercent = notNull(tumorPercent);
 		this.runID = notNull(runID);
-		this.sampleID = notNull(sampleID);
+		this.sampleName = notNull(sampleName);
 		this.coverageID = notNull(coverageID);
 		this.callerID = notNull(callerID);
 		this.runDate = notNull(runDate);
@@ -41,12 +41,12 @@ public class Sample {
 		this.enteredBy = notNull(enteredBy);
 	}
 	
-	public int getID(){
-		return ID;
+	public int getSampleID(){
+		return sampleID;
 	}
 	
-	public void setID(int id){
-		this.ID = id;
+	public void setSampleID(int id){
+		this.sampleID = id;
 	}
 	
 	private String notNull(String testString){

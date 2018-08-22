@@ -30,9 +30,9 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				(Pipeline pipeline) -> pipeline.runID));
 
 		columns.add(new PipelineTableModelColumn("The sample used",
-				"sampleID",
+				"sampleName",
 				String.class,
-				(Pipeline pipeline) -> pipeline.sampleID));
+				(Pipeline pipeline) -> pipeline.sampleName));
 
 		columns.add(new PipelineTableModelColumn("The assay used", 
 				"assayID", 
@@ -44,11 +44,6 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				String.class,
 				(Pipeline pipeline) -> pipeline.instrumentID));
 
-		columns.add(new PipelineTableModelColumn("The environment used", 
-				"environmentID", 
-				String.class,
-				(Pipeline pipeline) -> pipeline.environmentID));
-
 		columns.add(new PipelineTableModelColumn("The pipeline status", 
 				"status", 
 				String.class,
@@ -58,11 +53,24 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				"runTime", 
 				String.class,
 				(Pipeline pipeline) -> pipeline.runTime));
-
+		
+		columns.add(new PipelineTableModelColumn("The pipeline program", 
+				"program", 
+				String.class,
+				(Pipeline pipeline) -> pipeline.getProgram()));
+		
 		columns.add(new PipelineTableModelColumn("The pipeline progress", 
 				"progress", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.getProgress()));
+				(Pipeline pipeline) -> {
+					try {
+						return pipeline.getProgress();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return pipeline;
+				}));
 	}
 
 	public Pipeline getPipeline(int row){
