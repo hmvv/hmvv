@@ -60,7 +60,7 @@ public class DatabaseCommands {
 		String tumorSource = sample.getTumorSource();
 		String tumorPercent = sample.getTumorPercent();
 		String runID = sample.runID;
-		String sampleID = sample.sampleID;
+		String sampleName = sample.sampleName;
 		String coverageID = sample.coverageID;//no coverageID on nextseq
 		String variantCallerID = sample.callerID;//no variant caller on nextseq
 		String runDate = sample.runDate;
@@ -68,7 +68,10 @@ public class DatabaseCommands {
 		String enteredBy = sample.enteredBy;
 
 		//check if sample is already present in data
-		String checkSample = String.format("select * from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
+		String checkSample = String.format("select samples.runID, samples.sampleName, assays.assayName, instruments.instrumentName from samples " +
+				"join instruments on instruments.instrumentID = samples.instrumentID " +
+				"join assays on assays.assayID = samples.assayID " +
+				"where instruments.instrumentName = '%s' and assays.assayName = '%s' and samples.runID = '%s' and samples.sampleName = '%s' ", instrument, assay, runID, sampleName);
 		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
 		ResultSet rsCheckSample = pstCheckSample.executeQuery();
 		Integer sampleCount = 0;
@@ -76,31 +79,37 @@ public class DatabaseCommands {
 			sampleCount += 1;
 			break;
 		}
-		if(sampleCount != 0){
+		if(sampleCount != 0) {
 			throw new Exception("Error: Supplied sample exists in database; data not entered");
 		}
 
+		//need coverage/callerID placeholder for command-line
+        if (coverageID==""){coverageID="na";}
+        if (variantCallerID==""){variantCallerID="na";}
 
-		String enterSample = String.format("insert into Samples "
-				+ "(assay, instrument, lastName, firstName, orderNumber, pathNumber, tumorPercent, runID, sampleID, coverageID, callerID, runDate, note, enteredBy, tumorSource) "
-				+ "values ('%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-				assay, instrument, lastName, firstName, orderNumber, pathologyNumber, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy, tumorSource);
+		String enterSample = String.format("insert into samples "
+				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy) "
+				+ "values ( (select assayID from assays where assayName='"+assay+"'), (select instrumentID from instruments where instrumentName='"+instrument+"'), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )",
+				runID, sampleName, coverageID, variantCallerID, lastName, firstName, orderNumber, pathologyNumber, tumorSource, tumorPercent,  runDate, note,enteredBy);
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
 		pstEnterSample.executeUpdate();
 
 		//get ID
-		String findID = String.format("select ID from Samples where instrument = '%s' and runID = '%s' and sampleID = '%s'", instrument, runID, sampleID);
+		String findID = String.format("select samples.sampleID from samples " +
+				"join instruments on instruments.instrumentID = samples.instrumentID " +
+				"join assays on assays.assayID = samples.assayID " +
+				"where instruments.instrumentName = '%s' and assays.assayName = '%s' and samples.runID = '%s' and samples.sampleName = '%s'", instrument, assay, runID, sampleName);
 
 		PreparedStatement pstFindID = databaseConnection.prepareStatement(findID);
 		ResultSet rsFindID = pstFindID.executeQuery();
 		Integer count = 0;
-		String ID = "";
+		String sampleID = "";
 		while(rsFindID.next()){
-			ID = rsFindID.getString(1);
+            sampleID = rsFindID.getString(1);
 			try{
-				sample.setID(Integer.parseInt(ID));
+				sample.setSampleID(Integer.parseInt(sampleID));
 			}catch(Exception e){
-				throw new Exception("ID Assigned by database is not an integer: " + ID);
+				throw new Exception("sampleID Assigned by database is not an integer: " + sampleID);
 			}
 			count += 1;
 		}
@@ -108,10 +117,10 @@ public class DatabaseCommands {
 			throw new Exception("Error2: Problem locating the entered sample; data not entered");
 		}
 
-		queueSampleForPipelineAnalysis(sample);
+		queueSampleForRunningPipeline(sample);
 	}
 
-	private static void queueSampleForPipelineAnalysis(Sample sample) throws Exception{
+	private static void queueSampleForRunningPipeline(Sample sample) throws Exception{
 		
 		String coverageID = "na";
 		if(sample.coverageID.contains(".")) {
@@ -125,10 +134,8 @@ public class DatabaseCommands {
 		
 		String environment = Configurations.getEnvironment();
 		
-		String queueSample = String.format("INSERT INTO sampleAnalysisQueue " 
-				+ "(ID, runID, sampleID, coverageID, vcallerID, assayID,instrumentID,environmentID, timeSubmitted)"
-				+	" VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', now() )",
-				sample.getID(), sample.runID, sample.sampleID, coverageID, variantCallerID, sample.assay, sample.instrument, environment);
+		String queueSample = String.format("INSERT INTO pipelineQueue "
+				+ "(sampleID,timeSubmitted) VALUES ('%s', now() )",sample.getSampleID());
 
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.executeUpdate();
@@ -140,7 +147,7 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	public static ArrayList<String> getAllAssays() throws Exception{
 		ArrayList<String> assays = new ArrayList<String>();
-		String getAssay = "select distinct assay from assays";
+		String getAssay = "select distinct assayName from assays";
 		PreparedStatement pst = databaseConnection.prepareStatement(getAssay);
 		ResultSet rs = pst.executeQuery();
 		while(rs.next()){
@@ -149,7 +156,7 @@ public class DatabaseCommands {
 		pst.close();
 		return assays;
 	}
-
+ // TODO DB
 	private static int getPairedNormal(int tumorID) throws Exception{
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from tumorNormalPair where tumorID = ?");
 		preparedStatement.setInt(1, tumorID);
@@ -171,7 +178,10 @@ public class DatabaseCommands {
 
 	public static ArrayList<String> getInstrumentsForAssay(String assay) throws Exception{
 		ArrayList<String> instruments = new ArrayList<String>();
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instrument from assays where assay = ?");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instruments.instrumentName from instruments " +
+                "join assayInstrument on assayInstrument.instrumentID = instruments.instrumentID " +
+                "join assays on assays.assayID = assayInstrument.assayID " +
+                "where assays.assayName = ?");
 		preparedStatement.setString(1, assay);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
@@ -448,17 +458,17 @@ public class DatabaseCommands {
 		}
 	}
 
-	/**
-	 * Updates the reported flag in the mutation data table
-	 * 
-	 * @param setToReported
-	 * @param sampleID This is primary key for mutation data table
-	 * @param chr
-	 * @param pos
-	 * @param ref
-	 * @param alt
-	 * @throws SQLException
-	 */
+//	/**
+//	 * Updates the reported flag in the mutation data table
+//	 *
+//	 * @param setToReported
+//	 * @param sampleID This is primary key for mutation data table
+//	 * @param chr
+//	 * @param pos
+//	 * @param ref
+//	 * @param alt
+//	 * @throws SQLException
+//	 */
 	public static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		String reported = (setToReported) ? "1" : "0";
 		PreparedStatement updateStatement = databaseConnection.prepareStatement(
@@ -477,8 +487,12 @@ public class DatabaseCommands {
 	 * Sample Queries
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
-		String query = "select * from Samples order by ID desc";
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
+				"s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
+				"s.runDate, s.note, s.enteredBy from samples as s " +
+				"join instruments  as i on i.instrumentID = s.instrumentID " +
+				"join assays as a on a.assayID = s.assayID ";
+				PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
@@ -491,7 +505,7 @@ public class DatabaseCommands {
 
 	private static Sample getSample(ResultSet row) throws SQLException{
 		Sample sample = new Sample(
-				Integer.parseInt(row.getString("ID")),
+				Integer.parseInt(row.getString("sampleID")),
 				row.getString("assay"),
 				row.getString("instrument"),
 				row.getString("lastName"),
@@ -501,7 +515,7 @@ public class DatabaseCommands {
 				row.getString("tumorSource"),
 				row.getString("tumorPercent"),
 				row.getString("runID"),
-				row.getString("sampleID"),
+				row.getString("sampleName"),
 				row.getString("coverageID"),
 				row.getString("callerID"),
 				row.getString("runDate"),
@@ -511,14 +525,18 @@ public class DatabaseCommands {
 		return sample;
 	}
 
-	public static Sample getSample(int ID) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select assay, instrument, lastName, firstName, orderNumber,"
-				+ "pathNumber, tumorSource, tumorPercent, runID, sampleID, coverageID, callerID, runDate, note, enteredBy from Samples where ID = ?");
-		updateStatement.setString(1, ID+"");
+	public static Sample getSample(int sampleID) throws Exception{
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
+				"s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
+				"s.runDate, s.note, s.enteredBy from samples as s " +
+				"join instruments  as i on i.instrumentID = s.instrumentID " +
+				"join assays as a on a.assayID = s.assayID " +
+				"where s.sampleID = ? ");
+		updateStatement.setString(1, sampleID+"");
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		if(getSampleResult.next()){
 			return new Sample(
-					ID,
+                    sampleID,
 					getSampleResult.getString(1),
 					getSampleResult.getString(2),
 					getSampleResult.getString(3),
@@ -539,17 +557,17 @@ public class DatabaseCommands {
 		return null;
 	}
 
-	public static void updateSampleNote(int ID, String newNote) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update Samples set note = ? where ID = ?");
+	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set note = ? where sampleID = ?");
 		updateStatement.setString(1, newNote);
-		updateStatement.setString(2, ""+ID);
+		updateStatement.setString(2, ""+sampleID);
 		updateStatement.executeUpdate();
 		updateStatement.close();
 	}
 
 	public static void updateSample(Sample sample) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update Samples set lastName = ?, firstName = ?, orderNumber = ?, pathNumber = ?, "
-				+ "tumorSource = ?, tumorPercent = ?, note = ? where ID = ?");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set lastName = ?, firstName = ?, orderNumber = ?, pathNumber = ?, "
+				+ "tumorSource = ?, tumorPercent = ?, note = ? where sampleID = ?");
 		updateStatement.setString(1, sample.getLastName());
 		updateStatement.setString(2, sample.getFirstName());
 		updateStatement.setString(3, sample.getOrderNumber());
@@ -557,14 +575,14 @@ public class DatabaseCommands {
 		updateStatement.setString(5, sample.getTumorSource());
 		updateStatement.setString(6, sample.getTumorPercent());
 		updateStatement.setString(7, sample.getNote());
-		updateStatement.setString(8, sample.ID+"");
+		updateStatement.setString(8, sample.sampleID+"");
 		updateStatement.executeUpdate();
 		updateStatement.close();
 	}
 
-	public static void deleteSample(int ID) throws SQLException{
+	public static void deleteSample(int sampleID) throws SQLException{
 		CallableStatement callableStatement = databaseConnection.prepareCall("{call deleteSample(?)}");
-		callableStatement.setString(1, ""+ID);
+		callableStatement.setString(1, ""+sampleID);
 		callableStatement.executeUpdate();
 		callableStatement.close();
 	}
@@ -607,7 +625,7 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	public static ArrayList<GeneAnnotation> getGeneAnnotationHistory(String gene) throws Exception{
 		ArrayList<GeneAnnotation>  geneannotations = new ArrayList<GeneAnnotation>() ;
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select geneAnnotationID, gene, curation, enteredBy, enterDate from GeneAnnotation where gene = ? order by geneAnnotationID asc");
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select geneAnnotationID, gene, curation, enteredBy, enterDate from geneAnnotation where gene = ? order by geneAnnotationID asc");
 		selectStatement.setString(1, gene);
 		ResultSet rs = selectStatement.executeQuery();
 		while(rs.next()){
@@ -618,7 +636,7 @@ public class DatabaseCommands {
 	
 	public static ArrayList<Annotation> getAnnotationHistory(Coordinate coordinate) throws Exception{
 		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from annotation where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc");
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from variantAnnotation where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc");
 		selectStatement.setString(1, coordinate.getChr());
 		selectStatement.setString(2, coordinate.getPos());
 		selectStatement.setString(3, coordinate.getRef());
@@ -634,7 +652,7 @@ public class DatabaseCommands {
 		String gene = geneAnnotation.gene;
 		String curation = geneAnnotation.curation;
 		String enteredBy = geneAnnotation.enteredBy;
-		PreparedStatement pstEnterGeneAnnotation = databaseConnection.prepareStatement("insert into GeneAnnotation (gene, curation, enteredBy, enterDate) values (?, ?, ?, ?)");
+		PreparedStatement pstEnterGeneAnnotation = databaseConnection.prepareStatement("insert into geneAnnotation (gene, curation, enteredBy, enterDate) values (?, ?, ?, ?)");
 		pstEnterGeneAnnotation.setString(1, gene);
 		pstEnterGeneAnnotation.setString(2, curation);
 		pstEnterGeneAnnotation.setString(3, enteredBy);
@@ -654,7 +672,7 @@ public class DatabaseCommands {
 		String somatic = annotation.somatic;
 		String enteredBy = annotation.enteredBy;
 		
-		PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("insert into annotation ( chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate) "
+		PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("insert into variantAnnotation ( chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate) "
 				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		pstEnterAnnotation.setString(1, chr);
 		pstEnterAnnotation.setString(2, pos);
@@ -676,10 +694,9 @@ public class DatabaseCommands {
 		Pipeline pipeline = new Pipeline(
 				row.getInt("queueID"),
 				row.getString("runID"),
-				row.getString("sampleID"),
-				row.getString("assayID"),
-				row.getString("instrumentID"),
-				row.getString("environmentID"),				
+				row.getString("sampleName"),
+				row.getString("assayName"),
+				row.getString("instrumentName"),
 				row.getString("plstatus"),
 				row.getString("timeUpdated")
 				);
@@ -687,17 +704,20 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<Pipeline> getAllPipelines() throws Exception{
-		String query = "select t3.queueID, t3.runID, t3.sampleID, t3.assayID, t3.instrumentID, t3.environmentID, t2.plStatus, t2.timeUpdated " +
-				"from sampleAnalysisQueue as t3 " +
-				"left join ( " +
-				"select pipelineStatusID, queueID, plStatus, timeUpdated " +
-				"from pipelineStatus  " +
-				"where pipelineStatusID in " +
-				"(select  max(pipelineStatusID) " +
-				"from pipelineStatus " + 
-				"group by queueID) ) as t2 " +
-				"on t3.queueID = t2.queueID " +
-				"order by t3.queueID" ;
+		String query = "select t3.queueID, t1.runID, t1.sampleName, t4.assayName, t5.instrumentName, t2.plStatus, t2.timeUpdated " +
+				" from pipelineQueue as t3 " +
+				" join samples as t1 on t1.sampleID = t3.sampleID " +
+				" join assays as t4 on t4.assayID = t1.assayID " +
+		        " join instruments as t5 on t5.instrumentID = t1.instrumentID " +
+				" left join ( " +
+				" select pipelineStatusID, queueID, plStatus, timeUpdated " +
+				" from pipelineStatus  " +
+				" where pipelineStatusID in " +
+				" (select  max(pipelineStatusID) " +
+				" from pipelineStatus " +
+				" group by queueID) ) as t2 " +
+				" on t3.queueID = t2.queueID " +
+				" order by t3.queueID" ;
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();
@@ -730,7 +750,7 @@ public class DatabaseCommands {
 		return rows;
 	}
 	
-	//TODO make this query more appropriate and generic
+	//TODO DB
 	public static ArrayList<Amplicon> getAmpliconQCData() throws Exception{
 		String query = "select amplicon.sampleID, ampliconName, ampliconCov, ID, Samples.instrument, lastName"
 				+ " from amplicon join Samples on amplicon.sampleID = Samples.ID"
@@ -746,5 +766,29 @@ public class DatabaseCommands {
 		preparedStatement.close();
 
 		return amplicons;
+	}
+	
+	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
+		
+		int averageRunTime = 0;
+		int fileSize = SSHConnection.getFileSize(pipeline) / 1000 ; // get size in KB
+		
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(pipelineLogs.runTimeSecs) as averagetime from pipelineLogs " +
+				" join pipelineQueue on pipelineQueue.queueID = pipelineLogs.queueID " +
+				" join samples on samples.sampleID = pipelineQueue.sampleID " +
+                " join assays on assays.assayId = samples.assayID " +
+                " join instruments on instruments.instrumentID = instruments.instrumentID " +
+				" where instruments.instrumentName=? and assays.assayName=? and pipelineLogs.fileSizeKB between ? and ? ;");
+		preparedStatement.setString(1, pipeline.getInstrumentID());
+		preparedStatement.setString(2, pipeline.getAssayID());
+		preparedStatement.setInt(3, fileSize - 100);
+		preparedStatement.setInt(4, fileSize + 100);
+		ResultSet rs = preparedStatement.executeQuery();
+		while(rs.next()){
+			averageRunTime = rs.getInt("averagetime");
+		}
+		preparedStatement.close();
+		//System.out.println(pipeline.getInstrumentID() + ' ' + pipeline.getAssayID() + ' ' + pipeline.getsampleName() +" filesize " + fileSize + " averageRunTime " + averageRunTime);
+		return (float)averageRunTime;
 	}
 }
