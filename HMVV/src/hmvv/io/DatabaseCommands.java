@@ -214,7 +214,7 @@ public class DatabaseCommands {
 				+ " left join assays as t6"
 				+ " on t1.assayID = t6.assayID"
 				+ " where t2.sampleID = ? ";
-		String where = "((t2.genotype = 'HIGH' or t2.genotype = 'MODERATE') and t2.altFreq >= 10 and t2.readDP >= 100)";
+		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= 10 and t2.readDepth >= 100)";
 		if(getFilteredData) {
 			where = " !" + where;
 		}
@@ -293,9 +293,9 @@ public class DatabaseCommands {
 	public static ArrayList<Mutation> getMatchingMutations(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
 
-		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp,"
-				+ " t2.altFreq, t2.readDP, t2.altReadDP, t2.chr, t2.pos, t2.ref, t2.alt, t2.sampleID, "
-				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent "
+		String query = "select t2.reported, t2.gene, t2.exon, t2.HGVSc, t2.HGVSp,"
+				+ " t2.altFreq, t2.readDepth, t2.altReadDepth, t2.chr, t2.pos, t2.ref, t2.alt, t2.sampleID, "
+				+ " t1.lastName, t1.firstName, t1.orderNumber, t3.assayName, t1.tumorSource, t1.tumorPercent "
 				+ " from sampleVariants as t2"
 				+ " left join samples as t1"
 				+ " on t2.sampleID = t1.sampleID"

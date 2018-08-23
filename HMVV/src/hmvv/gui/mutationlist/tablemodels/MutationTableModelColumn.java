@@ -237,7 +237,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			(Mutation mutation) -> mutation.getAssay());
 	
 	public static final MutationTableModelColumn IDColumn = new MutationTableModelColumn("The unique ID for the sample",
-			"ID",
+			"sampleID",
 			Integer.class,
 			(Mutation mutation) -> mutation.getSampleID());
 	
