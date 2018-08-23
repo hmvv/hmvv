@@ -364,7 +364,7 @@ public class AnnotationFrame extends JFrame {
 					);
 			Annotation latestAnnotation = mutation.getLatestAnnotation();
 			if (latestAnnotation == null || !latestAnnotation.equals(newAnnotation)) {
-				DatabaseCommands.addAnnotationCuration(newAnnotation);
+				DatabaseCommands.addVariantAnnotationCuration(newAnnotation);
 				mutation.getAnnotationHistory().add(newAnnotation);
 				parent.notifyAnnotationUpdated(newAnnotation);
 			}
