@@ -22,9 +22,9 @@ public class SampleListTableModel extends AbstractTableModel{
 	private void constructColumns(){
 		columns = new ArrayList<SampleTableModelColumn>();
 		columns.add(new SampleTableModelColumn("The unique ID",
-				"ID",
+				"sampleID",
 				Integer.class,
-				(Sample sample) -> sample.ID));
+				(Sample sample) -> sample.sampleID));
 		
 		columns.add(new SampleTableModelColumn("The assay used",
 				"Assay",
@@ -72,9 +72,9 @@ public class SampleListTableModel extends AbstractTableModel{
 				(Sample sample) -> sample.runID));
 		
 		columns.add(new SampleTableModelColumn("The instrument generated sample ID", 
-				"sampleID", 
+				"sampleName",
 				String.class,
-				(Sample sample) -> sample.sampleID));
+				(Sample sample) -> sample.sampleName));
 		
 		columns.add(new SampleTableModelColumn("The instrument generated coverage ID (Life Technologies instruments only)", 
 				"coverageID", 
@@ -115,10 +115,10 @@ public class SampleListTableModel extends AbstractTableModel{
 	public Sample getSample(String runID, String coverageID, String variantCallerID, String sampleID){
 		for(Sample s : samples){
 			//only check sampleID because the coverageID and variantCallerID can be blank depending on the instrument
-			if(s.runID.equals("") || s.sampleID.equals("")){
+			if(s.runID.equals("") || s.sampleName.equals("")){
 				continue;
 			}
-			if(s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleID.equals(sampleID)){
+			if(s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleID)){
 				return s;
 			}
 		}

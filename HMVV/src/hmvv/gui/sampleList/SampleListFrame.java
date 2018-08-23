@@ -255,8 +255,8 @@ public class SampleListFrame extends JFrame {
 				c.setForeground(customColumns[column].color);
 				Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 				for(Pipeline p : pipelines) {
-					if(currentSample.ID == p.sampleTableID) {
-						GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgress(p);
+					if(currentSample.sampleID == p.sampleTableID) {
+						GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgram(p);
 						c.setBackground(pipelineProgress.displayColor);
 						break;
 					}
@@ -471,8 +471,7 @@ public class SampleListFrame extends JFrame {
 
 	private void handleMutationClick() throws Exception{
 		Sample currentSample = getCurrentlySelectedSample();
-		ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.ID);
-		
+		ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.sampleID);
 		for(Mutation m : mutations){
 			m.setCosmicID("LOADING...");
 		}
@@ -485,7 +484,7 @@ public class SampleListFrame extends JFrame {
 	private void handleEditNoteClick(){
 		//Edit note
 		Sample currentSample = getCurrentlySelectedSample();
-		final int sampleID = currentSample.ID;
+		final int sampleID = currentSample.sampleID;
 		String lastName = currentSample.getLastName();
 		String firstName = currentSample.getFirstName();
 		String note = currentSample.getNote();
@@ -511,7 +510,7 @@ public class SampleListFrame extends JFrame {
 		//Show amplicon
 		try {
 			Sample currentSample = getCurrentlySelectedSample();
-			int sampleID = currentSample.ID;
+			int sampleID = currentSample.sampleID;
 			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(sampleID);
 			amplicon.setVisible(true);
 		} catch (Exception e) {
@@ -524,7 +523,7 @@ public class SampleListFrame extends JFrame {
 		int viewRow = table.getSelectedRow();
 		final int modelRow = table.convertRowIndexToModel(viewRow);
 		Sample currentSample = getCurrentlySelectedSample();
-		int sampleID = currentSample.ID;
+		int sampleID = currentSample.sampleID;
 		String enteredBy = currentSample.enteredBy;
 		String currentUser = SSHConnection.getUserName();
 

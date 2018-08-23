@@ -31,24 +31,19 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				(Pipeline pipeline) -> pipeline.runID));
 
 		columns.add(new PipelineTableModelColumn("The sample used",
-				"sampleID",
+				"sampleName",
 				String.class,
-				(Pipeline pipeline) -> pipeline.sampleID));
+				(Pipeline pipeline) -> pipeline.sampleName));
 
 		columns.add(new PipelineTableModelColumn("The assay used", 
 				"assayID", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.assayID));
+				(Pipeline pipeline) -> pipeline.assayName));
 
 		columns.add(new PipelineTableModelColumn("The instrument used", 
 				"instrumentID", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.instrumentID));
-
-		columns.add(new PipelineTableModelColumn("The environment used", 
-				"environmentID", 
-				String.class,
-				(Pipeline pipeline) -> pipeline.environmentID));
+				(Pipeline pipeline) -> pipeline.instrumentName));
 
 		columns.add(new PipelineTableModelColumn("The pipeline status", 
 				"status", 
@@ -59,11 +54,22 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				"runTime", 
 				String.class,
 				(Pipeline pipeline) -> pipeline.runTime));
-
+		
+		columns.add(new PipelineTableModelColumn("The pipeline program", 
+				"program", 
+				String.class,
+				(Pipeline pipeline) -> GUIPipelineProgress.getProgram(pipeline).getDisplayString()));
+		
 		columns.add(new PipelineTableModelColumn("The pipeline progress", 
 				"progress", 
 				String.class,
-				(Pipeline pipeline) -> GUIPipelineProgress.getProgress(pipeline).getDisplayString()));
+				(Pipeline pipeline) -> {
+					try {
+						return GUIPipelineProgress.getProgress(pipeline);
+					} catch (Exception e) {
+						return "Error in obtaining Pipeline progress." + e.getMessage();
+					}
+				}));
 	}
 
 	public Pipeline getPipeline(int row){

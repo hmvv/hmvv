@@ -9,11 +9,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowSorter;
@@ -76,10 +78,10 @@ public class MonitorPipelines extends JDialog {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				int modelRow = table.convertRowIndexToModel(row);
-				GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgress(tableModel.getPipeline(modelRow));
+				GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgram(tableModel.getPipeline(modelRow));
 				if(pipelineProgress == GUIPipelineProgress.COMPLETE) {
 					c.setBackground(GUICommonTools.COMPLETE_COLOR);
-				}else {					
+				}else {
 					c.setBackground(pipelineProgress.displayColor);
 				}
 				return c;
@@ -102,6 +104,9 @@ public class MonitorPipelines extends JDialog {
 
 		btnRefresh = new JButton("Refresh");
 		btnRefresh.setFont(GUICommonTools.TAHOMA_BOLD_12);
+		
+		TableColumn progressColumn = table.getColumnModel().getColumn(8);
+		progressColumn.setCellRenderer(new ProgressCellRenderer());
 	}
 
 	private void layoutComponents(){
@@ -250,7 +255,32 @@ public class MonitorPipelines extends JDialog {
 		
 		JOptionPane.showMessageDialog(this, tableSP,
 				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
-						currentPipeline.instrumentID, currentPipeline.assayID, currentPipeline.runID, currentPipeline.sampleID),
+						currentPipeline.instrumentName, currentPipeline.assayName, currentPipeline.runID, currentPipeline.sampleName),
 				JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public class ProgressCellRenderer extends JProgressBar implements TableCellRenderer {
+		private static final long serialVersionUID = 1L;
+
+		ProgressCellRenderer() {
+	        super(0, 100);
+	        setOpaque(true);
+	        setStringPainted(true);
+	        setBackground(GUICommonTools.PROGRESS_BACKGROUND_COLOR);
+	        setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+	        setForeground(GUICommonTools.PROGRESS_FOREGROUND_COLOR);
+	    }
+
+	    @Override
+	    public boolean isDisplayable() { 
+	        return true; 
+	    }
+
+	    @Override
+	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) { 
+	        this.setValue((int) value);
+	        this.setString(value.toString()+'%');
+	        return this;
+	    }
 	}
 }

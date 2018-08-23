@@ -5,22 +5,19 @@ public class Pipeline {
 	public final Integer queueID;
 	public final Integer sampleTableID;
 	public final String runID;
-	public final String sampleID;
-	public final String assayID;
-	public final String instrumentID;
-	public final String environmentID;
+	public final String sampleName;
+	public final String assayName;
+	public final String instrumentName;
 	public final String status;
 	public final String runTime;
 	
-	
-	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleID , String assayID, String instrumentID, String environmentID, String status, String runTime) {
+	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleName , String assayName, String instrumentName, String status, String runTime) {
         this.queueID = queueID;
         this.sampleTableID = sampleTableID;
         this.runID = runID;
-        this.sampleID = sampleID;
-        this.assayID = assayID;
-        this.instrumentID = instrumentID;
-        this.environmentID = environmentID;
+        this.sampleName = sampleName;
+        this.assayName = assayName;
+        this.instrumentName = instrumentName;
         this.status = status;
         this.runTime = runTime;
 	}
@@ -33,20 +30,16 @@ public class Pipeline {
 		return runID;
 	}
 
-	public String getSampleID() {
-		return sampleID;
+	public String getsampleName() {
+		return sampleName;
 	}
 
-	public String getAssayID() {
-		return assayID;
+	public String getAssayName() {
+		return assayName;
 	}
 
-	public String getInstrumentID() {
-		return instrumentID;
-	}
-
-	public String getEnvironmentID() {
-		return environmentID;
+	public String getInstrumentName() {
+		return instrumentName;
 	}
 
 	public String getStatus() {

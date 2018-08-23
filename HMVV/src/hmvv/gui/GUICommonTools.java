@@ -14,10 +14,15 @@ import java.text.SimpleDateFormat;
 import javax.swing.JFrame;
 
 public class GUICommonTools {
-	public static final Color ERROR_COLOR = new Color(255,51,51);
-	public static final Color COMPLETE_COLOR = new Color(102,255,102);
+//	public static final Color ERROR_COLOR = new Color(255,51,51);
+//	public static final Color COMPLETE_COLOR = new Color(102,255,102);
+	public static final Color ERROR_COLOR = new Color(255,204,204);
+	public static final Color COMPLETE_COLOR = new Color(204,255,204);
 	public static final Color WHITE_COLOR = Color.WHITE;
 	public static final Color RUNNING_COLOR = new Color(255,255,204);
+	
+	public static final Color PROGRESS_BACKGROUND_COLOR = Color.YELLOW;
+	public static final Color PROGRESS_FOREGROUND_COLOR = Color.GREEN.darker();
 	
 	public static Font TAHOMA_PLAIN_13 = new Font("Tahoma", Font.BOLD, 13);
 	

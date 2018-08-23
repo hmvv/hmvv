@@ -688,7 +688,7 @@ public class MutationListFrame extends JFrame {
 	private void getFilteredMutationData() {
 		try{
 			loadFilteredMutationsButton.setText("Loading...");
-			ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample.ID);
+			ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample.sampleID);
 			for(int i = 0; i < mutations.size(); i++) {
 				if(isWindowClosed){
 					return;
