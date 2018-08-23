@@ -101,7 +101,7 @@ public class ViewAmpliconFrame extends JFrame {
 		for(Amplicon amplicon : DatabaseCommands.getFailedAmplicon(sampleID)){
 			textArea.append(amplicon.ampliconName);
 			textArea.append("\t");
-			textArea.append(amplicon.ampliconCov);
+			textArea.append(amplicon.readDepth);
 			textArea.append("\n");
 		}
 		
