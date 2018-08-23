@@ -85,8 +85,8 @@ public class DatabaseCommands {
 		}
 
 		//need coverage/callerID placeholder for command-line
-        if (coverageID==""){coverageID="-";}
-        if (variantCallerID==""){variantCallerID="-";}
+        if (coverageID.equals("")){coverageID="-";}
+        if (variantCallerID.equals("")){variantCallerID="-";}
 
 		String enterSample = String.format("insert into samples "
 				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy) "
@@ -326,22 +326,15 @@ public class DatabaseCommands {
 				"sampleVariants.chr, sampleVariants.pos, sampleVariants.ref, sampleVariants.alt, sampleVariants.consequence, sampleVariants.Sift, sampleVariants.PolyPhen, " +
 				
 				//sample fields
-				"samples.lastName, samples.firstName, samples.orderNumber, samples.tumorSource, samples.tumorPercent, sampleVariants.sampleID, assays.assayName as assay, " +
+				"samples.lastName, samples.firstName, samples.orderNumber, samples.tumorSource, samples.tumorPercent, sampleVariants.sampleID, assays.assayName, " +
 				
 				//reference database fields
 				"g1000Table.altCount, g1000Table.totalCount, g1000Table.altGlobalFreq, g1000Table.americanFreq, g1000Table.asianFreq, g1000Table.afrFreq, g1000Table.eurFreq, " +
-				"clinvarTable.origin, clinvarTable.clinicalAllele, clinvarTable.clinicalSig, clinvarTable.clinicalAcc, " +
-				"cosmicTable.cosmicID, " + 
+				"clinvarTable.origin, clinvarTable.clinicalAllele, clinvarTable.clinicalSig, clinvarTable.clinicalAcc " +
 				
-				//occurrenceCount
-				"occurrenceCount.occurrence " +
-				
-				"from sampleVariants" + 
-				
+				"from sampleVariants " + 
+
 				//joins
-				" left join db_cosmic_grch37v86 as cosmicTable " +
-				"on sampleVariants.chr = cosmicTable.chr and sampleVariants.pos = cosmicTable.pos and sampleVariants.ref = cosmicTable.ref and sampleVariants.alt = cosmicTable.alt " +
-				
 				"left join db_g1000 as g1000Table " +
 				"on sampleVariants.chr = g1000Table.chr and sampleVariants.pos = g1000Table.pos and sampleVariants.ref = g1000Table.ref and sampleVariants.alt = g1000Table.alt " +
 				
@@ -352,18 +345,8 @@ public class DatabaseCommands {
 				"on sampleVariants.sampleID = samples.sampleID " +
 				
 				"left join assays " +
-				"on samples.assayID = assays.assayID " +
-				
-				//occurrenceCount temp table
-				"left join " +
-					"(select chr, pos, ref, alt, assayID, count(*) as occurrence from " + 
-						"(select chr, pos, ref, alt, samples.sampleID, assayID " + 
-						"from sampleVariants join samples on sampleVariants.sampleID = samples.sampleID " +
-						"where impact != 'No Call' " +
-						"group by chr, pos, ref, alt, sampleID, assayID) as unfilteredOccurenceCount " +
-					"group by chr,pos,ref,alt, assayID " +
-				") as occurrenceCount " +
-				"on sampleVariants.chr = occurrenceCount.chr and sampleVariants.pos = occurrenceCount.pos and sampleVariants.ref = occurrenceCount.ref and sampleVariants.alt = occurrenceCount.alt and samples.assayID = occurrenceCount.assayID ";
+				"on samples.assayID = assays.assayID ";
+		
 		String whereClause = "";
 
 		if(!assay.equals("All")){
