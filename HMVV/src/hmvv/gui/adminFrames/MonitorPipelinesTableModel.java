@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
-import hmvv.gui.GUIPipelineProgress;
 import hmvv.model.Pipeline;
 
 public class MonitorPipelinesTableModel extends AbstractTableModel{
@@ -58,18 +57,12 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 		columns.add(new PipelineTableModelColumn("The pipeline program", 
 				"program", 
 				String.class,
-				(Pipeline pipeline) -> GUIPipelineProgress.getProgram(pipeline).getDisplayString()));
+				(Pipeline pipeline) -> pipeline.pipelineProgress.getDisplayString()));
 		
 		columns.add(new PipelineTableModelColumn("The pipeline progress", 
 				"progress", 
 				String.class,
-				(Pipeline pipeline) -> {
-					try {
-						return GUIPipelineProgress.getProgress(pipeline);
-					} catch (Exception e) {
-						return "Error in obtaining Pipeline progress." + e.getMessage();
-					}
-				}));
+				(Pipeline pipeline) -> pipeline.getProgress()));
 	}
 
 	public Pipeline getPipeline(int row){
@@ -79,6 +72,20 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 	public void resetModel() {
 		pipelines.clear();
 		fireTableDataChanged();
+	}
+	
+	public void addOrUpdatePipeline(Pipeline pipeline) {
+		for(int i = 0; i < pipelines.size(); i++) {
+			Pipeline p = pipelines.get(i);
+			if(p.queueID == pipeline.queueID) {
+				pipelines.set(i, pipeline);
+				fireTableRowsUpdated(i, i);
+				return;
+			}
+		}
+		
+		//not found, so add to model
+		addPipeline(pipeline);
 	}
 	
 	public void addPipeline(Pipeline pipeline){

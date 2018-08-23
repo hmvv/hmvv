@@ -85,13 +85,13 @@ public class DatabaseCommands {
 		}
 
 		//need coverage/callerID placeholder for command-line
-        if (coverageID==""){coverageID="na";}
-        if (variantCallerID==""){variantCallerID="na";}
+        if (coverageID==""){coverageID="-";}
+        if (variantCallerID==""){variantCallerID="-";}
 
 		String enterSample = String.format("insert into samples "
 				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy) "
 				+ "values ( (select assayID from assays where assayName='"+assay+"'), (select instrumentID from instruments where instrumentName='"+instrument+"'), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )",
-				runID, sampleName, coverageID, variantCallerID, lastName, firstName, orderNumber, pathologyNumber, tumorSource, tumorPercent,  runDate, note,enteredBy);
+				runID, sampleName, coverageID, variantCallerID, lastName, firstName, orderNumber, pathologyNumber, tumorSource, tumorPercent, runDate, note, enteredBy);
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
 		pstEnterSample.executeUpdate();
 
@@ -807,14 +807,14 @@ public class DatabaseCommands {
 				" where instruments.instrumentName=? and assays.assayName=? and pipelineLogs.fileSizeKB between ? and ? ;");
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
-		preparedStatement.setInt(3, fileSize - 100);
-		preparedStatement.setInt(4, fileSize + 100);
+		preparedStatement.setInt(3, fileSize - 1000);
+		preparedStatement.setInt(4, fileSize + 1000);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 			averageRunTime = rs.getInt("averagetime");
 		}
 		preparedStatement.close();
-		//System.out.println(pipeline.getInstrumentID() + ' ' + pipeline.getAssayID() + ' ' + pipeline.getsampleName() +" filesize " + fileSize + " averageRunTime " + averageRunTime);
+		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() +" filesize " + fileSize + " averageRunTime " + averageRunTime);
 		return (float)averageRunTime;
 	}
 }

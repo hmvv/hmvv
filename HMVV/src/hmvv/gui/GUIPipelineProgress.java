@@ -33,7 +33,6 @@ public enum GUIPipelineProgress {
 	}
 	
 	public static GUIPipelineProgress getProgram(Pipeline pipeline){
-		// TODO - need to think better way of doing this
 
 		//default to RUNNING
 		GUIPipelineProgress progress = GUIPipelineProgress.RUNNING;

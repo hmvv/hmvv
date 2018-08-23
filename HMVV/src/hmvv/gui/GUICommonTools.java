@@ -31,8 +31,8 @@ public class GUICommonTools {
 	public static Font TAHOMA_BOLD_13 = new Font("Tahoma", Font.BOLD, 13);
 	public static Font TAHOMA_BOLD_14 = new Font("Tahoma", Font.BOLD, 14);
 	
-	//public static final SimpleDateFormat extendedDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	public static final SimpleDateFormat extendedDateFormat = new SimpleDateFormat("M/d/y HH:mm:ss");
+	public static final SimpleDateFormat extendedDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	public static final SimpleDateFormat extendedDateFormat2 = new SimpleDateFormat("M/d/y HH:mm:ss");
 	public static final SimpleDateFormat shortDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public static Rectangle getScreenBounds(Component parent){

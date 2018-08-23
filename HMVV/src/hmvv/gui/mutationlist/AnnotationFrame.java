@@ -174,7 +174,7 @@ public class AnnotationFrame extends JFrame {
 	}
 	
 	private void setCommonAnnotationLabel(CommonAnnotation commonAnnotation, JLabel label) {
-		label.setText("Entered By: " + commonAnnotation.enteredBy + "   Date: " + GUICommonTools.extendedDateFormat.format(commonAnnotation.enterDate));
+		label.setText("Entered By: " + commonAnnotation.enteredBy + "   Date: " + GUICommonTools.extendedDateFormat2.format(commonAnnotation.enterDate));
 	}
 	
 	private void layoutComponents(){
