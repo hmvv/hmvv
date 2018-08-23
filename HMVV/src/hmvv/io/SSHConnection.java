@@ -17,6 +17,7 @@ import com.jcraft.jsch.SftpProgressMonitor;
 
 import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
+import hmvv.model.Pipeline;
 import hmvv.model.Sample;
 
 public class SSHConnection {
@@ -115,7 +116,7 @@ public class SSHConnection {
 	
 	public static File loadBAMForIGV(Sample sample, SftpProgressMonitor progressMonitor) throws Exception {
 		String runID = sample.runID;
-		String sampleID = sample.sampleID;
+		String sampleID = sample.sampleName;
 		String callerID = sample.callerID;
 		String instrument =  sample.instrument;
 		
@@ -152,11 +153,9 @@ public class SSHConnection {
 	}
 	
 	private static File loadIlluminaNextseqHeme_BAM(String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String instrument = "nextSeq_heme";
-		//TODO this will need to look at our environment to get the correct BAM file
-		//String command = String.format("ls /home/environments/" + Configurations.getEnvironment() + "/%s/*_%s_*/%s*.sort.bam", instrument, runID, sampleID);
-
-		String command = String.format("ls /home/%s/*_%s_*/%s*.sort.bam", instrument, runID, sampleID);
+		String instrument = "nextseq";
+		//TODO test this
+		String command = String.format("ls /home/environments/%s/nextseqAnalysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
 	
@@ -332,4 +331,23 @@ public class SSHConnection {
 			//TODO ignore this? The user may have the temp folder or the file open
 		}
 	}
+
+	
+	public static int getFileSize(Pipeline pipeline) throws Exception {
+		String command="";
+		if  ( pipeline.getInstrumentName().equals("miseq")) {
+			command = String.format("ls -l /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s_*.vcf | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
+		} else if  ( pipeline.getInstrumentName().equals("nextseq")) {
+			command = String.format("ls -l /home/%s/*_%s_*/out1/%s*_R1_001.fastq.gz | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
+		}else if  ( pipeline.getInstrumentName().equals("proton")) {
+			command = String.format("ls -l /home/%s/*%s/plugin_out/variantCaller_out*/%s/TSVC_variants.vcf | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
+		}
+		CommandResponse commandResult = SSHConnection.executeCommandAndGetOutput(command);
+		return Integer.parseInt(commandResult.responseLines.get(0));
+	}
 }
+
+
+
+
+

@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,7 +26,6 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
-import hmvv.io.SampleEnterCommands;
 import hmvv.model.Sample;
 
 public class EnterSample extends JDialog {
@@ -131,7 +131,7 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("RunID", runIDPanel));
 		mainPanel.add(new RowPanel("CoverageID", comboBoxCoverageIDList));
 		mainPanel.add(new RowPanel("VariantCallerID", comboBoxVariantCallerIDList));
-		mainPanel.add(new RowPanel("SampleID", comboBoxSample));
+		mainPanel.add(new RowPanel("SampleName", comboBoxSample));
 		mainPanel.add(new RowPanel("Last Name", textlastName));
 		mainPanel.add(new RowPanel("First Name", textFirstName));
 		mainPanel.add(new RowPanel("Order Number", textOrderNumber));
@@ -368,7 +368,7 @@ public class EnterSample extends JDialog {
 	
 	private void enterData() throws Exception{
 		Sample sample = constructSampleFromTextFields();
-		SampleEnterCommands.enterData(sample);
+		DatabaseCommands.insertDataIntoDatabase(sample);
 		parent.addSample(sample);
 		
 		JOptionPane.showMessageDialog(this, "Success: Sample entered");
@@ -378,7 +378,7 @@ public class EnterSample extends JDialog {
 	}
 	
 	private Sample constructSampleFromTextFields() throws Exception{
-		int ID = -1;//This will be computed by the database when the sample is inserted
+		int sampleID = -1;//This will be computed by the database when the sample is inserted
 		String assay = comboBoxAssay.getSelectedItem().toString();
 		String instrument = comboBoxInstrument.getSelectedItem().toString();
 		String lastName = textlastName.getText();
@@ -388,7 +388,7 @@ public class EnterSample extends JDialog {
 		String tumorSource = textTumorSource.getText();
 		String tumorPercent = textPercent.getText();
 		String runID = textRunID.getText();
-		String sampleID = comboBoxSample.getSelectedItem().toString();
+		String sampleName = comboBoxSample.getSelectedItem().toString();
 		
 		String coverageID = "";
 		if(comboBoxCoverageIDList.getSelectedItem() != null){
@@ -399,15 +399,15 @@ public class EnterSample extends JDialog {
 			variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
 		}
 		
-		String runDate = SampleEnterCommands.getDateString(instrument, runID);
+		String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
 		String note = textNote.getText();
 		String enteredBy = SSHConnection.getUserName();
 		
 		if(lastName.equals("") || firstName.equals("") || orderNumber.equals("") ){
 			throw new Exception("firstName, lastName, orderNumber are required");
 		}else {
-			return new Sample(ID, assay, instrument, lastName, firstName, orderNumber,
-				pathologyNumber, tumorSource, tumorPercent, runID, sampleID, coverageID, variantCallerID, runDate, note, enteredBy);
+			return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, note, enteredBy);
 		}
 	}
 	

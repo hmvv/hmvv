@@ -1,71 +1,24 @@
 package hmvv.model;
 
-public class Annotation {
+import java.util.Date;
+
+public class Annotation extends CommonAnnotation{
 	
-	public enum STATUS{open,close};
+	public final Coordinate coordinate;
+	public final String classification;
+	public final String curation;
+	public final String somatic;
 	
-	private Coordinate coordinate;
-	private String classification;
-	private String curation;
-	private String somatic;
-	private String updateStatus;
-	private STATUS editStatus;
-	
-	public Annotation(Coordinate coordinate, String classification, String curation, String somatic, String updateStatus, STATUS editStatus) {
+	public Annotation(Integer annotationID, Coordinate coordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate) {
+		super(annotationID, enteredBy, enterDate);
 		this.coordinate = coordinate;
 		this.classification = classification;
 		this.curation = curation;
 		this.somatic = somatic;
-		this.updateStatus = updateStatus;
-		this.editStatus = editStatus;
 	}
 	
-	public Annotation(Coordinate coordinate, STATUS editStatus) {
-		this(coordinate, "Not set", "", "Not set", "", editStatus);
-	}
-
-	public void setClassification(String classification) {
-		this.classification = classification;
-	}
-
-	public void setCuration(String curation) {
-		this.curation = curation;
-	}
-
-	public void setSomatic(String somatic) {
-		this.somatic = somatic;
-	}
-
-	public void setUpdateStatus(String updateStatus) {
-		this.updateStatus = updateStatus;
-	}
-	
-	public void setEditStatus(STATUS editStatus){
-		this.editStatus = editStatus;
-	}
-	
-	public Coordinate getCoordinate(){
-		return coordinate;
-	}
-
-	public String getClassification() {
-		return classification;
-	}
-
-	public String getCuration() {
-		return curation;
-	}
-
-	public String getSomatic() {
-		return somatic;
-	}
-
-	public String getUpdateStatus() {
-		return updateStatus;
-	}
-	
-	public STATUS getEditStatus(){
-		return editStatus;
+	public Annotation(Coordinate coordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate) {
+		this(-1, coordinate, classification, curation, somatic, enteredBy, enterDate);
 	}
 	
 	public String getSomaticDisplayText() {
@@ -90,14 +43,21 @@ public class Annotation {
 		}
 	}
 	
-	public boolean isAnnotationSet(){
-		if(!classification.equals("Not set")){
-			return true;
-		}
-		if(!somatic.equals("Not set")){
-			return true;
-		}
-		if(!curation.equals("")){
+	public boolean equals(Object o) {
+		if(o instanceof Annotation) {
+			Annotation other = (Annotation) o;
+			if(!other.coordinate.equals(coordinate)) {
+				return false;
+			}
+			if(!other.classification.equals(classification)) {
+				return false;
+			}
+			if(!other.curation.equals(curation)) {
+				return false;
+			}
+			if(!other.somatic.equals(somatic)) {
+				return false;
+			}
 			return true;
 		}
 		return false;

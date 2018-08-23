@@ -15,4 +15,9 @@ public class PipelineStatus {
 		this.pipelineStatus = pipelineStatus;
 		this.dateUpdated = dateUpdated;
 	}
+
+	public Date getDateUpdated() {
+		return dateUpdated;
+	}
+	
 }

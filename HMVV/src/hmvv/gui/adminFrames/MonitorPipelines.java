@@ -1,6 +1,5 @@
 package hmvv.gui.adminFrames;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -8,18 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
+import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -28,24 +18,31 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.GUIPipelineProgress;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineStatus;
 
 public class MonitorPipelines extends JDialog {
-
+	
 	private static final long serialVersionUID = 1L;
 
-	private JButton btnRefresh;
+	private JMenuBar menuBar;
 
+	//Asynchronous sample status updates
+	private Thread pipelineRefreshThread;
+	private final int secondsToSleep = 10;
+	private volatile long timeLastRefreshed = 0;
+	private volatile JMenuItem refreshLabel;
+	
 	private TableRowSorter<MonitorPipelinesTableModel> sorter;
-
+	
 	//Table
 	private JTable table;
 	private MonitorPipelinesTableModel tableModel;
 	private JScrollPane tableScrollPane;
-
+	
 	/**
 	 * Create the frame.
 	 * @throws Exception 
@@ -77,13 +74,11 @@ public class MonitorPipelines extends JDialog {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				int modelRow = table.convertRowIndexToModel(row);
-				String pipelineProgress = tableModel.getPipeline(modelRow).getProgress();
-				if(pipelineProgress.equals("ERROR")) {					
-					c.setBackground(new Color(255,51,51));
-				}else if(pipelineProgress.equals("Complete")) {					
-					c.setBackground(new Color(102,255,102));
+				GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgram(tableModel.getPipeline(modelRow));
+				if(pipelineProgress == GUIPipelineProgress.COMPLETE) {
+					c.setBackground(GUICommonTools.COMPLETE_COLOR);
 				}else {
-					c.setBackground(new Color(255,255,204));
+					c.setBackground(pipelineProgress.displayColor);
 				}
 				return c;
 			}
@@ -103,8 +98,14 @@ public class MonitorPipelines extends JDialog {
 		tableScrollPane = new JScrollPane();
 		tableScrollPane.setViewportView(table);
 
-		btnRefresh = new JButton("Refresh");
-		btnRefresh.setFont(GUICommonTools.TAHOMA_BOLD_12);
+		menuBar = new JMenuBar();
+		refreshLabel = new JMenuItem("");
+		refreshLabel.setEnabled(false);
+		menuBar.add(refreshLabel);
+		setJMenuBar(menuBar);
+
+		TableColumn progressColumn = table.getColumnModel().getColumn(8);
+		progressColumn.setCellRenderer(new ProgressCellRenderer());
 	}
 
 	private void layoutComponents(){
@@ -112,8 +113,6 @@ public class MonitorPipelines extends JDialog {
 		groupLayout.setHorizontalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(59)
-						.addComponent(btnRefresh)
 						.addGap(127))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
@@ -123,8 +122,6 @@ public class MonitorPipelines extends JDialog {
 		groupLayout.setVerticalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(25)
-						.addComponent(btnRefresh)
 						.addGap(25)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
 						.addGap(25))
@@ -170,16 +167,6 @@ public class MonitorPipelines extends JDialog {
 			}
 		});		
 
-		btnRefresh.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try{
-					buildModelFromDatabase();
-				}catch (Exception e){
-					JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
-				}
-			}
-		});
 	}
 
 	private void buildModelFromDatabase() throws Exception {
@@ -189,12 +176,49 @@ public class MonitorPipelines extends JDialog {
 			tableModel.addPipeline(p);
 		}
 
+		pipelineRefreshThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//loop forever (will exit when JFrame is closed).
+				while(true) {
+					long currentTimeInMillis = System.currentTimeMillis();
+					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
+                        updatePipelinesASynch();
+					}
+
+					setRefreshLabelText();
+
+					try {
+						Thread.sleep(1 * 1000);
+					} catch (InterruptedException e) {}
+				}
+			}
+		});
+
+		pipelineRefreshThread.start();
+
 	}
 
-	public void addPipeline(Pipeline pipeline){
-		tableModel.addPipeline(pipeline);
-	}
+    private void updatePipelinesASynch() {
+        try {
+            tableModel.resetModel();
+            ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
+            for(Pipeline p : pipelines) {
+                tableModel.addPipeline(p);
+            }
+            timeLastRefreshed = System.currentTimeMillis();
+        } catch (Exception e) {
+            // Silently fail. Don't want to spam user every interval.
+        }
+    }
 
+	private void setRefreshLabelText() {
+		long currentTimeInMillis = System.currentTimeMillis();
+		long timeToRefresh = timeLastRefreshed + (1000 * secondsToSleep);
+		long diff = timeToRefresh - currentTimeInMillis;
+		long secondsRemaining = diff / 1000;
+		refreshLabel.setText("Table will refresh in : " + secondsRemaining + "s");
+	}
 	private Pipeline getCurrentlySelectedPipeline(){
 		int viewRow = table.getSelectedRow();
 		int modelRow = table.convertRowIndexToModel(viewRow);
@@ -210,7 +234,7 @@ public class MonitorPipelines extends JDialog {
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
 			
-			private final SimpleDateFormat dateFormat = new SimpleDateFormat("M/d/y H:m:ss");
+			
 			
 			@Override 
 			public final boolean isCellEditable(int row, int column) {
@@ -242,7 +266,7 @@ public class MonitorPipelines extends JDialog {
 				if(column == 0) {
 					return pipelineStatus.pipelineStatus;
 				}else {
-					return dateFormat.format(pipelineStatus.dateUpdated);
+					return GUICommonTools.extendedDateFormat2.format(pipelineStatus.dateUpdated);
 				}
 			}
 			
@@ -258,7 +282,38 @@ public class MonitorPipelines extends JDialog {
 		
 		JOptionPane.showMessageDialog(this, tableSP,
 				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
-						currentPipeline.instrumentID, currentPipeline.assayID, currentPipeline.runID, currentPipeline.sampleID),
+						currentPipeline.instrumentName, currentPipeline.assayName, currentPipeline.runID, currentPipeline.sampleName),
 				JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public class ProgressCellRenderer extends JProgressBar implements TableCellRenderer {
+		private static final long serialVersionUID = 1L;
+
+		ProgressCellRenderer() {
+	        super(0, 100);
+	        setOpaque(true);
+	        setStringPainted(true);
+	        setBackground(GUICommonTools.PROGRESS_BACKGROUND_COLOR);
+	        setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+	        setForeground(GUICommonTools.PROGRESS_FOREGROUND_COLOR);
+	    }
+
+	    @Override
+	    public boolean isDisplayable() { 
+	        return true; 
+	    }
+
+	    @Override
+	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) { 
+	        if (value instanceof String){
+                this.setValue(0);
+                this.setString("ERROR");
+            } else {
+                this.setValue((int) value);
+                this.setString(value.toString()+'%');
+            }
+
+	        return this;
+	    }
 	}
 }

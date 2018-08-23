@@ -15,12 +15,12 @@ public class Mutation {
 	private String dbSNPID;
 	private ArrayList<String> cosmicIDs;
 	private String type;
-	private String genotype;
+	private VariantPredictionClass variantPredictionClass;
 	private Double altFreq;
 	private Integer readDP;
 	private Integer altReadDP;
 	private Integer occurrence;
-	private Annotation annotationObject;
+	private ArrayList<Annotation> annotationHistory;
 	
 	//ClinVar
 	private String origin;
@@ -148,12 +148,12 @@ public class Mutation {
 		this.type = type;
 	}
 
-	public String getGenotype() {
-		return genotype;
+	public VariantPredictionClass getVariantPredictionClass() {
+		return variantPredictionClass;
 	}
 
-	public void setGenotype(String genotype) {
-		this.genotype = genotype;
+	public void setVariantPredictionClass(VariantPredictionClass variantPredictionClass) {
+		this.variantPredictionClass = variantPredictionClass;
 	}
 
 	public Double getAltFreq() {
@@ -396,11 +396,18 @@ public class Mutation {
 		this.tumorPercent = tumorPercent;
 	}
 	
-	public Annotation getAnnotationObject() {
-		return annotationObject;
+	public ArrayList<Annotation> getAnnotationHistory() {
+		return annotationHistory;
 	}
 	
-	public void setAnnotationObject(Annotation annotationObject) {
-		this.annotationObject = annotationObject;
+	public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
+		this.annotationHistory = annotationHistory;
+	}
+	
+	public Annotation getLatestAnnotation() {
+		if(annotationHistory.size() == 0) {
+			return null;
+		}
+		return annotationHistory.get(annotationHistory.size() - 1);
 	}
 }

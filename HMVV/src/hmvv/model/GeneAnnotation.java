@@ -1,37 +1,33 @@
 package hmvv.model;
 
-public class GeneAnnotation {
-	private String gene;
-	private String curation;
-	private boolean locked;
+import java.util.Date;
+
+public class GeneAnnotation extends CommonAnnotation{
 	
-	public GeneAnnotation(String gene, String curation, boolean locked) {
+	public final String gene;
+	public final String curation;
+	
+	public GeneAnnotation(String gene, String curation, String enteredBy, Date enterDate) {
+		this(-1, gene, curation, enteredBy, enterDate);
+	}
+
+	public GeneAnnotation(Integer geneAnnotationID, String gene, String curation, String enteredBy, Date enterDate) {
+		super(geneAnnotationID, enteredBy, enterDate);
 		this.gene = gene;
 		this.curation = curation;
-		this.locked = locked;
 	}
 	
-	public void setGene(String gene) {
-		this.gene = gene;
-	}
-	
-	public void setCuration(String curation) {
-		this.curation = curation;
-	}
-
-	public String getGene() {
-		return gene;
-	}
-
-	public String getCuration() {
-		return curation;
-	}
-
-	public boolean isLocked() {
-		return locked;
-	}
-
-	public void setLocked(boolean locked) {
-		this.locked = locked;
+	public boolean equals(Object o) {
+		if(o instanceof GeneAnnotation) {
+			GeneAnnotation other = (GeneAnnotation) o;
+			if(!other.gene.equals(gene)) {
+				return false;
+			}
+			if(!other.curation.equals(curation)) {
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 }

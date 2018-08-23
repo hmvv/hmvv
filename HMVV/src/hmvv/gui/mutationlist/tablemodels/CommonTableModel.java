@@ -23,6 +23,10 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 		return mutationList.getMutation(row);
 	}
 	
+	public final void addFilteredMutation(Mutation mutation) {
+		mutationList.addFilteredMutation(mutation);
+	}
+	
 	/**
 	 * Here we are assuming all tables have the reported field on column 0
 	 */

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
@@ -15,6 +16,7 @@ import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
+import hmvv.model.VariantPredictionClass;
 
 public class MutationReportGenerator{
 	public static String generateLongReport(MutationList mutationList) throws Exception{
@@ -33,9 +35,8 @@ public class MutationReportGenerator{
 			String mutationText = gene + ":" + cDNA + ";" + codon;
 			String dbSNP = mutation.getDbSNPID();
 			Coordinate coordinate = mutation.getCoordinate();
-			Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
 			String orderNumber = mutation.getOrderNumber();
-			String genotype = mutation.getGenotype();
+			VariantPredictionClass variantPredictionClass = mutation.getVariantPredictionClass();
 			String cosmicIDs = mutation.cosmicIDsToString(",");
 			int occurrence = mutation.getOccurrence();
 			
@@ -43,14 +44,16 @@ public class MutationReportGenerator{
 			report.append("OrderNumber: " + orderNumber + "\n");
 			report.append("Mutation Info: " + mutationText + "\n");
 			report.append("Coordinate: " + coordinate.getCoordinateAsString() + "\n");
-			report.append("Genotype: " + genotype + "\n");
+			report.append("VariantPredictionClass: " + variantPredictionClass + "\n");
 			report.append("dbSNP ID: " + dbSNP + "\n");
 			report.append("Cosmic IDs: " + cosmicIDs + "\n");
 			report.append("Occurence: " + occurrence + "\n");
-			if(annotation.isAnnotationSet()){
-				String somatic = annotation.getSomatic();
-				String classification = annotation.getClassification();
-				String curation = annotation.getCuration();
+			
+			Annotation annotation = mutation.getLatestAnnotation();
+			if(annotation != null) {
+				String somatic = annotation.somatic;
+				String classification = annotation.classification;
+				String curation = annotation.curation;
 				report.append("Somatic: " + somatic + "\n");
 				report.append("Classification: " + classification + "\n");
 				report.append("Curation Note: " + curation + "\n" + "\n");
@@ -72,20 +75,23 @@ public class MutationReportGenerator{
 			String codon = mutation.getHGVSp();
 			String gene = mutation.getGene();
 			String mutationText = gene + ":" + cDNA + ";" + codon;
-			Coordinate coordinate = mutation.getCoordinate();
-			Annotation annotation = DatabaseCommands.getAnnotation(coordinate);
-			String curation = annotation.getCuration();
-			
-			GeneAnnotation geneAnnotation = DatabaseCommands.getGeneAnnotation(gene);
-			
-			
-			report.append("Mutation: " + mutationText + "\n");
-			if(curation.length() > 0) {
-				report.append("Curation Note: " + curation + "\n");
+			Annotation annotation = mutation.getLatestAnnotation();
+			if(annotation != null) {
+				String curation = annotation.curation;
+				if(curation.length() > 0) {
+					report.append("Curation Note: " + curation + "\n");
+				}
 			}
-			if(geneAnnotation.getCuration().length() > 0) {
-				report.append("Gene Note: " + geneAnnotation.getCuration() + "\n");
+			
+			ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
+			if(geneAnnotationHistory.size() > 0) {
+				GeneAnnotation geneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
+				report.append("Mutation: " + mutationText + "\n");
+				if(geneAnnotation.curation.length() > 0) {
+					report.append("Gene Note: " + geneAnnotation.curation + "\n");
+				}
 			}
+			
 			report.append("\n");
 		}
 

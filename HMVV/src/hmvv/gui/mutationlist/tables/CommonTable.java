@@ -19,6 +19,7 @@ import javax.swing.table.TableColumnModel;
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
+import hmvv.gui.mutationlist.CosmicInfoPopup;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
 import hmvv.io.DatabaseCommands;
@@ -205,7 +206,12 @@ public abstract class CommonTable extends JTable{
 		Mutation mutation = getSelectedMutation();
 		ArrayList<String> cosmic = mutation.getCosmicID();
 		if(cosmic.size() > 0){
-			InternetCommands.searchCosmic(cosmic);			
+			try {
+				CosmicInfoPopup.handleCosmicClick(parent, cosmic);
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(parent, "Error locating Cosmic Info: " + e.getMessage());
+			}
 		}
 	}
 	
@@ -234,29 +240,14 @@ public abstract class CommonTable extends JTable{
 			.replaceAll("Ter", "X")
 			.replaceAll("Tyr", "Y");
 	}
-	
 
 	protected void handleAnnotationClick() throws Exception{
-		Mutation mutation = getSelectedMutation();
-		Annotation annotation = mutation.getAnnotationObject();
-		
+		Mutation mutation = getSelectedMutation();		
 		String gene = mutation.getGene();
-		GeneAnnotation geneAnnotation = DatabaseCommands.getGeneAnnotation(gene);
+		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
 		
-		Boolean annotationAlreadyOpen = false;
-		if(annotation.getEditStatus().equals(Annotation.STATUS.open) || geneAnnotation.isLocked()){
-			int selectionValue = JOptionPane.showConfirmDialog(this, "This annotation is currently locked. Would you like to unlock it?");
-			if(selectionValue == JOptionPane.CANCEL_OPTION) {
-				return;
-			}else if(selectionValue == JOptionPane.YES_OPTION) {
-				annotationAlreadyOpen = false;
-			}else if(selectionValue == JOptionPane.NO_OPTION) {
-				annotationAlreadyOpen = true;
-			}
-		}
-		
-		boolean readOnly = annotationAlreadyOpen || !SSHConnection.isSuperUser();
-		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotation, annotation, this, parent);
+		boolean readOnly = !SSHConnection.isSuperUser();
+		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotationHistory, this, parent);
 		editAnnotation.setVisible(true);
 	}
 	

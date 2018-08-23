@@ -1,6 +1,8 @@
 package hmvv.gui.mutationlist.tablemodels;
 
+import hmvv.model.Annotation;
 import hmvv.model.Mutation;
+import hmvv.model.VariantPredictionClass;
 
 public class MutationTableModelColumn extends HMVVTableModelColumn{
 	/*
@@ -47,10 +49,10 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(Mutation mutation) -> mutation.getType());
 	
-	public static final MutationTableModelColumn genotypeColumn = new MutationTableModelColumn("Impact as predicted by Variant Effect Predictor.",
-			"genotype",
-			String.class,
-			(Mutation mutation) -> mutation.getGenotype());
+	public static final MutationTableModelColumn variantClassificationColumn = new MutationTableModelColumn("Classifcation as predicted by Variant Effect Predictor.",
+			"classification",
+			VariantPredictionClass.class,
+			(Mutation mutation) -> mutation.getVariantPredictionClass());
 	
 	public static final MutationTableModelColumn altFreqColumn = new MutationTableModelColumn(
 			"Thermo Fisher: Allele frequency based on Flow Evaluator observation counts. Illumina: The percentage of reads supporting the alternate allele.",
@@ -78,17 +80,41 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn annotationColumn = new MutationTableModelColumn("The text entered by the pathologist to generate the clinical laboratory report.",
 			"annotation",
 			String.class,
-			(Mutation mutation) -> mutation.getAnnotationObject().getDisplayText());
+			(Mutation mutation) -> getAnnotationDisplayText(mutation));
+	
+	public static String getAnnotationDisplayText(Mutation mutation) {
+		Annotation latestAnnotation = mutation.getLatestAnnotation();
+		if(latestAnnotation == null) {
+			return "Enter";
+		}
+		return latestAnnotation.getDisplayText();
+	}
 	
 	public static final MutationTableModelColumn somaticColumn = new MutationTableModelColumn("The somatic designation as entered by the pathologist in the annotation report.",
 			"somatic",
 			String.class,
-			(Mutation mutation) -> mutation.getAnnotationObject().getSomaticDisplayText());
+			(Mutation mutation) -> getSomaticDisplayText(mutation));
 	
+	public static String getSomaticDisplayText(Mutation mutation) {
+		Annotation latestAnnotation = mutation.getLatestAnnotation();
+		if(latestAnnotation == null) {
+			return "";
+		}
+		return latestAnnotation.getSomaticDisplayText();
+	}
+
 	public static final MutationTableModelColumn classificationColumn = new MutationTableModelColumn("The classification designation as entered by the pathologist in the annotation report.",
 			"classification",
 			String.class,
-			(Mutation mutation) -> mutation.getAnnotationObject().getClassificationDisplayText());
+			(Mutation mutation) -> getClassificationDisplayText(mutation));
+
+	public static String getClassificationDisplayText(Mutation mutation) {
+		Annotation latestAnnotation = mutation.getLatestAnnotation();
+		if(latestAnnotation == null) {
+			return "";
+		}
+		return latestAnnotation.getClassificationDisplayText();
+	}
 	
 	public static final MutationTableModelColumn gotoIGVColumn = new MutationTableModelColumn("Link to load the variant coordinate into IGV.",
 			"IGV",
@@ -211,7 +237,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			(Mutation mutation) -> mutation.getAssay());
 	
 	public static final MutationTableModelColumn IDColumn = new MutationTableModelColumn("The unique ID for the sample",
-			"ID",
+			"sampleID",
 			Integer.class,
 			(Mutation mutation) -> mutation.getSampleID());
 	
