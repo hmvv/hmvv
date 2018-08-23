@@ -9,17 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
+import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -37,8 +27,14 @@ import hmvv.model.PipelineStatus;
 public class MonitorPipelines extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
-	
-	private JButton btnRefresh;
+
+	private JMenuBar menuBar;
+
+	//Asynchronous sample status updates
+	private Thread pipelineRefreshThread;
+	private final int secondsToSleep = 10;
+	private volatile long timeLastRefreshed = 0;
+	private volatile JMenuItem refreshLabel;
 	
 	private TableRowSorter<MonitorPipelinesTableModel> sorter;
 	
@@ -102,9 +98,12 @@ public class MonitorPipelines extends JDialog {
 		tableScrollPane = new JScrollPane();
 		tableScrollPane.setViewportView(table);
 
-		btnRefresh = new JButton("Refresh");
-		btnRefresh.setFont(GUICommonTools.TAHOMA_BOLD_12);
-		
+		menuBar = new JMenuBar();
+		refreshLabel = new JMenuItem("");
+		refreshLabel.setEnabled(false);
+		menuBar.add(refreshLabel);
+		setJMenuBar(menuBar);
+
 		TableColumn progressColumn = table.getColumnModel().getColumn(8);
 		progressColumn.setCellRenderer(new ProgressCellRenderer());
 	}
@@ -114,8 +113,6 @@ public class MonitorPipelines extends JDialog {
 		groupLayout.setHorizontalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(59)
-						.addComponent(btnRefresh)
 						.addGap(127))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
@@ -125,8 +122,6 @@ public class MonitorPipelines extends JDialog {
 		groupLayout.setVerticalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(25)
-						.addComponent(btnRefresh)
 						.addGap(25)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
 						.addGap(25))
@@ -172,16 +167,6 @@ public class MonitorPipelines extends JDialog {
 			}
 		});		
 
-		btnRefresh.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try{
-					buildModelFromDatabase();
-				}catch (Exception e){
-					JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
-				}
-			}
-		});
 	}
 
 	private void buildModelFromDatabase() throws Exception {
@@ -190,8 +175,50 @@ public class MonitorPipelines extends JDialog {
 		for(Pipeline p : pipelines) {
 			tableModel.addPipeline(p);
 		}
+
+		pipelineRefreshThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//loop forever (will exit when JFrame is closed).
+				while(true) {
+					long currentTimeInMillis = System.currentTimeMillis();
+					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
+                        updatePipelinesASynch();
+					}
+
+					setRefreshLabelText();
+
+					try {
+						Thread.sleep(1 * 1000);
+					} catch (InterruptedException e) {}
+				}
+			}
+		});
+
+		pipelineRefreshThread.start();
+
 	}
 
+    private void updatePipelinesASynch() {
+        try {
+            tableModel.resetModel();
+            ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
+            for(Pipeline p : pipelines) {
+                tableModel.addPipeline(p);
+            }
+            timeLastRefreshed = System.currentTimeMillis();
+        } catch (Exception e) {
+            // Silently fail. Don't want to spam user every interval.
+        }
+    }
+
+	private void setRefreshLabelText() {
+		long currentTimeInMillis = System.currentTimeMillis();
+		long timeToRefresh = timeLastRefreshed + (1000 * secondsToSleep);
+		long diff = timeToRefresh - currentTimeInMillis;
+		long secondsRemaining = diff / 1000;
+		refreshLabel.setText("Table will refresh in : " + secondsRemaining + "s");
+	}
 	private Pipeline getCurrentlySelectedPipeline(){
 		int viewRow = table.getSelectedRow();
 		int modelRow = table.convertRowIndexToModel(viewRow);
@@ -239,7 +266,7 @@ public class MonitorPipelines extends JDialog {
 				if(column == 0) {
 					return pipelineStatus.pipelineStatus;
 				}else {
-					return GUICommonTools.extendedDateFormat.format(pipelineStatus.dateUpdated);
+					return GUICommonTools.extendedDateFormat2.format(pipelineStatus.dateUpdated);
 				}
 			}
 			
@@ -278,8 +305,14 @@ public class MonitorPipelines extends JDialog {
 
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) { 
-	        this.setValue((int) value);
-	        this.setString(value.toString()+'%');
+	        if (value instanceof String){
+                this.setValue(0);
+                this.setString("ERROR");
+            } else {
+                this.setValue((int) value);
+                this.setString(value.toString()+'%');
+            }
+
 	        return this;
 	    }
 	}

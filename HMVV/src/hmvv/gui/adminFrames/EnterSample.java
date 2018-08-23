@@ -399,7 +399,7 @@ public class EnterSample extends JDialog {
 			variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
 		}
 		
-		String runDate = GUICommonTools.shortDateFormat.format(Calendar.getInstance().getTime());
+		String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
 		String note = textNote.getText();
 		String enteredBy = SSHConnection.getUserName();
 		
