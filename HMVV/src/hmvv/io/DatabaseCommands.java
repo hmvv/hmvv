@@ -317,60 +317,82 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<Mutation> getMutationDataByQuery(String assay, String orderNumber, String lastName, String firstName, String gene, String cosmicID, String cDNA, String codon) throws Exception{
-		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp, t2.dbSNPID, t3.cosmicID, " +
-				"t2.type, t2.genotype, t2.altFreq, t2.readDP, t2.altReadDP, t6.occurrence, " +
-				"t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen, " +
-				"t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq, " +
-				"t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc,t2.pubmed, " +
-				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID " +
-				"from " + 
-				"data as t2 left join " +
-				"cosmic_grch37v82 as t3 " +
-				"on t2.chr = t3.chr and t2.pos = t3.pos and t2.ref = t3.ref and t2.alt = t3.alt " +
-				"left join g1000 as t4 " +
-				"on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt " +
-				"left join clinvar as t5 " +
-				"on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt " +
-				"left join Samples as t1 " +
-				"on t2.sampleID = t1.ID " +
+		String query =
+				"select " +
+				
+				//sampleVariant fields
+				"sampleVariants.reported, sampleVariants.gene, sampleVariants.exon, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.dbSNPID, " +
+				"sampleVariants.type, sampleVariants.impact, sampleVariants.altFreq, sampleVariants.readDepth, sampleVariants.altReadDepth, sampleVariants.pubmed," +
+				"sampleVariants.chr, sampleVariants.pos, sampleVariants.ref, sampleVariants.alt, sampleVariants.consequence, sampleVariants.Sift, sampleVariants.PolyPhen, " +
+				
+				//sample fields
+				"samples.lastName, samples.firstName, samples.orderNumber, samples.tumorSource, samples.tumorPercent, sampleVariants.sampleID, assays.assayName as assay, " +
+				
+				//reference database fields
+				"g1000Table.altCount, g1000Table.totalCount, g1000Table.altGlobalFreq, g1000Table.americanFreq, g1000Table.asianFreq, g1000Table.afrFreq, g1000Table.eurFreq, " +
+				"clinvarTable.origin, clinvarTable.clinicalAllele, clinvarTable.clinicalSig, clinvarTable.clinicalAcc, " +
+				"cosmicTable.cosmicID, " + 
+				
+				//occurrenceCount
+				"occurrenceCount.occurrence " +
+				
+				"from sampleVariants" + 
+				
+				//joins
+				" left join db_cosmic_grch37v86 as cosmicTable " +
+				"on sampleVariants.chr = cosmicTable.chr and sampleVariants.pos = cosmicTable.pos and sampleVariants.ref = cosmicTable.ref and sampleVariants.alt = cosmicTable.alt " +
+				
+				"left join db_g1000 as g1000Table " +
+				"on sampleVariants.chr = g1000Table.chr and sampleVariants.pos = g1000Table.pos and sampleVariants.ref = g1000Table.ref and sampleVariants.alt = g1000Table.alt " +
+				
+				"left join db_clinvar as clinvarTable " +
+				"on sampleVariants.chr = clinvarTable.chr and sampleVariants.pos = clinvarTable.pos and sampleVariants.ref = clinvarTable.ref and sampleVariants.alt = clinvarTable.alt " +
+				
+				"left join samples " +
+				"on sampleVariants.sampleID = samples.sampleID " +
+				
+				"left join assays " +
+				"on samples.assayID = assays.assayID " +
+				
+				//occurrenceCount temp table
 				"left join " +
-				"(select chr, pos, ref, alt, assay, count(*) as occurrence from " + 
-				"(select chr, pos, ref, alt, assay, sampleID from data " +
-				"where genotype != 'No Call' " +
-				"group by chr, pos, ref, alt, assay, sampleID) as t7 " +
-				"group by chr,pos,ref,alt, assay " +
-				") as t6 " +
-				"on t2.chr = t6.chr and t2.pos = t6.pos and t2.ref = t6.ref and t2.alt = t6.alt and t2.assay = t6.assay ";
+					"(select chr, pos, ref, alt, assayID, count(*) as occurrence from " + 
+						"(select chr, pos, ref, alt, samples.sampleID, assayID " + 
+						"from sampleVariants join samples on sampleVariants.sampleID = samples.sampleID " +
+						"where impact != 'No Call' " +
+						"group by chr, pos, ref, alt, sampleID, assayID) as unfilteredOccurenceCount " +
+					"group by chr,pos,ref,alt, assayID " +
+				") as occurrenceCount " +
+				"on sampleVariants.chr = occurrenceCount.chr and sampleVariants.pos = occurrenceCount.pos and sampleVariants.ref = occurrenceCount.ref and sampleVariants.alt = occurrenceCount.alt and samples.assayID = occurrenceCount.assayID ";
 		String whereClause = "";
 
 		if(!assay.equals("All")){
-			whereClause += String.format(" and t2.assay = '%s'", assay);
+			whereClause += String.format(" and assays.assayName = '%s'", assay);
 		}
 		if(!orderNumber.equals("")){
-			whereClause += String.format(" and t1.orderNumber = '%s'", orderNumber);
+			whereClause += String.format(" and samples.orderNumber = '%s'", orderNumber);
 		}
 		if(!lastName.equals("")){
-			whereClause += String.format(" and t1.lastName = '%s'", lastName);
+			whereClause += String.format(" and samples.lastName = '%s'", lastName);
 		}
 		if(!firstName.equals("")){
-			whereClause += String.format(" and t1.firstName = '%s'", firstName);
+			whereClause += String.format(" and samples.firstName = '%s'", firstName);
 		}
 		if(!gene.equals("")){
-			whereClause += String.format(" and t2.gene = '%s'", gene);
+			whereClause += String.format(" and sampleVariants.gene = '%s'", gene);
 		}
 		if(!cosmicID.equals("")){
-			whereClause += String.format(" and t3.cosmicID like '%%%s%%'", cosmicID);
+			whereClause += String.format(" and cosmicTable.cosmicID like '%%%s%%'", cosmicID);
 		}
 		if(!cDNA.equals("")){
-			whereClause += String.format(" and t2.HGVSc like '%%%s%%'", cDNA);
+			whereClause += String.format(" and sampleVariants.HGVSc like '%%%s%%'", cDNA);
 		}
 		if(!codon.equals("")){
-			whereClause += String.format(" and t2.HGVSp like '%%%s%%'", codon);
+			whereClause += String.format(" and sampleVariants.HGVSp like '%%%s%%'", codon);
 		}
 		if(whereClause.equals("")){
 			throw new Exception("You need to specify at least one search term");
-		}
-		else{
+		}else{
 			String whereClauseFinal = "where" + whereClause.replaceFirst("and", "");
 			query += whereClauseFinal;	
 		}
@@ -543,38 +565,6 @@ public class DatabaseCommands {
 				row.getString("enteredBy")
 				);
 		return sample;
-	}
-
-	public static Sample getSample(int sampleID) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
-				"s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
-				"s.runDate, s.note, s.enteredBy from samples as s " +
-				"join instruments  as i on i.instrumentID = s.instrumentID " +
-				"join assays as a on a.assayID = s.assayID " +
-				"where s.sampleID = ? ");
-		updateStatement.setString(1, sampleID+"");
-		ResultSet getSampleResult = updateStatement.executeQuery();
-		if(getSampleResult.next()){
-			return new Sample(
-                    sampleID,
-					getSampleResult.getString(1),
-					getSampleResult.getString(2),
-					getSampleResult.getString(3),
-					getSampleResult.getString(4),
-					getSampleResult.getString(5),
-					getSampleResult.getString(6),
-					getSampleResult.getString(7),
-					getSampleResult.getString(8),
-					getSampleResult.getString(9),
-					getSampleResult.getString(10),
-					getSampleResult.getString(11),
-					getSampleResult.getString(12),
-					getSampleResult.getString(13),
-					getSampleResult.getString(14),
-					getSampleResult.getString(15)
-					);
-		}
-		return null;
 	}
 
 	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
@@ -773,11 +763,24 @@ public class DatabaseCommands {
 	}
 	
 	//TODO Design this appropriately
-	public static ArrayList<Amplicon> getAmpliconQCData() throws Exception{
+	public static ArrayList<Amplicon> getAmpliconQCData(String assay) throws Exception{
 		String query = "select sampleAmplicons.sampleID, sampleAmplicons.ampliconName, sampleAmplicons.readDepth, samples.lastName from sampleAmplicons"
 				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " where samples.lastName like 'Horizon%' ";
+		
+		String geneFilter;
+		if(assay.equals("heme")) {
+			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS')";
+		}else if(assay.equals("gene50")) {
+			geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS')";
+		}else if(assay.equals("neuro")) {
+			geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS')";
+		}else {
+			throw new Exception("Unknown assay: " + assay);
+		}
+		query += geneFilter;
+		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();

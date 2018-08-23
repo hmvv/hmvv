@@ -278,8 +278,13 @@ public class MonitorPipelines extends JDialog {
 
 	    @Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) { 
-	        this.setValue((int) value);
-	        this.setString(value.toString()+'%');
+	    	if (value instanceof String){
+    	       this.setValue(0);
+    	       this.setString("ERROR");
+    	   } else {
+    	       this.setValue((int) value);
+    	       this.setString(value.toString()+'%');
+    	   }
 	        return this;
 	    }
 	}

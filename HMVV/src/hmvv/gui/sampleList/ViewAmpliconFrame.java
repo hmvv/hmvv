@@ -23,11 +23,14 @@ public class ViewAmpliconFrame extends JFrame {
 	private JTextArea textArea;
 	private JLabel lblNumber;
 	private JLabel lblTotal;
-
+	private Sample sample;
+	
 	/**
 	 * Create the frame.
 	 */
-	public ViewAmpliconFrame(int sampleID) throws Exception{
+	public ViewAmpliconFrame(Sample sample) throws Exception{
+		this.sample = sample;
+		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 655, 683);
 		contentPane = new JPanel();
@@ -94,21 +97,19 @@ public class ViewAmpliconFrame extends JFrame {
 		);
 		contentPane.setLayout(gl_contentPane);
 		
-		initialize(sampleID);
+		initialize();
 	}
 	
-	private void initialize(int sampleID) throws Exception{
-		for(Amplicon amplicon : DatabaseCommands.getFailedAmplicon(sampleID)){
+	private void initialize() throws Exception{
+		for(Amplicon amplicon : DatabaseCommands.getFailedAmplicon(sample.sampleID)){
 			textArea.append(amplicon.ampliconName);
 			textArea.append("\t");
 			textArea.append(amplicon.readDepth);
 			textArea.append("\n");
 		}
-		
-		Sample sample = DatabaseCommands.getSample(sampleID);
 		lblSample.setText(String.format("%s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
 		
-		AmpliconCount ampliconCount = DatabaseCommands.getAmpliconCount(sampleID);
+		AmpliconCount ampliconCount = DatabaseCommands.getAmpliconCount(sample.sampleID);
 		lblNumber.setText(ampliconCount.failedAmplicon);
 		lblTotal.setText(ampliconCount.totalAmplicon);
 	}

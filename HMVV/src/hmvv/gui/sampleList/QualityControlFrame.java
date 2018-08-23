@@ -16,7 +16,9 @@ import hmvv.model.Amplicon;
 
 public class QualityControlFrame {
 	public static void showQCChart(SampleListFrame parent) throws Exception {
-		ArrayList<Amplicon> amplicons = DatabaseCommands.getAmpliconQCData();
+		String assay = "heme";
+		
+		ArrayList<Amplicon> amplicons = DatabaseCommands.getAmpliconQCData(assay);
 		
 		SummaryStatistics ss = new SummaryStatistics();
 	    
@@ -64,7 +66,7 @@ public class QualityControlFrame {
 			public void run() {
 				SwingWrapper<XYChart> sw = new SwingWrapper<XYChart>(chart);
 				JFrame swFrame = sw.displayChart();
-				swFrame.setTitle("Levy-Jennings Chart");
+				swFrame.setTitle("Levy-Jennings Chart - " + assay);
 				swFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 				Rectangle bounds = GUICommonTools.getBounds(parent);
 				swFrame.setSize((int)(bounds.width*.5), (int)(bounds.height*.5));

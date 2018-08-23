@@ -108,10 +108,20 @@ public class MutationListFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	public MutationListFrame(SampleListFrame parent, MutationList mutationList){
+		this(parent, null, mutationList);
+	}
+	
 	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
-		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() +
-				" (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ", callerID = " + sample.callerID + ")";
-		setTitle(title);
+		//TODO this class is too complicated as a host for both the search results and the sample mutation list. Refactor.
+		if(sample == null) {
+			String title = "Mutation List Search Results"; 
+			setTitle(title);
+		}else {
+			String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() +
+					" (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ", callerID = " + sample.callerID + ")";			
+			setTitle(title);
+		}
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
@@ -261,7 +271,9 @@ public class MutationListFrame extends JFrame {
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
 		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		if(sample == null) {
-			loadIGVButton.setEnabled(false);//If no sample provided, this object is for the search results display.
+			//If no sample provided, this object is for the search results display.
+			loadFilteredMutationsButton.setEnabled(false);
+			loadIGVButton.setEnabled(false);
 		}
 		
 		ActionListener actionListener = new ActionListener(){
@@ -358,8 +370,11 @@ public class MutationListFrame extends JFrame {
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
 		
-		if(mutationList.getMutationCount() > 1 && mutationList.getMutation(0).getAssay().equals("exome")){
-			checkboxPanel.add(filterNomalCheckbox);
+		if(sample != null) {
+			//if null, this is for the mutation search
+			if(mutationList.getMutationCount() > 1 && sample.assay.equals("exome")){
+				checkboxPanel.add(filterNomalCheckbox);
+			}
 		}
 		leftFilterPanel.add(checkboxPanel);
 		
@@ -671,7 +686,9 @@ public class MutationListFrame extends JFrame {
 			}
 		}
 		
-		loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data
+		if(sample != null) {
+			loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data			
+		}
 	}
 	
 	private Thread createLoadFilteredMutationDataThread(){

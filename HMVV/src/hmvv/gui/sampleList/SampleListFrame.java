@@ -252,6 +252,9 @@ public class SampleListFrame extends JFrame {
 			@Override
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
+				if(row == table.getSelectedRow()) {
+					return c;
+				}
 				c.setForeground(customColumns[column].color);
 				Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 				for(Pipeline p : pipelines) {
@@ -510,8 +513,7 @@ public class SampleListFrame extends JFrame {
 		//Show amplicon
 		try {
 			Sample currentSample = getCurrentlySelectedSample();
-			int sampleID = currentSample.sampleID;
-			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(sampleID);
+			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(currentSample);
 			amplicon.setVisible(true);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(SampleListFrame.this, e);
@@ -522,18 +524,14 @@ public class SampleListFrame extends JFrame {
 		//Edit sample
 		int viewRow = table.getSelectedRow();
 		final int modelRow = table.convertRowIndexToModel(viewRow);
-		Sample currentSample = getCurrentlySelectedSample();
-		int sampleID = currentSample.sampleID;
-		String enteredBy = currentSample.enteredBy;
+		Sample sample = getCurrentlySelectedSample();
+		
 		String currentUser = SSHConnection.getUserName();
-
-		if(!currentUser.equals(enteredBy) && !SSHConnection.isSuperUser()){
+		if(!currentUser.equals(sample.enteredBy) && !SSHConnection.isSuperUser()){
 			JOptionPane.showMessageDialog(this, "Error: You can only edit samples entered by you!");
 			return;
 		}
 		
-		//Start editing sample page
-		Sample sample = DatabaseCommands.getSample(sampleID);
 		EditSampleFrame editSample = new EditSampleFrame(sample);
 		editSample.setVisible(true);
 		editSample.addConfirmListener(new ActionListener() {
@@ -552,7 +550,7 @@ public class SampleListFrame extends JFrame {
 		editSample.addDeleteListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					DatabaseCommands.deleteSample(sampleID);
+					DatabaseCommands.deleteSample(sample.sampleID);
 					tableModel.deleteSample(modelRow);
 				} catch (SQLException e1) {
 					JOptionPane.showMessageDialog(editSample, e1);
@@ -637,6 +635,7 @@ public class SampleListFrame extends JFrame {
 					mutationListFrame.setVisible(true);
 					searchMutation.dispose();
 				}catch(Exception ex){
+					ex.printStackTrace();
 					JOptionPane.showMessageDialog(SampleListFrame.this, ex.getMessage());
 				}
 			}
