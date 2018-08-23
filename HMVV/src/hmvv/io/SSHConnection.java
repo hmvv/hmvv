@@ -152,11 +152,9 @@ public class SSHConnection {
 	}
 	
 	private static File loadIlluminaNextseqHeme_BAM(String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String instrument = "nextSeq_heme";
-		//TODO this will need to look at our environment to get the correct BAM file
-		//String command = String.format("ls /home/environments/" + Configurations.getEnvironment() + "/%s/*_%s_*/%s*.sort.bam", instrument, runID, sampleID);
-
-		String command = String.format("ls /home/%s/*_%s_*/%s*.sort.bam", instrument, runID, sampleID);
+		String instrument = "nextseq";
+		//TODO test this
+		String command = String.format("ls /home/environments/%s/nextseqAnalysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
 	
