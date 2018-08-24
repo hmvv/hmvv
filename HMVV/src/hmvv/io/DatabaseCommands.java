@@ -22,7 +22,7 @@ import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
 public class DatabaseCommands {
-
+	
 	private static Connection databaseConnection = null;
 
 	public static Connection getDatabaseConnection(){
@@ -83,10 +83,6 @@ public class DatabaseCommands {
 		if(sampleCount != 0) {
 			throw new Exception("Error: Supplied sample exists in database; data not entered");
 		}
-
-		//need coverage/callerID placeholder for command-line
-        if (coverageID.equals("")){coverageID="-";}
-        if (variantCallerID.equals("")){variantCallerID="-";}
 
 		String enterSample = String.format("insert into samples "
 				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy) "

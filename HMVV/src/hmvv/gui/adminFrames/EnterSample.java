@@ -53,6 +53,8 @@ public class EnterSample extends JDialog {
 	
 	private SampleListTableModel sampleListTableModel;
 	
+	private static String defaultCoverageAndCallerID = "-";
+	
 	/**
 	 * Create the frame.
 	 */
@@ -304,20 +306,20 @@ public class EnterSample extends JDialog {
 		String runID = textRunID.getText();
 		String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
 		String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
-		String sampleID = (String)comboBoxSample.getSelectedItem();
+		String sampleName = (String)comboBoxSample.getSelectedItem();
 		
-		if(runID.equals("") || sampleID == null){
+		if(runID.equals("") || sampleName == null){
 			updateFields("", "", "", "", "", "", "", false);
 			return;
 		}
 		
 		//set these to the empty string so they match in sampleListTableModel.getSample
 		if(coverageID == null)
-			coverageID = "";
+			coverageID = defaultCoverageAndCallerID;
 		if(variantCallerID == null)
-			variantCallerID = "";
+			variantCallerID = defaultCoverageAndCallerID;
 		
-		Sample sample = sampleListTableModel.getSample(runID, coverageID, variantCallerID, sampleID);
+		Sample sample = sampleListTableModel.getSample(runID, coverageID, variantCallerID, sampleName);
 		if(sample != null){
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
 		}else{
@@ -390,11 +392,11 @@ public class EnterSample extends JDialog {
 		String runID = textRunID.getText();
 		String sampleName = comboBoxSample.getSelectedItem().toString();
 		
-		String coverageID = "";
+		String coverageID = defaultCoverageAndCallerID;
 		if(comboBoxCoverageIDList.getSelectedItem() != null){
 			coverageID = comboBoxCoverageIDList.getSelectedItem().toString();
 		}
-		String variantCallerID = "";
+		String variantCallerID = defaultCoverageAndCallerID;
 		if(comboBoxVariantCallerIDList.getSelectedItem() != null){
 			variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
 		}
