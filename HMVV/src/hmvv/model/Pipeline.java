@@ -30,7 +30,8 @@ public class Pipeline {
         try {
 			progress = GUIPipelineProgress.getProgress(this);
 		} catch (Exception e) {
-			progress = 0;
+			e.printStackTrace();
+			progress = -1;
 		}
 	}
 

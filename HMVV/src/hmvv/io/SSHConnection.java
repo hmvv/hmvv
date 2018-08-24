@@ -333,7 +333,7 @@ public class SSHConnection {
 	}
 
 	
-	public static int getFileSize(Pipeline pipeline) throws Exception {
+	public static long getFileSize(Pipeline pipeline) throws Exception {
 		String command="";
 		if  ( pipeline.getInstrumentName().equals("miseq")) {
 			command = String.format("ls -l /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s_*.vcf | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
@@ -343,7 +343,8 @@ public class SSHConnection {
 			command = String.format("ls -l /home/%s/*%s/plugin_out/variantCaller_out*/%s/TSVC_variants.vcf | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
 		}
 		CommandResponse commandResult = SSHConnection.executeCommandAndGetOutput(command);
-		return Integer.parseInt(commandResult.responseLines.get(0));
+		String fileSizeString = commandResult.responseLines.get(0);
+		return Long.parseLong(fileSizeString);
 	}
 }
 

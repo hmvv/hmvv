@@ -679,7 +679,7 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Monitor Pipelines Queries
 	 *************************************************************************/
-	private static Pipeline getPipeline(ResultSet row) throws SQLException{
+	private static Pipeline getPipeline(ResultSet row) throws Exception{
 		Pipeline pipeline = new Pipeline(
 				row.getInt("queueID"),
 				row.getInt("sampleID"),
@@ -776,7 +776,7 @@ public class DatabaseCommands {
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 		
 		int averageRunTime = 0;
-		int fileSize = SSHConnection.getFileSize(pipeline) / 1000 ; // get size in KB
+		long fileSize = SSHConnection.getFileSize(pipeline) / 1024 ; // get size in KB
 		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(pipelineLogs.runTimeSecs) as averagetime from pipelineLogs " +
 				" join pipelineQueue on pipelineQueue.queueID = pipelineLogs.queueID " +
@@ -786,8 +786,8 @@ public class DatabaseCommands {
 				" where instruments.instrumentName=? and assays.assayName=? and pipelineLogs.fileSizeKB between ? and ? ;");
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
-		preparedStatement.setInt(3, fileSize - 1000);
-		preparedStatement.setInt(4, fileSize + 1000);
+		preparedStatement.setLong(3, fileSize - 1000);//TODO make sure database can accommodate long values
+		preparedStatement.setLong(4, fileSize + 1000);//TODO make sure database can accommodate long values
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 			averageRunTime = rs.getInt("averagetime");
