@@ -313,7 +313,6 @@ public class EnterSample extends JDialog {
 			return;
 		}
 		
-		//set these to the empty string so they match in sampleListTableModel.getSample
 		if(coverageID == null)
 			coverageID = defaultCoverageAndCallerID;
 		if(variantCallerID == null)
