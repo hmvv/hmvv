@@ -29,7 +29,7 @@ public class QualityControlFrame {
 		for(int i = 0; i < xData.length; i++) {
 			xData[i] = i + 1;
 			try {
-				yData[i] = Double.parseDouble(amplicons.get(i).readDepth);
+				yData[i] = (double)(amplicons.get(i).readDepth);
 				ss.addValue(yData[i]);
 			}catch(Exception e) {
 				e.printStackTrace();//TODO figure out what to do here

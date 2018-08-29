@@ -57,7 +57,13 @@ public enum GUIPipelineProgress {
 		}else if  ( pipeline.getAssayName().equals("heme") || pipeline.getInstrumentName().equals("nextseq")) {
 			if (status.equals("started") || status.equals("queued")) {
 				progress.setDisplayString("0/6");
-			}else if (status.equals("bcl2fastq")) {
+			}else if (status.equals("bcl2fastq_running_now")) {
+				progress.setDisplayString("1/6");
+			}else if ( status.equals("bcl2fastq_completed_now")) {
+				progress.setDisplayString("1/6");
+			}else if ( status.equals("bcl2fastq_completed_past")) {
+				progress.setDisplayString("1/6");
+			}else if (status.equals("bcl2fastq_wait") ) {
 				progress.setDisplayString("1/6");
 			}else if (status.equals("varscanPE")) {
 				progress.setDisplayString("2/6");

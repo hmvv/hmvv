@@ -602,7 +602,7 @@ public class DatabaseCommands {
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		while(getSampleResult.next()){
-			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString(1), getSampleResult.getString(2));
+			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString(1), getSampleResult.getInt(2));
 			amplicons.add(amplicon);
 		}
 		updateStatement.close();
@@ -765,7 +765,7 @@ public class DatabaseCommands {
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
 
 		while(rs.next()){
-			Amplicon amplicon = new Amplicon(rs.getInt(1), rs.getString(2), rs.getString(3));
+			Amplicon amplicon = new Amplicon(rs.getInt(1), rs.getString(2), rs.getInt(3));
 			amplicons.add(amplicon);
 		}
 		preparedStatement.close();
@@ -776,24 +776,24 @@ public class DatabaseCommands {
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 		
 		int averageRunTime = 0;
-		long fileSize = SSHConnection.getFileSize(pipeline) / 1024 ; // get size in KB
+		long fileSize = SSHConnection.getFileSize(pipeline);
 		
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(pipelineLogs.runTimeSecs) as averagetime from pipelineLogs " +
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(pipelineLogs.totalRunTime) as averagetime from pipelineLogs " +
 				" join pipelineQueue on pipelineQueue.queueID = pipelineLogs.queueID " +
 				" join samples on samples.sampleID = pipelineQueue.sampleID " +
                 " join assays on assays.assayId = samples.assayID " +
                 " join instruments on instruments.instrumentID = instruments.instrumentID " +
-				" where instruments.instrumentName=? and assays.assayName=? and pipelineLogs.fileSizeKB between ? and ? ;");
+				" where instruments.instrumentName=? and assays.assayName=? and pipelineLogs.fileSize between ? and ? ;");
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
-		preparedStatement.setLong(3, fileSize - 1000);//TODO make sure database can accommodate long values
-		preparedStatement.setLong(4, fileSize + 1000);//TODO make sure database can accommodate long values
+		preparedStatement.setLong(3, fileSize - 1000);
+		preparedStatement.setLong(4, fileSize + 1000);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 			averageRunTime = rs.getInt("averagetime");
 		}
 		preparedStatement.close();
-		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() +" filesize " + fileSize + " averageRunTime " + averageRunTime);
+		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() + " filesize " + fileSize + " averageRunTime " + averageRunTime);
 		return (float)averageRunTime;
 	}
 }

@@ -85,7 +85,7 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 		}
 		
 		//not found, so add to model
-		addPipeline(pipeline);
+		//addPipeline(pipeline);
 	}
 	
 	public void addPipeline(Pipeline pipeline){

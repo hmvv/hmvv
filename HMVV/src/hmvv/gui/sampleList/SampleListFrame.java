@@ -513,7 +513,7 @@ public class SampleListFrame extends JFrame {
 		//Show amplicon
 		try {
 			Sample currentSample = getCurrentlySelectedSample();
-			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(currentSample);
+			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
 			amplicon.setVisible(true);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(SampleListFrame.this, e);
