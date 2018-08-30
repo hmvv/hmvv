@@ -345,7 +345,7 @@ public class SSHConnection {
 		}
 		CommandResponse commandResult = SSHConnection.executeCommandAndGetOutput(command);
 		String fileSizeString = commandResult.responseLines.get(0);
-		//System.out.println( command + "::" + fileSizeString);
+		if (fileSizeString.equals("")){fileSizeString="0";}
 		return Long.parseLong(fileSizeString);
 	}
 }

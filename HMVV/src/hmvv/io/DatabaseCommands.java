@@ -583,7 +583,7 @@ public class DatabaseCommands {
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("CALL calcAmpliconCount(?);");
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
-		if(getSampleResult.next()){//TODO Handle more than one entry in the database?
+		if(getSampleResult.next()){
 			AmpliconCount ampliconCount = new AmpliconCount(sampleID, getSampleResult.getString(1), getSampleResult.getString(2));
 			if(getSampleResult.next()){
 				throw new Exception("Error: more than one amplicon count result located for the sample");
@@ -707,7 +707,8 @@ public class DatabaseCommands {
 				" from pipelineStatus " +
 				" group by queueID) ) as t2 " +
 				" on t3.queueID = t2.queueID " +
-				" order by t3.queueID" ;
+				" where t2.timeUpdated  >= now() - interval 1 day" +
+				" order by t3.queueID desc" ;
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -778,12 +779,8 @@ public class DatabaseCommands {
 		int averageRunTime = 0;
 		long fileSize = SSHConnection.getFileSize(pipeline);
 		
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(pipelineLogs.totalRunTime) as averagetime from pipelineLogs " +
-				" join pipelineQueue on pipelineQueue.queueID = pipelineLogs.queueID " +
-				" join samples on samples.sampleID = pipelineQueue.sampleID " +
-                " join assays on assays.assayId = samples.assayID " +
-                " join instruments on instruments.instrumentID = instruments.instrumentID " +
-				" where instruments.instrumentName=? and assays.assayName=? and pipelineLogs.fileSize between ? and ? ;");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(totalRunTime) as averagetime from pipelineLogs " +
+				" where instrument=? and assay=? and fileSize between ? and ? ;");
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
 		preparedStatement.setLong(3, fileSize - 1000);

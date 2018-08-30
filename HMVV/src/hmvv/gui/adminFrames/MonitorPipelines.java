@@ -9,11 +9,7 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableRowSorter;
+import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.GUIPipelineProgress;
@@ -277,7 +273,10 @@ public class MonitorPipelines extends JDialog {
 		
 		JScrollPane tableSP = new JScrollPane(table);
 		tableSP.setPreferredSize(new Dimension(600,300));
-		
+
+		TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+		table.setRowSorter(sorter);
+
 		JOptionPane.showMessageDialog(this, tableSP,
 				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
 						currentPipeline.instrumentName, currentPipeline.assayName, currentPipeline.runID, currentPipeline.sampleName),
