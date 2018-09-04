@@ -1,9 +1,6 @@
 package hmvv.gui.adminFrames;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -178,8 +175,10 @@ public class EnterSample extends JDialog {
 							public void run() {
 								try {
 									findRun();
-								} catch (Exception e) {}
+								} catch (Exception e) {
+									JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
 								}
+							}
 						});
 						findRunThread.start();
 
@@ -188,9 +187,14 @@ public class EnterSample extends JDialog {
 						enterSampleThread = new Thread(new Runnable() {
 							@Override
 							public void run() {
+								enterSampleButton.setText("Processing...");
 								try {
 									enterData();
-								} catch (Exception e) {}
+									enterSampleButton.setText("Completed.");
+
+								} catch (Exception e) {
+									JOptionPane.showMessageDialog(EnterSample.this, "Error entering sample data: " + e.getMessage());
+								}
 							}
 						});
 						enterSampleThread.start();
@@ -330,6 +334,7 @@ public class EnterSample extends JDialog {
 	}
 
 	private void sampleIDSelectionChanged(){
+		enterSampleButton.setText("Enter Sample");
 		String runID = textRunID.getText();
 		String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
 		String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
@@ -406,8 +411,6 @@ public class EnterSample extends JDialog {
 
 			//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
-
-			JOptionPane.showMessageDialog(this, "Success: Sample entered");
 
 		}catch (Exception e){
 
