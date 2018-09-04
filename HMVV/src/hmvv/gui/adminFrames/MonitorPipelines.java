@@ -99,7 +99,7 @@ public class MonitorPipelines extends JDialog {
 		menuBar.add(refreshLabel);
 		setJMenuBar(menuBar);
 
-		TableColumn progressColumn = table.getColumnModel().getColumn(8);
+		TableColumn progressColumn = table.getColumnModel().getColumn(9);
 		progressColumn.setCellRenderer(new ProgressCellRenderer());
 	}
 

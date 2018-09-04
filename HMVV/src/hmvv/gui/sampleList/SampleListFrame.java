@@ -258,7 +258,7 @@ public class SampleListFrame extends JFrame {
 				c.setForeground(customColumns[column].color);
 				Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 				for(Pipeline p : pipelines) {
-					if(currentSample.sampleID == p.sampleTableID) {
+					if(currentSample.sampleID == p.sampleID) {
 						GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgram(p);
 						c.setBackground(pipelineProgress.displayColor);
 						break;

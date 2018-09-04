@@ -20,8 +20,8 @@ public class ViewAmpliconFrameTableModel extends AbstractTableModel{
     private void constructColumns() {
         columns = new ArrayList<ViewAmpliconFrameTableModelColumn>();
         columns.add(new ViewAmpliconFrameTableModelColumn("The sample ID",
-                "SampleID",
-                Integer.class,
+                "sampleID",
+                int.class,
                 (Amplicon amplicon) -> amplicon.sampleID));
 
         columns.add(new ViewAmpliconFrameTableModelColumn("The amplicon Name",
@@ -67,8 +67,8 @@ public class ViewAmpliconFrameTableModel extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int row, int column) {
-        Amplicon pipeline = amplicons.get(row);
-        return columns.get(column).getValue(pipeline);
+        Amplicon amplicon = amplicons.get(row);
+        return columns.get(column).getValue(amplicon);
     }
 
 }

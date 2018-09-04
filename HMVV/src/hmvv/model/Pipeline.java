@@ -5,7 +5,7 @@ import hmvv.gui.GUIPipelineProgress;
 public class Pipeline {
 	
 	public final Integer queueID;
-	public final Integer sampleTableID;
+	public final Integer sampleID;
 	public final String runID;
 	public final String sampleName;
 	public final String assayName;
@@ -19,7 +19,7 @@ public class Pipeline {
 	
 	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleName , String assayName, String instrumentName, String status, String runTime) {
         this.queueID = queueID;
-        this.sampleTableID = sampleTableID;
+        this.sampleID = sampleTableID;
         this.runID = runID;
         this.sampleName = sampleName;
         this.assayName = assayName;

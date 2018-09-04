@@ -24,6 +24,11 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				Integer.class,
 				(Pipeline pipeline) -> pipeline.queueID));
 
+		columns.add(new PipelineTableModelColumn("The sampleID",
+				"sampleID",
+				Integer.class,
+				(Pipeline pipeline) -> pipeline.sampleID));
+
 		columns.add(new PipelineTableModelColumn("The runID",
 				"RunID",
 				Integer.class,

@@ -42,7 +42,7 @@ public class ViewAmpliconFrame extends JDialog {
         tableModel = new ViewAmpliconFrameTableModel();
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
+        setSize((int)(bounds.width*.5), (int)(bounds.height*.90));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
@@ -51,6 +51,10 @@ public class ViewAmpliconFrame extends JDialog {
         layoutComponents();
         setLocationRelativeTo(parent);
         buildModelFromDatabase();
+
+        String title = "Sample Amplicons List - " + sample.getLastName() + "," + sample.getFirstName() +
+                " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
+        setTitle(title);
 	}
 
 	private void createComponents(){
@@ -60,7 +64,6 @@ public class ViewAmpliconFrame extends JDialog {
         };
 
 	    table.setAutoCreateRowSorter(true);
-
 	    sorter = new TableRowSorter<ViewAmpliconFrameTableModel>(tableModel);
         table.setRowSorter(sorter);
 
@@ -125,6 +128,8 @@ public class ViewAmpliconFrame extends JDialog {
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment( JLabel.CENTER );
         table.getColumnModel().getColumn(2).setCellRenderer( centerRenderer );
+
+        table.removeColumn(table.getColumnModel().getColumn(0));
 
         resizeColumnWidths();
     }

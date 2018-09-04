@@ -54,6 +54,10 @@ public class EnterSample extends JDialog {
 	private SampleListTableModel sampleListTableModel;
 	
 	private static String defaultCoverageAndCallerID = "-";
+
+
+	private Thread findRunThread;
+	private Thread enterSampleThread;
 	
 	/**
 	 * Create the frame.
@@ -67,8 +71,11 @@ public class EnterSample extends JDialog {
 		
 		createComponents();
 		layoutComponents();
-		activateComponents();
-		
+		try {
+			activateComponents();
+		}catch (Exception e){}
+
+
 		try{
 			for(String assay : DatabaseCommands.getAllAssays()){
 				comboBoxAssay.addItem(assay);
@@ -159,15 +166,35 @@ public class EnterSample extends JDialog {
 		setContentPane(contentPane);
 	}
 	
-	private void activateComponents(){
+	private void activateComponents() throws Exception{
 		ActionListener actionListener = new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					if(e.getSource() == btnFindRun) {
-						findRun();
+
+						findRunThread = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									findRun();
+								} catch (Exception e) {}
+								}
+						});
+						findRunThread.start();
+
 					}else if(e.getSource() == enterSampleButton) {
-						enterData();
+
+						enterSampleThread = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									enterData();
+								} catch (Exception e) {}
+							}
+						});
+						enterSampleThread.start();
+
 					}else if(e.getSource() == cancelButton) {
 						EnterSample.this.setVisible(false);
 					}
@@ -368,48 +395,64 @@ public class EnterSample extends JDialog {
 	}
 	
 	private void enterData() throws Exception{
-		Sample sample = constructSampleFromTextFields();
-		DatabaseCommands.insertDataIntoDatabase(sample);
-		parent.addSample(sample);
-		
-		JOptionPane.showMessageDialog(this, "Success: Sample entered");
-		
-		//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
-		updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
+
+		this.setEnabled(false);
+
+		try {
+
+			Sample sample = constructSampleFromTextFields();
+			DatabaseCommands.insertDataIntoDatabase(sample);
+			parent.addSample(sample);
+
+			//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
+			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
+
+			JOptionPane.showMessageDialog(this, "Success: Sample entered");
+
+		}catch (Exception e){
+
+		}finally {
+
+			this.setEnabled(true);
+		}
 	}
 	
-	private Sample constructSampleFromTextFields() throws Exception{
-		int sampleID = -1;//This will be computed by the database when the sample is inserted
-		String assay = comboBoxAssay.getSelectedItem().toString();
-		String instrument = comboBoxInstrument.getSelectedItem().toString();
-		String lastName = textlastName.getText();
-		String firstName = textFirstName.getText();
-		String orderNumber = textOrderNumber.getText();
-		String pathologyNumber = textPathologyNumber.getText();
-		String tumorSource = textTumorSource.getText();
-		String tumorPercent = textPercent.getText();
-		String runID = textRunID.getText();
-		String sampleName = comboBoxSample.getSelectedItem().toString();
-		
-		String coverageID = defaultCoverageAndCallerID;
-		if(comboBoxCoverageIDList.getSelectedItem() != null){
-			coverageID = comboBoxCoverageIDList.getSelectedItem().toString();
-		}
-		String variantCallerID = defaultCoverageAndCallerID;
-		if(comboBoxVariantCallerIDList.getSelectedItem() != null){
-			variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
-		}
-		
-		String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
-		String note = textNote.getText();
-		String enteredBy = SSHConnection.getUserName();
-		
-		if(lastName.equals("") || firstName.equals("") || orderNumber.equals("") ){
-			throw new Exception("firstName, lastName, orderNumber are required");
+	private Sample constructSampleFromTextFields(){
+
+		if(textlastName.getText().equals("") || textFirstName.getText().equals("") || textOrderNumber.getText().equals("") ){
+			JOptionPane.showMessageDialog(this,"First Name, Last Name, Order Number are required");
+			return null;
 		}else {
+
+			int sampleID = -1;//This will be computed by the database when the sample is inserted
+			String assay = comboBoxAssay.getSelectedItem().toString();
+			String instrument = comboBoxInstrument.getSelectedItem().toString();
+			String lastName = textlastName.getText();
+			String firstName = textFirstName.getText();
+			String orderNumber = textOrderNumber.getText();
+			String pathologyNumber = textPathologyNumber.getText();
+			String tumorSource = textTumorSource.getText();
+			String tumorPercent = textPercent.getText();
+			String runID = textRunID.getText();
+			String sampleName = comboBoxSample.getSelectedItem().toString();
+
+			String coverageID = defaultCoverageAndCallerID;
+			if(comboBoxCoverageIDList.getSelectedItem() != null){
+				coverageID = comboBoxCoverageIDList.getSelectedItem().toString();
+			}
+			String variantCallerID = defaultCoverageAndCallerID;
+			if(comboBoxVariantCallerIDList.getSelectedItem() != null){
+				variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
+			}
+
+			String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
+			String note = textNote.getText();
+			String enteredBy = SSHConnection.getUserName();
+
 			return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
-				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, note, enteredBy);
+					pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, note, enteredBy);
 		}
+
 	}
 	
 	private class RowPanel extends JPanel{
