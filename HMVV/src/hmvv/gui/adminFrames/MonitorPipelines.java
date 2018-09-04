@@ -12,10 +12,10 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.GUIPipelineProgress;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.model.Pipeline;
+import hmvv.model.PipelineProgram;
 import hmvv.model.PipelineStatus;
 
 public class MonitorPipelines extends JDialog {
@@ -69,8 +69,8 @@ public class MonitorPipelines extends JDialog {
 				Component c = super.prepareRenderer(renderer, row, column);
 				int modelRow = table.convertRowIndexToModel(row);
 				Pipeline pipeline = tableModel.getPipeline(modelRow);
-				GUIPipelineProgress pipelineProgress = pipeline.pipelineProgress;
-				if(pipelineProgress == GUIPipelineProgress.COMPLETE) {
+				PipelineProgram pipelineProgress = pipeline.pipelineProgram;
+				if(pipelineProgress == PipelineProgram.COMPLETE) {
 					c.setBackground(GUICommonTools.COMPLETE_COLOR);
 				}else {
 					c.setBackground(pipelineProgress.displayColor);

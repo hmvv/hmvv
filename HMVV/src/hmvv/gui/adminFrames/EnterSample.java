@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -52,7 +54,6 @@ public class EnterSample extends JDialog {
 	
 	private static String defaultCoverageAndCallerID = "-";
 
-
 	private Thread findRunThread;
 	private Thread enterSampleThread;
 	
@@ -68,10 +69,7 @@ public class EnterSample extends JDialog {
 		
 		createComponents();
 		layoutComponents();
-		try {
-			activateComponents();
-		}catch (Exception e){}
-
+		activateComponents();
 
 		try{
 			for(String assay : DatabaseCommands.getAllAssays()){
@@ -163,47 +161,40 @@ public class EnterSample extends JDialog {
 		setContentPane(contentPane);
 	}
 	
-	private void activateComponents() throws Exception{
+	private void activateComponents(){
 		ActionListener actionListener = new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					if(e.getSource() == btnFindRun) {
-
-						findRunThread = new Thread(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									findRun();
-								} catch (Exception e) {
-									JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
-								}
+				if(e.getSource() == btnFindRun) {
+					findRunThread = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								findRun();
+							} catch (Exception e) {
+								JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
 							}
-						});
-						findRunThread.start();
+						}
+					});
+					findRunThread.start();
 
-					}else if(e.getSource() == enterSampleButton) {
-
-						enterSampleThread = new Thread(new Runnable() {
-							@Override
-							public void run() {
-								enterSampleButton.setText("Processing...");
-								try {
-									enterData();
-									enterSampleButton.setText("Completed.");
-
-								} catch (Exception e) {
-									JOptionPane.showMessageDialog(EnterSample.this, "Error entering sample data: " + e.getMessage());
-								}
+				}else if(e.getSource() == enterSampleButton) {
+					enterSampleThread = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							enterSampleButton.setText("Processing...");
+							try {
+								enterData();
+								enterSampleButton.setText("Completed.");
+							} catch (Exception e) {
+								JOptionPane.showMessageDialog(EnterSample.this, "Error entering sample data: " + e.getMessage());
 							}
-						});
-						enterSampleThread.start();
+						}
+					});
+					enterSampleThread.start();
 
-					}else if(e.getSource() == cancelButton) {
-						EnterSample.this.setVisible(false);
-					}
-				}catch(Exception e1) {
-					JOptionPane.showMessageDialog(EnterSample.this, e1.getMessage());
+				}else if(e.getSource() == cancelButton) {
+					dispose();
 				}
 			}
 		};
@@ -211,7 +202,6 @@ public class EnterSample extends JDialog {
 		btnFindRun.addActionListener(actionListener);
 		enterSampleButton.addActionListener(actionListener);
 		cancelButton.addActionListener(actionListener);
-		
 		
 		comboBoxAssay.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
@@ -249,6 +239,20 @@ public class EnterSample extends JDialog {
 			}
 		});
 		
+		textRunID.addKeyListener(new KeyListener() {
+			@Override
+			public void keyPressed(KeyEvent arg0) {
+				if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+					btnFindRun.doClick();
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent arg0) {}
+
+			@Override
+			public void keyTyped(KeyEvent arg0) {}
+		});
 		sampleIDSelectionChanged();
 	}
 	
@@ -400,62 +404,54 @@ public class EnterSample extends JDialog {
 	}
 	
 	private void enterData() throws Exception{
-
-		this.setEnabled(false);
+		setEnabled(false);
 
 		try {
-
 			Sample sample = constructSampleFromTextFields();
 			DatabaseCommands.insertDataIntoDatabase(sample);
 			parent.addSample(sample);
 
 			//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
-
 		}catch (Exception e){
-
+			JOptionPane.showMessageDialog(this, e.getMessage());
 		}finally {
-
-			this.setEnabled(true);
+			setEnabled(true);
 		}
 	}
 	
-	private Sample constructSampleFromTextFields(){
-
+	private Sample constructSampleFromTextFields() throws Exception{
 		if(textlastName.getText().equals("") || textFirstName.getText().equals("") || textOrderNumber.getText().equals("") ){
-			JOptionPane.showMessageDialog(this,"First Name, Last Name, Order Number are required");
-			return null;
-		}else {
-
-			int sampleID = -1;//This will be computed by the database when the sample is inserted
-			String assay = comboBoxAssay.getSelectedItem().toString();
-			String instrument = comboBoxInstrument.getSelectedItem().toString();
-			String lastName = textlastName.getText();
-			String firstName = textFirstName.getText();
-			String orderNumber = textOrderNumber.getText();
-			String pathologyNumber = textPathologyNumber.getText();
-			String tumorSource = textTumorSource.getText();
-			String tumorPercent = textPercent.getText();
-			String runID = textRunID.getText();
-			String sampleName = comboBoxSample.getSelectedItem().toString();
-
-			String coverageID = defaultCoverageAndCallerID;
-			if(comboBoxCoverageIDList.getSelectedItem() != null){
-				coverageID = comboBoxCoverageIDList.getSelectedItem().toString();
-			}
-			String variantCallerID = defaultCoverageAndCallerID;
-			if(comboBoxVariantCallerIDList.getSelectedItem() != null){
-				variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
-			}
-
-			String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
-			String note = textNote.getText();
-			String enteredBy = SSHConnection.getUserName();
-
-			return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
-					pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, note, enteredBy);
+			throw new Exception("First Name, Last Name, Order Number are required");
 		}
 
+		int sampleID = -1;//This will be computed by the database when the sample is inserted
+		String assay = comboBoxAssay.getSelectedItem().toString();
+		String instrument = comboBoxInstrument.getSelectedItem().toString();
+		String lastName = textlastName.getText();
+		String firstName = textFirstName.getText();
+		String orderNumber = textOrderNumber.getText();
+		String pathologyNumber = textPathologyNumber.getText();
+		String tumorSource = textTumorSource.getText();
+		String tumorPercent = textPercent.getText();
+		String runID = textRunID.getText();
+		String sampleName = comboBoxSample.getSelectedItem().toString();
+
+		String coverageID = defaultCoverageAndCallerID;
+		if(comboBoxCoverageIDList.getSelectedItem() != null){
+			coverageID = comboBoxCoverageIDList.getSelectedItem().toString();
+		}
+		String variantCallerID = defaultCoverageAndCallerID;
+		if(comboBoxVariantCallerIDList.getSelectedItem() != null){
+			variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
+		}
+
+		String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
+		String note = textNote.getText();
+		String enteredBy = SSHConnection.getUserName();
+
+		return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, note, enteredBy);
 	}
 	
 	private class RowPanel extends JPanel{

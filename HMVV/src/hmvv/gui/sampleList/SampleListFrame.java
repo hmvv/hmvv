@@ -42,7 +42,6 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.GUIPipelineProgress;
 import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.MonitorPipelines;
@@ -259,8 +258,7 @@ public class SampleListFrame extends JFrame {
 				Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 				for(Pipeline p : pipelines) {
 					if(currentSample.sampleID == p.sampleID) {
-						GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgram(p);
-						c.setBackground(pipelineProgress.displayColor);
+						c.setBackground(p.pipelineProgram.displayColor);
 						break;
 					}
 				}

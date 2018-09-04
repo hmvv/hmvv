@@ -62,7 +62,7 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 		columns.add(new PipelineTableModelColumn("The pipeline program", 
 				"program", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.pipelineProgress.getDisplayString()));
+				(Pipeline pipeline) -> pipeline.pipelineProgram.getDisplayString()));
 		
 		columns.add(new PipelineTableModelColumn("The pipeline progress", 
 				"progress", 
