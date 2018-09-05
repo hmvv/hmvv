@@ -50,6 +50,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.IGVConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
@@ -119,7 +120,7 @@ public class MutationListFrame extends JFrame {
 			setTitle(title);
 		}else {
 			String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() +
-					" (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ", callerID = " + sample.callerID + ")";			
+					" (sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", sampleName = " + sample.sampleName + ", callerID = " + sample.callerID + ")";			
 			setTitle(title);
 		}
 		
@@ -497,11 +498,11 @@ public class MutationListFrame extends JFrame {
 		boolean includeReportedOnly = reportedOnlyCheckbox.isSelected();
 		boolean filterNormalPair = filterNomalCheckbox.isSelected();
 		int sampleID = (mutationList.getMutationCount() > 0) ? mutationList.getMutation(0).getSampleID() : -1;
-		int frequencyFrom =  getNumber(textFreqFrom, 0);
-		int frequencyTo = getNumber(textVarFreqTo, 100);
-		int minOccurence = getNumber(occurenceFromTextField, 0);
-		int minReadDepth = getNumber(minReadDepthTextField, 0);
-		int maxPopulationFrequency = getNumber(maxPopulationFrequencyTextField, 100);
+		int frequencyFrom =  getNumber(textFreqFrom, Configurations.ALLELE_FREQ_FILTER);
+		int frequencyTo = getNumber(textVarFreqTo, Configurations.MAX_ALLELE_FREQ_FILTER);
+		int minOccurence = getNumber(occurenceFromTextField, Configurations.MIN_OCCURENCE_FILTER);
+		int minReadDepth = getNumber(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
+		int maxPopulationFrequency = getNumber(maxPopulationFrequencyTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
 		VariantPredictionClass minPredictionClass = (VariantPredictionClass)predictionFilterComboBox.getSelectedItem();
 		try {
 			mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, filterNormalPair, sampleID, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, minPredictionClass);
@@ -529,11 +530,11 @@ public class MutationListFrame extends JFrame {
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);		
 		filterNomalCheckbox.setSelected(false);
-		textFreqFrom.setText("1");
-		textVarFreqTo.setText("100");
-		minReadDepthTextField.setText("100");
-		occurenceFromTextField.setText("0");
-		maxPopulationFrequencyTextField.setText("100");
+		textFreqFrom.setText(Configurations.ALLELE_FREQ_FILTER+"");
+		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
+		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
+		occurenceFromTextField.setText(Configurations.MIN_OCCURENCE_FILTER+"");
+		maxPopulationFrequencyTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
 		applyRowFilters();
 	}

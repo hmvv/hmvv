@@ -212,7 +212,7 @@ public class DatabaseCommands {
 				+ " left join assays as t6"
 				+ " on t1.assayID = t6.assayID"
 				+ " where t2.sampleID = ? ";
-		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= 10 and t2.readDepth >= 100)";
+		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.ALLELE_FREQ_FILTER + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
 		if(getFilteredData) {
 			where = " !" + where;
 		}
@@ -726,7 +726,7 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<PipelineStatus> getPipelineDetail(int queueID) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select pipelineStatusID, plStatus, timeUpdated from pipelineStatus where queueID = ? ");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select pipelineStatusID, plStatus, timeUpdated from pipelineStatus where queueID = ? order by timeupdated asc");
 		preparedStatement.setInt(1, queueID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();

@@ -78,7 +78,9 @@ public class MonitorPipelines extends JDialog {
 				return c;
 			}
 		};
-
+		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		
 		table.setAutoCreateRowSorter(true);
 
 		sorter = new TableRowSorter<MonitorPipelinesTableModel>(tableModel);
