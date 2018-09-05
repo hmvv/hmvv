@@ -45,6 +45,7 @@ import hmvv.gui.GUICommonTools;
 import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.MonitorPipelines;
+import hmvv.gui.adminFrames.QualityControlFrame;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
@@ -66,7 +67,7 @@ public class SampleListFrame extends JFrame {
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
-	private JMenuItem qualityControlMenuItem;
+	private JMenu qualityControlMenuItem;
 	
 	//Table
 	private JTable table;
@@ -175,7 +176,7 @@ public class SampleListFrame extends JFrame {
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
-		qualityControlMenuItem = new JMenuItem("Quality Control");
+		qualityControlMenuItem = new JMenu("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
 		refreshLabel = new JMenuItem("");
@@ -184,8 +185,33 @@ public class SampleListFrame extends JFrame {
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
-		adminMenu.add(qualityControlMenuItem);
 		adminMenu.add(newAssayMenuItem);
+		
+		adminMenu.addSeparator();
+		adminMenu.add(qualityControlMenuItem);
+		try{
+			for(String assay : DatabaseCommands.getAllAssays()){
+				//TODO support exome QC
+				if(assay.equals("exome")) {
+					continue;
+				}
+				JMenuItem assayMenuItem = new JMenuItem(assay);
+				qualityControlMenuItem.add(assayMenuItem);
+				assayMenuItem.addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						try {
+							QualityControlFrame.showQCChart(SampleListFrame.this, assay);
+						} catch (Exception e1) {
+							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+						}
+					}
+				});
+			}
+		}catch(Exception e){
+			//unable to get assays
+		}
+		
 		adminMenu.addSeparator();
 		adminMenu.add(refreshLabel);
 		
@@ -196,15 +222,12 @@ public class SampleListFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					
 					if(e.getSource() == enterSampleMenuItem){
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem){
 						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
 						monitorpipelines.setVisible(true);
-					}else if(e.getSource() == qualityControlMenuItem){
-						QualityControlFrame.showQCChart(SampleListFrame.this);
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);

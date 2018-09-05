@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
+import hmvv.main.Configurations;
+
 public class InternetCommands {
 	private static void browseToURL(String url) throws IOException, URISyntaxException {
 		if(Desktop.isDesktopSupported()){
@@ -59,8 +61,7 @@ public class InternetCommands {
 		for(String cosmicID : cosmicIDs){
 			String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
 			try {
-				//TODO should we default to v37 human genome?
-				browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?id=" + cosmicIDNumber);
+				browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, e.getMessage());
 			}

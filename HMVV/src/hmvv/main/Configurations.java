@@ -98,7 +98,8 @@ public class Configurations {
 	 * The Linux group which defines super users.
 	 */
 	public static String SUPER_USER_GROUP;
-
+	public static String GENOME_VERSION = "37";
+	
 	/*
 	 * SSH server configurations
 	 */

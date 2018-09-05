@@ -183,6 +183,7 @@ public class EnterSample extends JDialog {
 						@Override
 						public void run() {
 							enterSampleButton.setText("Processing...");
+							enterSampleButton.setEnabled(false);
 							try {
 								enterData();
 								enterSampleButton.setText("Completed.");

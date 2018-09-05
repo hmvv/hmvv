@@ -328,7 +328,7 @@ public class SSHConnection {
 		try {
 			file.delete();
 		}catch(Exception e) {
-			//TODO ignore this? The user may have the temp folder or the file open
+			//Ignore this. The user may have the temp folder or the file open.
 		}
 	}
 

@@ -8,12 +8,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
+import hmvv.model.GeneAmpliconTrend;
 import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
@@ -246,7 +248,7 @@ public class DatabaseCommands {
 	}
 	
 	public static String getCosmicInfo(String cosmicID) throws Exception{
-		String query = "select info from cosmic_grch37v86 where cosmicID = ?";
+		String query = "select info from db_cosmic_grch37v86 where cosmicID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -598,11 +600,11 @@ public class DatabaseCommands {
 
 	public static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, readDepth from sampleAmplicons where sampleID = ? and readDepth<100");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, gene, readDepth from sampleAmplicons where sampleID = ? and readDepth<100");
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		while(getSampleResult.next()){
-			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString(1), getSampleResult.getInt(2));
+			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString("gene"), getSampleResult.getString("ampliconName"), getSampleResult.getInt("readDepth"));
 			amplicons.add(amplicon);
 		}
 		updateStatement.close();
@@ -742,9 +744,14 @@ public class DatabaseCommands {
 		return rows;
 	}
 	
-	//TODO Design this appropriately
-	public static ArrayList<Amplicon> getAmpliconQCData(String assay) throws Exception{
-		String query = "select sampleAmplicons.sampleID, sampleAmplicons.ampliconName, sampleAmplicons.readDepth, samples.lastName from sampleAmplicons"
+	/**
+	 * 
+	 * @param assay
+	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
+	 * @throws Exception
+	 */
+	public static TreeMap<String, GeneAmpliconTrend> getAmpliconQCData(String assay) throws Exception{
+		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.readDepth from sampleAmplicons"
 				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " where samples.lastName like 'Horizon%' ";
@@ -757,21 +764,32 @@ public class DatabaseCommands {
 		}else if(assay.equals("neuro")) {
 			geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS')";
 		}else {
-			throw new Exception("Unknown assay: " + assay);
+			throw new Exception("Unsupported Assay: " + assay);
 		}
 		query += geneFilter;
 		
+		query += " order by sampleID, gene, ampliconName asc";
+		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-
+		
+		TreeMap<String, GeneAmpliconTrend> geneAmpliconTrends = new TreeMap<String, GeneAmpliconTrend>();
+		
+		//ArrayList<AmpliconTrend> ampliconTrends = new ArrayList<AmpliconTrend>();
+		//AmpliconTrend lastAmpliconTrend = null;
 		while(rs.next()){
-			Amplicon amplicon = new Amplicon(rs.getInt(1), rs.getString(2), rs.getInt(3));
-			amplicons.add(amplicon);
+			Amplicon amplicon = new Amplicon(rs.getInt("sampleID"), rs.getString("gene"), rs.getString("ampliconName"), rs.getInt("readDepth"));
+			GeneAmpliconTrend geneAmpliconTrend = geneAmpliconTrends.get(amplicon.gene);
+			if(geneAmpliconTrend == null) {
+				geneAmpliconTrend = new GeneAmpliconTrend(amplicon.gene);
+				geneAmpliconTrends.put(amplicon.gene, geneAmpliconTrend);
+			}
+			
+			geneAmpliconTrend.addAmplicon(amplicon);
 		}
 		preparedStatement.close();
 
-		return amplicons;
+		return geneAmpliconTrends;
 	}
 	
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {

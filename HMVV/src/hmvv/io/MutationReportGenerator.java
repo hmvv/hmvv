@@ -58,6 +58,8 @@ public class MutationReportGenerator{
 				report.append("Classification: " + classification + "\n");
 				report.append("Curation Note: " + curation + "\n" + "\n");
 			}
+			
+			report.append("\n");
 		}
 
 		return report.toString();
@@ -75,6 +77,8 @@ public class MutationReportGenerator{
 			String codon = mutation.getHGVSp();
 			String gene = mutation.getGene();
 			String mutationText = gene + ":" + cDNA + ";" + codon;
+			report.append("Mutation: " + mutationText + "\n");
+			
 			Annotation annotation = mutation.getLatestAnnotation();
 			if(annotation != null) {
 				String curation = annotation.curation;
@@ -86,7 +90,6 @@ public class MutationReportGenerator{
 			ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
 			if(geneAnnotationHistory.size() > 0) {
 				GeneAnnotation geneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
-				report.append("Mutation: " + mutationText + "\n");
 				if(geneAnnotation.curation.length() > 0) {
 					report.append("Gene Note: " + geneAnnotation.curation + "\n");
 				}
