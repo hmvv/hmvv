@@ -154,7 +154,6 @@ public class SSHConnection {
 	
 	private static File loadIlluminaNextseqHeme_BAM(String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
 		String instrument = "nextseq";
-		//TODO test this
 		String command = String.format("ls /home/environments/%s/nextseqAnalysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
@@ -328,22 +327,25 @@ public class SSHConnection {
 		try {
 			file.delete();
 		}catch(Exception e) {
-			//TODO ignore this? The user may have the temp folder or the file open
+			//Ignore this. The user may have the temp folder or the file open.
 		}
 	}
 
 	
-	public static int getFileSize(Pipeline pipeline) throws Exception {
+	public static long getFileSize(Pipeline pipeline) throws Exception {
 		String command="";
+
 		if  ( pipeline.getInstrumentName().equals("miseq")) {
-			command = String.format("ls -l /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s_*.vcf | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
+			command = String.format("ls -l --block-size=KB  /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s_*.vcf | awk '{print $5}' | tr -dc '0-9' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
 		} else if  ( pipeline.getInstrumentName().equals("nextseq")) {
-			command = String.format("ls -l /home/%s/*_%s_*/out1/%s*_R1_001.fastq.gz | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
+			command = String.format("ls -l --block-size=MB /home/%s/*_%s_*/out1/%s*_R1_001.fastq.gz | awk '{print $5}' | tr -dc '0-9'  ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
 		}else if  ( pipeline.getInstrumentName().equals("proton")) {
-			command = String.format("ls -l /home/%s/*%s/plugin_out/variantCaller_out*/%s/TSVC_variants.vcf | awk '{print $5}' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
+			command = String.format("ls -l --block-size=KB /home/%s/*%s/plugin_out/variantCaller_out*/%s/TSVC_variants.vcf | awk '{print $5}' | tr -dc '0-9' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
 		}
 		CommandResponse commandResult = SSHConnection.executeCommandAndGetOutput(command);
-		return Integer.parseInt(commandResult.responseLines.get(0));
+		String fileSizeString = commandResult.responseLines.get(0);
+		if (fileSizeString.equals("")){fileSizeString="0";}
+		return Long.parseLong(fileSizeString);
 	}
 }
 

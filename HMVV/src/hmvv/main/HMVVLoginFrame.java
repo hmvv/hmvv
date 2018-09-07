@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.InputStream;
 
 import javax.swing.JButton;
@@ -17,6 +19,7 @@ import javax.swing.JTextField;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
+import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
 
 public class HMVVLoginFrame extends JFrame {
@@ -26,11 +29,21 @@ public class HMVVLoginFrame extends JFrame {
 	private JTextField usernameTextField;
 	private JPasswordField passwordTextField;
 	private JButton loginButton;
+	private JLabel lblhmvv_version;
 	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
+		try {
+            String theme = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+            javax.swing.UIManager.setLookAndFeel(theme);
+        } catch(Exception e){
+            JOptionPane.showMessageDialog(null, e.getMessage() + "\nError loading windows theme.");
+            return;
+        }
+		
 		InputStream configurationStream = HMVVLoginFrame.class.getResourceAsStream("/config.ini");
 		if(configurationStream == null){
 			JOptionPane.showMessageDialog(null, "Could not locate configuration file. Application must be compiled with a config.ini file. Shutting down.");
@@ -81,35 +94,43 @@ public class HMVVLoginFrame extends JFrame {
 	}
 	
 	private void layoutLoginComponents(){
-		setSize(440, 345);
-		panel.setLayout(null);
-		
-		JLabel lblUsername = new JLabel("UserName");
-		lblUsername.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblUsername.setBounds(72, 71, 101, 33);
-		
-		JLabel lblPassword = new JLabel("Password");
-		lblPassword.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		lblPassword.setBounds(72, 145, 74, 14);
-		
-		usernameTextField.setBounds(160, 74, 142, 30);
-		usernameTextField.setColumns(10);
-		
-		passwordTextField.setBounds(160, 139, 142, 30);
-		
-		loginButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		loginButton.setBounds(181, 214, 89, 23);
-		
-		panel.add(lblUsername);
-		panel.add(usernameTextField);
-		panel.add(lblPassword);
-		panel.add(passwordTextField);
-		panel.add(loginButton);
-		add(panel);
-		getRootPane().setDefaultButton(loginButton);
-		
-		Rectangle bounds = GUICommonTools.getScreenBounds();
-		setLocation(bounds.width/2-getSize().width/2, bounds.height/2-getSize().height/2);
+      setSize(500, 450);
+        panel.setLayout(null);
+
+        JLabel lblhmvv = new JLabel("Houston Methodist Variant Viewer");
+        lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
+        lblhmvv.setBounds(75, 100, 1000, 30);
+
+		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 3.0 </a></html>");
+        lblhmvv_version.setFont(GUICommonTools.TAHOMA_BOLD_11);
+        lblhmvv_version.setBounds(215, 125, 100, 30);
+
+        JLabel lblUsername = new JLabel("UserName");
+        lblUsername.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        lblUsername.setBounds(125, 200, 100, 30);
+        usernameTextField.setBounds(200, 200, 140, 30);
+        usernameTextField.setColumns(10);
+
+        JLabel lblPassword = new JLabel("Password");
+        lblPassword.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        lblPassword.setBounds(125, 250, 100, 30);
+        passwordTextField.setBounds(200, 250, 140, 30);
+
+        loginButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        loginButton.setBounds(200, 325, 100, 30);
+
+		panel.add(lblhmvv);
+        panel.add(lblhmvv_version);
+        panel.add(lblUsername);
+        panel.add(usernameTextField);
+        panel.add(lblPassword);
+        panel.add(passwordTextField);
+        panel.add(loginButton);
+        add(panel);
+        getRootPane().setDefaultButton(loginButton);
+
+        Rectangle bounds = GUICommonTools.getScreenBounds();
+        setLocation(bounds.width/2-getSize().width/2, bounds.height/2-getSize().height/2);
 	}
 	
 	private void activateComponents(){
@@ -118,6 +139,13 @@ public class HMVVLoginFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				login();
 			}			
+		});
+
+		lblhmvv_version.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				InternetCommands.hmvvHome();
+			}
 		});
 	}
 	

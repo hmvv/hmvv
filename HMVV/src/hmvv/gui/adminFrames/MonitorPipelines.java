@@ -1,27 +1,19 @@
 package hmvv.gui.adminFrames;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableRowSorter;
+import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.GUIPipelineProgress;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.model.Pipeline;
+import hmvv.model.PipelineProgram;
 import hmvv.model.PipelineStatus;
 
 public class MonitorPipelines extends JDialog {
@@ -74,15 +66,24 @@ public class MonitorPipelines extends JDialog {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				int modelRow = table.convertRowIndexToModel(row);
-				GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgram(tableModel.getPipeline(modelRow));
-				if(pipelineProgress == GUIPipelineProgress.COMPLETE) {
-					c.setBackground(GUICommonTools.COMPLETE_COLOR);
+				Pipeline pipeline = tableModel.getPipeline(modelRow);
+				PipelineProgram pipelineProgress = pipeline.pipelineProgram;
+
+				if (isCellSelected(row,column)){
+					c.setBackground(new Color(51,153,255));
 				}else {
-					c.setBackground(pipelineProgress.displayColor);
+					if (pipelineProgress == PipelineProgram.COMPLETE) {
+						c.setBackground(GUICommonTools.COMPLETE_COLOR);
+					} else {
+						c.setBackground(pipelineProgress.displayColor);
+					}
 				}
 				return c;
 			}
 		};
+		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
 		table.setAutoCreateRowSorter(true);
 
@@ -104,7 +105,7 @@ public class MonitorPipelines extends JDialog {
 		menuBar.add(refreshLabel);
 		setJMenuBar(menuBar);
 
-		TableColumn progressColumn = table.getColumnModel().getColumn(8);
+		TableColumn progressColumn = table.getColumnModel().getColumn(9);
 		progressColumn.setCellRenderer(new ProgressCellRenderer());
 	}
 
@@ -201,10 +202,9 @@ public class MonitorPipelines extends JDialog {
 
     private void updatePipelinesASynch() {
         try {
-            tableModel.resetModel();
             ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
             for(Pipeline p : pipelines) {
-                tableModel.addPipeline(p);
+            	tableModel.addOrUpdatePipeline(p);
             }
             timeLastRefreshed = System.currentTimeMillis();
         } catch (Exception e) {
@@ -230,12 +230,12 @@ public class MonitorPipelines extends JDialog {
 		int queueID = currentPipeline.getQueueID();
 
 		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(queueID);
-		
+
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
-			
-			
-			
+
+
+
 			@Override 
 			public final boolean isCellEditable(int row, int column) {
 				return false;
@@ -276,10 +276,17 @@ public class MonitorPipelines extends JDialog {
 			}
 		};
 		JTable table = new JTable(tableModel);
-		
+
+		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+
 		JScrollPane tableSP = new JScrollPane(table);
 		tableSP.setPreferredSize(new Dimension(600,300));
-		
+
+		TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(table.getModel());
+		table.setRowSorter(sorter);
+
 		JOptionPane.showMessageDialog(this, tableSP,
 				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
 						currentPipeline.instrumentName, currentPipeline.assayName, currentPipeline.runID, currentPipeline.sampleName),
@@ -304,15 +311,15 @@ public class MonitorPipelines extends JDialog {
 	    }
 
 	    @Override
-	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) { 
-	        if (value instanceof String){
-                this.setValue(0);
-                this.setString("ERROR");
-            } else {
-                this.setValue((int) value);
-                this.setString(value.toString()+'%');
-            }
-
+	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	    	try {
+	    		int intValue = Integer.parseInt(value.toString());
+	    		setValue(intValue);
+                setString(intValue+"%");
+	    	}catch(Exception e) {
+	    		setValue(0);
+                setString("ERROR");
+	    	}
 	        return this;
 	    }
 	}

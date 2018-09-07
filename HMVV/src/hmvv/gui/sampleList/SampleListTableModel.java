@@ -90,7 +90,17 @@ public class SampleListTableModel extends AbstractTableModel{
 				"runDate", 
 				String.class,
 				(Sample sample) -> sample.runDate));
-		
+
+		columns.add(new SampleTableModelColumn("Pathologist entered patient history",
+				"patient History",
+				String.class,
+				(Sample sample) -> sample.getPatientHistory()));
+
+		columns.add(new SampleTableModelColumn("Pathologist entered bm diagnosis",
+				"BM Diagnosis",
+				String.class,
+				(Sample sample) -> sample.getBmDiagnosis()));
+
 		columns.add(new SampleTableModelColumn("Additional user entered information", 
 				"note", 
 				String.class,
@@ -112,13 +122,13 @@ public class SampleListTableModel extends AbstractTableModel{
 				(Sample sample) -> "edit"));
 	}
 	
-	public Sample getSample(String runID, String coverageID, String variantCallerID, String sampleID){
+	public Sample getSample(String runID, String coverageID, String variantCallerID, String sampleName){
 		for(Sample s : samples){
 			//only check sampleID because the coverageID and variantCallerID can be blank depending on the instrument
 			if(s.runID.equals("") || s.sampleName.equals("")){
 				continue;
 			}
-			if(s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleID)){
+			if(s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
 				return s;
 			}
 		}

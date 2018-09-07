@@ -18,11 +18,13 @@ public class Sample {
 	private String pathNumber;
 	private String tumorSource;
 	private String tumorPercent;
+	private String patientHistory;
+	private String bmDiagnosis ;
 	private String note;
 	
 	public Sample(int sampleID, String assay, String instrument, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
-			String coverageID, String callerID, String runDate, String note, String enteredBy) {
+			String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
 		this.sampleID = sampleID;
 		this.assay = notNull(assay);
 		this.instrument = notNull(instrument);
@@ -37,6 +39,8 @@ public class Sample {
 		this.coverageID = notNull(coverageID);
 		this.callerID = notNull(callerID);
 		this.runDate = notNull(runDate);
+		this.patientHistory = notNull(patientHistory);
+		this.bmDiagnosis = notNull(bmDiagnosis);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
 	}
@@ -95,6 +99,22 @@ public class Sample {
 
 	public String getTumorPercent() {
 		return tumorPercent;
+	}
+
+	public String getPatientHistory() {
+		return patientHistory;
+	}
+
+	public String getBmDiagnosis() {
+		return bmDiagnosis;
+	}
+
+	public void setPatientHistory(String patientHistory) {
+		this.patientHistory = patientHistory;
+	}
+
+	public void setBmDiagnosis(String bmDiagnosis) {
+		this.bmDiagnosis = bmDiagnosis;
 	}
 
 	public String getNote() {

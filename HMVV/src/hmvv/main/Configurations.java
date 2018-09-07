@@ -98,7 +98,14 @@ public class Configurations {
 	 * The Linux group which defines super users.
 	 */
 	public static String SUPER_USER_GROUP;
-
+	public static String GENOME_VERSION = "37";
+	
+	public static int ALLELE_FREQ_FILTER = 1;
+	public static int MAX_ALLELE_FREQ_FILTER = 100;
+	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
+	public static int READ_DEPTH_FILTER = 100;
+	public static int MIN_OCCURENCE_FILTER = 0;
+	
 	/*
 	 * SSH server configurations
 	 */
@@ -108,10 +115,6 @@ public class Configurations {
 	
 	//TODO improve the way this decision is made
 	public static String getEnvironment() {
-		if(DATABASE_NAME.equals("ngs")){
-			return "live";
-		}else{
-			return "test";
-		}
+		return DATABASE_NAME;
 	}
 }

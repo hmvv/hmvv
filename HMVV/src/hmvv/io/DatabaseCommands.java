@@ -8,13 +8,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.TreeMap;
 
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
+import hmvv.model.GeneAmpliconTrend;
 import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
@@ -23,7 +24,7 @@ import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
 public class DatabaseCommands {
-
+	
 	private static Connection databaseConnection = null;
 
 	public static Connection getDatabaseConnection(){
@@ -84,10 +85,6 @@ public class DatabaseCommands {
 		if(sampleCount != 0) {
 			throw new Exception("Error: Supplied sample exists in database; data not entered");
 		}
-
-		//need coverage/callerID placeholder for command-line
-        if (coverageID==""){coverageID="-";}
-        if (variantCallerID==""){variantCallerID="-";}
 
 		String enterSample = String.format("insert into samples "
 				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy) "
@@ -215,7 +212,7 @@ public class DatabaseCommands {
 				+ " left join assays as t6"
 				+ " on t1.assayID = t6.assayID"
 				+ " where t2.sampleID = ? ";
-		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= 10 and t2.readDepth >= 100)";
+		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.ALLELE_FREQ_FILTER + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
 		if(getFilteredData) {
 			where = " !" + where;
 		}
@@ -251,7 +248,7 @@ public class DatabaseCommands {
 	}
 	
 	public static String getCosmicInfo(String cosmicID) throws Exception{
-		String query = "select info from cosmic_grch37v86 where cosmicID = ?";
+		String query = "select info from db_cosmic_grch37v86 where cosmicID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -318,60 +315,65 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<Mutation> getMutationDataByQuery(String assay, String orderNumber, String lastName, String firstName, String gene, String cosmicID, String cDNA, String codon) throws Exception{
-		String query = "select t2.reported, t2.gene, t2.exons, t2.HGVSc, t2.HGVSp, t2.dbSNPID, t3.cosmicID, " +
-				"t2.type, t2.genotype, t2.altFreq, t2.readDP, t2.altReadDP, t6.occurrence, " +
-				"t2.chr, t2.pos, t2.ref, t2.alt, t2.Consequence, t2.Sift, t2.PolyPhen, " +
-				"t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq, " +
-				"t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc,t2.pubmed, " +
-				"t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent, t2.sampleID " +
-				"from " + 
-				"data as t2 left join " +
-				"cosmic_grch37v82 as t3 " +
-				"on t2.chr = t3.chr and t2.pos = t3.pos and t2.ref = t3.ref and t2.alt = t3.alt " +
-				"left join g1000 as t4 " +
-				"on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt " +
-				"left join clinvar as t5 " +
-				"on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt " +
-				"left join Samples as t1 " +
-				"on t2.sampleID = t1.ID " +
-				"left join " +
-				"(select chr, pos, ref, alt, assay, count(*) as occurrence from " + 
-				"(select chr, pos, ref, alt, assay, sampleID from data " +
-				"where genotype != 'No Call' " +
-				"group by chr, pos, ref, alt, assay, sampleID) as t7 " +
-				"group by chr,pos,ref,alt, assay " +
-				") as t6 " +
-				"on t2.chr = t6.chr and t2.pos = t6.pos and t2.ref = t6.ref and t2.alt = t6.alt and t2.assay = t6.assay ";
+		String query =
+				"select " +
+				
+				//sampleVariant fields
+				"sampleVariants.reported, sampleVariants.gene, sampleVariants.exon, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.dbSNPID, " +
+				"sampleVariants.type, sampleVariants.impact, sampleVariants.altFreq, sampleVariants.readDepth, sampleVariants.altReadDepth, sampleVariants.pubmed," +
+				"sampleVariants.chr, sampleVariants.pos, sampleVariants.ref, sampleVariants.alt, sampleVariants.consequence, sampleVariants.Sift, sampleVariants.PolyPhen, " +
+				
+				//sample fields
+				"samples.lastName, samples.firstName, samples.orderNumber, samples.tumorSource, samples.tumorPercent, sampleVariants.sampleID, assays.assayName, " +
+				
+				//reference database fields
+				"g1000Table.altCount, g1000Table.totalCount, g1000Table.altGlobalFreq, g1000Table.americanFreq, g1000Table.asianFreq, g1000Table.afrFreq, g1000Table.eurFreq, " +
+				"clinvarTable.origin, clinvarTable.clinicalAllele, clinvarTable.clinicalSig, clinvarTable.clinicalAcc " +
+				
+				"from sampleVariants " + 
+
+				//joins
+				"left join db_g1000 as g1000Table " +
+				"on sampleVariants.chr = g1000Table.chr and sampleVariants.pos = g1000Table.pos and sampleVariants.ref = g1000Table.ref and sampleVariants.alt = g1000Table.alt " +
+				
+				"left join db_clinvar as clinvarTable " +
+				"on sampleVariants.chr = clinvarTable.chr and sampleVariants.pos = clinvarTable.pos and sampleVariants.ref = clinvarTable.ref and sampleVariants.alt = clinvarTable.alt " +
+				
+				"left join samples " +
+				"on sampleVariants.sampleID = samples.sampleID " +
+				
+				"left join assays " +
+				"on samples.assayID = assays.assayID ";
+		
 		String whereClause = "";
 
 		if(!assay.equals("All")){
-			whereClause += String.format(" and t2.assay = '%s'", assay);
+			whereClause += String.format(" and assays.assayName = '%s'", assay);
 		}
 		if(!orderNumber.equals("")){
-			whereClause += String.format(" and t1.orderNumber = '%s'", orderNumber);
+			whereClause += String.format(" and samples.orderNumber = '%s'", orderNumber);
 		}
 		if(!lastName.equals("")){
-			whereClause += String.format(" and t1.lastName = '%s'", lastName);
+			whereClause += String.format(" and samples.lastName = '%s'", lastName);
 		}
 		if(!firstName.equals("")){
-			whereClause += String.format(" and t1.firstName = '%s'", firstName);
+			whereClause += String.format(" and samples.firstName = '%s'", firstName);
 		}
 		if(!gene.equals("")){
-			whereClause += String.format(" and t2.gene = '%s'", gene);
+			whereClause += String.format(" and sampleVariants.gene = '%s'", gene);
 		}
 		if(!cosmicID.equals("")){
-			whereClause += String.format(" and t3.cosmicID like '%%%s%%'", cosmicID);
+			whereClause += String.format(" and cosmicTable.cosmicID like '%%%s%%'", cosmicID);
 		}
 		if(!cDNA.equals("")){
-			whereClause += String.format(" and t2.HGVSc like '%%%s%%'", cDNA);
+			whereClause += String.format(" and sampleVariants.HGVSc like '%%%s%%'", cDNA);
 		}
 		if(!codon.equals("")){
-			whereClause += String.format(" and t2.HGVSp like '%%%s%%'", codon);
+			whereClause += String.format(" and sampleVariants.HGVSp like '%%%s%%'", codon);
 		}
 		if(whereClause.equals("")){
 			throw new Exception("You need to specify at least one search term");
-		}
-		else{
+		}else{
 			String whereClauseFinal = "where" + whereClause.replaceFirst("and", "");
 			query += whereClauseFinal;	
 		}
@@ -510,7 +512,7 @@ public class DatabaseCommands {
 	public static ArrayList<Sample> getAllSamples() throws Exception{
 		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
 				"s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
-				"s.runDate, s.note, s.enteredBy from samples as s " +
+				"s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy from samples as s " +
 				"join instruments  as i on i.instrumentID = s.instrumentID " +
 				"join assays as a on a.assayID = s.assayID ";
 				PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -540,42 +542,12 @@ public class DatabaseCommands {
 				row.getString("coverageID"),
 				row.getString("callerID"),
 				row.getString("runDate"),
+				row.getString("patientHistory"),
+				row.getString("bmDiagnosis"),
 				row.getString("note"),
 				row.getString("enteredBy")
 				);
 		return sample;
-	}
-
-	public static Sample getSample(int sampleID) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
-				"s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
-				"s.runDate, s.note, s.enteredBy from samples as s " +
-				"join instruments  as i on i.instrumentID = s.instrumentID " +
-				"join assays as a on a.assayID = s.assayID " +
-				"where s.sampleID = ? ");
-		updateStatement.setString(1, sampleID+"");
-		ResultSet getSampleResult = updateStatement.executeQuery();
-		if(getSampleResult.next()){
-			return new Sample(
-                    sampleID,
-					getSampleResult.getString(1),
-					getSampleResult.getString(2),
-					getSampleResult.getString(3),
-					getSampleResult.getString(4),
-					getSampleResult.getString(5),
-					getSampleResult.getString(6),
-					getSampleResult.getString(7),
-					getSampleResult.getString(8),
-					getSampleResult.getString(9),
-					getSampleResult.getString(10),
-					getSampleResult.getString(11),
-					getSampleResult.getString(12),
-					getSampleResult.getString(13),
-					getSampleResult.getString(14),
-					getSampleResult.getString(15)
-					);
-		}
-		return null;
 	}
 
 	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
@@ -588,15 +560,17 @@ public class DatabaseCommands {
 
 	public static void updateSample(Sample sample) throws Exception{
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set lastName = ?, firstName = ?, orderNumber = ?, pathNumber = ?, "
-				+ "tumorSource = ?, tumorPercent = ?, note = ? where sampleID = ?");
+				+ "tumorSource = ?, tumorPercent = ?, patientHistory = ?, bmDiagnosis = ?, note = ? where sampleID = ?");
 		updateStatement.setString(1, sample.getLastName());
 		updateStatement.setString(2, sample.getFirstName());
 		updateStatement.setString(3, sample.getOrderNumber());
 		updateStatement.setString(4, sample.getPathNumber());
 		updateStatement.setString(5, sample.getTumorSource());
 		updateStatement.setString(6, sample.getTumorPercent());
-		updateStatement.setString(7, sample.getNote());
-		updateStatement.setString(8, sample.sampleID+"");
+		updateStatement.setString(7, sample.getPatientHistory());
+		updateStatement.setString(8, sample.getBmDiagnosis());
+		updateStatement.setString(9, sample.getNote());
+		updateStatement.setString(10, sample.sampleID+"");
 		updateStatement.executeUpdate();
 		updateStatement.close();
 	}
@@ -615,7 +589,7 @@ public class DatabaseCommands {
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("CALL calcAmpliconCount(?);");
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
-		if(getSampleResult.next()){//TODO Handle more than one entry in the database?
+		if(getSampleResult.next()){
 			AmpliconCount ampliconCount = new AmpliconCount(sampleID, getSampleResult.getString(1), getSampleResult.getString(2));
 			if(getSampleResult.next()){
 				throw new Exception("Error: more than one amplicon count result located for the sample");
@@ -630,11 +604,11 @@ public class DatabaseCommands {
 
 	public static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, readDepth from sampleAmplicons where sampleID = ? and readDepth<100");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, gene, readDepth from sampleAmplicons where sampleID = ? and readDepth<100");
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		while(getSampleResult.next()){
-			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString(1), getSampleResult.getString(2));
+			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString("gene"), getSampleResult.getString("ampliconName"), getSampleResult.getInt("readDepth"));
 			amplicons.add(amplicon);
 		}
 		updateStatement.close();
@@ -711,7 +685,7 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Monitor Pipelines Queries
 	 *************************************************************************/
-	private static Pipeline getPipeline(ResultSet row) throws SQLException{
+	private static Pipeline getPipeline(ResultSet row) throws Exception{
 		Pipeline pipeline = new Pipeline(
 				row.getInt("queueID"),
 				row.getInt("sampleID"),
@@ -739,7 +713,8 @@ public class DatabaseCommands {
 				" from pipelineStatus " +
 				" group by queueID) ) as t2 " +
 				" on t3.queueID = t2.queueID " +
-				" order by t3.queueID" ;
+				" where t2.timeUpdated  >= now() - interval 10 day" +
+				" order by t3.queueID desc" ;
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -755,7 +730,7 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<PipelineStatus> getPipelineDetail(int queueID) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select pipelineStatusID, plStatus, timeUpdated from pipelineStatus where queueID = ? ");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select pipelineStatusID, plStatus, timeUpdated from pipelineStatus where queueID = ? order by timeupdated asc");
 		preparedStatement.setInt(1, queueID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
@@ -773,46 +748,72 @@ public class DatabaseCommands {
 		return rows;
 	}
 	
-	//TODO Design this appropriately
-	public static ArrayList<Amplicon> getAmpliconQCData() throws Exception{
-		String query = "select sampleAmplicons.sampleID, sampleAmplicons.ampliconName, sampleAmplicons.readDepth, samples.lastName from sampleAmplicons"
+	/**
+	 * 
+	 * @param assay
+	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
+	 * @throws Exception
+	 */
+	public static TreeMap<String, GeneAmpliconTrend> getAmpliconQCData(String assay) throws Exception{
+		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.readDepth from sampleAmplicons"
 				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " where samples.lastName like 'Horizon%' ";
+		
+		String geneFilter;
+		if(assay.equals("heme")) {
+			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS')";
+		}else if(assay.equals("gene50")) {
+			geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS')";
+		}else if(assay.equals("neuro")) {
+			geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS')";
+		}else {
+			throw new Exception("Unsupported Assay: " + assay);
+		}
+		query += geneFilter;
+		
+		query += " order by sampleID, gene, ampliconName asc";
+		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-
+		
+		TreeMap<String, GeneAmpliconTrend> geneAmpliconTrends = new TreeMap<String, GeneAmpliconTrend>();
+		
+		//ArrayList<AmpliconTrend> ampliconTrends = new ArrayList<AmpliconTrend>();
+		//AmpliconTrend lastAmpliconTrend = null;
 		while(rs.next()){
-			Amplicon amplicon = new Amplicon(rs.getInt(1), rs.getString(2), rs.getString(3));
-			amplicons.add(amplicon);
+			Amplicon amplicon = new Amplicon(rs.getInt("sampleID"), rs.getString("gene"), rs.getString("ampliconName"), rs.getInt("readDepth"));
+			GeneAmpliconTrend geneAmpliconTrend = geneAmpliconTrends.get(amplicon.gene);
+			if(geneAmpliconTrend == null) {
+				geneAmpliconTrend = new GeneAmpliconTrend(amplicon.gene);
+				geneAmpliconTrends.put(amplicon.gene, geneAmpliconTrend);
+			}
+			
+			geneAmpliconTrend.addAmplicon(amplicon);
 		}
 		preparedStatement.close();
 
-		return amplicons;
+		return geneAmpliconTrends;
 	}
 	
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
-		
+
+		int fileRange = 1000;
 		int averageRunTime = 0;
-		int fileSize = SSHConnection.getFileSize(pipeline) / 1000 ; // get size in KB
+		long fileSize = SSHConnection.getFileSize(pipeline);
 		
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(pipelineLogs.runTimeSecs) as averagetime from pipelineLogs " +
-				" join pipelineQueue on pipelineQueue.queueID = pipelineLogs.queueID " +
-				" join samples on samples.sampleID = pipelineQueue.sampleID " +
-                " join assays on assays.assayId = samples.assayID " +
-                " join instruments on instruments.instrumentID = instruments.instrumentID " +
-				" where instruments.instrumentName=? and assays.assayName=? and pipelineLogs.fileSizeKB between ? and ? ;");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(totalRunTime) as averagetime from pipelineLogs " +
+				" where instrument=? and assay=? and fileSize between ? and ? ;");
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
-		preparedStatement.setInt(3, fileSize - 1000);
-		preparedStatement.setInt(4, fileSize + 1000);
+		preparedStatement.setLong(3, fileSize - fileRange);
+		preparedStatement.setLong(4, fileSize + fileRange);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 			averageRunTime = rs.getInt("averagetime");
 		}
 		preparedStatement.close();
-		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() +" filesize " + fileSize + " averageRunTime " + averageRunTime);
+		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() + " filesize " + fileSize + " averageRunTime " + averageRunTime);
 		return (float)averageRunTime;
 	}
 }

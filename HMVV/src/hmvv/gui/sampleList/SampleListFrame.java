@@ -29,11 +29,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -42,14 +45,15 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.GUIPipelineProgress;
 import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.MonitorPipelines;
+import hmvv.gui.adminFrames.QualityControlFrame;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
@@ -67,7 +71,7 @@ public class SampleListFrame extends JFrame {
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
-	private JMenuItem qualityControlMenuItem;
+	private JMenu qualityControlMenuItem;
 	
 	//Table
 	private JTable table;
@@ -93,12 +97,15 @@ public class SampleListFrame extends JFrame {
 	private volatile long timeLastRefreshed = 0;
 	private volatile ArrayList<Pipeline> pipelines;
 	private volatile JMenuItem refreshLabel;
+	private int mutationLinkColumn =0;
+	private int ampliconColumn = 18;
+	private int sampleEditColumn = 19;
 	
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) {
-		super("Sample List");
+		super( Configurations.DATABASE_NAME + " : Sample List");
 		tableModel = new SampleListTableModel(samples);
 		
 		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
@@ -111,7 +118,7 @@ public class SampleListFrame extends JFrame {
 		    }
 		});		
 		
-		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), 0, 14, 16, 17);
+		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), mutationLinkColumn, ampliconColumn, sampleEditColumn);
 		pipelines = new ArrayList<Pipeline>();//initialize as blank so that if setupPipelineRefreshThread() fails, the object is still instantiated
 		
 		createMenu();
@@ -176,7 +183,7 @@ public class SampleListFrame extends JFrame {
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
-		qualityControlMenuItem = new JMenuItem("Quality Control");
+		qualityControlMenuItem = new JMenu("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
 		refreshLabel = new JMenuItem("");
@@ -185,8 +192,33 @@ public class SampleListFrame extends JFrame {
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
-		adminMenu.add(qualityControlMenuItem);
 		adminMenu.add(newAssayMenuItem);
+		
+		adminMenu.addSeparator();
+		adminMenu.add(qualityControlMenuItem);
+		try{
+			for(String assay : DatabaseCommands.getAllAssays()){
+				//TODO support exome QC
+				if(assay.equals("exome")) {
+					continue;
+				}
+				JMenuItem assayMenuItem = new JMenuItem(assay);
+				qualityControlMenuItem.add(assayMenuItem);
+				assayMenuItem.addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						try {
+							QualityControlFrame.showQCChart(SampleListFrame.this, assay);
+						} catch (Exception e1) {
+							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+						}
+					}
+				});
+			}
+		}catch(Exception e){
+			//unable to get assays
+		}
+		
 		adminMenu.addSeparator();
 		adminMenu.add(refreshLabel);
 		
@@ -197,15 +229,12 @@ public class SampleListFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					
 					if(e.getSource() == enterSampleMenuItem){
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem){
 						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
 						monitorpipelines.setVisible(true);
-					}else if(e.getSource() == qualityControlMenuItem){
-						QualityControlFrame.showQCChart(SampleListFrame.this);
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -252,12 +281,14 @@ public class SampleListFrame extends JFrame {
 			@Override
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
+				if(row == table.getSelectedRow()) {
+					return c;
+				}
 				c.setForeground(customColumns[column].color);
 				Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 				for(Pipeline p : pipelines) {
-					if(currentSample.sampleID == p.sampleTableID) {
-						GUIPipelineProgress pipelineProgress = GUIPipelineProgress.getProgram(p);
-						c.setBackground(pipelineProgress.displayColor);
+					if(currentSample.sampleID == p.sampleID) {
+						c.setBackground(p.pipelineProgram.displayColor);
 						break;
 					}
 				}
@@ -266,7 +297,12 @@ public class SampleListFrame extends JFrame {
 			}
 		};
 		
+		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+
 		table.setAutoCreateRowSorter(true);
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 		sorter = new TableRowSorter<SampleListTableModel>(tableModel);
 		table.setRowSorter(sorter);
@@ -454,13 +490,11 @@ public class SampleListFrame extends JFrame {
 	private void handleTableMouseClick(MouseEvent c){
 		try{
 			Point pClick = c.getPoint();
-			if(table.columnAtPoint (pClick) == 0){
+			if(table.columnAtPoint (pClick) == mutationLinkColumn){
 				handleMutationClick();
-			}else if(table.columnAtPoint (pClick) == 14){
-				handleEditNoteClick();
-			}else if(table.columnAtPoint (pClick) == 16){
+			}else if(table.columnAtPoint (pClick) == ampliconColumn){
 				handleShowAmpliconClick();
-			}else if(table.columnAtPoint (pClick) == 17){
+			}else if(table.columnAtPoint (pClick) == sampleEditColumn){
 				handleEditSampleClick();
 			}
 		}catch (Exception e){
@@ -481,37 +515,11 @@ public class SampleListFrame extends JFrame {
 		mutationListFrame.setVisible(true);
 	}
 
-	private void handleEditNoteClick(){
-		//Edit note
-		Sample currentSample = getCurrentlySelectedSample();
-		final int sampleID = currentSample.sampleID;
-		String lastName = currentSample.getLastName();
-		String firstName = currentSample.getFirstName();
-		String note = currentSample.getNote();
-		String name = String.format("%s,%s", lastName,firstName);
-
-		EditNoteDialog noteDialog = new EditNoteDialog(name, note);
-		noteDialog.setVisible(true);
-		noteDialog.addConfirmListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try{
-					DatabaseCommands.updateSampleNote(sampleID, noteDialog.getNote());
-					noteDialog.setVisible(false);
-					currentSample.setNote(noteDialog.getNote());
-					tableModel.fireTableDataChanged();
-				}catch (Exception e1){
-					JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
-				}
-			}
-		});
-	}
-
 	private void handleShowAmpliconClick(){
 		//Show amplicon
 		try {
 			Sample currentSample = getCurrentlySelectedSample();
-			int sampleID = currentSample.sampleID;
-			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(sampleID);
+			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
 			amplicon.setVisible(true);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(SampleListFrame.this, e);
@@ -522,18 +530,14 @@ public class SampleListFrame extends JFrame {
 		//Edit sample
 		int viewRow = table.getSelectedRow();
 		final int modelRow = table.convertRowIndexToModel(viewRow);
-		Sample currentSample = getCurrentlySelectedSample();
-		int sampleID = currentSample.sampleID;
-		String enteredBy = currentSample.enteredBy;
+		Sample sample = getCurrentlySelectedSample();
+		
 		String currentUser = SSHConnection.getUserName();
-
-		if(!currentUser.equals(enteredBy) && !SSHConnection.isSuperUser()){
+		if(!currentUser.equals(sample.enteredBy) && !SSHConnection.isSuperUser()){
 			JOptionPane.showMessageDialog(this, "Error: You can only edit samples entered by you!");
 			return;
 		}
 		
-		//Start editing sample page
-		Sample sample = DatabaseCommands.getSample(sampleID);
 		EditSampleFrame editSample = new EditSampleFrame(sample);
 		editSample.setVisible(true);
 		editSample.addConfirmListener(new ActionListener() {
@@ -552,7 +556,7 @@ public class SampleListFrame extends JFrame {
 		editSample.addDeleteListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					DatabaseCommands.deleteSample(sampleID);
+					DatabaseCommands.deleteSample(sample.sampleID);
 					tableModel.deleteSample(modelRow);
 				} catch (SQLException e1) {
 					JOptionPane.showMessageDialog(editSample, e1);
@@ -637,6 +641,7 @@ public class SampleListFrame extends JFrame {
 					mutationListFrame.setVisible(true);
 					searchMutation.dispose();
 				}catch(Exception ex){
+					ex.printStackTrace();
 					JOptionPane.showMessageDialog(SampleListFrame.this, ex.getMessage());
 				}
 			}

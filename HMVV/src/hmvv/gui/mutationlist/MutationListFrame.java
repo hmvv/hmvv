@@ -50,6 +50,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.IGVConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
@@ -108,10 +109,20 @@ public class MutationListFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
+	public MutationListFrame(SampleListFrame parent, MutationList mutationList){
+		this(parent, null, mutationList);
+	}
+	
 	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
-		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() +
-				" (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ", callerID = " + sample.callerID + ")";
-		setTitle(title);
+		//TODO this class is too complicated as a host for both the search results and the sample mutation list. Refactor.
+		if(sample == null) {
+			String title = "Mutation List Search Results"; 
+			setTitle(title);
+		}else {
+			String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() +
+					" (sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", sampleName = " + sample.sampleName + ", callerID = " + sample.callerID + ")";			
+			setTitle(title);
+		}
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
@@ -261,7 +272,9 @@ public class MutationListFrame extends JFrame {
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
 		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		if(sample == null) {
-			loadIGVButton.setEnabled(false);//If no sample provided, this object is for the search results display.
+			//If no sample provided, this object is for the search results display.
+			loadFilteredMutationsButton.setEnabled(false);
+			loadIGVButton.setEnabled(false);
 		}
 		
 		ActionListener actionListener = new ActionListener(){
@@ -358,8 +371,11 @@ public class MutationListFrame extends JFrame {
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
 		
-		if(mutationList.getMutationCount() > 1 && mutationList.getMutation(0).getAssay().equals("exome")){
-			checkboxPanel.add(filterNomalCheckbox);
+		if(sample != null) {
+			//if null, this is for the mutation search
+			if(mutationList.getMutationCount() > 1 && sample.assay.equals("exome")){
+				checkboxPanel.add(filterNomalCheckbox);
+			}
 		}
 		leftFilterPanel.add(checkboxPanel);
 		
@@ -482,11 +498,11 @@ public class MutationListFrame extends JFrame {
 		boolean includeReportedOnly = reportedOnlyCheckbox.isSelected();
 		boolean filterNormalPair = filterNomalCheckbox.isSelected();
 		int sampleID = (mutationList.getMutationCount() > 0) ? mutationList.getMutation(0).getSampleID() : -1;
-		int frequencyFrom =  getNumber(textFreqFrom, 0);
-		int frequencyTo = getNumber(textVarFreqTo, 100);
-		int minOccurence = getNumber(occurenceFromTextField, 0);
-		int minReadDepth = getNumber(minReadDepthTextField, 0);
-		int maxPopulationFrequency = getNumber(maxPopulationFrequencyTextField, 100);
+		int frequencyFrom =  getNumber(textFreqFrom, Configurations.ALLELE_FREQ_FILTER);
+		int frequencyTo = getNumber(textVarFreqTo, Configurations.MAX_ALLELE_FREQ_FILTER);
+		int minOccurence = getNumber(occurenceFromTextField, Configurations.MIN_OCCURENCE_FILTER);
+		int minReadDepth = getNumber(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
+		int maxPopulationFrequency = getNumber(maxPopulationFrequencyTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
 		VariantPredictionClass minPredictionClass = (VariantPredictionClass)predictionFilterComboBox.getSelectedItem();
 		try {
 			mutationList.filterMutations(includeCosmicOnly, includeReportedOnly, filterNormalPair, sampleID, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, minPredictionClass);
@@ -514,11 +530,11 @@ public class MutationListFrame extends JFrame {
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);		
 		filterNomalCheckbox.setSelected(false);
-		textFreqFrom.setText("1");
-		textVarFreqTo.setText("100");
-		minReadDepthTextField.setText("100");
-		occurenceFromTextField.setText("0");
-		maxPopulationFrequencyTextField.setText("100");
+		textFreqFrom.setText(Configurations.ALLELE_FREQ_FILTER+"");
+		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
+		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
+		occurenceFromTextField.setText(Configurations.MIN_OCCURENCE_FILTER+"");
+		maxPopulationFrequencyTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
 		applyRowFilters();
 	}
@@ -671,7 +687,9 @@ public class MutationListFrame extends JFrame {
 			}
 		}
 		
-		loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data
+		if(sample != null) {
+			loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data			
+		}
 	}
 	
 	private Thread createLoadFilteredMutationDataThread(){
