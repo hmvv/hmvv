@@ -53,6 +53,7 @@ import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
@@ -96,12 +97,15 @@ public class SampleListFrame extends JFrame {
 	private volatile long timeLastRefreshed = 0;
 	private volatile ArrayList<Pipeline> pipelines;
 	private volatile JMenuItem refreshLabel;
+	private int mutationLinkColumn =0;
+	private int ampliconColumn = 18;
+	private int sampleEditColumn = 19;
 	
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) {
-		super("Sample List");
+		super( Configurations.DATABASE_NAME + " : Sample List");
 		tableModel = new SampleListTableModel(samples);
 		
 		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
@@ -114,7 +118,7 @@ public class SampleListFrame extends JFrame {
 		    }
 		});		
 		
-		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), 0, 14, 16, 17);
+		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), mutationLinkColumn, ampliconColumn, sampleEditColumn);
 		pipelines = new ArrayList<Pipeline>();//initialize as blank so that if setupPipelineRefreshThread() fails, the object is still instantiated
 		
 		createMenu();
@@ -295,7 +299,8 @@ public class SampleListFrame extends JFrame {
 		
 		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
 		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
-		
+		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+
 		table.setAutoCreateRowSorter(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
@@ -485,13 +490,11 @@ public class SampleListFrame extends JFrame {
 	private void handleTableMouseClick(MouseEvent c){
 		try{
 			Point pClick = c.getPoint();
-			if(table.columnAtPoint (pClick) == 0){
+			if(table.columnAtPoint (pClick) == mutationLinkColumn){
 				handleMutationClick();
-			}else if(table.columnAtPoint (pClick) == 14){
-				handleEditNoteClick();
-			}else if(table.columnAtPoint (pClick) == 16){
+			}else if(table.columnAtPoint (pClick) == ampliconColumn){
 				handleShowAmpliconClick();
-			}else if(table.columnAtPoint (pClick) == 17){
+			}else if(table.columnAtPoint (pClick) == sampleEditColumn){
 				handleEditSampleClick();
 			}
 		}catch (Exception e){
@@ -510,31 +513,6 @@ public class SampleListFrame extends JFrame {
 		MutationList mutationList = new MutationList(mutations);
 		MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
 		mutationListFrame.setVisible(true);
-	}
-
-	private void handleEditNoteClick(){
-		//Edit note
-		Sample currentSample = getCurrentlySelectedSample();
-		final int sampleID = currentSample.sampleID;
-		String lastName = currentSample.getLastName();
-		String firstName = currentSample.getFirstName();
-		String note = currentSample.getNote();
-		String name = String.format("%s,%s", lastName,firstName);
-
-		EditNoteDialog noteDialog = new EditNoteDialog(name, note);
-		noteDialog.setVisible(true);
-		noteDialog.addConfirmListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try{
-					DatabaseCommands.updateSampleNote(sampleID, noteDialog.getNote());
-					noteDialog.setVisible(false);
-					currentSample.setNote(noteDialog.getNote());
-					tableModel.fireTableDataChanged();
-				}catch (Exception e1){
-					JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
-				}
-			}
-		});
 	}
 
 	private void handleShowAmpliconClick(){

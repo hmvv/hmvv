@@ -75,56 +75,56 @@ public class Pipeline {
 	
 	private PipelineProgram computeProgram(){
 		//default to RUNNING
-		PipelineProgram progress = PipelineProgram.RUNNING;
+		PipelineProgram program = PipelineProgram.RUNNING;
 
 		if (status.equals("pipelineCompleted")){
 			return PipelineProgram.COMPLETE;
 		}else if ( instrumentName.equals("proton") || instrumentName.equals("pgm") || instrumentName.equals("miseq")) {
 			if (status.equals("started") || status.equals("queued") ) {
-				progress.setDisplayString("0/4");
+				program.setDisplayString("0/4");
 			}else if (status.equals("bedtools")) {
-				progress.setDisplayString("1/4");
+				program.setDisplayString("1/4");
 			}else if (status.equals("VEP") || status.equals("parseVEP")) {
-				progress.setDisplayString("2/4");
+				program.setDisplayString("2/4");
 			}else if (status.equals("UpdateDatabase")) {
-				progress.setDisplayString("3/4");
+				program.setDisplayString("3/4");
 			}else if (status.equals("UpdatingDatabase")) {
-				progress.setDisplayString("4/4");
+				program.setDisplayString("4/4");
 			}else if (status.startsWith("ERROR")) {
-				progress = PipelineProgram.ERROR;
+				program = PipelineProgram.ERROR;
 			}
 		}else if  ( assayName.equals("heme") || instrumentName.equals("nextseq")) {
 			if (status.equals("started") || status.equals("queued")) {
-				progress.setDisplayString("0/6");
+				program.setDisplayString("0/6");
 			}else if (status.equals("bcl2fastq_running_now")) {
-				progress.setDisplayString("1/6");
+				program.setDisplayString("1/6");
 			}else if ( status.equals("bcl2fastq_completed_now")) {
-				progress.setDisplayString("1/6");
+				program.setDisplayString("1/6");
 			}else if ( status.equals("bcl2fastq_completed_past")) {
-				progress.setDisplayString("1/6");
+				program.setDisplayString("1/6");
 			}else if (status.equals("bcl2fastq_wait") ) {
-				progress.setDisplayString("1/6");
+				program.setDisplayString("1/6");
 			}else if (status.equals("varscanPE")) {
-				progress.setDisplayString("2/6");
+				program.setDisplayString("2/6");
 			}else if (status.equals("bedtools")) {
-				progress.setDisplayString("3/6");
+				program.setDisplayString("3/6");
 			}else if (status.equals("VEP")) {
-				progress.setDisplayString("4/6");
+				program.setDisplayString("4/6");
 			}else if (status.equals("samtools")) {
-				progress.setDisplayString("5/6");
+				program.setDisplayString("5/6");
 			}else if (status.equals("UpdateDatabase")) {
-				progress.setDisplayString("6/6");
+				program.setDisplayString("6/6");
 			}else if (status.equals("UpdatingDatabase")) {
-				progress.setDisplayString("6/6");
+				program.setDisplayString("6/6");
 			}else if (status.startsWith("ERROR")) {
-				progress = PipelineProgram.ERROR;
+				program = PipelineProgram.ERROR;
 			}
 		}
-
-		return progress;
+		return program;
 	}
 
 	private int computeProgress() throws Exception {
+
 		if (pipelineProgram == PipelineProgram.RUNNING) {
 			float progress = 0.0f;
 			float pipelineTotalTime = DatabaseCommands.getPipelineTimeEstimate(this);
@@ -141,7 +141,12 @@ public class Pipeline {
 			}
 
 			float timeElapsed = (float) ((Math.abs(currentTime.getTime() - pipelineStartTime.getTime())) / (1000.0f));
-			progress = ((timeElapsed * 100.0f) / pipelineTotalTime);
+
+			if (this.getInstrumentName().equals("nextseq")){
+				progress = ((timeElapsed * 100.0f) / (pipelineTotalTime * 60.0f));
+			} else{
+				progress = ((timeElapsed * 100.0f) / pipelineTotalTime);
+			}
 
 			if (syncWithProgram() == 0) {
 				progress = 0.0f;

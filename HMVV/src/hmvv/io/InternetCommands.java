@@ -112,4 +112,13 @@ public class InternetCommands {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
 	}
+
+	public static void hmvvHome(){
+		String search = "http://10.110.21.70/hmvv3";
+		try {
+			browseToURL(search);
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+	}
 }

@@ -512,7 +512,7 @@ public class DatabaseCommands {
 	public static ArrayList<Sample> getAllSamples() throws Exception{
 		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
 				"s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
-				"s.runDate, s.note, s.enteredBy from samples as s " +
+				"s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy from samples as s " +
 				"join instruments  as i on i.instrumentID = s.instrumentID " +
 				"join assays as a on a.assayID = s.assayID ";
 				PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -542,6 +542,8 @@ public class DatabaseCommands {
 				row.getString("coverageID"),
 				row.getString("callerID"),
 				row.getString("runDate"),
+				row.getString("patientHistory"),
+				row.getString("bmDiagnosis"),
 				row.getString("note"),
 				row.getString("enteredBy")
 				);
@@ -558,15 +560,17 @@ public class DatabaseCommands {
 
 	public static void updateSample(Sample sample) throws Exception{
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set lastName = ?, firstName = ?, orderNumber = ?, pathNumber = ?, "
-				+ "tumorSource = ?, tumorPercent = ?, note = ? where sampleID = ?");
+				+ "tumorSource = ?, tumorPercent = ?, patientHistory = ?, bmDiagnosis = ?, note = ? where sampleID = ?");
 		updateStatement.setString(1, sample.getLastName());
 		updateStatement.setString(2, sample.getFirstName());
 		updateStatement.setString(3, sample.getOrderNumber());
 		updateStatement.setString(4, sample.getPathNumber());
 		updateStatement.setString(5, sample.getTumorSource());
 		updateStatement.setString(6, sample.getTumorPercent());
-		updateStatement.setString(7, sample.getNote());
-		updateStatement.setString(8, sample.sampleID+"");
+		updateStatement.setString(7, sample.getPatientHistory());
+		updateStatement.setString(8, sample.getBmDiagnosis());
+		updateStatement.setString(9, sample.getNote());
+		updateStatement.setString(10, sample.sampleID+"");
 		updateStatement.executeUpdate();
 		updateStatement.close();
 	}
@@ -709,7 +713,7 @@ public class DatabaseCommands {
 				" from pipelineStatus " +
 				" group by queueID) ) as t2 " +
 				" on t3.queueID = t2.queueID " +
-				" where t2.timeUpdated  >= now() - interval 1 day" +
+				" where t2.timeUpdated  >= now() - interval 10 day" +
 				" order by t3.queueID desc" ;
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -793,7 +797,8 @@ public class DatabaseCommands {
 	}
 	
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
-		
+
+		int fileRange = 1000;
 		int averageRunTime = 0;
 		long fileSize = SSHConnection.getFileSize(pipeline);
 		
@@ -801,8 +806,8 @@ public class DatabaseCommands {
 				" where instrument=? and assay=? and fileSize between ? and ? ;");
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
-		preparedStatement.setLong(3, fileSize - 1000);
-		preparedStatement.setLong(4, fileSize + 1000);
+		preparedStatement.setLong(3, fileSize - fileRange);
+		preparedStatement.setLong(4, fileSize + fileRange);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 			averageRunTime = rs.getInt("averagetime");

@@ -1,8 +1,6 @@
 package hmvv.gui.adminFrames;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -70,17 +68,23 @@ public class MonitorPipelines extends JDialog {
 				int modelRow = table.convertRowIndexToModel(row);
 				Pipeline pipeline = tableModel.getPipeline(modelRow);
 				PipelineProgram pipelineProgress = pipeline.pipelineProgram;
-				if(pipelineProgress == PipelineProgram.COMPLETE) {
-					c.setBackground(GUICommonTools.COMPLETE_COLOR);
+
+				if (isCellSelected(row,column)){
+					c.setBackground(new Color(51,153,255));
 				}else {
-					c.setBackground(pipelineProgress.displayColor);
+					if (pipelineProgress == PipelineProgram.COMPLETE) {
+						c.setBackground(GUICommonTools.COMPLETE_COLOR);
+					} else {
+						c.setBackground(pipelineProgress.displayColor);
+					}
 				}
 				return c;
 			}
 		};
 		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
 		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
-		
+		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+
 		table.setAutoCreateRowSorter(true);
 
 		sorter = new TableRowSorter<MonitorPipelinesTableModel>(tableModel);
@@ -226,12 +230,12 @@ public class MonitorPipelines extends JDialog {
 		int queueID = currentPipeline.getQueueID();
 
 		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(queueID);
-		
+
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
-			
-			
-			
+
+
+
 			@Override 
 			public final boolean isCellEditable(int row, int column) {
 				return false;
@@ -272,7 +276,11 @@ public class MonitorPipelines extends JDialog {
 			}
 		};
 		JTable table = new JTable(tableModel);
-		
+
+		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+
 		JScrollPane tableSP = new JScrollPane(table);
 		tableSP.setPreferredSize(new Dimension(600,300));
 

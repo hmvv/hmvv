@@ -90,7 +90,17 @@ public class SampleListTableModel extends AbstractTableModel{
 				"runDate", 
 				String.class,
 				(Sample sample) -> sample.runDate));
-		
+
+		columns.add(new SampleTableModelColumn("Pathologist entered patient history",
+				"patient History",
+				String.class,
+				(Sample sample) -> sample.getPatientHistory()));
+
+		columns.add(new SampleTableModelColumn("Pathologist entered bm diagnosis",
+				"BM Diagnosis",
+				String.class,
+				(Sample sample) -> sample.getBmDiagnosis()));
+
 		columns.add(new SampleTableModelColumn("Additional user entered information", 
 				"note", 
 				String.class,
