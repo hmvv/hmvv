@@ -39,7 +39,7 @@ public class EnterSample extends JDialog {
 	private JTextField textTumorSource;
 	private JTextField textPercent;
 	private JTextField textPatientHistory;
-	private JTextField textBMDiagnosis;
+	private JTextField textDiagnosis;
 	private JTextField textNote;
 	
 	private JComboBox<String> comboBoxAssay;
@@ -113,7 +113,7 @@ public class EnterSample extends JDialog {
 		textTumorSource = new JTextField();
 		textPercent = new JTextField();
 		textPatientHistory = new JTextField();
-		textBMDiagnosis = new JTextField();
+		textDiagnosis = new JTextField();
 		textNote = new JTextField();
 		
 		enterSampleButton = new JButton("Enter Sample");
@@ -147,7 +147,7 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("Tumor Source", textTumorSource));
 		mainPanel.add(new RowPanel("Tumor Percent", textPercent));
 		mainPanel.add(new RowPanel("Patient History", textPatientHistory));
-		mainPanel.add(new RowPanel("BM Diagnosis", textBMDiagnosis));
+		mainPanel.add(new RowPanel("Diagnosis", textDiagnosis));
 		mainPanel.add(new RowPanel("Note", textNote));
 		
 		
@@ -385,7 +385,7 @@ public class EnterSample extends JDialog {
 		textTumorSource.setEditable(editable);
 		textPercent.setEditable(editable);
 		textPatientHistory.setEditable(editable);
-		textBMDiagnosis.setEditable(editable);
+		textDiagnosis.setEditable(editable);
 		textNote.setEditable(editable);
 		enterSampleButton.setEnabled(editable);
 	}
@@ -457,12 +457,12 @@ public class EnterSample extends JDialog {
 
 		String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
 		String patientHistory = textPatientHistory.getText();
-		String bmDiagnosis = textBMDiagnosis.getText();
+		String diagnosis = textDiagnosis.getText();
 		String note = textNote.getText();
 		String enteredBy = SSHConnection.getUserName();
 
 		return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
-				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, bmDiagnosis, note, enteredBy);
+				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
 	}
 	
 	private class RowPanel extends JPanel{

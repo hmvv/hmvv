@@ -19,7 +19,7 @@ public class Sample {
 	private String tumorSource;
 	private String tumorPercent;
 	private String patientHistory;
-	private String bmDiagnosis ;
+	private String diagnosis ;
 	private String note;
 	
 	public Sample(int sampleID, String assay, String instrument, String lastName, String firstName, String orderNumber,
@@ -40,7 +40,7 @@ public class Sample {
 		this.callerID = notNull(callerID);
 		this.runDate = notNull(runDate);
 		this.patientHistory = notNull(patientHistory);
-		this.bmDiagnosis = notNull(bmDiagnosis);
+		this.diagnosis = notNull(bmDiagnosis);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
 	}
@@ -105,16 +105,16 @@ public class Sample {
 		return patientHistory;
 	}
 
-	public String getBmDiagnosis() {
-		return bmDiagnosis;
+	public String getDiagnosis() {
+		return diagnosis;
 	}
 
 	public void setPatientHistory(String patientHistory) {
 		this.patientHistory = patientHistory;
 	}
 
-	public void setBmDiagnosis(String bmDiagnosis) {
-		this.bmDiagnosis = bmDiagnosis;
+	public void setDiagnosis(String diagnosis) {
+		this.diagnosis = diagnosis;
 	}
 
 	public String getNote() {

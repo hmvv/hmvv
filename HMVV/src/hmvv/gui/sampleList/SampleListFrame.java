@@ -1,6 +1,7 @@
 package hmvv.gui.sampleList;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -100,10 +101,6 @@ public class SampleListFrame extends JFrame {
 	private int mutationLinkColumn =0;
 	private int ampliconColumn = 18;
 	private int sampleEditColumn = 19;
-
-	private Thread monitorPipelineThread;
-	private Thread mutationListThread;
-
 	
 	/**
 	 * Initialize the contents of the frame.
@@ -237,15 +234,17 @@ public class SampleListFrame extends JFrame {
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem){
-                        monitorPipelineThread = new Thread(new Runnable() {
+						Thread monitorPipelineThread = new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 try {
+                                	setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                                     MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
                                     monitorpipelines.setVisible(true);
                                 } catch (Exception e) {
-                                    JOptionPane.showMessageDialog(SampleListFrame.this, "Error entering sample data: " + e.getMessage());
+                                    JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading Monitor Pipeline window: " + e.getMessage());
                                 }
+                                setCursor(Cursor.getDefaultCursor());
                             }
                         });
                         monitorPipelineThread.start();
@@ -343,8 +342,8 @@ public class SampleListFrame extends JFrame {
 		sampleSearchButton.setToolTipText("Open sample search window");
 		sampleSearchButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
-		resetButton = new JButton("Refresh");
-		resetButton.setToolTipText("Reset Samples (remove all filters)");
+		resetButton = new JButton("Reset Filters");
+		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
 		mutationSearchButton = new JButton("Mutation Search");
@@ -518,10 +517,11 @@ public class SampleListFrame extends JFrame {
 	}
 
 	private void handleMutationClick() throws Exception{
-		mutationListThread = new Thread(new Runnable() {
+		Thread mutationListThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
+					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
 					ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.sampleID);
 					for(Mutation m : mutations){
@@ -531,8 +531,9 @@ public class SampleListFrame extends JFrame {
 					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
 					mutationListFrame.setVisible(true);
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, "Error entering sample data: " + e.getMessage());
+					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading mutation data: " + e.getMessage());
 				}
+				table.setCursor(Cursor.getDefaultCursor());
 			}
 		});
 		mutationListThread.start();
@@ -561,7 +562,7 @@ public class SampleListFrame extends JFrame {
 			return;
 		}
 		
-		EditSampleFrame editSample = new EditSampleFrame(sample);
+		EditSampleFrame editSample = new EditSampleFrame(this, sample);
 		editSample.setVisible(true);
 		editSample.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

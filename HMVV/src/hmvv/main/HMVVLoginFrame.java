@@ -1,5 +1,6 @@
 package hmvv.main;
 
+import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -40,8 +41,7 @@ public class HMVVLoginFrame extends JFrame {
             String theme = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
             javax.swing.UIManager.setLookAndFeel(theme);
         } catch(Exception e){
-            JOptionPane.showMessageDialog(null, e.getMessage() + "\nError loading windows theme.");
-            return;
+            //Error loading windows theme. Using Java default.
         }
 		
 		InputStream configurationStream = HMVVLoginFrame.class.getResourceAsStream("/config.ini");
@@ -94,50 +94,66 @@ public class HMVVLoginFrame extends JFrame {
 	}
 	
 	private void layoutLoginComponents(){
-      setSize(500, 450);
-        panel.setLayout(null);
+		setSize(500, 450);
+		panel.setLayout(null);
 
-        JLabel lblhmvv = new JLabel("Houston Methodist Variant Viewer");
-        lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
-        lblhmvv.setBounds(75, 100, 1000, 30);
+		JLabel lblhmvv = new JLabel("Houston Methodist Variant Viewer");
+		lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
+		lblhmvv.setBounds(75, 100, 1000, 30);
 
 		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 3.0 </a></html>");
-        lblhmvv_version.setFont(GUICommonTools.TAHOMA_BOLD_11);
-        lblhmvv_version.setBounds(215, 125, 100, 30);
+		lblhmvv_version.setFont(GUICommonTools.TAHOMA_BOLD_11);
+		lblhmvv_version.setBounds(215, 125, 100, 30);
 
-        JLabel lblUsername = new JLabel("UserName");
-        lblUsername.setFont(GUICommonTools.TAHOMA_BOLD_14);
-        lblUsername.setBounds(125, 200, 100, 30);
-        usernameTextField.setBounds(200, 200, 140, 30);
-        usernameTextField.setColumns(10);
+		JLabel lblUsername = new JLabel("Username");
+		lblUsername.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		lblUsername.setBounds(125, 200, 100, 30);
+		usernameTextField.setBounds(215, 200, 140, 30);
+		usernameTextField.setColumns(10);
 
-        JLabel lblPassword = new JLabel("Password");
-        lblPassword.setFont(GUICommonTools.TAHOMA_BOLD_14);
-        lblPassword.setBounds(125, 250, 100, 30);
-        passwordTextField.setBounds(200, 250, 140, 30);
+		JLabel lblPassword = new JLabel("Password");
+		lblPassword.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		lblPassword.setBounds(125, 250, 100, 30);
+		passwordTextField.setBounds(215, 250, 140, 30);
 
-        loginButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
-        loginButton.setBounds(200, 325, 100, 30);
+		loginButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		loginButton.setBounds(125, 325, 230, 30);
 
 		panel.add(lblhmvv);
-        panel.add(lblhmvv_version);
-        panel.add(lblUsername);
-        panel.add(usernameTextField);
-        panel.add(lblPassword);
-        panel.add(passwordTextField);
-        panel.add(loginButton);
-        add(panel);
-        getRootPane().setDefaultButton(loginButton);
+		panel.add(lblhmvv_version);
+		panel.add(lblUsername);
+		panel.add(usernameTextField);
+		panel.add(lblPassword);
+		panel.add(passwordTextField);
+		panel.add(loginButton);
+		add(panel);
+		getRootPane().setDefaultButton(loginButton);
 
-        Rectangle bounds = GUICommonTools.getScreenBounds();
-        setLocation(bounds.width/2-getSize().width/2, bounds.height/2-getSize().height/2);
+		Rectangle bounds = GUICommonTools.getScreenBounds();
+		setLocation(bounds.width/2-getSize().width/2, bounds.height/2-getSize().height/2);
 	}
 	
 	private void activateComponents(){
 		loginButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				login();
+				new Thread(new Runnable() {
+					public void run() {
+						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						loginButton.setEnabled(false);
+						loginButton.setText("Logging in...");
+						usernameTextField.setEnabled(false);
+						passwordTextField.setEnabled(false);
+						
+						login();
+						
+						loginButton.setEnabled(true);
+						loginButton.setText("Login");
+						usernameTextField.setEnabled(true);
+						passwordTextField.setEnabled(true);
+						setCursor(Cursor.getDefaultCursor());
+					}
+				}).start();
 			}			
 		});
 
@@ -150,8 +166,7 @@ public class HMVVLoginFrame extends JFrame {
 	}
 	
 	private void login(){
-		
-		String userName= usernameTextField.getText();
+		String userName = usernameTextField.getText();
 		String passwd = new String(passwordTextField.getPassword());
 		try{
 			SSHConnection.connect(userName, passwd);

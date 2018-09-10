@@ -24,7 +24,7 @@ public class EditSampleFrame extends JFrame {
 	private JTextField textSource;
 	private JTextField textPercent;
 	private JTextField textPatientHistory;
-	private JTextField textBMDiagnosis;
+	private JTextField textDiagnosis;
 	private JTextField textNote;
 	private JLabel labelID1;
 	private JLabel labelAssay1;
@@ -39,7 +39,7 @@ public class EditSampleFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public EditSampleFrame(Sample sample) {
+	public EditSampleFrame(SampleListFrame parent, Sample sample) {
 		super("Edit Sample");
 		this.sample = sample;
 		
@@ -75,47 +75,47 @@ public class EditSampleFrame extends JFrame {
 		lblInstrument.setBounds(42, 100, 81, 14);
 		contentPane.add(lblInstrument);
 
-		JLabel lblRunid = new JLabel("runID");
+		JLabel lblRunid = new JLabel("Run ID");
 		lblRunid.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblRunid.setBounds(42, 130, 81, 14);
 		contentPane.add(lblRunid);
 
-		JLabel lblSampleid = new JLabel("sampleID");
+		JLabel lblSampleid = new JLabel("Sample ID");
 		lblSampleid.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblSampleid.setBounds(42, 160, 81, 14);
 		contentPane.add(lblSampleid);
 
-		JLabel lblLastname = new JLabel("LastName");
+		JLabel lblLastname = new JLabel("Last Name");
 		lblLastname.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblLastname.setBounds(42, 220, 81, 14);
 		contentPane.add(lblLastname);
 
-		JLabel lblFirstname = new JLabel("firstName");
+		JLabel lblFirstname = new JLabel("First Name");
 		lblFirstname.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblFirstname.setBounds(42, 250, 81, 14);
 		contentPane.add(lblFirstname);
 
-		JLabel lblOrdernumber = new JLabel("orderNumber");
+		JLabel lblOrdernumber = new JLabel("Order Number");
 		lblOrdernumber.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblOrdernumber.setBounds(42, 280, 100, 14);
 		contentPane.add(lblOrdernumber);
 
-		JLabel lblPathologynumber = new JLabel("pathologyNumber");
+		JLabel lblPathologynumber = new JLabel("Pathology Number");
 		lblPathologynumber.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblPathologynumber.setBounds(42, 310, 127, 14);
 		contentPane.add(lblPathologynumber);
 
-		JLabel lblTumorsource = new JLabel("tumorSource");
+		JLabel lblTumorsource = new JLabel("Tumor Source");
 		lblTumorsource.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblTumorsource.setBounds(42, 340, 127, 14);
 		contentPane.add(lblTumorsource);
 
-		JLabel lblTumorpercent = new JLabel("tumorPercent");
+		JLabel lblTumorpercent = new JLabel("Tumor Percent");
 		lblTumorpercent.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblTumorpercent.setBounds(42, 370, 127, 14);
 		contentPane.add(lblTumorpercent);
 
-		JLabel lblRundate = new JLabel("runDate");
+		JLabel lblRundate = new JLabel("Run Date");
 		lblRundate.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		lblRundate.setBounds(42, 190, 127, 14);
 		contentPane.add(lblRundate);
@@ -125,10 +125,10 @@ public class EditSampleFrame extends JFrame {
 		lblPatientHistory.setBounds(42, 400, 127, 14);
 		contentPane.add(lblPatientHistory);
 
-		JLabel lblBMDiagnosis = new JLabel("BM Diagnosis");
-		lblBMDiagnosis.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblBMDiagnosis.setBounds(42, 430, 127, 14);
-		contentPane.add(lblBMDiagnosis);
+		JLabel lblDiagnosis = new JLabel("Diagnosis");
+		lblDiagnosis.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		lblDiagnosis.setBounds(42, 430, 127, 14);
+		contentPane.add(lblDiagnosis);
 
 		JLabel lblNote = new JLabel("Note");
 		lblNote.setFont(GUICommonTools.TAHOMA_BOLD_13);
@@ -185,15 +185,15 @@ public class EditSampleFrame extends JFrame {
 		textPercent.setBounds(207, 370, 218, 20);
 		contentPane.add(textPercent);
 
-		textPatientHistory = new JTextField(sample.getNote());
+		textPatientHistory = new JTextField(sample.getPatientHistory());
 		textPatientHistory.setColumns(10);
 		textPatientHistory.setBounds(207, 400, 218, 20);
 		contentPane.add(textPatientHistory);
 
-		textBMDiagnosis = new JTextField(sample.getNote());
-		textBMDiagnosis.setColumns(10);
-		textBMDiagnosis.setBounds(207, 430, 218, 20);
-		contentPane.add(textBMDiagnosis);
+		textDiagnosis = new JTextField(sample.getDiagnosis());
+		textDiagnosis.setColumns(10);
+		textDiagnosis.setBounds(207, 430, 218, 20);
+		contentPane.add(textDiagnosis);
 
 		textNote = new JTextField(sample.getNote());
 		textNote.setColumns(10);
@@ -221,6 +221,9 @@ public class EditSampleFrame extends JFrame {
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		btnDelete.setBounds(128, 513, 89, 23);
 		contentPane.add(btnDelete);
+		
+		setLocationRelativeTo(parent);
+		setResizable(false);
 	}
 
 	public Sample getUpdatedSample(){
@@ -231,7 +234,7 @@ public class EditSampleFrame extends JFrame {
 		sample.setTumorSource(textSource.getText());
 		sample.setTumorPercent(textPercent.getText());
 		sample.setPatientHistory(textPatientHistory.getText());
-		sample.setBmDiagnosis(textBMDiagnosis.getText());
+		sample.setDiagnosis(textDiagnosis.getText());
 		sample.setNote(textNote.getText());
 		return sample;
 	}

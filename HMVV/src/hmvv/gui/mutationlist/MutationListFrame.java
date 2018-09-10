@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -55,7 +56,7 @@ import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
-public class MutationListFrame extends JFrame {
+public class MutationListFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 		
 	private BasicTable basicTabTable;
@@ -114,6 +115,7 @@ public class MutationListFrame extends JFrame {
 	}
 	
 	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
+		super(parent);
 		//TODO this class is too complicated as a host for both the search results and the sample mutation list. Refactor.
 		if(sample == null) {
 			String title = "Mutation List Search Results"; 

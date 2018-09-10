@@ -568,7 +568,7 @@ public class DatabaseCommands {
 		updateStatement.setString(5, sample.getTumorSource());
 		updateStatement.setString(6, sample.getTumorPercent());
 		updateStatement.setString(7, sample.getPatientHistory());
-		updateStatement.setString(8, sample.getBmDiagnosis());
+		updateStatement.setString(8, sample.getDiagnosis());
 		updateStatement.setString(9, sample.getNote());
 		updateStatement.setString(10, sample.sampleID+"");
 		updateStatement.executeUpdate();
