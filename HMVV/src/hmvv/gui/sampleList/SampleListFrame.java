@@ -100,6 +100,10 @@ public class SampleListFrame extends JFrame {
 	private int mutationLinkColumn =0;
 	private int ampliconColumn = 18;
 	private int sampleEditColumn = 19;
+
+	private Thread monitorPipelineThread;
+	private Thread mutationListThread;
+
 	
 	/**
 	 * Initialize the contents of the frame.
@@ -233,8 +237,18 @@ public class SampleListFrame extends JFrame {
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem){
-						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
-						monitorpipelines.setVisible(true);
+                        monitorPipelineThread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
+                                    monitorpipelines.setVisible(true);
+                                } catch (Exception e) {
+                                    JOptionPane.showMessageDialog(SampleListFrame.this, "Error entering sample data: " + e.getMessage());
+                                }
+                            }
+                        });
+                        monitorPipelineThread.start();
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -504,15 +518,24 @@ public class SampleListFrame extends JFrame {
 	}
 
 	private void handleMutationClick() throws Exception{
-		Sample currentSample = getCurrentlySelectedSample();
-		ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.sampleID);
-		for(Mutation m : mutations){
-			m.setCosmicID("LOADING...");
-		}
-		
-		MutationList mutationList = new MutationList(mutations);
-		MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
-		mutationListFrame.setVisible(true);
+		mutationListThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Sample currentSample = getCurrentlySelectedSample();
+					ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.sampleID);
+					for(Mutation m : mutations){
+						m.setCosmicID("LOADING...");
+					}
+					MutationList mutationList = new MutationList(mutations);
+					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
+					mutationListFrame.setVisible(true);
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(SampleListFrame.this, "Error entering sample data: " + e.getMessage());
+				}
+			}
+		});
+		mutationListThread.start();
 	}
 
 	private void handleShowAmpliconClick(){
