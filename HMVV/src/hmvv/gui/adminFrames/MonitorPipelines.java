@@ -322,7 +322,11 @@ public class MonitorPipelines extends JDialog {
 	    	try {
 	    		int intValue = Integer.parseInt(value.toString());
 	    		setValue(intValue);
-                setString(intValue+"%");
+	    		if(intValue == -1) {
+	                setString("ERROR");
+	    		}else {
+                	setString(intValue+"%");
+	    		}
 	    	}catch(Exception e) {
 	    		setValue(0);
                 setString("ERROR");
