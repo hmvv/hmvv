@@ -139,11 +139,12 @@ public class SampleListFrame extends JFrame {
 				while(true) {
 					long currentTimeInMillis = System.currentTimeMillis();
 					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
+						refreshLabel.setText("Refreshing table...");
 						if(!updatePipelinesASynch()){
 							JOptionPane.showMessageDialog(SampleListFrame.this, "Failure to update pipeline status details. Please contact the administrator.");
 							refreshLabel.setText("Status refresh disabled");
 							return;
-						};
+						}
 					}
 					
 					setRefreshLabelText();
@@ -236,13 +237,11 @@ public class SampleListFrame extends JFrame {
                             @Override
                             public void run() {
                                 try {
-                                	setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                                    MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
+                                	MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
                                     monitorpipelines.setVisible(true);
                                 } catch (Exception e) {
                                     JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading Monitor Pipeline window: " + e.getMessage());
                                 }
-                                setCursor(Cursor.getDefaultCursor());
                             }
                         });
                         monitorPipelineThread.start();

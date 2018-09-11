@@ -64,21 +64,26 @@ public class MonitorPipelines extends JDialog {
 
 			@Override
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
-				Component c = super.prepareRenderer(renderer, row, column);
-				int modelRow = table.convertRowIndexToModel(row);
-				Pipeline pipeline = tableModel.getPipeline(modelRow);
-				PipelineProgram pipelineProgress = pipeline.pipelineProgram;
-
-				if (isCellSelected(row,column)){
-					c.setBackground(new Color(51,153,255));
-				}else {
-					if (pipelineProgress == PipelineProgram.COMPLETE) {
-						c.setBackground(GUICommonTools.COMPLETE_COLOR);
-					} else {
-						c.setBackground(pipelineProgress.displayColor);
+				try {
+					Component c = super.prepareRenderer(renderer, row, column);
+					int modelRow = table.convertRowIndexToModel(row);
+					Pipeline pipeline = tableModel.getPipeline(modelRow);
+					PipelineProgram pipelineProgress = pipeline.pipelineProgram;
+	
+					if (isCellSelected(row,column)){
+						c.setBackground(new Color(51,153,255));
+					}else {
+						if (pipelineProgress == PipelineProgram.COMPLETE) {
+							c.setBackground(GUICommonTools.COMPLETE_COLOR);
+						} else {
+							c.setBackground(pipelineProgress.displayColor);
+						}
 					}
+					return c;
+				}catch(Exception e) {
+					//occasionally when the table is first loading from the database and the model is still empty, table.convertRowIndexToModel(row) will throw an Exception.
+					return null;
 				}
-				return c;
 			}
 		};
 		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
@@ -100,7 +105,7 @@ public class MonitorPipelines extends JDialog {
 		tableScrollPane.setViewportView(table);
 
 		menuBar = new JMenuBar();
-		refreshLabel = new JMenuItem("");
+		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 		menuBar.add(refreshLabel);
 		setJMenuBar(menuBar);
@@ -171,12 +176,7 @@ public class MonitorPipelines extends JDialog {
 	}
 
 	private void buildModelFromDatabase() throws Exception {
-		tableModel.resetModel();
-		ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
-		for(Pipeline p : pipelines) {
-			tableModel.addPipeline(p);
-		}
-
+		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		pipelineRefreshThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -184,11 +184,17 @@ public class MonitorPipelines extends JDialog {
 				while(true) {
 					long currentTimeInMillis = System.currentTimeMillis();
 					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
-                        updatePipelinesASynch();
+						refreshLabel.setText("Refreshing table...");
+                        if(!updatePipelinesASynch()) {
+                        	JOptionPane.showMessageDialog(MonitorPipelines.this, "Failure to update pipeline status details. Please contact the administrator.");
+							refreshLabel.setText("Status refresh disabled");
+							return;
+                        }
+                        setCursor(Cursor.getDefaultCursor());
 					}
 
 					setRefreshLabelText();
-
+					
 					try {
 						Thread.sleep(1 * 1000);
 					} catch (InterruptedException e) {}
@@ -200,15 +206,16 @@ public class MonitorPipelines extends JDialog {
 
 	}
 
-    private void updatePipelinesASynch() {
+    private boolean updatePipelinesASynch() {
         try {
             ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
             for(Pipeline p : pipelines) {
             	tableModel.addOrUpdatePipeline(p);
             }
             timeLastRefreshed = System.currentTimeMillis();
+            return true;
         } catch (Exception e) {
-            // Silently fail. Don't want to spam user every interval.
+        	return false;
         }
     }
 
