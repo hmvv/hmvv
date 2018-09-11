@@ -131,14 +131,7 @@ public class SampleListFrame extends JFrame {
 		setupPipelineRefreshThread();
 	}
 	
-	private void setupPipelineRefreshThread() {
-		try {
-			pipelines = DatabaseCommands.getAllPipelines();
-		} catch (Exception e1) {
-			JOptionPane.showMessageDialog(this, "Database error getting pipeline status. Please contact the system administrator");
-			return;
-		}
-		
+	private void setupPipelineRefreshThread() {		
 		pipelineRefreshThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -146,7 +139,11 @@ public class SampleListFrame extends JFrame {
 				while(true) {
 					long currentTimeInMillis = System.currentTimeMillis();
 					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
-						updatePipelinesASynch();
+						if(!updatePipelinesASynch()){
+							JOptionPane.showMessageDialog(SampleListFrame.this, "Failure to update pipeline status details. Please contact the administrator.");
+							refreshLabel.setText("Status refresh disabled");
+							return;
+						};
 					}
 					
 					setRefreshLabelText();
@@ -161,13 +158,14 @@ public class SampleListFrame extends JFrame {
 		pipelineRefreshThread.start();
 	}
 	
-	private void updatePipelinesASynch() {
+	private boolean updatePipelinesASynch() {
 		try {
 			pipelines = DatabaseCommands.getAllPipelines();
 			table.repaint();							
 			timeLastRefreshed = System.currentTimeMillis();
+			return true;
 		} catch (Exception e) {
-			// Silently fail. Don't want to spam user every interval.
+			return false;
 		}
 	}
 	
@@ -187,7 +185,7 @@ public class SampleListFrame extends JFrame {
 		qualityControlMenuItem = new JMenu("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
-		refreshLabel = new JMenuItem("");
+		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 		
 		menuBar.add(adminMenu);

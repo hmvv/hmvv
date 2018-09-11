@@ -141,7 +141,6 @@ public class HMVVLoginFrame extends JFrame {
 					public void run() {
 						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						loginButton.setEnabled(false);
-						loginButton.setText("Logging in...");
 						usernameTextField.setEnabled(false);
 						passwordTextField.setEnabled(false);
 						
@@ -169,6 +168,7 @@ public class HMVVLoginFrame extends JFrame {
 		String userName = usernameTextField.getText();
 		String passwd = new String(passwordTextField.getPassword());
 		try{
+			loginButton.setText("Logging in...");
 			SSHConnection.connect(userName, passwd);
 		} catch(Exception e){
 			if(e.getMessage().equals("Auth fail")){
@@ -180,13 +180,15 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try {
-			DatabaseCommands.connect(userName);
+			loginButton.setText("Connecting to database...");
+			DatabaseCommands.connect();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, "Database connection failed (" + e.getMessage() + ")." + " Please contact the system administrator.");
 			return;
 		}
 		
 		try{
+			loginButton.setText("Loading Sample list...");
 			SampleListFrame sampleList = new SampleListFrame(HMVVLoginFrame.this, DatabaseCommands.getAllSamples());
 			sampleList.setVisible(true);
 			dispose();

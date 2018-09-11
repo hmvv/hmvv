@@ -27,11 +27,7 @@ public class DatabaseCommands {
 	
 	private static Connection databaseConnection = null;
 
-	public static Connection getDatabaseConnection(){
-		return databaseConnection;
-	}
-
-	public static void connect(String user) throws Exception{
+	public static void connect() throws Exception{
 		String driver = "com.mysql.jdbc.Driver";
 		String url = "jdbc:mysql://" + SSHConnection.getForwardingHost() +":" + SSHConnection.getForwardingPort() + "/";
 		String[] credentials = null;
