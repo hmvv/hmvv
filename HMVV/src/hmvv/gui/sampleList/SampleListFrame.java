@@ -539,12 +539,14 @@ public class SampleListFrame extends JFrame {
 	private void handleShowAmpliconClick(){
 		//Show amplicon
 		try {
+            table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Sample currentSample = getCurrentlySelectedSample();
 			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
 			amplicon.setVisible(true);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(SampleListFrame.this, e);
 		}
+        table.setCursor(Cursor.getDefaultCursor());
 	}
 
 	private void handleEditSampleClick() throws Exception{

@@ -166,10 +166,12 @@ public class MonitorPipelines extends JDialog {
 			@Override
 			public void mouseClicked(MouseEvent c) {
 				try{
+					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					handlePipelineSelectionClick();
 				}catch (Exception e){
 					JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
 				}
+				table.setCursor(Cursor.getDefaultCursor());
 			}
 		});		
 
@@ -240,8 +242,6 @@ public class MonitorPipelines extends JDialog {
 
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
-
-
 
 			@Override 
 			public final boolean isCellEditable(int row, int column) {

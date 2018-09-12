@@ -162,6 +162,7 @@ public class HMVVLoginFrame extends JFrame {
 				InternetCommands.hmvvHome();
 			}
 		});
+		lblhmvv_version.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 	}
 	
 	private void login(){

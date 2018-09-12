@@ -24,7 +24,7 @@ public class InternetCommands {
 
 	public static void searchGoogle(String term){
 		try {
-			browseToURL("https://www.google.com/#q=" + term);
+			browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}

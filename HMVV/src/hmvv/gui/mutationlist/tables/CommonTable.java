@@ -1,6 +1,7 @@
 package hmvv.gui.mutationlist.tables;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -247,13 +248,15 @@ public abstract class CommonTable extends JTable{
 	}
 
 	protected void handleAnnotationClick() throws Exception{
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		Mutation mutation = getSelectedMutation();		
 		String gene = mutation.getGene();
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-		
+
 		boolean readOnly = !SSHConnection.isSuperUser();
 		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotationHistory, this, parent);
 		editAnnotation.setVisible(true);
+		this.setCursor(Cursor.getDefaultCursor());
 	}
 	
 	public void notifyAnnotationUpdated(Annotation annotation) {
