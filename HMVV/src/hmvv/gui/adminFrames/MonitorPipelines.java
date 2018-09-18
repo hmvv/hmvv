@@ -236,9 +236,8 @@ public class MonitorPipelines extends JDialog {
 
 	private void handlePipelineSelectionClick() throws Exception{
 		Pipeline currentPipeline = getCurrentlySelectedPipeline();
-		int queueID = currentPipeline.getQueueID();
 
-		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(queueID);
+		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(currentPipeline.queueID);
 
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;

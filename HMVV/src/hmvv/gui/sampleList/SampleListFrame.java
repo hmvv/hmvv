@@ -58,6 +58,7 @@ import hmvv.main.Configurations;
 import hmvv.main.HMVVLoginFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
+import hmvv.model.PipelineProgram;
 import hmvv.model.Sample;
 
 public class SampleListFrame extends JFrame {
@@ -299,10 +300,13 @@ public class SampleListFrame extends JFrame {
 				for(Pipeline p : pipelines) {
 					if(currentSample.sampleID == p.sampleID) {
 						c.setBackground(p.pipelineProgram.displayColor);
-						break;
+						return c;
 					}
 				}
 				
+				//If the sampleID was not found in the list of recent pipelines. Revert to default color.
+				//TODO store pipeline program in database to allow display of failed runs from the distant past
+				c.setBackground(PipelineProgram.COMPLETE.displayColor);
 				return c;
 			}
 		};

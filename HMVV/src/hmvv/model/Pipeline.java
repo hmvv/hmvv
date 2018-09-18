@@ -7,8 +7,8 @@ import hmvv.io.DatabaseCommands;
 
 public class Pipeline {
 	
-	public final Integer queueID;
-	public final Integer sampleID;
+	public final int queueID;
+	public final int sampleID;
 	public final String runID;
 	public final String sampleName;
 	public final String assayName;
@@ -35,10 +35,6 @@ public class Pipeline {
 			e.printStackTrace();
 			progress = -1;
 		}
-	}
-
-	public Integer getQueueID() {
-		return queueID;
 	}
 
 	public String getRunID() {

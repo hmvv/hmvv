@@ -188,14 +188,18 @@ public class EnterSample extends JDialog {
 					enterSampleThread = new Thread(new Runnable() {
 						@Override
 						public void run() {
+							setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 							enterSampleButton.setText("Processing...");
 							enterSampleButton.setEnabled(false);
 							try {
 								enterData();
-								enterSampleButton.setText("Completed.");
+								enterSampleButton.setText("Completed");
 							} catch (Exception e) {
 								JOptionPane.showMessageDialog(EnterSample.this, "Error entering sample data: " + e.getMessage());
+								enterSampleButton.setText("Enter Sample");
+								enterSampleButton.setEnabled(true);
 							}
+							setCursor(Cursor.getDefaultCursor());
 						}
 					});
 					enterSampleThread.start();
@@ -422,8 +426,6 @@ public class EnterSample extends JDialog {
 
 			//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
-		}catch (Exception e){
-			JOptionPane.showMessageDialog(this, e.getMessage());
 		}finally {
 			setEnabled(true);
 		}

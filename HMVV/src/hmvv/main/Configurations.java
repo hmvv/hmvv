@@ -100,7 +100,7 @@ public class Configurations {
 	public static String SUPER_USER_GROUP;
 	public static String GENOME_VERSION = "37";
 	
-	public static int ALLELE_FREQ_FILTER = 1;
+	public static int ALLELE_FREQ_FILTER = 10;
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
 	public static int READ_DEPTH_FILTER = 100;

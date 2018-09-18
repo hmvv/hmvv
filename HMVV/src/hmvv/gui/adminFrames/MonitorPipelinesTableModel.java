@@ -82,7 +82,7 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 	public void addOrUpdatePipeline(Pipeline pipeline) {
 		for(int i = 0; i < pipelines.size(); i++) {
 			Pipeline p = pipelines.get(i);
-            if(p.queueID.intValue() == pipeline.queueID.intValue()) {
+            if(p.queueID == pipeline.queueID) {
 				pipelines.set(i, pipeline);
 				fireTableRowsUpdated(i, i);
 				return;
