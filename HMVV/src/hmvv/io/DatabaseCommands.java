@@ -15,11 +15,12 @@ import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
-import hmvv.model.GeneAmpliconTrend;
+import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.GeneAnnotation;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineStatus;
+import hmvv.model.QCDataElement;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
@@ -128,7 +129,7 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	public static ArrayList<String> getAllAssays() throws Exception{
 		ArrayList<String> assays = new ArrayList<String>();
-		String getAssay = "select distinct assayName from assays";
+		String getAssay = "select distinct assayName from assays order by assayName";
 		PreparedStatement pst = databaseConnection.prepareStatement(getAssay);
 		ResultSet rs = pst.executeQuery();
 		while(rs.next()){
@@ -750,7 +751,7 @@ public class DatabaseCommands {
 	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
 	 * @throws Exception
 	 */
-	public static TreeMap<String, GeneAmpliconTrend> getAmpliconQCData(String assay) throws Exception{
+	public static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(String assay) throws Exception{
 		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.readDepth from sampleAmplicons"
 				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
 				+ " join assays on assays.assayID = samples.assayID"
@@ -758,11 +759,13 @@ public class DatabaseCommands {
 		
 		String geneFilter;
 		if(assay.equals("heme")) {
-			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS')";
+			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS') and assayName = 'heme'";
 		}else if(assay.equals("gene50")) {
-			geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS')";
+			geneFilter = " and (sampleAmplicons.gene like '%EGFR%' or sampleAmplicons.gene like '%KRAS%' or sampleAmplicons.gene like '%NRAS%') and assayName = 'gene50'";
 		}else if(assay.equals("neuro")) {
-			geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS')";
+			//TODO the sampleAmplicons table currently does not properly store gene name
+			//geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS') and assayName = 'neuro'";
+			throw new Exception("Unsupported Assay: " + assay);
 		}else {
 			throw new Exception("Unsupported Assay: " + assay);
 		}
@@ -773,23 +776,126 @@ public class DatabaseCommands {
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		
-		TreeMap<String, GeneAmpliconTrend> geneAmpliconTrends = new TreeMap<String, GeneAmpliconTrend>();
+		TreeMap<String, GeneQCDataElementTrend> geneAmpliconTrends = new TreeMap<String, GeneQCDataElementTrend>();
 		
-		//ArrayList<AmpliconTrend> ampliconTrends = new ArrayList<AmpliconTrend>();
-		//AmpliconTrend lastAmpliconTrend = null;
 		while(rs.next()){
-			Amplicon amplicon = new Amplicon(rs.getInt("sampleID"), rs.getString("gene"), rs.getString("ampliconName"), rs.getInt("readDepth"));
-			GeneAmpliconTrend geneAmpliconTrend = geneAmpliconTrends.get(amplicon.gene);
+			String gene = rs.getString("gene");
+			if(assay.equals("gene50")) {
+				String[] splitGene = gene.split("_");
+				if(splitGene.length == 3) {//the expected value
+					gene = splitGene[1];
+				}
+			}
+			QCDataElement amplicon = new QCDataElement(rs.getInt("sampleID"), gene, rs.getString("ampliconName"), rs.getInt("readDepth"));
+			GeneQCDataElementTrend geneAmpliconTrend = geneAmpliconTrends.get(amplicon.gene);
 			if(geneAmpliconTrend == null) {
-				geneAmpliconTrend = new GeneAmpliconTrend(amplicon.gene);
+				geneAmpliconTrend = new GeneQCDataElementTrend(amplicon.gene);
 				geneAmpliconTrends.put(amplicon.gene, geneAmpliconTrend);
 			}
 			
-			geneAmpliconTrend.addAmplicon(amplicon);
+			geneAmpliconTrend.addDataElement(amplicon);
 		}
 		preparedStatement.close();
 
 		return geneAmpliconTrends;
+	}
+	
+	/**
+	 * 
+	 * @param assay
+	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
+	 * @throws Exception
+	 */
+	public static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(String assay) throws Exception{
+		String query = "select sampleVariants.sampleID, sampleVariants.gene, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.altFreq"
+				+ " from samples"
+				+ " join assays on assays.assayID = samples.assayID"
+				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
+				+ " where samples.lastName like 'Horizon%' "
+				//+ "   ( gene = 'BRAF' 	and HGVSc like '%c.1799T>A'		and HGVSp like '%p.Val600Glu' )"
+				//+ "or ( gene = 'KIT' 	and HGVSc like '%c.2447A>T'			and HGVSp like '%p.Asp816Val' )"
+				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2573T>G'		and HGVSp like '%p.Leu858Arg' )"
+				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2369C>T'		and HGVSp like '%p.Thr790Met' )"
+				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2155G>A'		and HGVSp like '%p.Gly719Ser' )"
+				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2%'			and HGVSp like '%p.Glu746_Ala750del' )"
+				//+ "or ( gene = 'KRAS' 	and HGVSc like '%c.35G>A'		and HGVSp like '%p.Gly12Asp' )"
+				//+ "or ( gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
+				//+ "or ( gene = 'NRAS' 	and HGVSc like '%c.181C>A'		and HGVSp like '%p.Gln61Lys' )"
+				//+ "or ( gene = 'PIK3CA' and HGVSc like '%c.1633G>A'		and HGVSp like '%p.Glu545Lys' )"
+				//+ "or ( gene = 'PIK3CA' and HGVSc like '%c.3140A>G'		and HGVSp like '%p.His1047Arg' )"
+				
+				//+ "or ( gene = 'IDH1' 	and HGVSc like '%c.782C>T'		and HGVSp like '%p.Ser261Leu' )"
+				//+ "or ( gene = 'IDH1' 	and HGVSc like '%c.532G>A'		and HGVSp like '%p.Val178Ile' )"
+				//+ "or ( gene = 'MLH1' 	and HGVSc like '%c.967C>A'		and HGVSp like '%p.Leu323Met' )"
+				//+ "or ( gene = 'NOTCH1' and HGVSc like '%c.2002C>T'		and HGVSp like '%p.Pro668Ser' )"
+				//+ "or ( gene = 'NTRK1' 	and consequence = '5_prime_UTR_variant' )"
+				//+ "or ( gene = 'PDGFRA' and HGVSc like '%c.1277G>A'		and HGVSp like '%p.Gly426Asp' )"
+				
+				//+ "or ( gene = 'ABL2' 	and HGVSc like '%'		and HGVSp like '%p.Pro986lnfs%' )"
+				//+ "or ( gene = 'ALK' 	and HGVSc like '%'		and HGVSp like '%p.Pro1543Ser' )"
+				//+ "or ( gene = 'APC' 	and HGVSc like '%'		and HGVSp like '%p.Arg2714Cys' )"
+				//+ "or ( gene = 'ARID1A' and HGVSc like '%'		and HGVSp like '%p.Pro1562lnfs%' )"
+				//+ "or ( gene = 'BRCA2' 	and HGVSc like '%'		and HGVSp like '%p.Ala1689lnfs%' )"
+				//+ "or ( gene = 'CDX2' 	and HGVSc like '%'		and HGVSp like '%p.Val306lnfs%' )"
+				//+ "or ( gene = 'EP300' 	and HGVSc like '%'		and HGVSp like '%p.Lys291lnfs%' )"
+				//+ "or ( gene = 'FBXW7' 	and HGVSc like '%'		and HGVSp like '%p.Gly667lnfs%' )"
+				//+ "or ( gene = 'FGFR1' 	and HGVSc like '%'		and HGVSp like '%p.Pro150Leu' )"
+				//+ "or ( gene = 'FLT3' 	and HGVSc like '%'		and HGVSp like '%p.Val197Ala' )"
+				//+ "or ( gene = 'MET' 	and HGVSc like '%'		and HGVSp like '%p.Val237lnfs%' )"
+				//+ "or ( gene = 'NF1' 	and HGVSc like '%'		and HGVSp like '%p.Leu626lnfs%' )"
+				//+ "or ( gene = 'NF2' 	and HGVSc like '%'		and HGVSp like '%p.Pro275lnfs%' )"
+				;
+		
+		String geneFilter;
+		if(assay.equals("heme")) {
+			geneFilter =
+			" and (( gene = 'BRAF' 	and HGVSc like '%c.1799T>A'			and HGVSp like '%p.Val600Glu' )"
+			+ "or (  gene = 'KIT' 	and HGVSc like '%c.2447A>T'		and HGVSp like '%p.Asp816Val' )"
+			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.35G>A'		and HGVSp like '%p.Gly12Asp' )"
+			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
+			 + ") and assays.assayName = 'heme' ";
+		}else if(assay.equals("gene50")) {
+			geneFilter =
+			" and (( gene = 'EGFR' 	and HGVSc like '%c.2155G>A'			and HGVSp like '%p.Gly719Ser' )"
+			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
+			+ "or (  gene = 'NRAS' 	and HGVSc like '%c.181C>A'		and HGVSp like '%p.Gln61Lys' )"
+			 + ") and assays.assayName = 'gene50' ";
+		}else if(assay.equals("neuro")) {
+			geneFilter =
+			" and (( gene = 'EGFR' 	and HGVSc like '%c.2155G>A'			and HGVSp like '%p.Gly719Ser' )"
+			+ "or (  gene = 'IDH1' 	and HGVSc like '%c.532G>A'		and HGVSp like '%p.Val178Ile' )"
+			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
+			+ "or (  gene = 'NRAS' 	and HGVSc like '%c.181C>A'		and HGVSp like '%p.Gln61Lys' )"	
+			 + ") and assays.assayName = 'neuro' ";
+		}else {
+			throw new Exception("Unsupported Assay: " + assay);
+		}
+		
+		query += geneFilter;
+		query += " order by sampleID, gene";
+		
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		ResultSet rs = preparedStatement.executeQuery();
+		
+		TreeMap<String, GeneQCDataElementTrend> geneVariantTrends = new TreeMap<String, GeneQCDataElementTrend>();
+		
+		while(rs.next()){
+			String variant = rs.getString("HGVSp");
+			variant = variant.replaceAll(".*:", "");
+			variant = Configurations.abbreviationtoLetter(variant);
+			
+			QCDataElement variantDataElement = new QCDataElement(rs.getInt("sampleID"), rs.getString("gene"), variant, Math.round(rs.getFloat("altFreq")));
+			GeneQCDataElementTrend geneVariantTrend = geneVariantTrends.get(variantDataElement.gene);
+			if(geneVariantTrend == null) {
+				geneVariantTrend = new GeneQCDataElementTrend(variantDataElement.gene);
+				geneVariantTrends.put(variantDataElement.gene, geneVariantTrend);
+			}
+			
+			geneVariantTrend.addDataElement(variantDataElement);
+		}
+		preparedStatement.close();
+
+		return geneVariantTrends;
 	}
 	
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {

@@ -83,6 +83,36 @@ public class Configurations {
 		}
 	}
 	
+	public static String abbreviationtoLetter(String mutation){
+		return mutation
+			.replaceAll("Ala", "A")
+			.replaceAll("Asx", "B")
+			.replaceAll("Cys", "C")
+			.replaceAll("Asp", "D")
+			.replaceAll("Glu", "E")
+			.replaceAll("Phe", "F")
+			.replaceAll("Gly", "G")
+			.replaceAll("His", "H")
+			.replaceAll("Ile", "I")
+			.replaceAll("Xle", "J")
+			.replaceAll("Lys", "K")
+			.replaceAll("Leu", "L")
+			.replaceAll("Met", "M")
+			.replaceAll("Asn", "N")
+			.replaceAll("Hyp", "O")
+			.replaceAll("Pro", "P")
+			.replaceAll("Gln", "Q")
+			.replaceAll("Arg", "R")
+			.replaceAll("Ser", "S")
+			.replaceAll("Thr", "T")
+			.replaceAll("Glp", "U")
+			.replaceAll("Val", "V")
+			.replaceAll("Trp", "W")
+			.replaceAll("Ter", "X")
+			.replaceAll("Tyr", "Y")
+			.replaceAll("Glx", "Z");
+	}
+	
 	/*
 	 * Database configurations
 	 */

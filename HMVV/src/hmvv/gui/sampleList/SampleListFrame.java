@@ -15,6 +15,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -56,6 +57,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVLoginFrame;
+import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineProgram;
@@ -203,18 +205,38 @@ public class SampleListFrame extends JFrame {
 				if(assay.equals("exome")) {
 					continue;
 				}
-				JMenuItem assayMenuItem = new JMenuItem(assay);
+				
+				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
 				qualityControlMenuItem.add(assayMenuItem);
 				assayMenuItem.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try {
-							QualityControlFrame.showQCChart(SampleListFrame.this, assay);
+							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
+							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
 						}
 					}
 				});
+				if(assay.equals("neuro")) {
+					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
+				}
+				assayMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
+				qualityControlMenuItem.add(assayMenuItem);
+				assayMenuItem.addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						try {
+							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
+							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+						} catch (Exception e1) {
+							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+						}
+					}
+				});
+				
+				qualityControlMenuItem.addSeparator();
 			}
 		}catch(Exception e){
 			//unable to get assays
