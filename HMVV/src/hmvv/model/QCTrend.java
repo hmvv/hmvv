@@ -15,15 +15,6 @@ public class QCTrend {
 	}
 	
 	public void addDataElement(QCDataElement dataElement) {
-		for(int i = 0; i < dataElements.size(); i++) {
-			//Occasionally there are duplicate data element names, so pick the one with the highest value
-			if(dataElements.get(i).sampleID == dataElement.sampleID) {
-				if(dataElements.get(i).dataElementValue < dataElement.dataElementValue) {
-					dataElements.set(i, dataElement);
-				}
-				return;
-			}
-		}
 		dataElements.add(dataElement);
 	}
 	

@@ -807,66 +807,27 @@ public class DatabaseCommands {
 	 * @throws Exception
 	 */
 	public static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(String assay) throws Exception{
-		String query = "select sampleVariants.sampleID, sampleVariants.gene, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.altFreq"
+		String query = "select sampleVariants.sampleID, sampleVariants.gene, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.altFreq, cosmicID"
 				+ " from samples"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
-				+ " where samples.lastName like 'Horizon%' "
-				//+ "   ( gene = 'BRAF' 	and HGVSc like '%c.1799T>A'		and HGVSp like '%p.Val600Glu' )"
-				//+ "or ( gene = 'KIT' 	and HGVSc like '%c.2447A>T'			and HGVSp like '%p.Asp816Val' )"
-				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2573T>G'		and HGVSp like '%p.Leu858Arg' )"
-				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2369C>T'		and HGVSp like '%p.Thr790Met' )"
-				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2155G>A'		and HGVSp like '%p.Gly719Ser' )"
-				//+ "or ( gene = 'EGFR' 	and HGVSc like '%c.2%'			and HGVSp like '%p.Glu746_Ala750del' )"
-				//+ "or ( gene = 'KRAS' 	and HGVSc like '%c.35G>A'		and HGVSp like '%p.Gly12Asp' )"
-				//+ "or ( gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
-				//+ "or ( gene = 'NRAS' 	and HGVSc like '%c.181C>A'		and HGVSp like '%p.Gln61Lys' )"
-				//+ "or ( gene = 'PIK3CA' and HGVSc like '%c.1633G>A'		and HGVSp like '%p.Glu545Lys' )"
-				//+ "or ( gene = 'PIK3CA' and HGVSc like '%c.3140A>G'		and HGVSp like '%p.His1047Arg' )"
-				
-				//+ "or ( gene = 'IDH1' 	and HGVSc like '%c.782C>T'		and HGVSp like '%p.Ser261Leu' )"
-				//+ "or ( gene = 'IDH1' 	and HGVSc like '%c.532G>A'		and HGVSp like '%p.Val178Ile' )"
-				//+ "or ( gene = 'MLH1' 	and HGVSc like '%c.967C>A'		and HGVSp like '%p.Leu323Met' )"
-				//+ "or ( gene = 'NOTCH1' and HGVSc like '%c.2002C>T'		and HGVSp like '%p.Pro668Ser' )"
-				//+ "or ( gene = 'NTRK1' 	and consequence = '5_prime_UTR_variant' )"
-				//+ "or ( gene = 'PDGFRA' and HGVSc like '%c.1277G>A'		and HGVSp like '%p.Gly426Asp' )"
-				
-				//+ "or ( gene = 'ABL2' 	and HGVSc like '%'		and HGVSp like '%p.Pro986lnfs%' )"
-				//+ "or ( gene = 'ALK' 	and HGVSc like '%'		and HGVSp like '%p.Pro1543Ser' )"
-				//+ "or ( gene = 'APC' 	and HGVSc like '%'		and HGVSp like '%p.Arg2714Cys' )"
-				//+ "or ( gene = 'ARID1A' and HGVSc like '%'		and HGVSp like '%p.Pro1562lnfs%' )"
-				//+ "or ( gene = 'BRCA2' 	and HGVSc like '%'		and HGVSp like '%p.Ala1689lnfs%' )"
-				//+ "or ( gene = 'CDX2' 	and HGVSc like '%'		and HGVSp like '%p.Val306lnfs%' )"
-				//+ "or ( gene = 'EP300' 	and HGVSc like '%'		and HGVSp like '%p.Lys291lnfs%' )"
-				//+ "or ( gene = 'FBXW7' 	and HGVSc like '%'		and HGVSp like '%p.Gly667lnfs%' )"
-				//+ "or ( gene = 'FGFR1' 	and HGVSc like '%'		and HGVSp like '%p.Pro150Leu' )"
-				//+ "or ( gene = 'FLT3' 	and HGVSc like '%'		and HGVSp like '%p.Val197Ala' )"
-				//+ "or ( gene = 'MET' 	and HGVSc like '%'		and HGVSp like '%p.Val237lnfs%' )"
-				//+ "or ( gene = 'NF1' 	and HGVSc like '%'		and HGVSp like '%p.Leu626lnfs%' )"
-				//+ "or ( gene = 'NF2' 	and HGVSc like '%'		and HGVSp like '%p.Pro275lnfs%' )"
-				;
+				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
+				+ " where samples.lastName like 'Horizon%' ";
 		
 		String geneFilter;
 		if(assay.equals("heme")) {
 			geneFilter =
-			" and (( gene = 'BRAF' 	and HGVSc like '%c.1799T>A'			and HGVSp like '%p.Val600Glu' )"
-			+ "or (  gene = 'KIT' 	and HGVSc like '%c.2447A>T'		and HGVSp like '%p.Asp816Val' )"
-			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.35G>A'		and HGVSp like '%p.Gly12Asp' )"
-			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
-			 + ") and assays.assayName = 'heme' ";
+			//TODO choose between COSM1135366 and COSM521? COSM1140132 and COSM532? They have the same coordinates and seem to track together.
+			"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM1135366' or cosmicID = 'COSM521' or cosmicID = 'COSM1140132' or cosmicID = 'COSM532')"
+			+ " and assays.assayName = 'heme' ";
 		}else if(assay.equals("gene50")) {
 			geneFilter =
-			" and (( gene = 'EGFR' 	and HGVSc like '%c.2155G>A'			and HGVSp like '%p.Gly719Ser' )"
-			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
-			+ "or (  gene = 'NRAS' 	and HGVSc like '%c.181C>A'		and HGVSp like '%p.Gln61Lys' )"
-			 + ") and assays.assayName = 'gene50' ";
+			"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
+			+ " and assays.assayName = 'gene50' ";
 		}else if(assay.equals("neuro")) {
 			geneFilter =
-			" and (( gene = 'EGFR' 	and HGVSc like '%c.2155G>A'			and HGVSp like '%p.Gly719Ser' )"
-			+ "or (  gene = 'IDH1' 	and HGVSc like '%c.532G>A'		and HGVSp like '%p.Val178Ile' )"
-			+ "or (  gene = 'KRAS' 	and HGVSc like '%c.38G>A'		and HGVSp like '%p.Gly13Asp' )"
-			+ "or (  gene = 'NRAS' 	and HGVSc like '%c.181C>A'		and HGVSp like '%p.Gln61Lys' )"	
-			 + ") and assays.assayName = 'neuro' ";
+			"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM97131' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
+			+ " and assays.assayName = 'neuro' ";
 		}else {
 			throw new Exception("Unsupported Assay: " + assay);
 		}
@@ -883,6 +844,7 @@ public class DatabaseCommands {
 			String variant = rs.getString("HGVSp");
 			variant = variant.replaceAll(".*:", "");
 			variant = Configurations.abbreviationtoLetter(variant);
+			variant += "(" + rs.getString("cosmicID") + ")";
 			
 			QCDataElement variantDataElement = new QCDataElement(rs.getInt("sampleID"), rs.getString("gene"), variant, Math.round(rs.getFloat("altFreq")));
 			GeneQCDataElementTrend geneVariantTrend = geneVariantTrends.get(variantDataElement.gene);
