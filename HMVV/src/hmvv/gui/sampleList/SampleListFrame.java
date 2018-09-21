@@ -158,7 +158,7 @@ public class SampleListFrame extends JFrame {
 				}
 			}
 		});
-		
+		pipelineRefreshThread.setName("Sample List Pipeline Status Refresh");
 		pipelineRefreshThread.start();
 	}
 	
@@ -423,6 +423,10 @@ public class SampleListFrame extends JFrame {
 				);
 		getContentPane().setLayout(groupLayout);
 		
+		if(Configurations.isTestEnvironment()) {
+			getContentPane().setBackground(Configurations.TEST_ENV_COLOR);
+		}
+		
 		resizeColumnWidths();
 	}
 	
@@ -551,7 +555,7 @@ public class SampleListFrame extends JFrame {
 				try {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
-					ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.sampleID);
+					ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample);
 					for(Mutation m : mutations){
 						m.setCosmicID("LOADING...");
 					}

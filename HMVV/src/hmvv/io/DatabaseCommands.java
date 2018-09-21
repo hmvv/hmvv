@@ -154,7 +154,9 @@ public class DatabaseCommands {
 		if(normalID == -1){
 			return null;
 		}else{
-			return getUnfilteredMutationDataByID(normalID);
+			throw new Exception("This function has not been implemented.");
+			//TODO implement this function
+			//return getUnfilteredMutationDataByID(normalID);
 		}
 	}
 
@@ -184,15 +186,15 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Mutation Queries
 	 *************************************************************************/
-	public static ArrayList<Mutation> getUnfilteredMutationDataByID(int ID) throws Exception{
-		return getMutationDataByID(ID, false);
+	public static ArrayList<Mutation> getUnfilteredMutationDataByID(Sample sample) throws Exception{
+		return getMutationDataByID(sample, false);
 	}
 	
-	public static ArrayList<Mutation> getFilteredMutationDataByID(int ID) throws Exception{
-		return getMutationDataByID(ID, true);
+	public static ArrayList<Mutation> getFilteredMutationDataByID(Sample sample) throws Exception{
+		return getMutationDataByID(sample, true);
 	}
 	
-	private static ArrayList<Mutation> getMutationDataByID(int ID, boolean getFilteredData) throws Exception{
+	private static ArrayList<Mutation> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.reported, t2.gene, t2.exon, t2.HGVSc, t2.HGVSp, t2.dbSNPID,"
 				+ " t2.type, t2.impact, t2.altFreq, t2.readDepth, t2.altReadDepth, "
 				+ " t2.chr, t2.pos, t2.ref, t2.alt, t2.consequence, t2.Sift, t2.PolyPhen,"
@@ -209,14 +211,14 @@ public class DatabaseCommands {
 				+ " left join assays as t6"
 				+ " on t1.assayID = t6.assayID"
 				+ " where t2.sampleID = ? ";
-		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.ALLELE_FREQ_FILTER + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
+		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
 		if(getFilteredData) {
 			where = " !" + where;
 		}
 		query = query + " and " + where;
 		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		preparedStatement.setString(1, ""+ID);
+		preparedStatement.setString(1, ""+sample.sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Mutation> mutations = makeModel(rs);
 		preparedStatement.close();
@@ -812,7 +814,8 @@ public class DatabaseCommands {
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
 				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
-				+ " where samples.lastName like 'Horizon%' ";
+				+ " where samples.lastName like 'Horizon%' "
+				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
 		
 		String geneFilter;
 		if(assay.equals("heme")) {

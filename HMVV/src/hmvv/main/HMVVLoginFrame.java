@@ -96,7 +96,10 @@ public class HMVVLoginFrame extends JFrame {
 	private void layoutLoginComponents(){
 		setSize(500, 450);
 		panel.setLayout(null);
-
+		if(Configurations.isTestEnvironment()) {
+			panel.setBackground(Configurations.TEST_ENV_COLOR);
+		}
+		
 		JLabel lblhmvv = new JLabel("Houston Methodist Variant Viewer");
 		lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
 		lblhmvv.setBounds(75, 100, 1000, 30);

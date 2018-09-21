@@ -500,7 +500,7 @@ public class MutationListFrame extends JDialog {
 		boolean includeReportedOnly = reportedOnlyCheckbox.isSelected();
 		boolean filterNormalPair = filterNomalCheckbox.isSelected();
 		int sampleID = (mutationList.getMutationCount() > 0) ? mutationList.getMutation(0).getSampleID() : -1;
-		int frequencyFrom =  getNumber(textFreqFrom, Configurations.ALLELE_FREQ_FILTER);
+		int frequencyFrom =  getNumber(textFreqFrom, Configurations.getAlleleFrequencyFilter(sample));
 		int frequencyTo = getNumber(textVarFreqTo, Configurations.MAX_ALLELE_FREQ_FILTER);
 		int minOccurence = getNumber(occurenceFromTextField, Configurations.MIN_OCCURENCE_FILTER);
 		int minReadDepth = getNumber(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
@@ -532,7 +532,7 @@ public class MutationListFrame extends JDialog {
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);		
 		filterNomalCheckbox.setSelected(false);
-		textFreqFrom.setText(Configurations.ALLELE_FREQ_FILTER+"");
+		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
 		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
 		occurenceFromTextField.setText(Configurations.MIN_OCCURENCE_FILTER+"");
@@ -708,7 +708,7 @@ public class MutationListFrame extends JDialog {
 	private void getFilteredMutationData() {
 		try{
 			loadFilteredMutationsButton.setText("Loading...");
-			ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample.sampleID);
+			ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample);
 			for(int i = 0; i < mutations.size(); i++) {
 				if(isWindowClosed){
 					return;

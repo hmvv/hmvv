@@ -25,6 +25,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.model.Sample;
 
 public class EnterSample extends JDialog {
@@ -77,6 +78,7 @@ public class EnterSample extends JDialog {
 			for(String assay : DatabaseCommands.getAllAssays()){
 				comboBoxAssay.addItem(assay);
 			}
+			comboBoxAssay.setSelectedItem(Configurations.DEFAULT_ASSAY);
 		}catch(Exception e){
 			JOptionPane.showMessageDialog(parent, "Error getting Assays from database: " + e.getMessage());
 			dispose();
@@ -351,6 +353,8 @@ public class EnterSample extends JDialog {
 	private void sampleIDSelectionChanged(){
 		enterSampleButton.setText("Enter Sample");
 		String runID = textRunID.getText();
+		String assay = (String)comboBoxAssay.getSelectedItem();
+		String instrument = (String)comboBoxInstrument.getSelectedItem();
 		String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
 		String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
 		String sampleName = (String)comboBoxSample.getSelectedItem();
@@ -365,7 +369,7 @@ public class EnterSample extends JDialog {
 		if(variantCallerID == null)
 			variantCallerID = defaultCoverageAndCallerID;
 		
-		Sample sample = sampleListTableModel.getSample(runID, coverageID, variantCallerID, sampleName);
+		Sample sample = sampleListTableModel.getSample(assay, instrument, runID, coverageID, variantCallerID, sampleName);
 		if(sample != null){
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
 		}else{

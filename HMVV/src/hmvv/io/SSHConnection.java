@@ -17,7 +17,6 @@ import com.jcraft.jsch.SftpProgressMonitor;
 
 import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
-import hmvv.model.Pipeline;
 import hmvv.model.Sample;
 
 public class SSHConnection {
