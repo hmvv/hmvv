@@ -353,7 +353,6 @@ public class EnterSample extends JDialog {
 	private void sampleIDSelectionChanged(){
 		enterSampleButton.setText("Enter Sample");
 		String runID = textRunID.getText();
-		String assay = (String)comboBoxAssay.getSelectedItem();
 		String instrument = (String)comboBoxInstrument.getSelectedItem();
 		String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
 		String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
@@ -369,7 +368,7 @@ public class EnterSample extends JDialog {
 		if(variantCallerID == null)
 			variantCallerID = defaultCoverageAndCallerID;
 		
-		Sample sample = sampleListTableModel.getSample(assay, instrument, runID, coverageID, variantCallerID, sampleName);
+		Sample sample = sampleListTableModel.getSample(instrument, runID, coverageID, variantCallerID, sampleName);
 		if(sample != null){
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
 		}else{

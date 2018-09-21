@@ -122,13 +122,13 @@ public class SampleListTableModel extends AbstractTableModel{
 				(Sample sample) -> "edit"));
 	}
 	
-	public Sample getSample(String assay, String instrument, String runID, String coverageID, String variantCallerID, String sampleName){
+	public Sample getSample(String instrument, String runID, String coverageID, String variantCallerID, String sampleName){
 		for(Sample s : samples){
 			//only check sampleID because the coverageID and variantCallerID can be blank depending on the instrument
 			if(s.runID.equals("") || s.sampleName.equals("")){
 				continue;
 			}
-			if(s.assay.equals(assay) && s.instrument.equals(instrument) && s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
+			if(s.instrument.equals(instrument) && s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
 				return s;
 			}
 		}
