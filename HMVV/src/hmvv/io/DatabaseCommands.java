@@ -862,22 +862,19 @@ public class DatabaseCommands {
 	
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 
-		int fileRange = 1000;
 		int averageRunTime = 0;
-		long fileSize = SSHConnection.getFileSize(pipeline);
-		
+
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(totalRunTime) as averagetime from pipelineLogs " +
-				" where instrument=? and assay=? and fileSize between ? and ? ;");
+				" where instrument=? and assay=? ;");
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
-		preparedStatement.setLong(3, fileSize - fileRange);
-		preparedStatement.setLong(4, fileSize + fileRange);
+
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 			averageRunTime = rs.getInt("averagetime");
 		}
 		preparedStatement.close();
-		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() + " filesize " + fileSize + " averageRunTime " + averageRunTime);
+		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() +  " averageRunTime " + averageRunTime);
 		return (float)averageRunTime;
 	}
 }

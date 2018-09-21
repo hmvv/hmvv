@@ -1,6 +1,8 @@
 package hmvv.gui.adminFrames;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -20,16 +22,10 @@ public class MonitorPipelines extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
 
-	private JMenuBar menuBar;
-
-	//Asynchronous sample status updates
-	private Thread pipelineRefreshThread;
-	private final int secondsToSleep = 10;
-	private volatile long timeLastRefreshed = 0;
-	private volatile JMenuItem refreshLabel;
-	
 	private TableRowSorter<MonitorPipelinesTableModel> sorter;
-	
+
+	private JButton refreshPipelines;
+
 	//Table
 	private JTable table;
 	private MonitorPipelinesTableModel tableModel;
@@ -104,14 +100,12 @@ public class MonitorPipelines extends JDialog {
 		tableScrollPane = new JScrollPane();
 		tableScrollPane.setViewportView(table);
 
-		menuBar = new JMenuBar();
-		refreshLabel = new JMenuItem("Loading status refresh...");
-		refreshLabel.setEnabled(false);
-		menuBar.add(refreshLabel);
-		setJMenuBar(menuBar);
-
 		TableColumn progressColumn = table.getColumnModel().getColumn(9);
 		progressColumn.setCellRenderer(new ProgressCellRenderer());
+
+		refreshPipelines = new JButton("Refresh");
+		refreshPipelines.setToolTipText("Refresh pipeline status");
+		refreshPipelines.setFont(GUICommonTools.TAHOMA_BOLD_12);
 	}
 
 	private void layoutComponents(){
@@ -119,7 +113,9 @@ public class MonitorPipelines extends JDialog {
 		groupLayout.setHorizontalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(127))
+						.addGap(15))
+						.addComponent(refreshPipelines)
+						.addGap(15)
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE)
@@ -127,10 +123,12 @@ public class MonitorPipelines extends JDialog {
 				);
 		groupLayout.setVerticalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(25)
-						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
-						.addGap(25))
+						.addGroup(groupLayout.createSequentialGroup()
+								.addGap(15)
+								.addComponent(refreshPipelines)
+								.addGap(15)
+								.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+								.addGap(25))
 				);
 		getContentPane().setLayout(groupLayout);
 
@@ -161,7 +159,7 @@ public class MonitorPipelines extends JDialog {
 	}
 
 
-	private void activateComponents(){
+	private void activateComponents() throws Exception {
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent c) {
@@ -173,61 +171,33 @@ public class MonitorPipelines extends JDialog {
 				}
 				table.setCursor(Cursor.getDefaultCursor());
 			}
-		});		
-
-	}
-
-	private void buildModelFromDatabase() throws Exception {
-		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		pipelineRefreshThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				//loop forever (will exit when JFrame is closed).
-				while(true) {
-					long currentTimeInMillis = System.currentTimeMillis();
-					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
-						refreshLabel.setText("Refreshing table...");
-                        if(!updatePipelinesASynch()) {
-                        	JOptionPane.showMessageDialog(MonitorPipelines.this, "Failure to update pipeline status details. Please contact the administrator.");
-							refreshLabel.setText("Status refresh disabled");
-							return;
-                        }
-                        setCursor(Cursor.getDefaultCursor());
-					}
-
-					setRefreshLabelText();
-					
-					try {
-						Thread.sleep(1 * 1000);
-					} catch (InterruptedException e) {}
-				}
-			}
 		});
 
-		pipelineRefreshThread.start();
-
-	}
-
-    private boolean updatePipelinesASynch() {
-        try {
-            ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
-            for(Pipeline p : pipelines) {
-            	tableModel.addOrUpdatePipeline(p);
+        refreshPipelines.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    buildModelFromDatabase();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
+                }
+                setCursor(Cursor.getDefaultCursor());
             }
-            timeLastRefreshed = System.currentTimeMillis();
-            return true;
-        } catch (Exception e) {
-        	return false;
-        }
-    }
-
-	private void setRefreshLabelText() {
-		long currentTimeInMillis = System.currentTimeMillis();
-		long timeToRefresh = timeLastRefreshed + (1000 * secondsToSleep);
-		long diff = timeToRefresh - currentTimeInMillis;
-		long secondsRemaining = diff / 1000;
-		refreshLabel.setText("Table will refresh in : " + secondsRemaining + "s");
+        });
 	}
+
+	public void buildModelFromDatabase() throws Exception {
+		try {
+			ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
+			for(Pipeline p : pipelines) {
+				tableModel.addOrUpdatePipeline(p);
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(MonitorPipelines.this, "Failure to update pipeline status details. Please contact the administrator.");
+		}
+	}
+
 	private Pipeline getCurrentlySelectedPipeline(){
 		int viewRow = table.getSelectedRow();
 		int modelRow = table.convertRowIndexToModel(viewRow);

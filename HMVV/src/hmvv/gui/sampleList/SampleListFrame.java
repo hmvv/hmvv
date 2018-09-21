@@ -256,18 +256,7 @@ public class SampleListFrame extends JFrame {
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem){
-						Thread monitorPipelineThread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                	MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
-                                    monitorpipelines.setVisible(true);
-                                } catch (Exception e) {
-                                    JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading Monitor Pipeline window: " + e.getMessage());
-                                }
-                            }
-                        });
-                        monitorPipelineThread.start();
+						handleMonitorPipelineClick();
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -539,6 +528,22 @@ public class SampleListFrame extends JFrame {
 		}
 	}
 
+	private void handleMonitorPipelineClick() throws Exception{
+		Thread monitorPipelineThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
+					monitorpipelines.setVisible(true);
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading Monitor Pipeline window: " + e.getMessage());
+				}
+				setCursor(Cursor.getDefaultCursor());
+			}
+		});
+		monitorPipelineThread.start();
+	}
 	private void handleMutationClick() throws Exception{
 		Thread mutationListThread = new Thread(new Runnable() {
 			@Override
