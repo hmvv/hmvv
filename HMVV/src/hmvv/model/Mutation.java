@@ -412,6 +412,9 @@ public class Mutation {
 	
 	public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
 		this.annotationHistory = annotationHistory;
+		if(annotationHistory.size() > 0) {
+			this.latestAnnotation = annotationHistory.get(annotationHistory.size() - 1);
+		}
 	}
 	
 	public void setLatestAnnotation(Annotation latestAnnotation) {

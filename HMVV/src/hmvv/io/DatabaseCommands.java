@@ -453,7 +453,7 @@ public class DatabaseCommands {
 			//If annotation fields were also in the query
 			try {				
 				Annotation annotation = new Annotation(
-					getIntegerOrNull(rs, "anotationID"), 
+					Integer.parseInt(rs.getString("annotationID")), 
 					new Coordinate(getStringOrBlank(rs, "chr"), getStringOrBlank(rs, "pos"), getStringOrBlank(rs, "ref"), getStringOrBlank(rs, "alt")),
 					getStringOrBlank(rs, "classification"),
 					getStringOrBlank(rs, "curation"),
