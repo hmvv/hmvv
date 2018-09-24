@@ -83,7 +83,7 @@ public class AnnotationFrame extends JFrame {
 		
 		this.geneAnnotationHistory = geneAnnotationHistory;
 		currentGeneAnnotationIndex = geneAnnotationHistory.size() - 1; 
-		currentAnnotationIndex = mutation.getAnnotationHistory().size() - 1;
+		currentAnnotationIndex = mutation.getAnnotationHistorySize() - 1;
 		
 		createComponents();
 		layoutComponents();
@@ -125,7 +125,7 @@ public class AnnotationFrame extends JFrame {
 		}
 
 		previousAnnotationButton = new JButton("Previous");
-		if (mutation.getAnnotationHistory().size() <= 1) { 
+		if (mutation.getAnnotationHistorySize() <= 1) { 
 			previousAnnotationButton.setEnabled(false); 
 		}		
 
@@ -352,7 +352,7 @@ public class AnnotationFrame extends JFrame {
 	}
 	
 	private void saveAnnotationRecord() throws Exception {
-		if(currentAnnotationIndex == mutation.getAnnotationHistory().size() - 1 || mutation.getAnnotationHistory().isEmpty()) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
+		if(currentAnnotationIndex == mutation.getAnnotationHistorySize() - 1 || mutation.getAnnotationHistorySize() == 0) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
 			//annotation update
 			Annotation newAnnotation = new Annotation(
 					mutation.getCoordinate(),
@@ -365,7 +365,7 @@ public class AnnotationFrame extends JFrame {
 			Annotation latestAnnotation = mutation.getLatestAnnotation();
 			if (latestAnnotation == null || !latestAnnotation.equals(newAnnotation)) {
 				DatabaseCommands.addVariantAnnotationCuration(newAnnotation);
-				mutation.getAnnotationHistory().add(newAnnotation);
+				mutation.addAnnotation(newAnnotation);
 				parent.notifyAnnotationUpdated(newAnnotation);
 			}
 		}
@@ -417,20 +417,20 @@ public class AnnotationFrame extends JFrame {
 	}
 	
 	private void updateAnnotation() {
-		Annotation currentannotation = mutation.getAnnotationHistory().get(currentAnnotationIndex);
+		Annotation currentannotation = mutation.getAnnotation(currentAnnotationIndex);
 		annotationTextArea.setText(currentannotation.curation);
 		pathogenicityComboBox.setSelectedItem(currentannotation.classification);
 		mutationTypeComboBox.setSelectedItem(currentannotation.somatic);
 		setCommonAnnotationLabel(currentannotation, historyLabelAnnotation);
 		
-		updateCommon(currentAnnotationIndex, mutation.getAnnotationHistory().size(), annotationTextArea, previousAnnotationButton, nextAnnotationButton);
+		updateCommon(currentAnnotationIndex, mutation.getAnnotationHistorySize(), annotationTextArea, previousAnnotationButton, nextAnnotationButton);
 		
-		if (currentAnnotationIndex == mutation.getAnnotationHistory().size() - 1) {
+		if (currentAnnotationIndex == mutation.getAnnotationHistorySize() - 1) {
 			if(!readOnly) {
 				pathogenicityComboBox.setEnabled(true);
 				mutationTypeComboBox.setEnabled(true);
 			}
-		}else if(mutation.getAnnotationHistory().size() != 1) {
+		}else if(mutation.getAnnotationHistorySize() != 1) {
 			pathogenicityComboBox.setEnabled(false);
 			mutationTypeComboBox.setEnabled(false);
 		}

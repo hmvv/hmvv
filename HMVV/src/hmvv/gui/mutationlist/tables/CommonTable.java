@@ -226,8 +226,12 @@ public abstract class CommonTable extends JTable{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		Mutation mutation = getSelectedMutation();		
 		String gene = mutation.getGene();
+		
+		ArrayList<Annotation> annotationHistory = DatabaseCommands.getVariantAnnotationHistory(mutation.getCoordinate());
+		mutation.setAnnotationHistory(annotationHistory);
+		
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-
+		
 		boolean readOnly = !SSHConnection.isSuperUser();
 		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotationHistory, this, parent);
 		editAnnotation.setVisible(true);

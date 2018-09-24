@@ -201,21 +201,28 @@ public class DatabaseCommands {
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.origin, t5.clinicalAllele, t5.clinicalSig, t5.clinicalAcc, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, t1.tumorSource, t1.tumorPercent, t2.sampleID "
+				+ " , max(t7.annotationID) as annotationID, t7.classification, t7.curation, t7.somatic, t7.enteredBy, t7.enterDate "
+				
 				+ " from sampleVariants as t2"
+				+ " join samples as t1 on t2.sampleID = t1.sampleID "
+				+ " join assays as t6 on t1.assayID = t6.assayID"
+				
 				+ " left join db_g1000 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
+				
 				+ " left join db_clinvar as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
-				+ " left join samples as t1"
-				+ " on t2.sampleID = t1.sampleID "
-				+ " left join assays as t6"
-				+ " on t1.assayID = t6.assayID"
+				
+				+ " left join variantAnnotation as t7 on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt "
+				
 				+ " where t2.sampleID = ? ";
 		String where = "((t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
 		if(getFilteredData) {
 			where = " !" + where;
 		}
 		query = query + " and " + where;
+		//query = query + " group by t2.sampleVariantID, t7.chr, t7.pos, t7.ref, t7.alt ";
+		query = query + " group by t2.sampleVariantID ";
 		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
@@ -443,8 +450,21 @@ public class DatabaseCommands {
 			mutation.setTumorSource(getStringOrBlank(rs, "tumorSource"));
 			mutation.setTumorPercent(getStringOrBlank(rs, "tumorPercent"));
 
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate());
-			mutation.setAnnotationHistory(annotationHistory);
+			//If annotation fields were also in the query
+			try {				
+				Annotation annotation = new Annotation(
+					getIntegerOrNull(rs, "anotationID"), 
+					new Coordinate(getStringOrBlank(rs, "chr"), getStringOrBlank(rs, "pos"), getStringOrBlank(rs, "ref"), getStringOrBlank(rs, "alt")),
+					getStringOrBlank(rs, "classification"),
+					getStringOrBlank(rs, "curation"),
+					getStringOrBlank(rs, "somatic"),
+					getStringOrBlank(rs, "enteredBy"),
+					rs.getDate("enterDate")
+				);
+				mutation.setLatestAnnotation(annotation);
+			}catch(Exception e) {
+				
+			}
 
 			mutations.add(mutation);
 		}

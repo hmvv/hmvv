@@ -33,11 +33,15 @@ public class BasicTableModel extends CommonTableModel {
 		return columns;
 	}
 	
-	public void updateModel(int row, ArrayList<String> cosmicIDs, int occurenceCount){
+	public void updateModel(int row, int occurenceCount){
+		Mutation mutation = getMutation(row);
+		mutation.setOccurrence(occurenceCount);
+		fireTableCellUpdated(row, 12);
+	}
+	
+	public void updateModel(int row, ArrayList<String> cosmicIDs){
 		Mutation mutation = getMutation(row);
 		mutation.setCosmicID(cosmicIDs);
-		mutation.setOccurrence(occurenceCount);
 		fireTableCellUpdated(row, 6);
-		fireTableCellUpdated(row, 12);
 	}
 }

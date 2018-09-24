@@ -617,44 +617,30 @@ public class MutationListFrame extends JDialog {
 	 * 
 	 */
 	private void loadMissingDataAsynchronous(){
-		disableInputForAsynchronousLoad();
-		Thread loadingThread = createExtraMutationDataThread();
-		createWaitingThread(loadingThread);
+		createExtraMutationDataThread();
 	}
 	
 	private void loadFilteredMutationsAsynchronous() {
-		disableInputForAsynchronousLoad();
-		Thread loadingThread = createLoadFilteredMutationDataThread();
-		createWaitingThread(loadingThread);
+		createLoadFilteredMutationDataThread();
 	}
 	
-	private void createWaitingThread(Thread loadingThread) {
-		Thread waitingThread = new Thread(new Runnable(){
-			@Override
-			public void run() {
-				try{
-					loadingThread.join();
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-				enableInputAfterAsynchronousLoad();
-			}
-		});
-		waitingThread.start();
-	}
-	
-	private Thread createExtraMutationDataThread(){
+	private void createExtraMutationDataThread(){
 		Thread missingDataThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
-				getExtraMutationData();
+				disableInputForAsynchronousLoad();
+				getCosmicMutationData();
+				getOccurrenceMutationData();
+				enableInputAfterAsynchronousLoad();
+				if(sample != null) {
+					loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data			
+				}
 			}
 		});
 		missingDataThread.start();
-		return missingDataThread;
 	}
 	
-	private void getExtraMutationData(){
+	private void getCosmicMutationData(){
 		for(int index = 0; index < basicTabTableModel.getRowCount(); index++){
 			if(isWindowClosed){
 				return;
@@ -663,11 +649,9 @@ public class MutationListFrame extends JDialog {
 			try{
 				Mutation mutation = basicTabTableModel.getMutation(index);
 				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
-				int count = DatabaseCommands.getOccurrenceCount(mutation);
-				basicTabTableModel.updateModel(index, cosmicIDs, count);
+				basicTabTableModel.updateModel(index, cosmicIDs);
 			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
 			}
 		}
 		
@@ -679,30 +663,57 @@ public class MutationListFrame extends JDialog {
 			try{
 				Mutation mutation = mutationList.getFilteredMutation(index);
 				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
-				int count = DatabaseCommands.getOccurrenceCount(mutation);
-				
+				basicTabTableModel.updateModel(index, cosmicIDs);
 				//do this here since these mutations are not in the basicTabTableModel
 				mutation.setCosmicID(cosmicIDs);
-				mutation.setOccurrence(count);
 			}catch(Exception e){
-				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
 			}
-		}
-		
-		if(sample != null) {
-			loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data			
 		}
 	}
 	
-	private Thread createLoadFilteredMutationDataThread(){
+	private void getOccurrenceMutationData(){
+		for(int index = 0; index < basicTabTableModel.getRowCount(); index++){
+			if(isWindowClosed){
+				return;
+			}
+			
+			try{
+				Mutation mutation = basicTabTableModel.getMutation(index);
+				int count = DatabaseCommands.getOccurrenceCount(mutation);
+				basicTabTableModel.updateModel(index,  count);
+			}catch(Exception e){
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load occurrence count data.");
+			}
+		}
+		
+		for(int index = 0; index < mutationList.getFilteredMutationCount(); index++){
+			if(isWindowClosed){
+				return;
+			}
+			
+			try{
+				Mutation mutation = mutationList.getFilteredMutation(index);
+				int count = DatabaseCommands.getOccurrenceCount(mutation);
+				
+				//do this here since these mutations are not in the basicTabTableModel
+				mutation.setOccurrence(count);
+			}catch(Exception e){
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load occurrence count data.");
+			}
+		}
+	}
+	
+	private void createLoadFilteredMutationDataThread(){
 		Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
+				disableInputForAsynchronousLoad();
 				getFilteredMutationData();
+				enableInputAfterAsynchronousLoad();
 			}
 		});
 		loadFilteredMutationDataThread.start();
-		return loadFilteredMutationDataThread;
 	}
 	
 	private void getFilteredMutationData() {
