@@ -11,6 +11,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.main.Configurations;
 import hmvv.model.Sample;
 
 public class EditSampleFrame extends JFrame {
@@ -217,10 +218,13 @@ public class EditSampleFrame extends JFrame {
 		contentPane.add(btnCancel);
 
 		btnDelete = new JButton("Delete");
-
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		btnDelete.setBounds(128, 513, 89, 23);
 		contentPane.add(btnDelete);
+
+		if (Configurations.getEnvironment().equals("ngs_live")){
+			btnDelete.setEnabled(false);
+		}
 		
 		setLocationRelativeTo(parent);
 		setResizable(false);

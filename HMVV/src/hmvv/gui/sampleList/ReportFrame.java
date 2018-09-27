@@ -92,16 +92,15 @@ public class ReportFrame extends JFrame {
 				return ".txt file";
 			}			
 		});
-		int returnValue = saveAsFileChooser.showOpenDialog(saveAsFileChooser);
-		if(returnValue == JFileChooser.APPROVE_OPTION){
+		int returnValue = saveAsFileChooser.showOpenDialog(this);
+		if(returnValue == JFileChooser.APPROVE_OPTION ){
 			File fileName = saveAsFileChooser.getSelectedFile();
 			if(!fileName.getName().endsWith(".txt")){
 				fileName = new File(fileName.toString() + ".txt");
 			}
 			BufferedWriter outFile = new BufferedWriter(new FileWriter(fileName));
-            outFile.write(text); 
-
-            outFile.close();
+			outFile.write(text);
+			outFile.close();
 		}
 	}
 }

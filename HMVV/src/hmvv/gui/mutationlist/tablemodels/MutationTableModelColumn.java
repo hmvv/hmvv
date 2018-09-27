@@ -104,7 +104,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	}
 
 	public static final MutationTableModelColumn classificationColumn = new MutationTableModelColumn("The classification designation as entered by the pathologist in the annotation report.",
-			"classification",
+			"prediction",
 			String.class,
 			(Mutation mutation) -> getClassificationDisplayText(mutation));
 
