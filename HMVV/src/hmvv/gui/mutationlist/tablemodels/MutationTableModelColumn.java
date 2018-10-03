@@ -50,7 +50,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			(Mutation mutation) -> mutation.getType());
 	
 	public static final MutationTableModelColumn variantClassificationColumn = new MutationTableModelColumn("Classifcation as predicted by Variant Effect Predictor.",
-			"classification",
+			"prediction",
 			VariantPredictionClass.class,
 			(Mutation mutation) -> mutation.getVariantPredictionClass());
 	
@@ -104,7 +104,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	}
 
 	public static final MutationTableModelColumn classificationColumn = new MutationTableModelColumn("The classification designation as entered by the pathologist in the annotation report.",
-			"prediction",
+			"classification",
 			String.class,
 			(Mutation mutation) -> getClassificationDisplayText(mutation));
 

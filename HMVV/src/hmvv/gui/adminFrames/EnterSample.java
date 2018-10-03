@@ -435,8 +435,8 @@ public class EnterSample extends JDialog {
 	}
 	
 	private Sample constructSampleFromTextFields() throws Exception{
-		if(textlastName.getText().equals("") || textFirstName.getText().equals("") || textOrderNumber.getText().equals("") ){
-			throw new Exception("First Name, Last Name, Order Number are required");
+		if(textlastName.getText().equals("") || textFirstName.getText().equals("")  ){
+			throw new Exception("First Name and Last Name are required");
 		}
 
 		int sampleID = -1;//This will be computed by the database when the sample is inserted

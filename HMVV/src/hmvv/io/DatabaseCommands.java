@@ -215,8 +215,8 @@ public class DatabaseCommands {
 				
 				+ " left join variantAnnotation as t7 on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt "
 				
-				+ " where t2.sampleID = ? "
-				+ " and t2.exon != '' ";//Filter the introns
+				+ " where t2.sampleID = ? ";
+//				+ " and t2.exon != '' ";//Filter the introns
 		String where = " ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
 		if(getFilteredData) {
 			where = " !" + where;
