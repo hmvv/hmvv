@@ -17,7 +17,6 @@ import com.jcraft.jsch.SftpProgressMonitor;
 
 import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
-import hmvv.model.Pipeline;
 import hmvv.model.Sample;
 
 public class SSHConnection {
@@ -329,23 +328,6 @@ public class SSHConnection {
 		}catch(Exception e) {
 			//Ignore this. The user may have the temp folder or the file open.
 		}
-	}
-
-	
-	public static long getFileSize(Pipeline pipeline) throws Exception {
-		String command="";
-
-		if  ( pipeline.getInstrumentName().equals("miseq")) {
-			command = String.format("ls -l --block-size=KB  /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s_*.vcf | awk '{print $5}' | tr -dc '0-9' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
-		} else if  ( pipeline.getInstrumentName().equals("nextseq")) {
-			command = String.format("ls -l --block-size=MB /home/%s/*_%s_*/out1/%s*_R1_001.fastq.gz | awk '{print $5}' | tr -dc '0-9'  ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
-		}else if  ( pipeline.getInstrumentName().equals("proton")) {
-			command = String.format("ls -l --block-size=KB /home/%s/*%s/plugin_out/variantCaller_out*/%s/TSVC_variants.vcf | awk '{print $5}' | tr -dc '0-9' ", pipeline.getInstrumentName(), pipeline.getRunID(), pipeline.getsampleName());
-		}
-		CommandResponse commandResult = SSHConnection.executeCommandAndGetOutput(command);
-		String fileSizeString = commandResult.responseLines.get(0);
-		if (fileSizeString.equals("")){fileSizeString="0";}
-		return Long.parseLong(fileSizeString);
 	}
 }
 

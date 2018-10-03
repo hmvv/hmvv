@@ -1,11 +1,15 @@
 package hmvv.main;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.swing.JOptionPane;
+
+import hmvv.model.Sample;
+
 public class Configurations {
 
 	public static void loadConfigurations(Component parent, InputStream configurationInputStream) throws Exception{
@@ -83,6 +87,36 @@ public class Configurations {
 		}
 	}
 	
+	public static String abbreviationtoLetter(String mutation){
+		return mutation
+			.replaceAll("Ala", "A")
+			.replaceAll("Asx", "B")
+			.replaceAll("Cys", "C")
+			.replaceAll("Asp", "D")
+			.replaceAll("Glu", "E")
+			.replaceAll("Phe", "F")
+			.replaceAll("Gly", "G")
+			.replaceAll("His", "H")
+			.replaceAll("Ile", "I")
+			.replaceAll("Xle", "J")
+			.replaceAll("Lys", "K")
+			.replaceAll("Leu", "L")
+			.replaceAll("Met", "M")
+			.replaceAll("Asn", "N")
+			.replaceAll("Hyp", "O")
+			.replaceAll("Pro", "P")
+			.replaceAll("Gln", "Q")
+			.replaceAll("Arg", "R")
+			.replaceAll("Ser", "S")
+			.replaceAll("Thr", "T")
+			.replaceAll("Glp", "U")
+			.replaceAll("Val", "V")
+			.replaceAll("Trp", "W")
+			.replaceAll("Ter", "X")
+			.replaceAll("Tyr", "Y")
+			.replaceAll("Glx", "Z");
+	}
+	
 	/*
 	 * Database configurations
 	 */
@@ -100,11 +134,24 @@ public class Configurations {
 	public static String SUPER_USER_GROUP;
 	public static String GENOME_VERSION = "37";
 	
-	public static int ALLELE_FREQ_FILTER = 1;
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
 	public static int READ_DEPTH_FILTER = 100;
 	public static int MIN_OCCURENCE_FILTER = 0;
+	
+	
+	public static int ALLELE_FREQ_FILTER = 10;
+	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
+	public static int getAlleleFrequencyFilter(Sample sample) {
+		//TODO Is there a better way to do this?
+		if(sample.getLastName().contains("Horizon")){
+			return HORIZON_ALLELE_FREQ_FILTER;
+		}else {
+			return ALLELE_FREQ_FILTER;
+		}
+	}
+	
+	public static String DEFAULT_ASSAY = "heme";
 	
 	/*
 	 * SSH server configurations
@@ -113,8 +160,12 @@ public class Configurations {
 	public static Integer SSH_PORT;
 	public static String SSH_FORWARDING_HOST;
 	
-	//TODO improve the way this decision is made
 	public static String getEnvironment() {
 		return DATABASE_NAME;
+	}
+	
+	public static Color TEST_ENV_COLOR = Color.CYAN;
+	public static boolean isTestEnvironment() {
+		return !getEnvironment().equals("ngs_live");
 	}
 }

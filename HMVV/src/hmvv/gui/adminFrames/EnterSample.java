@@ -25,6 +25,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.model.Sample;
 
 public class EnterSample extends JDialog {
@@ -39,7 +40,7 @@ public class EnterSample extends JDialog {
 	private JTextField textTumorSource;
 	private JTextField textPercent;
 	private JTextField textPatientHistory;
-	private JTextField textBMDiagnosis;
+	private JTextField textDiagnosis;
 	private JTextField textNote;
 	
 	private JComboBox<String> comboBoxAssay;
@@ -77,6 +78,7 @@ public class EnterSample extends JDialog {
 			for(String assay : DatabaseCommands.getAllAssays()){
 				comboBoxAssay.addItem(assay);
 			}
+			comboBoxAssay.setSelectedItem(Configurations.DEFAULT_ASSAY);
 		}catch(Exception e){
 			JOptionPane.showMessageDialog(parent, "Error getting Assays from database: " + e.getMessage());
 			dispose();
@@ -113,7 +115,7 @@ public class EnterSample extends JDialog {
 		textTumorSource = new JTextField();
 		textPercent = new JTextField();
 		textPatientHistory = new JTextField();
-		textBMDiagnosis = new JTextField();
+		textDiagnosis = new JTextField();
 		textNote = new JTextField();
 		
 		enterSampleButton = new JButton("Enter Sample");
@@ -147,7 +149,7 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("Tumor Source", textTumorSource));
 		mainPanel.add(new RowPanel("Tumor Percent", textPercent));
 		mainPanel.add(new RowPanel("Patient History", textPatientHistory));
-		mainPanel.add(new RowPanel("BM Diagnosis", textBMDiagnosis));
+		mainPanel.add(new RowPanel("Diagnosis", textDiagnosis));
 		mainPanel.add(new RowPanel("Note", textNote));
 		
 		
@@ -188,14 +190,18 @@ public class EnterSample extends JDialog {
 					enterSampleThread = new Thread(new Runnable() {
 						@Override
 						public void run() {
+							setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 							enterSampleButton.setText("Processing...");
 							enterSampleButton.setEnabled(false);
 							try {
 								enterData();
-								enterSampleButton.setText("Completed.");
+								enterSampleButton.setText("Completed");
 							} catch (Exception e) {
 								JOptionPane.showMessageDialog(EnterSample.this, "Error entering sample data: " + e.getMessage());
+								enterSampleButton.setText("Enter Sample");
+								enterSampleButton.setEnabled(true);
 							}
+							setCursor(Cursor.getDefaultCursor());
 						}
 					});
 					enterSampleThread.start();
@@ -347,6 +353,7 @@ public class EnterSample extends JDialog {
 	private void sampleIDSelectionChanged(){
 		enterSampleButton.setText("Enter Sample");
 		String runID = textRunID.getText();
+		String instrument = (String)comboBoxInstrument.getSelectedItem();
 		String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
 		String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
 		String sampleName = (String)comboBoxSample.getSelectedItem();
@@ -361,7 +368,7 @@ public class EnterSample extends JDialog {
 		if(variantCallerID == null)
 			variantCallerID = defaultCoverageAndCallerID;
 		
-		Sample sample = sampleListTableModel.getSample(runID, coverageID, variantCallerID, sampleName);
+		Sample sample = sampleListTableModel.getSample(instrument, runID, coverageID, variantCallerID, sampleName);
 		if(sample != null){
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
 		}else{
@@ -385,7 +392,7 @@ public class EnterSample extends JDialog {
 		textTumorSource.setEditable(editable);
 		textPercent.setEditable(editable);
 		textPatientHistory.setEditable(editable);
-		textBMDiagnosis.setEditable(editable);
+		textDiagnosis.setEditable(editable);
 		textNote.setEditable(editable);
 		enterSampleButton.setEnabled(editable);
 	}
@@ -422,16 +429,14 @@ public class EnterSample extends JDialog {
 
 			//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
-		}catch (Exception e){
-			JOptionPane.showMessageDialog(this, e.getMessage());
 		}finally {
 			setEnabled(true);
 		}
 	}
 	
 	private Sample constructSampleFromTextFields() throws Exception{
-		if(textlastName.getText().equals("") || textFirstName.getText().equals("") || textOrderNumber.getText().equals("") ){
-			throw new Exception("First Name, Last Name, Order Number are required");
+		if(textlastName.getText().equals("") || textFirstName.getText().equals("")  ){
+			throw new Exception("First Name and Last Name are required");
 		}
 
 		int sampleID = -1;//This will be computed by the database when the sample is inserted
@@ -457,12 +462,12 @@ public class EnterSample extends JDialog {
 
 		String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
 		String patientHistory = textPatientHistory.getText();
-		String bmDiagnosis = textBMDiagnosis.getText();
+		String diagnosis = textDiagnosis.getText();
 		String note = textNote.getText();
 		String enteredBy = SSHConnection.getUserName();
 
 		return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
-				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, bmDiagnosis, note, enteredBy);
+				pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
 	}
 	
 	private class RowPanel extends JPanel{

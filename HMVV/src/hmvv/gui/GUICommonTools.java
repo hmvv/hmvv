@@ -9,9 +9,8 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.text.SimpleDateFormat;
-
-import javax.swing.JFrame;
 
 public class GUICommonTools {
 //	public static final Color ERROR_COLOR = new Color(255,51,51);
@@ -57,13 +56,13 @@ public class GUICommonTools {
 	    return bounds;
 	}
 	
-	public static Rectangle getBounds(JFrame jframe){
+	public static Rectangle getBounds(Window window){
 	    Rectangle bounds = new Rectangle();
-	    Point topLeftCorner = jframe.getLocationOnScreen();
+	    Point topLeftCorner = window.getLocationOnScreen();
 	    bounds.x = topLeftCorner.x;
 	    bounds.y = topLeftCorner.y;
-	    bounds.width = jframe.getSize().width;
-	    bounds.height = jframe.getSize().height;
+	    bounds.width = window.getSize().width;
+	    bounds.height = window.getSize().height;
 	    return bounds;
 	}	
 	

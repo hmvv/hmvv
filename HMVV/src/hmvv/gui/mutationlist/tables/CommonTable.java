@@ -1,6 +1,7 @@
 package hmvv.gui.mutationlist.tables;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -27,6 +28,7 @@ import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
@@ -187,7 +189,7 @@ public abstract class CommonTable extends JTable{
 		String change = mutation.getHGVSp();
 		searchGoogleForMutation(mutation, change);
 		
-		String abbreviatedChange = abbreviationtoLetter(change);
+		String abbreviatedChange = Configurations.abbreviationtoLetter(change);
 		searchGoogleForMutation(mutation, abbreviatedChange);
 	}
 	
@@ -219,41 +221,21 @@ public abstract class CommonTable extends JTable{
 			}
 		}
 	}
-	
-	private String abbreviationtoLetter(String mutation){
-		return mutation
-			.replaceAll("Ala", "A")
-			.replaceAll("Cys", "C")
-			.replaceAll("Glu", "E")
-			.replaceAll("Phe", "F")
-			.replaceAll("Gly", "G")
-			.replaceAll("His", "H")
-			.replaceAll("Ile", "I")
-			.replaceAll("Lys", "K")
-			.replaceAll("Leu", "L")
-			.replaceAll("Met", "M")
-			.replaceAll("Asn", "N")
-			.replaceAll("Hyp", "O")
-			.replaceAll("Pro", "P")
-			.replaceAll("Gln", "Q")
-			.replaceAll("Arg", "R")
-			.replaceAll("Ser", "S")
-			.replaceAll("Thr", "T")
-			.replaceAll("Glp", "U")
-			.replaceAll("Val", "V")
-			.replaceAll("Trp", "W")
-			.replaceAll("Ter", "X")
-			.replaceAll("Tyr", "Y");
-	}
 
 	protected void handleAnnotationClick() throws Exception{
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		Mutation mutation = getSelectedMutation();		
 		String gene = mutation.getGene();
+		
+		ArrayList<Annotation> annotationHistory = DatabaseCommands.getVariantAnnotationHistory(mutation.getCoordinate());
+		mutation.setAnnotationHistory(annotationHistory);
+		
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
 		
 		boolean readOnly = !SSHConnection.isSuperUser();
 		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotationHistory, this, parent);
 		editAnnotation.setVisible(true);
+		this.setCursor(Cursor.getDefaultCursor());
 	}
 	
 	public void notifyAnnotationUpdated(Annotation annotation) {

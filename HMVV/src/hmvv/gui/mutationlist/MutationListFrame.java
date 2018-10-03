@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -55,7 +56,7 @@ import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
-public class MutationListFrame extends JFrame {
+public class MutationListFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 		
 	private BasicTable basicTabTable;
@@ -114,6 +115,7 @@ public class MutationListFrame extends JFrame {
 	}
 	
 	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
+		super(parent);
 		//TODO this class is too complicated as a host for both the search results and the sample mutation list. Refactor.
 		if(sample == null) {
 			String title = "Mutation List Search Results"; 
@@ -498,7 +500,7 @@ public class MutationListFrame extends JFrame {
 		boolean includeReportedOnly = reportedOnlyCheckbox.isSelected();
 		boolean filterNormalPair = filterNomalCheckbox.isSelected();
 		int sampleID = (mutationList.getMutationCount() > 0) ? mutationList.getMutation(0).getSampleID() : -1;
-		int frequencyFrom =  getNumber(textFreqFrom, Configurations.ALLELE_FREQ_FILTER);
+		int frequencyFrom =  getNumber(textFreqFrom, Configurations.getAlleleFrequencyFilter(sample));
 		int frequencyTo = getNumber(textVarFreqTo, Configurations.MAX_ALLELE_FREQ_FILTER);
 		int minOccurence = getNumber(occurenceFromTextField, Configurations.MIN_OCCURENCE_FILTER);
 		int minReadDepth = getNumber(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
@@ -530,7 +532,7 @@ public class MutationListFrame extends JFrame {
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);		
 		filterNomalCheckbox.setSelected(false);
-		textFreqFrom.setText(Configurations.ALLELE_FREQ_FILTER+"");
+		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
 		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
 		occurenceFromTextField.setText(Configurations.MIN_OCCURENCE_FILTER+"");
@@ -615,44 +617,30 @@ public class MutationListFrame extends JFrame {
 	 * 
 	 */
 	private void loadMissingDataAsynchronous(){
-		disableInputForAsynchronousLoad();
-		Thread loadingThread = createExtraMutationDataThread();
-		createWaitingThread(loadingThread);
+		createExtraMutationDataThread();
 	}
 	
 	private void loadFilteredMutationsAsynchronous() {
-		disableInputForAsynchronousLoad();
-		Thread loadingThread = createLoadFilteredMutationDataThread();
-		createWaitingThread(loadingThread);
+		createLoadFilteredMutationDataThread();
 	}
 	
-	private void createWaitingThread(Thread loadingThread) {
-		Thread waitingThread = new Thread(new Runnable(){
-			@Override
-			public void run() {
-				try{
-					loadingThread.join();
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-				enableInputAfterAsynchronousLoad();
-			}
-		});
-		waitingThread.start();
-	}
-	
-	private Thread createExtraMutationDataThread(){
+	private void createExtraMutationDataThread(){
 		Thread missingDataThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
-				getExtraMutationData();
+				disableInputForAsynchronousLoad();
+				getCosmicMutationData();
+				getOccurrenceMutationData();
+				enableInputAfterAsynchronousLoad();
+				if(sample != null) {
+					loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data			
+				}
 			}
 		});
 		missingDataThread.start();
-		return missingDataThread;
 	}
 	
-	private void getExtraMutationData(){
+	private void getCosmicMutationData(){
 		for(int index = 0; index < basicTabTableModel.getRowCount(); index++){
 			if(isWindowClosed){
 				return;
@@ -661,11 +649,9 @@ public class MutationListFrame extends JFrame {
 			try{
 				Mutation mutation = basicTabTableModel.getMutation(index);
 				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
-				int count = DatabaseCommands.getOccurrenceCount(mutation);
-				basicTabTableModel.updateModel(index, cosmicIDs, count);
+				basicTabTableModel.updateModel(index, cosmicIDs);
 			}catch(Exception e){
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
 			}
 		}
 		
@@ -677,36 +663,63 @@ public class MutationListFrame extends JFrame {
 			try{
 				Mutation mutation = mutationList.getFilteredMutation(index);
 				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
-				int count = DatabaseCommands.getOccurrenceCount(mutation);
-				
+				basicTabTableModel.updateModel(index, cosmicIDs);
 				//do this here since these mutations are not in the basicTabTableModel
 				mutation.setCosmicID(cosmicIDs);
-				mutation.setOccurrence(count);
 			}catch(Exception e){
-				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
 			}
-		}
-		
-		if(sample != null) {
-			loadFilteredMutationsButton.setEnabled(true);//now that the unfiltered data is loaded, enable the option to load the filtered data			
 		}
 	}
 	
-	private Thread createLoadFilteredMutationDataThread(){
+	private void getOccurrenceMutationData(){
+		for(int index = 0; index < basicTabTableModel.getRowCount(); index++){
+			if(isWindowClosed){
+				return;
+			}
+			
+			try{
+				Mutation mutation = basicTabTableModel.getMutation(index);
+				int count = DatabaseCommands.getOccurrenceCount(mutation);
+				basicTabTableModel.updateModel(index,  count);
+			}catch(Exception e){
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load occurrence count data.");
+			}
+		}
+		
+		for(int index = 0; index < mutationList.getFilteredMutationCount(); index++){
+			if(isWindowClosed){
+				return;
+			}
+			
+			try{
+				Mutation mutation = mutationList.getFilteredMutation(index);
+				int count = DatabaseCommands.getOccurrenceCount(mutation);
+				
+				//do this here since these mutations are not in the basicTabTableModel
+				mutation.setOccurrence(count);
+			}catch(Exception e){
+				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load occurrence count data.");
+			}
+		}
+	}
+	
+	private void createLoadFilteredMutationDataThread(){
 		Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
+				disableInputForAsynchronousLoad();
 				getFilteredMutationData();
+				enableInputAfterAsynchronousLoad();
 			}
 		});
 		loadFilteredMutationDataThread.start();
-		return loadFilteredMutationDataThread;
 	}
 	
 	private void getFilteredMutationData() {
 		try{
 			loadFilteredMutationsButton.setText("Loading...");
-			ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample.sampleID);
+			ArrayList<Mutation> mutations = DatabaseCommands.getFilteredMutationDataByID(sample);
 			for(int i = 0; i < mutations.size(); i++) {
 				if(isWindowClosed){
 					return;

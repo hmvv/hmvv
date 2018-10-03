@@ -21,6 +21,7 @@ public class Mutation {
 	private Integer altReadDP;
 	private Integer occurrence;
 	private ArrayList<Annotation> annotationHistory;
+	private Annotation latestAnnotation;
 	
 	//ClinVar
 	private String origin;
@@ -396,18 +397,31 @@ public class Mutation {
 		this.tumorPercent = tumorPercent;
 	}
 	
-	public ArrayList<Annotation> getAnnotationHistory() {
-		return annotationHistory;
+	public void addAnnotation(Annotation annotation) {
+		annotationHistory.add(annotation);
+		this.latestAnnotation = annotation;
+	}
+	
+	public int getAnnotationHistorySize() {
+		return annotationHistory.size();
+	}
+	
+	public Annotation getAnnotation(int index) {
+		return annotationHistory.get(index);
 	}
 	
 	public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
 		this.annotationHistory = annotationHistory;
+		if(annotationHistory.size() > 0) {
+			this.latestAnnotation = annotationHistory.get(annotationHistory.size() - 1);
+		}
+	}
+	
+	public void setLatestAnnotation(Annotation latestAnnotation) {
+		this.latestAnnotation = latestAnnotation;
 	}
 	
 	public Annotation getLatestAnnotation() {
-		if(annotationHistory.size() == 0) {
-			return null;
-		}
-		return annotationHistory.get(annotationHistory.size() - 1);
+		return latestAnnotation;
 	}
 }

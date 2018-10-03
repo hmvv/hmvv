@@ -1,6 +1,7 @@
 package hmvv.gui.sampleList;
 
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -14,6 +15,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -55,8 +57,10 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVLoginFrame;
+import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
+import hmvv.model.PipelineProgram;
 import hmvv.model.Sample;
 
 public class SampleListFrame extends JFrame {
@@ -130,14 +134,7 @@ public class SampleListFrame extends JFrame {
 		setupPipelineRefreshThread();
 	}
 	
-	private void setupPipelineRefreshThread() {
-		try {
-			pipelines = DatabaseCommands.getAllPipelines();
-		} catch (Exception e1) {
-			JOptionPane.showMessageDialog(this, "Database error getting pipeline status. Please contact the system administrator");
-			return;
-		}
-		
+	private void setupPipelineRefreshThread() {		
 		pipelineRefreshThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -145,7 +142,12 @@ public class SampleListFrame extends JFrame {
 				while(true) {
 					long currentTimeInMillis = System.currentTimeMillis();
 					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
-						updatePipelinesASynch();
+						refreshLabel.setText("Refreshing table...");
+						if(!updatePipelinesASynch()){
+							JOptionPane.showMessageDialog(SampleListFrame.this, "Failure to update pipeline status details. Please contact the administrator.");
+							refreshLabel.setText("Status refresh disabled");
+							return;
+						}
 					}
 					
 					setRefreshLabelText();
@@ -156,17 +158,18 @@ public class SampleListFrame extends JFrame {
 				}
 			}
 		});
-		
+		pipelineRefreshThread.setName("Sample List Pipeline Status Refresh");
 		pipelineRefreshThread.start();
 	}
 	
-	private void updatePipelinesASynch() {
+	private boolean updatePipelinesASynch() {
 		try {
 			pipelines = DatabaseCommands.getAllPipelines();
 			table.repaint();							
 			timeLastRefreshed = System.currentTimeMillis();
+			return true;
 		} catch (Exception e) {
-			// Silently fail. Don't want to spam user every interval.
+			return false;
 		}
 	}
 	
@@ -186,7 +189,7 @@ public class SampleListFrame extends JFrame {
 		qualityControlMenuItem = new JMenu("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
-		refreshLabel = new JMenuItem("");
+		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 		
 		menuBar.add(adminMenu);
@@ -202,18 +205,38 @@ public class SampleListFrame extends JFrame {
 				if(assay.equals("exome")) {
 					continue;
 				}
-				JMenuItem assayMenuItem = new JMenuItem(assay);
+				
+				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
 				qualityControlMenuItem.add(assayMenuItem);
 				assayMenuItem.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try {
-							QualityControlFrame.showQCChart(SampleListFrame.this, assay);
+							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
+							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
 						} catch (Exception e1) {
 							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
 						}
 					}
 				});
+				if(assay.equals("neuro")) {
+					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
+				}
+				assayMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
+				qualityControlMenuItem.add(assayMenuItem);
+				assayMenuItem.addActionListener(new ActionListener(){
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						try {
+							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
+							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+						} catch (Exception e1) {
+							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+						}
+					}
+				});
+				
+				qualityControlMenuItem.addSeparator();
 			}
 		}catch(Exception e){
 			//unable to get assays
@@ -233,8 +256,7 @@ public class SampleListFrame extends JFrame {
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem){
-						MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
-						monitorpipelines.setVisible(true);
+						handleMonitorPipelineClick();
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -289,10 +311,13 @@ public class SampleListFrame extends JFrame {
 				for(Pipeline p : pipelines) {
 					if(currentSample.sampleID == p.sampleID) {
 						c.setBackground(p.pipelineProgram.displayColor);
-						break;
+						return c;
 					}
 				}
 				
+				//If the sampleID was not found in the list of recent pipelines. Revert to default color.
+				//TODO store pipeline program in database to allow display of failed runs from the distant past
+				c.setBackground(PipelineProgram.COMPLETE.displayColor);
 				return c;
 			}
 		};
@@ -329,8 +354,8 @@ public class SampleListFrame extends JFrame {
 		sampleSearchButton.setToolTipText("Open sample search window");
 		sampleSearchButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
-		resetButton = new JButton("Refresh");
-		resetButton.setToolTipText("Reset Samples (remove all filters)");
+		resetButton = new JButton("Reset Filters");
+		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
 		mutationSearchButton = new JButton("Mutation Search");
@@ -397,6 +422,10 @@ public class SampleListFrame extends JFrame {
 						.addGap(25))
 				);
 		getContentPane().setLayout(groupLayout);
+		
+		if(Configurations.isTestEnvironment()) {
+			getContentPane().setBackground(Configurations.TEST_ENV_COLOR);
+		}
 		
 		resizeColumnWidths();
 	}
@@ -503,27 +532,56 @@ public class SampleListFrame extends JFrame {
 		}
 	}
 
+	private void handleMonitorPipelineClick() throws Exception{
+		Thread monitorPipelineThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
+					monitorpipelines.setVisible(true);
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading Monitor Pipeline window: " + e.getMessage());
+				}
+				setCursor(Cursor.getDefaultCursor());
+			}
+		});
+		monitorPipelineThread.start();
+	}
 	private void handleMutationClick() throws Exception{
-		Sample currentSample = getCurrentlySelectedSample();
-		ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample.sampleID);
-		for(Mutation m : mutations){
-			m.setCosmicID("LOADING...");
-		}
-		
-		MutationList mutationList = new MutationList(mutations);
-		MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
-		mutationListFrame.setVisible(true);
+		Thread mutationListThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					Sample currentSample = getCurrentlySelectedSample();
+					ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample);
+					for(Mutation m : mutations){
+						m.setCosmicID("LOADING...");
+					}
+					MutationList mutationList = new MutationList(mutations);
+					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
+					mutationListFrame.setVisible(true);
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading mutation data: " + e.getMessage());
+				}
+				table.setCursor(Cursor.getDefaultCursor());
+			}
+		});
+		mutationListThread.start();
 	}
 
 	private void handleShowAmpliconClick(){
 		//Show amplicon
 		try {
+            table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Sample currentSample = getCurrentlySelectedSample();
 			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
 			amplicon.setVisible(true);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(SampleListFrame.this, e);
 		}
+        table.setCursor(Cursor.getDefaultCursor());
 	}
 
 	private void handleEditSampleClick() throws Exception{
@@ -538,7 +596,7 @@ public class SampleListFrame extends JFrame {
 			return;
 		}
 		
-		EditSampleFrame editSample = new EditSampleFrame(sample);
+		EditSampleFrame editSample = new EditSampleFrame(this, sample);
 		editSample.setVisible(true);
 		editSample.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

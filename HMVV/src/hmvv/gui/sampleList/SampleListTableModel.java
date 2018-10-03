@@ -22,7 +22,7 @@ public class SampleListTableModel extends AbstractTableModel{
 	private void constructColumns(){
 		columns = new ArrayList<SampleTableModelColumn>();
 		columns.add(new SampleTableModelColumn("The unique ID",
-				"sampleID",
+				"Sample ID",
 				Integer.class,
 				(Sample sample) -> sample.sampleID));
 		
@@ -67,68 +67,68 @@ public class SampleListTableModel extends AbstractTableModel{
 				(Sample sample) -> sample.getTumorPercent()));
 		
 		columns.add(new SampleTableModelColumn("The instrument generated run ID", 
-				"runID", 
+				"Run ID", 
 				String.class,
 				(Sample sample) -> sample.runID));
 		
 		columns.add(new SampleTableModelColumn("The instrument generated sample ID", 
-				"sampleName",
+				"Sample Name",
 				String.class,
 				(Sample sample) -> sample.sampleName));
 		
 		columns.add(new SampleTableModelColumn("The instrument generated coverage ID (Life Technologies instruments only)", 
-				"coverageID", 
+				"Coverage ID", 
 				String.class,
 				(Sample sample) -> sample.coverageID));
 		
 		columns.add(new SampleTableModelColumn("The instrument generated caller ID (Life Technologies instruments only)", 
-				"callerID", 
+				"Caller ID", 
 				String.class,
 				(Sample sample) -> sample.callerID));
 		
 		columns.add(new SampleTableModelColumn("The date the sample was run", 
-				"runDate", 
+				"Run Date", 
 				String.class,
 				(Sample sample) -> sample.runDate));
 
-		columns.add(new SampleTableModelColumn("Pathologist entered patient history",
-				"patient History",
+		columns.add(new SampleTableModelColumn("The patient's clinical history",
+				"Patient History",
 				String.class,
 				(Sample sample) -> sample.getPatientHistory()));
 
-		columns.add(new SampleTableModelColumn("Pathologist entered bm diagnosis",
-				"BM Diagnosis",
+		columns.add(new SampleTableModelColumn("The diagnosis of the tissue sample",
+				"Sample Diagnosis",
 				String.class,
-				(Sample sample) -> sample.getBmDiagnosis()));
+				(Sample sample) -> sample.getDiagnosis()));
 
 		columns.add(new SampleTableModelColumn("Additional user entered information", 
-				"note", 
+				"Note", 
 				String.class,
 				(Sample sample) -> sample.getNote()));
 		
 		columns.add(new SampleTableModelColumn("User ID of the individual who entered this sample", 
-				"enteredBy", 
+				"Entered By", 
 				String.class,
 				(Sample sample) -> sample.enteredBy));
 		
 		columns.add(new SampleTableModelColumn("The coverage depth report across amplicons in the assay", 
-				"amplicon", 
+				"Amplicon", 
 				String.class, 
 				(Sample sample) -> "amplicon"));
 		
 		columns.add(new SampleTableModelColumn("Click to edit metadata associated with this sample", 
-				"edit", 
+				"Edit Sample", 
 				String.class,
 				(Sample sample) -> "edit"));
 	}
 	
-	public Sample getSample(String runID, String coverageID, String variantCallerID, String sampleName){
+	public Sample getSample(String instrument, String runID, String coverageID, String variantCallerID, String sampleName){
 		for(Sample s : samples){
 			//only check sampleID because the coverageID and variantCallerID can be blank depending on the instrument
 			if(s.runID.equals("") || s.sampleName.equals("")){
 				continue;
 			}
-			if(s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
+			if(s.instrument.equals(instrument) && s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
 				return s;
 			}
 		}
