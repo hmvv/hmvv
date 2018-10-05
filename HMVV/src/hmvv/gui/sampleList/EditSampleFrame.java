@@ -8,6 +8,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
@@ -24,7 +26,7 @@ public class EditSampleFrame extends JFrame {
 	private JTextField textPathology;
 	private JTextField textSource;
 	private JTextField textPercent;
-	private JTextField textPatientHistory;
+	private JTextArea textPatientHistory;
 	private JTextField textDiagnosis;
 	private JTextField textNote;
 	private JLabel labelID1;
@@ -128,12 +130,12 @@ public class EditSampleFrame extends JFrame {
 
 		JLabel lblDiagnosis = new JLabel("Diagnosis");
 		lblDiagnosis.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblDiagnosis.setBounds(42, 430, 127, 14);
+		lblDiagnosis.setBounds(42, 460, 127, 14);
 		contentPane.add(lblDiagnosis);
 
 		JLabel lblNote = new JLabel("Note");
 		lblNote.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblNote.setBounds(42, 460, 127, 14);
+		lblNote.setBounds(42, 490, 127, 14);
 		contentPane.add(lblNote);
 
 		labelInstrument1 = new JLabel(sample.instrument);
@@ -186,24 +188,29 @@ public class EditSampleFrame extends JFrame {
 		textPercent.setBounds(207, 370, 218, 20);
 		contentPane.add(textPercent);
 
-		textPatientHistory = new JTextField(sample.getPatientHistory());
+		textPatientHistory = new JTextArea();
+		textPatientHistory.setText(sample.getPatientHistory());
+		textPatientHistory.setLineWrap(true);
+		textPatientHistory.setWrapStyleWord(true);
 		textPatientHistory.setColumns(10);
-		textPatientHistory.setBounds(207, 400, 218, 20);
-		contentPane.add(textPatientHistory);
+		JScrollPane textPatientHistoryScroll = new JScrollPane(textPatientHistory);
+		textPatientHistoryScroll.setBounds(207, 400, 218, 40);
+		contentPane.add(textPatientHistoryScroll);
+
 
 		textDiagnosis = new JTextField(sample.getDiagnosis());
 		textDiagnosis.setColumns(10);
-		textDiagnosis.setBounds(207, 430, 218, 20);
+		textDiagnosis.setBounds(207, 460, 218, 20);
 		contentPane.add(textDiagnosis);
 
 		textNote = new JTextField(sample.getNote());
 		textNote.setColumns(10);
-		textNote.setBounds(207, 460, 218, 20);
+		textNote.setBounds(207, 490, 218, 20);
 		contentPane.add(textNote);
 
 		btnSubmit = new JButton("Update");
 		btnSubmit.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnSubmit.setBounds(267, 513, 89, 23);
+		btnSubmit.setBounds(267, 530, 89, 23);
 		contentPane.add(btnSubmit);
 
 		JButton btnCancel = new JButton("Cancel");
@@ -214,12 +221,12 @@ public class EditSampleFrame extends JFrame {
 			}
 		});
 		btnCancel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnCancel.setBounds(412, 513, 89, 23);
+		btnCancel.setBounds(412, 530, 89, 23);
 		contentPane.add(btnCancel);
 
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnDelete.setBounds(128, 513, 89, 23);
+		btnDelete.setBounds(128, 530, 89, 23);
 		contentPane.add(btnDelete);
 
 		if (Configurations.getEnvironment().equals("ngs_live")){
