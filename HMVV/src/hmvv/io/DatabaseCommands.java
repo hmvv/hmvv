@@ -661,7 +661,21 @@ public class DatabaseCommands {
 		}
 		return annotations;
 	}
-	
+
+	public static String getVariantAnnotationDraft(Coordinate coordinate) throws Exception{
+		String draft="";
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select draft from variantAnnotationDraft where chr = ? and pos = ? and ref = ? and alt = ?");
+		selectStatement.setString(1, coordinate.getChr());
+		selectStatement.setString(2, coordinate.getPos());
+		selectStatement.setString(3, coordinate.getRef());
+		selectStatement.setString(4, coordinate.getAlt());
+		ResultSet rs = selectStatement.executeQuery();
+		if(rs.next()){
+			draft=rs.getString(1);
+		}
+		return draft;
+	}
+
 	public static void addGeneAnnotationCuration(GeneAnnotation geneAnnotation) throws Exception{
 		String gene = geneAnnotation.gene;
 		String curation = geneAnnotation.curation;
@@ -699,6 +713,41 @@ public class DatabaseCommands {
 		pstEnterAnnotation.setTimestamp(9, new java.sql.Timestamp(annotation.enterDate.getTime()));
 		pstEnterAnnotation.executeUpdate();
 		pstEnterAnnotation.close();
+	}
+
+	public static void addVariantAnnotationDraft(Coordinate coordinate, String draft) throws Exception{
+		String chr = coordinate.getChr();
+		String pos = coordinate.getPos();
+		String ref = coordinate.getRef();
+		String alt = coordinate.getAlt();
+
+		PreparedStatement selectStatement = databaseConnection.prepareStatement("select draft from variantAnnotationDraft where chr = ? and pos = ? and ref = ? and alt = ?");
+		selectStatement.setString(1, chr);
+		selectStatement.setString(2, pos);
+		selectStatement.setString(3, ref);
+		selectStatement.setString(4, alt);
+		ResultSet rsCheckSample = selectStatement.executeQuery();
+
+		if(rsCheckSample.next()){
+			PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("update variantAnnotationDraft set draft=? where chr = ? and pos = ? and ref = ? and alt = ?");
+			pstEnterAnnotation.setString(1, draft);
+			pstEnterAnnotation.setString(2, chr);
+			pstEnterAnnotation.setString(3, pos);
+			pstEnterAnnotation.setString(4, ref);
+			pstEnterAnnotation.setString(5, alt);
+			pstEnterAnnotation.executeUpdate();
+			pstEnterAnnotation.close(); }
+		else {
+			PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("insert into variantAnnotationDraft ( chr, pos, ref, alt, draft) "
+					+ "values (?, ?, ?, ?, ?)");
+			pstEnterAnnotation.setString(1, chr);
+			pstEnterAnnotation.setString(2, pos);
+			pstEnterAnnotation.setString(3, ref);
+			pstEnterAnnotation.setString(4, alt);
+			pstEnterAnnotation.setString(5, draft);
+			pstEnterAnnotation.executeUpdate();
+			pstEnterAnnotation.close();
+		}
 	}
 
 	/* ************************************************************************
@@ -767,121 +816,7 @@ public class DatabaseCommands {
 		return rows;
 	}
 	
-	/**
-	 * 
-	 * @param assay
-	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
-	 * @throws Exception
-	 */
-	public static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(String assay) throws Exception{
-		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.readDepth from sampleAmplicons"
-				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
-				+ " join assays on assays.assayID = samples.assayID"
-				+ " where samples.lastName like 'Horizon%' ";
-		
-		String geneFilter;
-		if(assay.equals("heme")) {
-			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS') and assayName = 'heme'";
-		}else if(assay.equals("gene50")) {
-			geneFilter = " and (sampleAmplicons.gene like '%EGFR%' or sampleAmplicons.gene like '%KRAS%' or sampleAmplicons.gene like '%NRAS%') and assayName = 'gene50'";
-		}else if(assay.equals("neuro")) {
-			//TODO the sampleAmplicons table currently does not properly store gene name
-			//geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS') and assayName = 'neuro'";
-			throw new Exception("Unsupported Assay: " + assay);
-		}else {
-			throw new Exception("Unsupported Assay: " + assay);
-		}
-		query += geneFilter;
-		
-		query += " order by sampleID, gene, ampliconName asc";
-		
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		ResultSet rs = preparedStatement.executeQuery();
-		
-		TreeMap<String, GeneQCDataElementTrend> geneAmpliconTrends = new TreeMap<String, GeneQCDataElementTrend>();
-		
-		while(rs.next()){
-			String gene = rs.getString("gene");
-			if(assay.equals("gene50")) {
-				String[] splitGene = gene.split("_");
-				if(splitGene.length == 3) {//the expected value
-					gene = splitGene[1];
-				}
-			}
-			QCDataElement amplicon = new QCDataElement(rs.getInt("sampleID"), gene, rs.getString("ampliconName"), rs.getInt("readDepth"));
-			GeneQCDataElementTrend geneAmpliconTrend = geneAmpliconTrends.get(amplicon.gene);
-			if(geneAmpliconTrend == null) {
-				geneAmpliconTrend = new GeneQCDataElementTrend(amplicon.gene);
-				geneAmpliconTrends.put(amplicon.gene, geneAmpliconTrend);
-			}
-			
-			geneAmpliconTrend.addDataElement(amplicon);
-		}
-		preparedStatement.close();
 
-		return geneAmpliconTrends;
-	}
-	
-	/**
-	 * 
-	 * @param assay
-	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
-	 * @throws Exception
-	 */
-	public static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(String assay) throws Exception{
-		String query = "select sampleVariants.sampleID, sampleVariants.gene, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.altFreq, cosmicID"
-				+ " from samples"
-				+ " join assays on assays.assayID = samples.assayID"
-				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
-				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
-				+ " where samples.lastName like 'Horizon%' "
-				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
-		
-		String geneFilter;
-		if(assay.equals("heme")) {
-			geneFilter =
-			//TODO choose between COSM1135366 and COSM521? COSM1140132 and COSM532? They have the same coordinates and seem to track together.
-			"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM1135366' or cosmicID = 'COSM521' or cosmicID = 'COSM1140132' or cosmicID = 'COSM532')"
-			+ " and assays.assayName = 'heme' ";
-		}else if(assay.equals("gene50")) {
-			geneFilter =
-			"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
-			+ " and assays.assayName = 'gene50' ";
-		}else if(assay.equals("neuro")) {
-			geneFilter =
-			"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM97131' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
-			+ " and assays.assayName = 'neuro' ";
-		}else {
-			throw new Exception("Unsupported Assay: " + assay);
-		}
-		
-		query += geneFilter;
-		query += " order by sampleID, gene";
-		
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		ResultSet rs = preparedStatement.executeQuery();
-		
-		TreeMap<String, GeneQCDataElementTrend> geneVariantTrends = new TreeMap<String, GeneQCDataElementTrend>();
-		
-		while(rs.next()){
-			String variant = rs.getString("HGVSp");
-			variant = variant.replaceAll(".*:", "");
-			variant = Configurations.abbreviationtoLetter(variant);
-			variant += "(" + rs.getString("cosmicID") + ")";
-			
-			QCDataElement variantDataElement = new QCDataElement(rs.getInt("sampleID"), rs.getString("gene"), variant, Math.round(rs.getFloat("altFreq")));
-			GeneQCDataElementTrend geneVariantTrend = geneVariantTrends.get(variantDataElement.gene);
-			if(geneVariantTrend == null) {
-				geneVariantTrend = new GeneQCDataElementTrend(variantDataElement.gene);
-				geneVariantTrends.put(variantDataElement.gene, geneVariantTrend);
-			}
-			
-			geneVariantTrend.addDataElement(variantDataElement);
-		}
-		preparedStatement.close();
-
-		return geneVariantTrends;
-	}
 	
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 
@@ -900,4 +835,127 @@ public class DatabaseCommands {
 		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() +  " averageRunTime " + averageRunTime);
 		return (float)averageRunTime;
 	}
+
+	/* ************************************************************************
+	 * Query QC Plot
+	 *************************************************************************/
+
+	/**
+	 *
+	 * @param assay
+	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
+	 * @throws Exception
+	 */
+	public static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(String assay) throws Exception{
+		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.readDepth from sampleAmplicons"
+				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
+				+ " join assays on assays.assayID = samples.assayID"
+				+ " where samples.lastName like 'Horizon%' ";
+
+		String geneFilter;
+		if(assay.equals("heme")) {
+			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS') and assayName = 'heme'";
+		}else if(assay.equals("gene50")) {
+			geneFilter = " and (sampleAmplicons.gene like '%EGFR%' or sampleAmplicons.gene like '%KRAS%' or sampleAmplicons.gene like '%NRAS%') and assayName = 'gene50'";
+		}else if(assay.equals("neuro")) {
+			//TODO the sampleAmplicons table currently does not properly store gene name
+			//geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS') and assayName = 'neuro'";
+			throw new Exception("Unsupported Assay: " + assay);
+		}else {
+			throw new Exception("Unsupported Assay: " + assay);
+		}
+		query += geneFilter;
+
+		query += " order by sampleID, gene, ampliconName asc";
+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		ResultSet rs = preparedStatement.executeQuery();
+
+		TreeMap<String, GeneQCDataElementTrend> geneAmpliconTrends = new TreeMap<String, GeneQCDataElementTrend>();
+
+		while(rs.next()){
+			String gene = rs.getString("gene");
+			if(assay.equals("gene50")) {
+				String[] splitGene = gene.split("_");
+				if(splitGene.length == 3) {//the expected value
+					gene = splitGene[1];
+				}
+			}
+			QCDataElement amplicon = new QCDataElement(rs.getInt("sampleID"), gene, rs.getString("ampliconName"), rs.getInt("readDepth"));
+			GeneQCDataElementTrend geneAmpliconTrend = geneAmpliconTrends.get(amplicon.gene);
+			if(geneAmpliconTrend == null) {
+				geneAmpliconTrend = new GeneQCDataElementTrend(amplicon.gene);
+				geneAmpliconTrends.put(amplicon.gene, geneAmpliconTrend);
+			}
+
+			geneAmpliconTrend.addDataElement(amplicon);
+		}
+		preparedStatement.close();
+
+		return geneAmpliconTrends;
+	}
+
+	/**
+	 *
+	 * @param assay
+	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
+	 * @throws Exception
+	 */
+	public static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(String assay) throws Exception{
+		String query = "select sampleVariants.sampleID, sampleVariants.gene, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.altFreq, cosmicID"
+				+ " from samples"
+				+ " join assays on assays.assayID = samples.assayID"
+				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
+				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
+				+ " where samples.lastName like 'Horizon%' "
+				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
+
+		String geneFilter;
+		if(assay.equals("heme")) {
+			geneFilter =
+					//TODO choose between COSM1135366 and COSM521? COSM1140132 and COSM532? They have the same coordinates and seem to track together.
+					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM1135366' or cosmicID = 'COSM521' or cosmicID = 'COSM1140132' or cosmicID = 'COSM532')"
+							+ " and assays.assayName = 'heme' ";
+		}else if(assay.equals("gene50")) {
+			geneFilter =
+					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
+							+ " and assays.assayName = 'gene50' ";
+		}else if(assay.equals("neuro")) {
+			geneFilter =
+					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM97131' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
+							+ " and assays.assayName = 'neuro' ";
+		}else {
+			throw new Exception("Unsupported Assay: " + assay);
+		}
+
+		query += geneFilter;
+		query += " order by sampleID, gene";
+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		ResultSet rs = preparedStatement.executeQuery();
+
+		TreeMap<String, GeneQCDataElementTrend> geneVariantTrends = new TreeMap<String, GeneQCDataElementTrend>();
+
+		while(rs.next()){
+			String variant = rs.getString("HGVSp");
+			variant = variant.replaceAll(".*:", "");
+			variant = Configurations.abbreviationtoLetter(variant);
+			variant += "(" + rs.getString("cosmicID") + ")";
+
+			QCDataElement variantDataElement = new QCDataElement(rs.getInt("sampleID"), rs.getString("gene"), variant, Math.round(rs.getFloat("altFreq")));
+			GeneQCDataElementTrend geneVariantTrend = geneVariantTrends.get(variantDataElement.gene);
+			if(geneVariantTrend == null) {
+				geneVariantTrend = new GeneQCDataElementTrend(variantDataElement.gene);
+				geneVariantTrends.put(variantDataElement.gene, geneVariantTrend);
+			}
+
+			geneVariantTrend.addDataElement(variantDataElement);
+		}
+		preparedStatement.close();
+
+		return geneVariantTrends;
+	}
+
+
+
 }

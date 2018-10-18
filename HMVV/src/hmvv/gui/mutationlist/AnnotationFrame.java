@@ -11,16 +11,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.AttributeSet;
@@ -29,6 +20,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.DocumentFilter;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.tables.AnnotationDraftFrame;
 import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
@@ -49,6 +41,7 @@ public class AnnotationFrame extends JFrame {
 	private JButton previousAnnotationButton;
 	private JButton nextGeneAnnotationButton;
 	private JButton nextAnnotationButton;
+	private JButton draftButton;
 	
 	private JComboBox<String> pathogenicityComboBox;
 	private JComboBox<String> mutationTypeComboBox;
@@ -135,7 +128,7 @@ public class AnnotationFrame extends JFrame {
 		
 		nextAnnotationButton = new JButton("Next");
 		nextAnnotationButton.setEnabled(false);
-		
+
 		geneAnnotationTextArea = new JTextArea();
 		geneAnnotationTextArea.setWrapStyleWord(true);
 		geneAnnotationTextArea.setLineWrap(true);
@@ -145,8 +138,11 @@ public class AnnotationFrame extends JFrame {
 		annotationTextArea.setLineWrap(true);
 		
 		historyLabelGeneAnnotation = new JLabel("New Gene Annotation");
-		historyLabelAnnotation = new JLabel("New Annotation");		
-		
+		historyLabelAnnotation = new JLabel("New Annotation");
+
+		draftButton = new JButton("Draft");
+		draftButton.setEnabled(true);
+
 		okButton = new JButton("OK");
 		getRootPane().setDefaultButton(okButton);
 
@@ -280,6 +276,8 @@ public class AnnotationFrame extends JFrame {
 		
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		buttonPane.add(draftButton);
+        buttonPane.add(Box.createRigidArea(new Dimension(650,0)));
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);
 		
@@ -305,6 +303,17 @@ public class AnnotationFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				AnnotationFrame.this.dispose();
+			}
+		});
+
+		draftButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				try{
+					showAnnotationDraftFrame();
+				}catch(Exception e){
+					JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+				}
 			}
 		});
 
@@ -490,5 +499,10 @@ public class AnnotationFrame extends JFrame {
 			else
 				Toolkit.getDefaultToolkit().beep();
 		}
+	}
+
+	private void showAnnotationDraftFrame(){
+		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this,mutation.getLatestAnnotation());
+		annotationdraftframe.setVisible(true);
 	}
 }
