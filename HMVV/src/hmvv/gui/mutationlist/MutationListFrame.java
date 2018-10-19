@@ -33,18 +33,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
-import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
-import hmvv.gui.mutationlist.tablemodels.CoordinatesTableModel;
-import hmvv.gui.mutationlist.tablemodels.G1000TableModel;
-import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.gui.mutationlist.tablemodels.SampleTableModel;
-import hmvv.gui.mutationlist.tables.BasicTable;
-import hmvv.gui.mutationlist.tables.ClinVarTable;
-import hmvv.gui.mutationlist.tables.CommonTable;
-import hmvv.gui.mutationlist.tables.CoordinatesTable;
-import hmvv.gui.mutationlist.tables.G1000Table;
-import hmvv.gui.mutationlist.tables.SampleTable;
+import hmvv.gui.mutationlist.tablemodels.*;
+import hmvv.gui.mutationlist.tables.*;
 import hmvv.gui.sampleList.ReportFrame;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
@@ -62,24 +52,40 @@ public class MutationListFrame extends JDialog {
 	private BasicTable basicTabTable;
 	private BasicTableModel basicTabTableModel;
 
-	private CoordinatesTable coordinatesTabTable;
-	private CoordinatesTableModel coordinatesTabTableModel;
-	
+	private VEPTable vepTabTable;
+	private VEPTableModel vepTabTableModel;
+
+	private CosmicTable cosmicTabTable;
+	private CosmicTableModel cosmicTabTableModel;
+
 	private G1000Table g1000TabTable;
 	private G1000TableModel g1000TabTableModel;
-	
+
 	private ClinVarTable clinVarTabTable;
 	private ClinVarTableModel clinVarTabTableModel;
-	
+
+	private GnomadTable gnomadTabTable;
+	private GnomadTableModel gnomadTabTableModel;
+
+	private OncokbTable oncokbTabTable;
+	private OncokbTableModel oncokbTabTableModel;
+
+	private CivicTable civicTabTable;
+	private CivicTableModel civicTabTableModel;
+
 	private SampleTable sampleTabTable;
 	private SampleTableModel sampleTabTableModel;
-	
+
 	private JScrollPane basicTabScrollPane;
-	private JScrollPane coordinatesTabScrollPane;
+	private JScrollPane vepTabScrollPane;
+	private JScrollPane cosmicTabScrollPane;
 	private JScrollPane g1000TabScrollPane;
 	private JScrollPane clinVarTabScrollPane;
+	private JScrollPane gnomadTabScrollPane;
+	private JScrollPane oncokbTabScrollPane;
+	private JScrollPane civicTabScrollPane;
 	private JScrollPane sampleTabScrollPane;
-	
+
 	private MutationList mutationList;
 	private Sample sample;
 	
@@ -168,18 +174,34 @@ public class MutationListFrame extends JDialog {
 		basicTabTableModel = new BasicTableModel(mutationList);
 		basicTabTable = new BasicTable(this, basicTabTableModel);
 		basicTabTable.setAutoCreateRowSorter(true);
+
+		vepTabTableModel = new VEPTableModel(mutationList);
+		vepTabTable = new VEPTable(this, vepTabTableModel);
+		vepTabTable.setAutoCreateRowSorter(true);
 		
-		coordinatesTabTableModel = new CoordinatesTableModel(mutationList);
-		coordinatesTabTable = new CoordinatesTable(this, coordinatesTabTableModel);
-		coordinatesTabTable.setAutoCreateRowSorter(true);
-		
+		cosmicTabTableModel = new CosmicTableModel(mutationList);
+		cosmicTabTable = new CosmicTable(this, cosmicTabTableModel);
+		cosmicTabTable.setAutoCreateRowSorter(true);
+
 		g1000TabTableModel = new G1000TableModel(mutationList);
 		g1000TabTable = new G1000Table(this, g1000TabTableModel);
 		g1000TabTable.setAutoCreateRowSorter(true);
-		
+
 		clinVarTabTableModel = new ClinVarTableModel(mutationList);
 		clinVarTabTable = new ClinVarTable(this, clinVarTabTableModel);
 		clinVarTabTable.setAutoCreateRowSorter(true);
+
+		gnomadTabTableModel = new GnomadTableModel(mutationList);
+		gnomadTabTable = new GnomadTable(this, gnomadTabTableModel);
+		gnomadTabTable.setAutoCreateRowSorter(true);
+
+		oncokbTabTableModel = new OncokbTableModel(mutationList);
+		oncokbTabTable = new OncokbTable(this, oncokbTabTableModel);
+		oncokbTabTable.setAutoCreateRowSorter(true);
+
+		civicTabTableModel = new CivicTableModel(mutationList);
+		civicTabTable = new CivicTable(this, civicTabTableModel);
+		civicTabTable.setAutoCreateRowSorter(true);
 
 		sampleTabTableModel = new SampleTableModel(mutationList);
 		sampleTabTable = new SampleTable(this, sampleTabTableModel);
@@ -352,18 +374,26 @@ public class MutationListFrame extends JDialog {
 	
 	private void layoutComponents(){
 		basicTabScrollPane = new JScrollPane(basicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		coordinatesTabScrollPane = new JScrollPane(coordinatesTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		vepTabScrollPane = new JScrollPane(vepTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		cosmicTabScrollPane = new JScrollPane(cosmicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		g1000TabScrollPane = new JScrollPane(g1000TabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		clinVarTabScrollPane = new JScrollPane(clinVarTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		gnomadTabScrollPane = new JScrollPane(gnomadTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		oncokbTabScrollPane = new JScrollPane(oncokbTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		civicTabScrollPane = new JScrollPane(civicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		sampleTabScrollPane = new JScrollPane(sampleTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
+
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Basic", null, basicTabScrollPane, null);
-		tabbedPane.addTab("Coordinates", null, coordinatesTabScrollPane, null);
+		tabbedPane.addTab("VEP", null, vepTabScrollPane, null);
+		tabbedPane.addTab("Cosmic", null, cosmicTabScrollPane, null);
 		tabbedPane.addTab("G1000", null, g1000TabScrollPane, null);
 		tabbedPane.addTab("ClinVar", null, clinVarTabScrollPane, null);
+		tabbedPane.addTab("Gnomad", null, gnomadTabScrollPane, null);
+		tabbedPane.addTab("Oncokb", null, oncokbTabScrollPane, null);
+		tabbedPane.addTab("Civic", null, civicTabScrollPane, null);
 		tabbedPane.addTab("Sample", null, sampleTabScrollPane, null);
-		
+
 		selectedTable = basicTabTable;
 		selectedScrollPane = basicTabScrollPane;
 		
@@ -472,16 +502,28 @@ public class MutationListFrame extends JDialog {
 	        	if(selectedIndex == 0){
 	        		selectedTable = basicTabTable;
 	        		selectedScrollPane = basicTabScrollPane;
-	        	}else if(selectedIndex == 1){
-	        		selectedTable = coordinatesTabTable;
-	        		selectedScrollPane = coordinatesTabScrollPane;
+				}else if(selectedIndex == 1){
+					selectedTable = vepTabTable;
+					selectedScrollPane = vepTabScrollPane;
 	        	}else if(selectedIndex == 2){
+	        		selectedTable = cosmicTabTable;
+	        		selectedScrollPane = cosmicTabScrollPane;
+	        	}else if(selectedIndex == 3){
 	        		selectedTable = g1000TabTable;
 	        		selectedScrollPane = g1000TabScrollPane;
-	        	}else if(selectedIndex == 3){
-	        		selectedTable = clinVarTabTable;
-	        		selectedScrollPane = clinVarTabScrollPane;
-	        	}else if(selectedIndex == 4){
+				}else if(selectedIndex == 4){
+					selectedTable = clinVarTabTable;
+					selectedScrollPane = clinVarTabScrollPane;
+				}else if(selectedIndex == 5){
+					selectedTable = gnomadTabTable;
+					selectedScrollPane = gnomadTabScrollPane;
+				}else if(selectedIndex == 6){
+					selectedTable = oncokbTabTable;
+					selectedScrollPane = oncokbTabScrollPane;
+				}else if(selectedIndex == 7){
+					selectedTable = civicTabTable;
+					selectedScrollPane = civicTabScrollPane;
+	        	}else if(selectedIndex == 8){
 	        		selectedTable = sampleTabTable;
 	        		selectedScrollPane = sampleTabScrollPane;
 	        	}else{
@@ -558,7 +600,7 @@ public class MutationListFrame extends JDialog {
 		
 		int returnValue = saveAs.showSaveDialog(this);
 		if(returnValue == JFileChooser.APPROVE_OPTION){
-			MutationReportGenerator.exportReport(saveAs.getSelectedFile(), basicTabTableModel, clinVarTabTableModel, coordinatesTabTableModel, g1000TabTableModel, sampleTabTableModel);
+			MutationReportGenerator.exportReport(saveAs.getSelectedFile(), basicTabTableModel, clinVarTabTableModel, cosmicTabTableModel, g1000TabTableModel, sampleTabTableModel);
 		}
 	}
 	
@@ -659,7 +701,7 @@ public class MutationListFrame extends JDialog {
 			if(isWindowClosed){
 				return;
 			}
-			
+
 			try{
 				Mutation mutation = mutationList.getFilteredMutation(index);
 				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
@@ -729,11 +771,11 @@ public class MutationListFrame extends JDialog {
 					Mutation mutation = mutations.get(i);
 					ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
 					int count = DatabaseCommands.getOccurrenceCount(mutation);
-					
+
 					//can update here because basicTabTableModel.addFilteredMutation() adds to non-visible list of mutations
 					mutation.setCosmicID(cosmicIDs);
 					mutation.setOccurrence(count);
-					
+
 					basicTabTableModel.addFilteredMutation(mutation);
 				}catch(Exception e){
 					e.printStackTrace();

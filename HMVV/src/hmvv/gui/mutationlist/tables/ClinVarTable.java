@@ -15,24 +15,12 @@ public class ClinVarTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4, 8, 9);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount() );
 	}
 	
 	@Override
 	protected void handleMouseClick(int column) throws Exception{
-		if(column == 1){
-			searchGoogleForGene();
-		}else if(column == 3){
-			searchGoogleForProteinChange();
-			searchGoogleForDNAChange();
-		}else if(column == 4){
-			searchGoogleForDNAChange();
-			searchGoogleForProteinChange();
-		}else if(column == 8){
-			searchClinvar();
-		}else if(column == 9){
-			searchPubmed();
-		}
+
 	}
 	
 	private void searchClinvar(){

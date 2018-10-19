@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
-import hmvv.gui.mutationlist.tablemodels.CoordinatesTableModel;
+import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
 import hmvv.gui.mutationlist.tablemodels.G1000TableModel;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.mutationlist.tablemodels.SampleTableModel;
@@ -26,8 +26,7 @@ public class MutationReportGenerator{
 			if(!mutation.isReported()){
 				continue;
 			}
-			
-			
+
 			String name = mutation.getLastName() + ", " + mutation.getFirstName();
 			String cDNA = mutation.getHGVSc();
 			String codon = mutation.getHGVSp();
@@ -101,7 +100,7 @@ public class MutationReportGenerator{
 		return report.toString();
 	}
 	
-	public static void exportReport(File outputFile, BasicTableModel basicTable, ClinVarTableModel clinvarTable, CoordinatesTableModel coordinatesTable,
+	public static void exportReport(File outputFile, BasicTableModel basicTable, ClinVarTableModel clinvarTable, CosmicTableModel coordinatesTable,
 			G1000TableModel g1000Table, SampleTableModel sampleTable) throws IOException{
 		File fileName = outputFile;
 		if(!outputFile.getName().endsWith(".txt")){

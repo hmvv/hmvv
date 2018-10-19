@@ -14,17 +14,24 @@ public class BasicTableModel extends CommonTableModel {
 	protected ArrayList<MutationTableModelColumn> constructColumns(){
 		ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
 		columns.add(MutationTableModelColumn.reportedColumn);
+
 		columns.add(MutationTableModelColumn.geneColumn);
 		columns.add(MutationTableModelColumn.exonsColumn);
-		columns.add(MutationTableModelColumn.HGVScColumn);
-		columns.add(MutationTableModelColumn.HGVSpColumn);
-		columns.add(MutationTableModelColumn.dbSNPIDColumn);
-		columns.add(MutationTableModelColumn.cosmicIDColumn);
+
+		columns.add(MutationTableModelColumn.chrColumn);
+		columns.add(MutationTableModelColumn.posColumn);
+		columns.add(MutationTableModelColumn.altColumn);
+		columns.add(MutationTableModelColumn.refColumn);
+
 		columns.add(MutationTableModelColumn.typeColumn);
-		columns.add(MutationTableModelColumn.variantClassificationColumn);
 		columns.add(MutationTableModelColumn.altFreqColumn);
 		columns.add(MutationTableModelColumn.readDPColumn);
 		columns.add(MutationTableModelColumn.altReadDPColumn);
+		columns.add(MutationTableModelColumn.variantClassificationColumn);
+		columns.add(MutationTableModelColumn.ConsequenceColumn);
+		columns.add(MutationTableModelColumn.SiftColumn);
+		columns.add(MutationTableModelColumn.PolyPhenColumn);
+
 		columns.add(MutationTableModelColumn.occurrenceColumn);
 		columns.add(MutationTableModelColumn.annotationColumn);
 		columns.add(MutationTableModelColumn.somaticColumn);

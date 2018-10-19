@@ -21,28 +21,14 @@ public class BasicTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 4, 5, 6, 12, 13, 16);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(),  16,19);
 	}
 	
 	@Override
 	protected void handleMouseClick(int column) throws Exception{
-		if(column == 1){
-			searchGoogleForGene();
-		}else if(column == 3){
-			searchGoogleForProteinChange();
-			searchGoogleForDNAChange();
-		}else if(column == 4){
-			searchGoogleForDNAChange();
-			searchGoogleForProteinChange();
-		}else if(column == 5){
-			searchSNP();
-		}else if(column == 6){
-			searchCosmic();
-		}else if(column == 12){
-			findSimilarSamples();
-		}else if(column == 13){
+		if(column == 16){
 			handleAnnotationClick();
-		}else if(column == 16){
+		}else if(column == 19){
 			new Thread(new Runnable() {
 				public void run() {
 					try {
