@@ -11,7 +11,6 @@ import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
 import hmvv.gui.mutationlist.tablemodels.G1000TableModel;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.gui.mutationlist.tablemodels.SampleTableModel;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
@@ -101,7 +100,7 @@ public class MutationReportGenerator{
 	}
 	
 	public static void exportReport(File outputFile, BasicTableModel basicTable, ClinVarTableModel clinvarTable, CosmicTableModel coordinatesTable,
-			G1000TableModel g1000Table, SampleTableModel sampleTable) throws IOException{
+			G1000TableModel g1000Table) throws IOException{
 		File fileName = outputFile;
 		if(!outputFile.getName().endsWith(".txt")){
 			fileName = new File(outputFile.toString() + ".txt");
@@ -118,9 +117,6 @@ public class MutationReportGenerator{
 		}
 		for (int col = 5; col < clinvarTable.getColumnCount(); col++){
 			outFile.write(clinvarTable.getColumnName(col) + "\t"); 
-		}
-		for (int col = 5; col < sampleTable.getColumnCount(); col++){
-			outFile.write(sampleTable.getColumnName(col) + "\t"); 
 		}
 		outFile.write("\r\n");
 		for (int i = 0; i < basicTable.getRowCount(); i++) {
@@ -152,14 +148,6 @@ public class MutationReportGenerator{
 				}
 				outFile.write(output + "\t");
 			}
-			for (int j = 5; j < sampleTable.getColumnCount(); j++) {
-				String output = "null";
-				if(sampleTable.getValueAt(i, j) != null){
-					output = sampleTable.getValueAt(i, j).toString();
-				}
-				outFile.write(output + "\t");
-			}
-			outFile.write("\r\n");
 		}
 
 		outFile.close();

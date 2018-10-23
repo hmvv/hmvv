@@ -19,11 +19,10 @@ public class CosmicTableModel extends CommonTableModel {
 
 		columns.add(MutationTableModelColumn.chrColumn);
 		columns.add(MutationTableModelColumn.posColumn);
-		columns.add(MutationTableModelColumn.altColumn);
 		columns.add(MutationTableModelColumn.refColumn);
+		columns.add(MutationTableModelColumn.altColumn);
 
 		columns.add(MutationTableModelColumn.cosmicIDColumn);
-
 		return columns;
 	}
 }

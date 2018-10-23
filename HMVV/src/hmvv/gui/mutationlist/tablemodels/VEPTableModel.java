@@ -20,8 +20,18 @@ public class VEPTableModel extends CommonTableModel  {
 
         columns.add(MutationTableModelColumn.chrColumn);
         columns.add(MutationTableModelColumn.posColumn);
-        columns.add(MutationTableModelColumn.altColumn);
         columns.add(MutationTableModelColumn.refColumn);
+        columns.add(MutationTableModelColumn.altColumn);
+
+        columns.add(MutationTableModelColumn.variantClassificationColumn);
+        columns.add(MutationTableModelColumn.typeColumn);
+        columns.add(MutationTableModelColumn.altFreqColumn);
+        columns.add(MutationTableModelColumn.readDPColumn);
+        columns.add(MutationTableModelColumn.altReadDPColumn);
+
+        columns.add(MutationTableModelColumn.ConsequenceColumn);
+        columns.add(MutationTableModelColumn.SiftColumn);
+        columns.add(MutationTableModelColumn.PolyPhenColumn);
 
         columns.add(MutationTableModelColumn.HGVScColumn);
         columns.add(MutationTableModelColumn.HGVSpColumn);

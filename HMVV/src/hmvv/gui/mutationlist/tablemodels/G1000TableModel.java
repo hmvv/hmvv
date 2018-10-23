@@ -18,8 +18,8 @@ public class G1000TableModel extends CommonTableModel {
 
 		columns.add(MutationTableModelColumn.chrColumn);
 		columns.add(MutationTableModelColumn.posColumn);
-		columns.add(MutationTableModelColumn.altColumn);
 		columns.add(MutationTableModelColumn.refColumn);
+		columns.add(MutationTableModelColumn.altColumn);
 
 		columns.add(MutationTableModelColumn.altCountColumn);
 		columns.add(MutationTableModelColumn.totalCountColumn);

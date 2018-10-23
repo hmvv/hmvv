@@ -22,10 +22,11 @@ public class GnomadTableModel  extends CommonTableModel  {
 
             columns.add(MutationTableModelColumn.chrColumn);
             columns.add(MutationTableModelColumn.posColumn);
-            columns.add(MutationTableModelColumn.altColumn);
             columns.add(MutationTableModelColumn.refColumn);
+            columns.add(MutationTableModelColumn.altColumn);
 
-
+            columns.add(MutationTableModelColumn.gnomadID);
+            columns.add(MutationTableModelColumn.gnomadAltFreqColumn);
 
             return columns;
         }

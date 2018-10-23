@@ -20,8 +20,12 @@ public class OncokbTableModel  extends CommonTableModel  {
 
             columns.add(MutationTableModelColumn.chrColumn);
             columns.add(MutationTableModelColumn.posColumn);
-            columns.add(MutationTableModelColumn.altColumn);
             columns.add(MutationTableModelColumn.refColumn);
+            columns.add(MutationTableModelColumn.altColumn);
+
+            columns.add(MutationTableModelColumn.oncokbID);
+            columns.add(MutationTableModelColumn.oncogenicityColumn);
+            columns.add(MutationTableModelColumn.oncoMutationEffectColumn);
 
             return columns;
         }

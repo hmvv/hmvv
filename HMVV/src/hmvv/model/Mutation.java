@@ -6,38 +6,41 @@ public class Mutation {
 
     //common
     private boolean reported;
+    private String chr;
+    private String pos;
+    private String ref;
+    private String alt;
     private String gene;
     private String exons;
-    private String HGVSc;
-    private String HGVSp;
 
-    //basic
-    private String dbSNPID;
-    private ArrayList<String> cosmicIDs;
+    // custom
+    private Integer occurrence;
+    private ArrayList<Annotation> annotationHistory;
+    private Annotation latestAnnotation;
+
+   //vep
     private String type;
     private VariantPredictionClass variantPredictionClass;
     private Double altFreq;
     private Integer readDP;
     private Integer altReadDP;
-    private Integer occurrence;
-    private ArrayList<Annotation> annotationHistory;
-    private Annotation latestAnnotation;
-
-    //ClinVar
-    private String origin;
-    private String clinicalAllele;
-    private String clinicalSig;
-    private String clinicalAcc;
-    private String pubmed;
-
-    //Coordinates
-    private String chr;
-    private String pos;
-    private String ref;
-    private String alt;
     private String consequence;
     private String sift;
     private String polyPhen;
+    private String dbSNPID;
+    private String HGVSc;
+    private String HGVSp;
+    private String pubmed;
+
+    //ClinVar
+    private String clinvarID;
+    private String clinicaldisease;
+    private String clinicalsignificance;
+    private String clinicalconsequence;
+    private String clinicalorigin;
+
+    //cosmic
+    private ArrayList<String> cosmicIDs;
 
     //G1000
     private Integer altCount;
@@ -57,15 +60,32 @@ public class Mutation {
     private String tumorSource;
     private String tumorPercent;
 
-    public Mutation(){
+    //gnomad
+    private String gnomadID;
+    private String gnomad_allfreq;
+
+    //oncokb
+    private String oncokbID;
+    private String onco_Protein_Change;
+    private String onco_Protein_Change_LF;
+    private String oncogenicity;
+    private String onco_MutationEffect;
+
+    //civic
+    private String civicID;
+    private String civic_variant_origin;
+    private String civic_variant_url;
+
+    public Mutation() {
 
     }
 
     /**
      * Assumes a chr, pos, ref, and alt key are set
+     *
      * @return
      */
-    public Coordinate getCoordinate(){
+    public Coordinate getCoordinate() {
         return new Coordinate(chr, pos, ref, alt);
     }
 
@@ -121,11 +141,11 @@ public class Mutation {
         return cosmicIDs;
     }
 
-    public String cosmicIDsToString(String separator){
+    public String cosmicIDsToString(String separator) {
         StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < cosmicIDs.size(); i++){
+        for (int i = 0; i < cosmicIDs.size(); i++) {
             sb.append(cosmicIDs.get(i));
-            if(i+1 < cosmicIDs.size()){
+            if (i + 1 < cosmicIDs.size()) {
                 sb.append(separator);
             }
         }
@@ -189,36 +209,43 @@ public class Mutation {
         this.occurrence = occurrence;
     }
 
-    public String getOrigin() {
-        return origin;
+    public String getClinvarID() {
+        return clinvarID;
+    }
+    public String getClinicaldisease() {
+        return clinicaldisease;
     }
 
-    public void setOrigin(String origin) {
-        this.origin = origin;
+    public String getClinicalsignificance() {
+        return clinicalsignificance;
     }
 
-    public String getClinicalAllele() {
-        return clinicalAllele;
+    public String getClinicalconsequence() {
+        return clinicalconsequence;
     }
 
-    public void setClinicalAllele(String clinicalAllele) {
-        this.clinicalAllele = clinicalAllele;
+    public String getClinicalorigin() {
+        return clinicalorigin;
     }
 
-    public String getClinicalSig() {
-        return clinicalSig;
+    public void setClinvarID(String id) {
+        this.clinvarID = id ;
     }
 
-    public void setClinicalSig(String clinicalSig) {
-        this.clinicalSig = clinicalSig;
+    public void setClinicaldisease(String clinicaldisease) {
+        this.clinicaldisease = clinicaldisease;
     }
 
-    public String getClinicalAcc() {
-        return clinicalAcc;
+    public void setClinicalsignificance(String clinicalsignificance) {
+        this.clinicalsignificance = clinicalsignificance;
     }
 
-    public void setClinicalAcc(String clinicalAcc) {
-        this.clinicalAcc = clinicalAcc;
+    public void setClinicalconsequence(String clinicalconsequence) {
+        this.clinicalconsequence = clinicalconsequence;
+    }
+
+    public void setClinicalorigin(String clinicalorigin) {
+        this.clinicalorigin = clinicalorigin;
     }
 
     public String getPubmed() {
@@ -412,7 +439,7 @@ public class Mutation {
 
     public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
         this.annotationHistory = annotationHistory;
-        if(annotationHistory.size() > 0) {
+        if (annotationHistory.size() > 0) {
             this.latestAnnotation = annotationHistory.get(annotationHistory.size() - 1);
         }
     }
@@ -423,5 +450,92 @@ public class Mutation {
 
     public Annotation getLatestAnnotation() {
         return latestAnnotation;
+    }
+
+    public String getGnomad_allfreq() {
+        return gnomad_allfreq;
+    }
+
+    public void setGnomad_allfreq(String gnomad_allfreq) {
+        this.gnomad_allfreq = gnomad_allfreq;
+    }
+
+    public String getGnomadID() {
+        return gnomadID;
+    }
+
+    public void setGnomadID() {
+
+        if (this.getGnomad_allfreq() != "") {
+            this.gnomadID = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
+        }
+    }
+
+    public String getOncokbID() {
+        return oncokbID;
+    }
+
+    public String getOncogenicity() {
+        return oncogenicity;
+    }
+
+    public String getOnco_MutationEffect() {
+        return onco_MutationEffect;
+    }
+    public String getOnco_Protein_Change() {
+        return onco_Protein_Change;
+    }
+
+    public String getOnco_Protein_Change_LF() {
+        return onco_Protein_Change_LF;
+    }
+
+    public void setOncokbID() {
+       if (this.getOnco_Protein_Change() != null) {
+            this.oncokbID = this.getGene() + "-" + this.getOnco_Protein_Change();
+       }
+    }
+
+    public void setOncogenicity(String oncogenicity) {
+
+        this.oncogenicity = oncogenicity;
+    }
+
+    public void setOnco_MutationEffect(String onco_MutationEffect) {
+        this.onco_MutationEffect = onco_MutationEffect;
+    }
+
+    public void setOnco_Protein_Change(String onco_Protein_Change) {
+        this.onco_Protein_Change = onco_Protein_Change;
+    }
+
+    public void setOnco_Protein_Change_LF(String onco_Protein_Change_LF) {
+        this.onco_Protein_Change_LF = onco_Protein_Change_LF;
+    }
+
+    public String getCivicID() {
+        return civicID;
+    }
+
+    public String getCivic_variant_origin() {
+        return civic_variant_origin;
+    }
+
+    public String getCivic_variant_url() {
+        return civic_variant_url;
+    }
+
+    public void setCivicID() {
+        if (this.getCivic_variant_url() != null){
+            this.civicID = this.getGene();
+        }
+    }
+
+    public void setCivic_variant_origin(String civic_variant_origin) {
+        this.civic_variant_origin = civic_variant_origin;
+    }
+
+    public void setCivic_variant_url(String civic_variant_url) {
+        this.civic_variant_url = civic_variant_url;
     }
 }

@@ -15,27 +15,23 @@ public class ClinVarTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount() );
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(),7);
 	}
 	
 	@Override
 	protected void handleMouseClick(int column) throws Exception{
+		if(column == 7) {
+            searchClinVar();
+		}
+	}
 
-	}
-	
-	private void searchClinvar(){
-		Mutation mutation = getSelectedMutation();
-		String clinvar = mutation.getClinicalAcc();
-		if(!clinvar.equals("") && !clinvar.equals("null")){
-			InternetCommands.searchClinvar(clinvar);
-		}
-	}
-	
-	private void searchPubmed(){
-		Mutation mutation = getSelectedMutation();
-		String pubmed = mutation.getPubmed();
-		if(!pubmed.equals("") && !pubmed.equals("null")){
-			InternetCommands.searchPubmed(pubmed);
-		}
-	}
+    private void searchClinVar(){
+        Mutation mutation = getSelectedMutation();
+        String id = mutation.getClinvarID();
+        if(!id.equals("") && !id.equals("null")){
+            InternetCommands.searchClinvar(id);
+        }
+    }
+
+
 }

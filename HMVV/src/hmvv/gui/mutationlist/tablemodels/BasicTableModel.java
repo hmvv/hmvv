@@ -20,17 +20,15 @@ public class BasicTableModel extends CommonTableModel {
 
 		columns.add(MutationTableModelColumn.chrColumn);
 		columns.add(MutationTableModelColumn.posColumn);
-		columns.add(MutationTableModelColumn.altColumn);
 		columns.add(MutationTableModelColumn.refColumn);
+		columns.add(MutationTableModelColumn.altColumn);
 
 		columns.add(MutationTableModelColumn.typeColumn);
 		columns.add(MutationTableModelColumn.altFreqColumn);
 		columns.add(MutationTableModelColumn.readDPColumn);
-		columns.add(MutationTableModelColumn.altReadDPColumn);
 		columns.add(MutationTableModelColumn.variantClassificationColumn);
-		columns.add(MutationTableModelColumn.ConsequenceColumn);
-		columns.add(MutationTableModelColumn.SiftColumn);
-		columns.add(MutationTableModelColumn.PolyPhenColumn);
+
+		columns.add(MutationTableModelColumn.cosmicIDColumn);
 
 		columns.add(MutationTableModelColumn.occurrenceColumn);
 		columns.add(MutationTableModelColumn.annotationColumn);

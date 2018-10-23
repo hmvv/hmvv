@@ -1,14 +1,12 @@
-package hmvv.gui.mutationlist.tables;
+package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.AnnotationFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.model.Annotation;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.text.DefaultStyledDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -104,6 +102,7 @@ public class AnnotationDraftFrame extends JFrame {
 
                 try {
                     DatabaseCommands.addVariantAnnotationDraft(latestAnnotation.coordinate,annotationTextArea.getText());
+                    AnnotationDraftFrame.this.dispose();
 
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(AnnotationDraftFrame.this, e.getMessage());

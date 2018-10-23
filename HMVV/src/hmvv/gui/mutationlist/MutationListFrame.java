@@ -73,9 +73,6 @@ public class MutationListFrame extends JDialog {
 	private CivicTable civicTabTable;
 	private CivicTableModel civicTabTableModel;
 
-	private SampleTable sampleTabTable;
-	private SampleTableModel sampleTabTableModel;
-
 	private JScrollPane basicTabScrollPane;
 	private JScrollPane vepTabScrollPane;
 	private JScrollPane cosmicTabScrollPane;
@@ -84,7 +81,6 @@ public class MutationListFrame extends JDialog {
 	private JScrollPane gnomadTabScrollPane;
 	private JScrollPane oncokbTabScrollPane;
 	private JScrollPane civicTabScrollPane;
-	private JScrollPane sampleTabScrollPane;
 
 	private MutationList mutationList;
 	private Sample sample;
@@ -112,6 +108,7 @@ public class MutationListFrame extends JDialog {
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
 	
 	private volatile boolean isWindowClosed;
+	private boolean isMutationSelected;
 	
 	/**
 	 * Create the frame.
@@ -127,8 +124,8 @@ public class MutationListFrame extends JDialog {
 			String title = "Mutation List Search Results"; 
 			setTitle(title);
 		}else {
-			String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() +
-					" (sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", sampleName = " + sample.sampleName + ", callerID = " + sample.callerID + ")";			
+			String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() + "," + sample.getOrderNumber() +
+					" (sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay + ")";
 			setTitle(title);
 		}
 		
@@ -203,9 +200,6 @@ public class MutationListFrame extends JDialog {
 		civicTabTable = new CivicTable(this, civicTabTableModel);
 		civicTabTable.setAutoCreateRowSorter(true);
 
-		sampleTabTableModel = new SampleTableModel(mutationList);
-		sampleTabTable = new SampleTable(this, sampleTabTableModel);
-		sampleTabTable.setAutoCreateRowSorter(true);
 	}
 
 	private void constructCheckBoxFilters(){
@@ -381,7 +375,6 @@ public class MutationListFrame extends JDialog {
 		gnomadTabScrollPane = new JScrollPane(gnomadTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		oncokbTabScrollPane = new JScrollPane(oncokbTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		civicTabScrollPane = new JScrollPane(civicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		sampleTabScrollPane = new JScrollPane(sampleTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Basic", null, basicTabScrollPane, null);
@@ -392,7 +385,6 @@ public class MutationListFrame extends JDialog {
 		tabbedPane.addTab("Gnomad", null, gnomadTabScrollPane, null);
 		tabbedPane.addTab("Oncokb", null, oncokbTabScrollPane, null);
 		tabbedPane.addTab("Civic", null, civicTabScrollPane, null);
-		tabbedPane.addTab("Sample", null, sampleTabScrollPane, null);
 
 		selectedTable = basicTabTable;
 		selectedScrollPane = basicTabScrollPane;
@@ -523,9 +515,6 @@ public class MutationListFrame extends JDialog {
 				}else if(selectedIndex == 7){
 					selectedTable = civicTabTable;
 					selectedScrollPane = civicTabScrollPane;
-	        	}else if(selectedIndex == 8){
-	        		selectedTable = sampleTabTable;
-	        		selectedScrollPane = sampleTabScrollPane;
 	        	}else{
 	        		//undefined
 	        		return;
@@ -600,7 +589,7 @@ public class MutationListFrame extends JDialog {
 		
 		int returnValue = saveAs.showSaveDialog(this);
 		if(returnValue == JFileChooser.APPROVE_OPTION){
-			MutationReportGenerator.exportReport(saveAs.getSelectedFile(), basicTabTableModel, clinVarTabTableModel, cosmicTabTableModel, g1000TabTableModel, sampleTabTableModel);
+			MutationReportGenerator.exportReport(saveAs.getSelectedFile(), basicTabTableModel, clinVarTabTableModel, cosmicTabTableModel, g1000TabTableModel);
 		}
 	}
 	
@@ -671,7 +660,7 @@ public class MutationListFrame extends JDialog {
 			@Override
 			public void run() {
 				disableInputForAsynchronousLoad();
-				getCosmicMutationData();
+				getDatabaseMutationData();
 				getOccurrenceMutationData();
 				enableInputAfterAsynchronousLoad();
 				if(sample != null) {
@@ -682,16 +671,30 @@ public class MutationListFrame extends JDialog {
 		missingDataThread.start();
 	}
 	
-	private void getCosmicMutationData(){
+	private void getDatabaseMutationData(){
 		for(int index = 0; index < basicTabTableModel.getRowCount(); index++){
 			if(isWindowClosed){
 				return;
 			}
-			
 			try{
+
 				Mutation mutation = basicTabTableModel.getMutation(index);
+
+				//cosmic
 				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
 				basicTabTableModel.updateModel(index, cosmicIDs);
+
+				//gnomad
+				mutation.setGnomadID();
+
+				//oncokb
+				DatabaseCommands.updateOncokbInfo(mutation);
+				mutation.setOncokbID();
+
+				//civic
+				DatabaseCommands.updateCivicInfo(mutation);
+				mutation.setCivicID();
+
 			}catch(Exception e){
 				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
 			}
@@ -704,10 +707,24 @@ public class MutationListFrame extends JDialog {
 
 			try{
 				Mutation mutation = mutationList.getFilteredMutation(index);
+
+				//cosmic
 				ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
 				basicTabTableModel.updateModel(index, cosmicIDs);
+
+				//gnomad
+				mutation.setGnomadID();
+
+				//oncokb
+				DatabaseCommands.updateOncokbInfo(mutation);
+				mutation.setOncokbID();
+
+				//civic
+				DatabaseCommands.updateCivicInfo(mutation);
+				mutation.setCivicID();
 				//do this here since these mutations are not in the basicTabTableModel
 				mutation.setCosmicID(cosmicIDs);
+
 			}catch(Exception e){
 				JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
 			}
@@ -719,7 +736,6 @@ public class MutationListFrame extends JDialog {
 			if(isWindowClosed){
 				return;
 			}
-			
 			try{
 				Mutation mutation = basicTabTableModel.getMutation(index);
 				int count = DatabaseCommands.getOccurrenceCount(mutation);
@@ -774,6 +790,7 @@ public class MutationListFrame extends JDialog {
 
 					//can update here because basicTabTableModel.addFilteredMutation() adds to non-visible list of mutations
 					mutation.setCosmicID(cosmicIDs);
+					mutation.setGnomadID();
 					mutation.setOccurrence(count);
 
 					basicTabTableModel.addFilteredMutation(mutation);

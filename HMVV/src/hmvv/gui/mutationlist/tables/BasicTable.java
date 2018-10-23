@@ -21,14 +21,16 @@ public class BasicTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(),  16,19);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(),  11,13,16);
 	}
 	
 	@Override
 	protected void handleMouseClick(int column) throws Exception{
-		if(column == 16){
+		if (column == 11){
+			searchCosmic();
+		}else if(column == 12){
 			handleAnnotationClick();
-		}else if(column == 19){
+		}else if(column == 15){
 			new Thread(new Runnable() {
 				public void run() {
 					try {

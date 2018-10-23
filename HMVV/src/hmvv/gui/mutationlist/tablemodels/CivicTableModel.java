@@ -20,8 +20,11 @@ public class CivicTableModel  extends CommonTableModel  {
 
         columns.add(MutationTableModelColumn.chrColumn);
         columns.add(MutationTableModelColumn.posColumn);
-        columns.add(MutationTableModelColumn.altColumn);
         columns.add(MutationTableModelColumn.refColumn);
+        columns.add(MutationTableModelColumn.altColumn);
+
+        columns.add(MutationTableModelColumn.civicID);
+        columns.add(MutationTableModelColumn.civicOriginColumn);
 
         return columns;
     }

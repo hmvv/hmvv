@@ -20,7 +20,6 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.DocumentFilter;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tables.AnnotationDraftFrame;
 import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
@@ -140,7 +139,7 @@ public class AnnotationFrame extends JFrame {
 		historyLabelGeneAnnotation = new JLabel("New Gene Annotation");
 		historyLabelAnnotation = new JLabel("New Annotation");
 
-		draftButton = new JButton("Draft");
+		draftButton = new JButton("Variant Annotation Draft");
 		draftButton.setEnabled(true);
 
 		okButton = new JButton("OK");
@@ -277,7 +276,7 @@ public class AnnotationFrame extends JFrame {
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		buttonPane.add(draftButton);
-        buttonPane.add(Box.createRigidArea(new Dimension(650,0)));
+        buttonPane.add(Box.createRigidArea(new Dimension(550,0)));
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);
 		

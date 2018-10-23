@@ -18,13 +18,15 @@ public class ClinVarTableModel extends CommonTableModel {
 
 		columns.add(MutationTableModelColumn.chrColumn);
 		columns.add(MutationTableModelColumn.posColumn);
-		columns.add(MutationTableModelColumn.altColumn);
 		columns.add(MutationTableModelColumn.refColumn);
+		columns.add(MutationTableModelColumn.altColumn);
+
+		columns.add(MutationTableModelColumn.clinvarID);
 
 		columns.add(MutationTableModelColumn.originColumn);
-		columns.add(MutationTableModelColumn.clinicalAlleleColumn);
-		columns.add(MutationTableModelColumn.clinicalSigColumn);
-		columns.add(MutationTableModelColumn.clinicalAccColumn);
+		columns.add(MutationTableModelColumn.clinicalDisease);
+		columns.add(MutationTableModelColumn.clinicalSignificance);
+		columns.add(MutationTableModelColumn.clinicalConsequence);
 
 		return columns;
 	}

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
-import hmvv.gui.mutationlist.tablemodels.SampleTableModelColumn;
 import hmvv.model.Sample;
 
 public class SampleListTableModel extends AbstractTableModel{
