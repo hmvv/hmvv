@@ -12,15 +12,22 @@ public class ClinVarTableModel extends CommonTableModel {
 	protected ArrayList<MutationTableModelColumn> constructColumns(){
 		ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
 		columns.add(MutationTableModelColumn.reportedColumn);
+
 		columns.add(MutationTableModelColumn.geneColumn);
 		columns.add(MutationTableModelColumn.exonsColumn);
-		columns.add(MutationTableModelColumn.HGVScColumn);
-		columns.add(MutationTableModelColumn.HGVSpColumn);
+
+		columns.add(MutationTableModelColumn.chrColumn);
+		columns.add(MutationTableModelColumn.posColumn);
+		columns.add(MutationTableModelColumn.refColumn);
+		columns.add(MutationTableModelColumn.altColumn);
+
+		columns.add(MutationTableModelColumn.clinvarID);
+
 		columns.add(MutationTableModelColumn.originColumn);
-		columns.add(MutationTableModelColumn.clinicalAlleleColumn);
-		columns.add(MutationTableModelColumn.clinicalSigColumn);
-		columns.add(MutationTableModelColumn.clinicalAccColumn);
-		columns.add(MutationTableModelColumn.pubmedColumn);
+		columns.add(MutationTableModelColumn.clinicalDisease);
+		columns.add(MutationTableModelColumn.clinicalSignificance);
+		columns.add(MutationTableModelColumn.clinicalConsequence);
+
 		return columns;
 	}
 }

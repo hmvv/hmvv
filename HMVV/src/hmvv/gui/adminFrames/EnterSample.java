@@ -151,20 +151,20 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("Patient History", textPatientHistory));
 		mainPanel.add(new RowPanel("Diagnosis", textDiagnosis));
 		mainPanel.add(new RowPanel("Note", textNote));
-		
-		
+
+
 		JPanel southPanel = new JPanel();
 		GridLayout southGridLayout = new GridLayout(1,0);
 		southGridLayout.setHgap(30);
 		southPanel.setLayout(southGridLayout);
 		southPanel.add(enterSampleButton);
 		southPanel.add(cancelButton);
-		
+
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BorderLayout());
 		contentPane.add(mainPanel, BorderLayout.CENTER);
 		contentPane.add(southPanel, BorderLayout.SOUTH);
-		
+
 		contentPane.setBorder(new EmptyBorder(20, 35, 15, 35));
 		setContentPane(contentPane);
 	}

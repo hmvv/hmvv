@@ -12,10 +12,15 @@ public class G1000TableModel extends CommonTableModel {
 	protected ArrayList<MutationTableModelColumn> constructColumns(){
 		ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
 		columns.add(MutationTableModelColumn.reportedColumn);
+
 		columns.add(MutationTableModelColumn.geneColumn);
 		columns.add(MutationTableModelColumn.exonsColumn);
-		columns.add(MutationTableModelColumn.HGVScColumn);
-		columns.add(MutationTableModelColumn.HGVSpColumn);
+
+		columns.add(MutationTableModelColumn.chrColumn);
+		columns.add(MutationTableModelColumn.posColumn);
+		columns.add(MutationTableModelColumn.refColumn);
+		columns.add(MutationTableModelColumn.altColumn);
+
 		columns.add(MutationTableModelColumn.altCountColumn);
 		columns.add(MutationTableModelColumn.totalCountColumn);
 		columns.add(MutationTableModelColumn.altGlobalFreqColumn);

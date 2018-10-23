@@ -22,6 +22,24 @@ public class InternetCommands {
 		}
 	}
 
+	public static void searchGnomad(String term){
+		try {
+			browseToURL("http://gnomad.broadinstitute.org/variant/" + term );
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+	}
+
+
+	public static void searchOncokb(String term){
+		String[] terms = term.split("-");
+		try {
+			browseToURL("http://oncokb.org/#/gene/"+terms[0]+"/alteration/"+ terms[1] );
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+	}
+
 	public static void searchGoogle(String term){
 		try {
 			browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
@@ -68,27 +86,19 @@ public class InternetCommands {
 		}
 	}
 
-	public static void searchClinvar(String ID){
+	public static void searchClinvar(String term){
 		try {
-			if(!ID.contains("|") && !ID.contains(",")){
-				browseToURL("http://www.ncbi.nlm.nih.gov/clinvar/" + ID);
-			}else{
-				Pattern splitBy = Pattern.compile("[,|]");
-				String[] IDs = splitBy.split(ID);
-				Integer n = 0;
-				String search = "http://www.ncbi.nlm.nih.gov/clinvar/?term=";
-				for(String oneID : IDs){
-					String oneIDShort = oneID.replaceAll("\\.[0-9]$", "");
-					if(n == 0){
-						search += oneIDShort;
-					}else{
-						String toAdd = "+OR+" + oneIDShort;
-						search += toAdd;
-					}
-					n += 1;
-				}
-				browseToURL(search);
-			}
+			browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term );
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, e.getMessage());
+		}
+
+	}
+
+	public static void searchCivic(String url){
+
+		try {
+			browseToURL(url);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
