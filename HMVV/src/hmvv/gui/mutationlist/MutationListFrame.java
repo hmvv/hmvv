@@ -483,6 +483,8 @@ public class MutationListFrame extends JDialog {
 		tabbedPane.addChangeListener(new ChangeListener() {
 	        public void stateChanged(ChangeEvent e) {
 	        	int selectedIndex = tabbedPane.getSelectedIndex();
+
+				int selectedRow = selectedTable.getSelectedRow();
 	        	
 	        	int[] modelRowToViewRow = new int[selectedTable.getRowCount()];
 	        	for(int i = 0; i < selectedTable.getRowCount(); i++){
@@ -522,6 +524,11 @@ public class MutationListFrame extends JDialog {
 	        	
 	        	selectedScrollPane.getVerticalScrollBar().setValue(currentVerticalScrollValue);
 	        	selectedTable.resizeColumnWidths();
+
+				if (selectedRow != -1) {
+					selectedTable.addRowSelectionInterval(selectedRow, selectedRow);
+				}
+
 	        }
 	    });
 	}
