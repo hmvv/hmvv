@@ -12,6 +12,8 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.text.SimpleDateFormat;
 
+import javax.swing.JTextField;
+
 public class GUICommonTools {
 //	public static final Color ERROR_COLOR = new Color(255,51,51);
 //	public static final Color COMPLETE_COLOR = new Color(102,255,102);
@@ -90,5 +92,20 @@ public class GUICommonTools {
 			.replaceAll("Trp", "W")
 			.replaceAll("Ter", "X")
 			.replaceAll("Tyr", "Y");
+	}
+	
+	public static int getNumber(JTextField field, Integer defaultInt){
+		String value = field.getText();
+		Integer valueInt = null;
+		if(value.equals("")){
+			valueInt = defaultInt;
+		}else{
+			try{
+				valueInt = Integer.parseInt(value);
+			}catch(Exception e){
+				return defaultInt;
+			}
+		}
+		return valueInt;
 	}
 }

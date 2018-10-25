@@ -62,7 +62,7 @@ public class Mutation {
 
     //gnomad
     private String gnomadID;
-    private String gnomad_allfreq;
+    private Double gnomad_allfreq;
 
     //oncokb
     private String oncokbID;
@@ -452,11 +452,11 @@ public class Mutation {
         return latestAnnotation;
     }
 
-    public String getGnomad_allfreq() {
+    public Double getGnomad_allfreq() {
         return gnomad_allfreq;
     }
 
-    public void setGnomad_allfreq(String gnomad_allfreq) {
+    public void setGnomad_allfreq(Double gnomad_allfreq) {
         this.gnomad_allfreq = gnomad_allfreq;
     }
 
@@ -465,10 +465,9 @@ public class Mutation {
     }
 
     public void setGnomadID() {
-
-        if (this.getGnomad_allfreq() != "") {
+       // if (this.getGnomad_allfreq() == null) {    	//TODO it seems like this check doesn't always work. I find variants online that don't have a gnomad_allfreq in our database
             this.gnomadID = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
-        }
+        //}
     }
 
     public String getOncokbID() {

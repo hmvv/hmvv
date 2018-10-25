@@ -25,7 +25,7 @@ import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
 public class DatabaseCommands {
-	
+
 	private static Connection databaseConnection = null;
 
 	public static void connect() throws Exception{
@@ -101,7 +101,7 @@ public class DatabaseCommands {
 		Integer count = 0;
 		String sampleID = "";
 		while(rsFindID.next()){
-            sampleID = rsFindID.getString(1);
+			sampleID = rsFindID.getString(1);
 			try{
 				sample.setSampleID(Integer.parseInt(sampleID));
 			}catch(Exception e){
@@ -138,7 +138,7 @@ public class DatabaseCommands {
 		pst.close();
 		return assays;
 	}
- // TODO create this table in DB
+	// TODO create this table in DB
 	private static int getPairedNormal(int tumorID) throws Exception{
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from tumorNormalPair where tumorID = ?");
 		preparedStatement.setInt(1, tumorID);
@@ -163,9 +163,9 @@ public class DatabaseCommands {
 	public static ArrayList<String> getInstrumentsForAssay(String assay) throws Exception{
 		ArrayList<String> instruments = new ArrayList<String>();
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instruments.instrumentName from instruments " +
-                "join assayInstrument on assayInstrument.instrumentID = instruments.instrumentID " +
-                "join assays on assays.assayID = assayInstrument.assayID " +
-                "where assays.assayName = ?");
+				"join assayInstrument on assayInstrument.instrumentID = instruments.instrumentID " +
+				"join assays on assays.assayID = assayInstrument.assayID " +
+				"where assays.assayName = ?");
 		preparedStatement.setString(1, assay);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
@@ -186,14 +186,14 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Mutation Queries
 	 *************************************************************************/
-	public static ArrayList<Mutation> getUnfilteredMutationDataByID(Sample sample) throws Exception{
+	public static ArrayList<Mutation> getBaseMutationsBySample(Sample sample) throws Exception{
 		return getMutationDataByID(sample, false);
 	}
-	
-	public static ArrayList<Mutation> getFilteredMutationDataByID(Sample sample) throws Exception{
+
+	public static ArrayList<Mutation> getExtraMutationsBySample(Sample sample) throws Exception{
 		return getMutationDataByID(sample, true);
 	}
-	
+
 	private static ArrayList<Mutation> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
@@ -224,14 +224,14 @@ public class DatabaseCommands {
 				+ " left join db_gnomad as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 
 				+ " where t2.sampleID = ? ";
-//				+ " and t2.exon != '' ";//Filter the introns
+		//				+ " and t2.exon != '' ";//Filter the introns
 		String where = " ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
 		if(getFilteredData) {
 			where = " !" + where;
 		}
 		query = query + " and " + where;
 		query = query + " group by t2.sampleVariantID ";
-		
+
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -260,7 +260,7 @@ public class DatabaseCommands {
 		rs.close();
 		return cosmicIDs;
 	}
-	
+
 	public static String getCosmicInfo(String cosmicID) throws Exception{
 		String query = "select info from db_cosmic_grch37v86 where cosmicID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -277,7 +277,15 @@ public class DatabaseCommands {
 	public static void updateOncokbInfo(Mutation mutation) throws Exception{
 
 		String ENST_id = mutation.getHGVSc().split("\\.")[0];
-		String ENSP = mutation.getHGVSp().split("\\.")[2];
+
+		String ENSP = "";
+		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
+		if(getHGVSpArray.length > 1) {
+			ENSP = getHGVSpArray[2];
+		}else {
+			//TODO What to do here?
+			return;
+		}
 
 		String query = "select Protein_Change,Protein_Change_LF,Oncogenicity, Mutation_Effect from db_oncokb where Isoform = ? and  Gene = ? and Protein_Change_LF = ? limit 1";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -295,21 +303,27 @@ public class DatabaseCommands {
 	}
 
 
-    public static void updateCivicInfo(Mutation mutation) throws Exception{
+	public static void updateCivicInfo(Mutation mutation) throws Exception{
+		String ENSP = "";
+		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
+		if(getHGVSpArray.length > 1) {
+			ENSP = getHGVSpArray[2];
+		}else {
+			//TODO What to do here?
+			return;
+		}
 
-        String ENSP = mutation.getHGVSp().split("\\.")[2];
-
-        String query = "select variant_origin,variant_civic_url from db_civic where gene = ? and variant_LF = ? limit 1 ";
-        PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-        preparedStatement.setString(1, mutation.getGene());
-        preparedStatement.setString(2, ENSP);
-        ResultSet rs = preparedStatement.executeQuery();
-        if(rs.next()){
-            mutation.setCivic_variant_origin(getStringOrBlank(rs, "variant_origin"));
-            mutation.setCivic_variant_url(getStringOrBlank(rs, "variant_civic_url"));
-        }
-        rs.close();
-    }
+		String query = "select variant_origin,variant_civic_url from db_civic where gene = ? and variant_LF = ? limit 1 ";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, mutation.getGene());
+		preparedStatement.setString(2, ENSP);
+		ResultSet rs = preparedStatement.executeQuery();
+		if(rs.next()){
+			mutation.setCivic_variant_origin(getStringOrBlank(rs, "variant_origin"));
+			mutation.setCivic_variant_url(getStringOrBlank(rs, "variant_civic_url"));
+		}
+		rs.close();
+	}
 
 	/**
 	 * Acquires the number of occurrences of this mutation from the database.
@@ -368,34 +382,34 @@ public class DatabaseCommands {
 	public static ArrayList<Mutation> getMutationDataByQuery(String assay, String orderNumber, String lastName, String firstName, String gene, String cosmicID, String cDNA, String codon) throws Exception{
 		String query =
 				"select " +
-				
+
 				//sampleVariant fields
 				"sampleVariants.reported, sampleVariants.gene, sampleVariants.exon, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.dbSNPID, " +
 				"sampleVariants.type, sampleVariants.impact, sampleVariants.altFreq, sampleVariants.readDepth, sampleVariants.altReadDepth, sampleVariants.pubmed," +
 				"sampleVariants.chr, sampleVariants.pos, sampleVariants.ref, sampleVariants.alt, sampleVariants.consequence, sampleVariants.Sift, sampleVariants.PolyPhen, " +
-				
+
 				//sample fields
 				"samples.lastName, samples.firstName, samples.orderNumber, samples.tumorSource, samples.tumorPercent, sampleVariants.sampleID, assays.assayName, " +
-				
+
 				//reference database fields
 				"g1000Table.altCount, g1000Table.totalCount, g1000Table.altGlobalFreq, g1000Table.americanFreq, g1000Table.asianFreq, g1000Table.afrFreq, g1000Table.eurFreq, " +
 				"clinvarTable.origin, clinvarTable.clinicalAllele, clinvarTable.clinicalSig, clinvarTable.clinicalAcc " +
-				
+
 				"from sampleVariants " + 
 
 				//joins
 				"left join db_g1000 as g1000Table " +
 				"on sampleVariants.chr = g1000Table.chr and sampleVariants.pos = g1000Table.pos and sampleVariants.ref = g1000Table.ref and sampleVariants.alt = g1000Table.alt " +
-				
+
 				"left join db_clinvar as clinvarTable " +
 				"on sampleVariants.chr = clinvarTable.chr and sampleVariants.pos = clinvarTable.pos and sampleVariants.ref = clinvarTable.ref and sampleVariants.alt = clinvarTable.alt " +
-				
+
 				"left join samples " +
 				"on sampleVariants.sampleID = samples.sampleID " +
-				
+
 				"left join assays " +
 				"on samples.assayID = assays.assayID ";
-		
+
 		String whereClause = "";
 
 		if(!assay.equals("All")){
@@ -499,21 +513,24 @@ public class DatabaseCommands {
 			//If annotation fields were also in the query
 			try {				
 				Annotation annotation = new Annotation(
-					Integer.parseInt(rs.getString("annotationID")), 
-					new Coordinate(getStringOrBlank(rs, "chr"), getStringOrBlank(rs, "pos"), getStringOrBlank(rs, "ref"), getStringOrBlank(rs, "alt")),
-					getStringOrBlank(rs, "classification"),
-					getStringOrBlank(rs, "curation"),
-					getStringOrBlank(rs, "somatic"),
-					getStringOrBlank(rs, "enteredBy"),
-					rs.getDate("enterDate")
-				);
+						Integer.parseInt(rs.getString("annotationID")), 
+						new Coordinate(getStringOrBlank(rs, "chr"), getStringOrBlank(rs, "pos"), getStringOrBlank(rs, "ref"), getStringOrBlank(rs, "alt")),
+						getStringOrBlank(rs, "classification"),
+						getStringOrBlank(rs, "curation"),
+						getStringOrBlank(rs, "somatic"),
+						getStringOrBlank(rs, "enteredBy"),
+						rs.getDate("enterDate")
+						);
 				mutation.setLatestAnnotation(annotation);
 			}catch(Exception e) {
-				
+
 			}
 
 			//gnomad
-			mutation.setGnomad_allfreq(getStringOrBlank(rs, "AF"));
+			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
+			if(gnomadAllFreq != null) {
+				mutation.setGnomad_allfreq(100*gnomadAllFreq);//Multiply by 100 because these are stored as decimals in the database				
+			}
 
 			mutations.add(mutation);
 		}
@@ -549,17 +566,17 @@ public class DatabaseCommands {
 		}
 	}
 
-//	/**
-//	 * Updates the reported flag in the mutation data table
-//	 *
-//	 * @param setToReported
-//	 * @param sampleID This is primary key for mutation data table
-//	 * @param chr
-//	 * @param pos
-//	 * @param ref
-//	 * @param alt
-//	 * @throws SQLException
-//	 */
+	//	/**
+	//	 * Updates the reported flag in the mutation data table
+	//	 *
+	//	 * @param setToReported
+	//	 * @param sampleID This is primary key for mutation data table
+	//	 * @param chr
+	//	 * @param pos
+	//	 * @param ref
+	//	 * @param alt
+	//	 * @throws SQLException
+	//	 */
 	public static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		String reported = (setToReported) ? "1" : "0";
 		PreparedStatement updateStatement = databaseConnection.prepareStatement(
@@ -583,7 +600,7 @@ public class DatabaseCommands {
 				"s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy from samples as s " +
 				"join instruments  as i on i.instrumentID = s.instrumentID " +
 				"join assays as a on a.assayID = s.assayID ";
-				PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
@@ -696,7 +713,7 @@ public class DatabaseCommands {
 		}
 		return geneannotations;
 	}
-	
+
 	public static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate) throws Exception{
 		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
 		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from variantAnnotation where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc");
@@ -748,7 +765,7 @@ public class DatabaseCommands {
 		String curation = annotation.curation;
 		String somatic = annotation.somatic;
 		String enteredBy = annotation.enteredBy;
-		
+
 		PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("insert into variantAnnotation ( chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate) "
 				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		pstEnterAnnotation.setString(1, chr);
@@ -821,7 +838,7 @@ public class DatabaseCommands {
 				" from pipelineQueue as t3 " +
 				" join samples as t1 on t1.sampleID = t3.sampleID " +
 				" join assays as t4 on t4.assayID = t1.assayID " +
-		        " join instruments as t5 on t5.instrumentID = t1.instrumentID " +
+				" join instruments as t5 on t5.instrumentID = t1.instrumentID " +
 				" left join ( " +
 				" select pipelineStatusID, queueID, plStatus, timeUpdated " +
 				" from pipelineStatus  " +
@@ -851,12 +868,12 @@ public class DatabaseCommands {
 		preparedStatement.setInt(1, queueID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
-		
+
 		while(rs.next()){
 			int pipelineStatusID = rs.getInt("pipelineStatusID");
 			String plStatusString = rs.getString("plStatus");
 			Timestamp timeUpdated = rs.getTimestamp("timeUpdated");
-			
+
 			PipelineStatus pipelineStatus = new PipelineStatus(pipelineStatusID, queueID, plStatusString, timeUpdated);
 			rows.add(pipelineStatus);
 		}
@@ -864,9 +881,9 @@ public class DatabaseCommands {
 
 		return rows;
 	}
-	
 
-	
+
+
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 
 		int averageRunTime = 0;
@@ -964,7 +981,7 @@ public class DatabaseCommands {
 			geneFilter =
 					//TODO choose between COSM1135366 and COSM521? COSM1140132 and COSM532? They have the same coordinates and seem to track together.
 					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM1135366' or cosmicID = 'COSM521' or cosmicID = 'COSM1140132' or cosmicID = 'COSM532')"
-							+ " and assays.assayName = 'heme' ";
+					+ " and assays.assayName = 'heme' ";
 		}else if(assay.equals("gene50")) {
 			geneFilter =
 					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"

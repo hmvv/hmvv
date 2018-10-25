@@ -268,40 +268,40 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	// gnomad
 
 	public static final MutationTableModelColumn gnomadID = new MutationTableModelColumn("Identifier for gnomad db",
-			"Gnomad ID ",
+			"Gnomad ID",
 			String.class,
 			(Mutation mutation) -> mutation.getGnomadID());
 
-	public static final MutationTableModelColumn gnomadAltFreqColumn = new MutationTableModelColumn("The percent of Alt Freq in the sample",
-			"Allele Freq ",
-			String.class,
+	public static final MutationTableModelColumn gnomadAltFreqColumn = new MutationTableModelColumn("The global allele frequency",
+			"Allele Freq",
+			Double.class,
 			(Mutation mutation) -> mutation.getGnomad_allfreq());
 
 	//oncokb
 
-	public static final MutationTableModelColumn oncokbID = new MutationTableModelColumn("Identifier for gnomad db",
-			"Oncokb ID ",
+	public static final MutationTableModelColumn oncokbID = new MutationTableModelColumn("Identifier for Oncokb db",
+			"Oncokb ID",
 			String.class,
 			(Mutation mutation) -> mutation.getOncokbID());
 
-	public static final MutationTableModelColumn oncogenicityColumn = new MutationTableModelColumn("The percent of Alt Freq in the sample",
+	public static final MutationTableModelColumn oncogenicityColumn = new MutationTableModelColumn("The oncogenicity",
 			"Oncogenicity",
 			String.class,
 			(Mutation mutation) -> mutation.getOncogenicity());
 
-	public static final MutationTableModelColumn oncoMutationEffectColumn = new MutationTableModelColumn("The percent of Alt Freq in the sample",
+	public static final MutationTableModelColumn oncoMutationEffectColumn = new MutationTableModelColumn("The mutation effect",
 			"Mutation Effect",
 			String.class,
 			(Mutation mutation) -> mutation.getOnco_MutationEffect());
 
 	//civic
 
-	public static final MutationTableModelColumn civicID = new MutationTableModelColumn("Identifier for gnomad db",
-			"civic ID ",
+	public static final MutationTableModelColumn civicID = new MutationTableModelColumn("Identifier for Civic db",
+			"Civic ID",
 			String.class,
 			(Mutation mutation) -> mutation.getCivicID());
 
-	public static final MutationTableModelColumn civicOriginColumn = new MutationTableModelColumn("The percent of Alt Freq in the sample",
+	public static final MutationTableModelColumn civicOriginColumn = new MutationTableModelColumn("The variant origin",
 			"Variant Origin",
 			String.class,
 			(Mutation mutation) -> mutation.getCivic_variant_origin());

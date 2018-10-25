@@ -2,8 +2,6 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-import hmvv.model.Mutation;
-
 public class BasicTableModel extends CommonTableModel {
 	private static final long serialVersionUID = 1L;
 
@@ -36,17 +34,5 @@ public class BasicTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.classificationColumn);
 		columns.add(MutationTableModelColumn.gotoIGVColumn);
 		return columns;
-	}
-	
-	public void updateModel(int row, int occurenceCount){
-		Mutation mutation = getMutation(row);
-		mutation.setOccurrence(occurenceCount);
-		fireTableCellUpdated(row, 12);
-	}
-	
-	public void updateModel(int row, ArrayList<String> cosmicIDs){
-		Mutation mutation = getMutation(row);
-		mutation.setCosmicID(cosmicIDs);
-		fireTableCellUpdated(row, 6);
 	}
 }

@@ -15,7 +15,7 @@ public class VEPTable extends CommonTable{
 
         @Override
         protected HMVVTableColumn[] constructCustomColumns(){
-            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 15,16,17,18);
+            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 15, 16, 17, 18);
         }
 
         @Override
@@ -26,7 +26,7 @@ public class VEPTable extends CommonTable{
                 searchGoogleForProteinChange();
            }else if(column == 17) {
                searchSNP();
-           }else if (column ==18){
+           }else if (column == 18){
                searchPubmed();
            }
         }

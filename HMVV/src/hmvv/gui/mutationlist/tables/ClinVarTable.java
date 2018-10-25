@@ -15,7 +15,7 @@ public class ClinVarTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(),7);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 7);
 	}
 	
 	@Override

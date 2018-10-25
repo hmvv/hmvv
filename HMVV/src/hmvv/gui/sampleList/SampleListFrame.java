@@ -527,7 +527,6 @@ public class SampleListFrame extends JFrame {
 				handleEditSampleClick();
 			}
 		}catch (Exception e){
-			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}
 	}
@@ -548,6 +547,7 @@ public class SampleListFrame extends JFrame {
 		});
 		monitorPipelineThread.start();
 	}
+	
 	private void handleMutationClick() throws Exception{
 		Thread mutationListThread = new Thread(new Runnable() {
 			@Override
@@ -555,7 +555,7 @@ public class SampleListFrame extends JFrame {
 				try {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
-					ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample);
+					ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
 					for(Mutation m : mutations){
 						m.setCosmicID("LOADING...");
 					}
@@ -695,11 +695,10 @@ public class SampleListFrame extends JFrame {
 				try{
 					ArrayList<Mutation> mutations = searchMutation.getMutationSearchResults();
 					MutationList mutationSearchList = new MutationList(mutations);
-					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, null, mutationSearchList);
+					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationSearchList);
 					mutationListFrame.setVisible(true);
 					searchMutation.dispose();
 				}catch(Exception ex){
-					ex.printStackTrace();
 					JOptionPane.showMessageDialog(SampleListFrame.this, ex.getMessage());
 				}
 			}
