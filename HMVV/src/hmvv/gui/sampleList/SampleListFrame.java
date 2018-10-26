@@ -85,7 +85,6 @@ public class SampleListFrame extends JFrame {
 	//Buttons
 	private JButton sampleSearchButton;
 	private JButton resetButton;
-	private JButton mutationSearchButton;
 	
 	//Labels
 	private JLabel lblChooseAnAssay;
@@ -357,10 +356,6 @@ public class SampleListFrame extends JFrame {
 		resetButton = new JButton("Reset Filters");
 		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
-
-		mutationSearchButton = new JButton("Mutation Search");
-		mutationSearchButton.setToolTipText("Open mutation search window");
-		mutationSearchButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 		
 		lblChooseAnAssay = new JLabel("Choose an assay");
 		lblChooseAnAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -390,8 +385,6 @@ public class SampleListFrame extends JFrame {
 						.addComponent(sampleSearchButton)
 						.addGap(18)
 						.addComponent(resetButton)
-						.addGap(18)
-						.addComponent(mutationSearchButton)
 						.addGap(145))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
@@ -412,7 +405,6 @@ public class SampleListFrame extends JFrame {
 								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(25)
 										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(mutationSearchButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(sampleSearchButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(resetButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(lblRunid, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
@@ -487,13 +479,6 @@ public class SampleListFrame extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				resetFilters();
 				refilterTable();
-			}
-		});
-		
-		mutationSearchButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				mutationSearchAction();
 			}
 		});
 		
@@ -685,23 +670,5 @@ public class SampleListFrame extends JFrame {
 	private void resetFilters(){
 		assayComboBox.setSelectedIndex(0);
 		textRunID.setText("");
-	}
-
-	private void mutationSearchAction(){
-		MutationSearchDialog searchMutation = new MutationSearchDialog(this);
-		searchMutation.setVisible(true);
-		searchMutation.addConfirmListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try{
-					ArrayList<Mutation> mutations = searchMutation.getMutationSearchResults();
-					MutationList mutationSearchList = new MutationList(mutations);
-					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, mutationSearchList);
-					mutationListFrame.setVisible(true);
-					searchMutation.dispose();
-				}catch(Exception ex){
-					JOptionPane.showMessageDialog(SampleListFrame.this, ex.getMessage());
-				}
-			}
-		});
 	}
 }

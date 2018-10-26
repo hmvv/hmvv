@@ -7,7 +7,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -25,9 +24,7 @@ import hmvv.gui.mutationlist.tables.*;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.AsynchronousCallback;
 import hmvv.io.AsynchronousMutationDataIO;
-import hmvv.io.DatabaseCommands;
 import hmvv.io.MutationReportGenerator;
-import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
 public class MutationListFrame extends JDialog implements AsynchronousCallback{
@@ -76,7 +73,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	private Sample sample;
 	private MutationFilterPanel mutationFilterPanel;
-	private MutationButtonPanel mutationButtonPanel;
+	private MutationFeaturePanel mutationFeaturePanel;
 	
 	private volatile boolean isWindowClosed;
 	
@@ -112,8 +109,8 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
 		super(parent);
-		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() + "," + sample.getOrderNumber() +
-				" (sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay + ")";
+		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
+				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
 		setTitle(title);
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -146,23 +143,13 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 
 	private void constructComponents() {
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		
-		ArrayList<Mutation> mutationsInNormalPair = new ArrayList<Mutation>();
-		try {
-			if(sample != null && sample.assay.equals("exome")) {
-				mutationsInNormalPair = DatabaseCommands.getPairedNormalMutations(sample.sampleID);
-			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Error getting paired normal variants.");
-		}
-		
 		if(sample != null) {
-			mutationFilterPanel = new MutationFilterPanel(sample, mutationList, mutationListFilters, mutationsInNormalPair);
-			mutationButtonPanel = new MutationButtonPanel(this, sample, mutationList, mutationFilterPanel);
+			mutationFilterPanel = new MutationFilterPanel(this,sample, mutationList, mutationListFilters);
+			mutationFeaturePanel = new MutationFeaturePanel(this, sample, mutationList,mutationFilterPanel);
 		}
-		
 		constructTabs();
 	}
 	
@@ -226,8 +213,8 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
 		if(sample != null) {
-			northPanel.add(mutationFilterPanel, BorderLayout.CENTER);
-			northPanel.add(mutationButtonPanel, BorderLayout.EAST);
+			northPanel.add(mutationFilterPanel, BorderLayout.WEST);
+			northPanel.add(mutationFeaturePanel, BorderLayout.CENTER);
 		}
 		
 		JPanel contentPane = new JPanel();
@@ -298,14 +285,14 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	public void disableInputForAsynchronousLoad() {
 		if(sample != null) {
-			mutationButtonPanel.disableInputForAsynchronousLoad();
+			mutationFeaturePanel.disableInputForAsynchronousLoad();
 			mutationFilterPanel.disableInputForAsynchronousLoad();
 		}
 	}
 	
 	public void enableInputAfterAsynchronousLoad() {
 		if(sample != null) {
-			mutationButtonPanel.enableInputAfterAsynchronousLoad();
+			mutationFeaturePanel.enableInputAfterAsynchronousLoad();
 			mutationFilterPanel.enableInputAfterAsynchronousLoad();
 		}
 	}

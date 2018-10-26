@@ -138,27 +138,6 @@ public class DatabaseCommands {
 		pst.close();
 		return assays;
 	}
-	// TODO create this table in DB
-	private static int getPairedNormal(int tumorID) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalID from tumorNormalPair where tumorID = ?");
-		preparedStatement.setInt(1, tumorID);
-		ResultSet rs = preparedStatement.executeQuery();
-		if(rs.next()){
-			return rs.getInt(1);
-		}
-		return -1;
-	}
-
-	public static ArrayList<Mutation> getPairedNormalMutations(int ID) throws Exception{
-		int normalID = getPairedNormal(ID);
-		if(normalID == -1){
-			return null;
-		}else{
-			throw new Exception("This function has not been implemented.");
-			//TODO implement this function
-			//return getUnfilteredMutationDataByID(normalID);
-		}
-	}
 
 	public static ArrayList<String> getInstrumentsForAssay(String assay) throws Exception{
 		ArrayList<String> instruments = new ArrayList<String>();
@@ -302,7 +281,6 @@ public class DatabaseCommands {
 		rs.close();
 	}
 
-
 	public static void updateCivicInfo(Mutation mutation) throws Exception{
 		String ENSP = "";
 		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
@@ -351,103 +329,6 @@ public class DatabaseCommands {
 			preparedStatement.close();
 			return 0;
 		}
-	}
-
-	public static ArrayList<Mutation> getMatchingMutations(Mutation mutation) throws Exception{
-		Coordinate coordinate = mutation.getCoordinate();
-
-		String query = "select t2.reported, t2.gene, t2.exon, t2.HGVSc, t2.HGVSp,"
-				+ " t2.altFreq, t2.readDepth, t2.altReadDepth, t2.chr, t2.pos, t2.ref, t2.alt, t2.sampleID, "
-				+ " t1.lastName, t1.firstName, t1.orderNumber, t3.assayName, t1.tumorSource, t1.tumorPercent "
-				+ " from sampleVariants as t2"
-				+ " left join samples as t1"
-				+ " on t2.sampleID = t1.sampleID"
-				+ " left join assays as t3"
-				+ " on t3.assayID = t1.assayID"
-				+ " where t2.impact != ? and t3.assayName = ? and t2.chr = ? and t2.pos = ? and t2.ref = ? and t2.alt = ?";
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		preparedStatement.setString(1, "No Call");
-		preparedStatement.setString(2, mutation.getAssay());
-		preparedStatement.setString(3, coordinate.getChr());
-		preparedStatement.setString(4, coordinate.getPos());
-		preparedStatement.setString(5, coordinate.getRef());
-		preparedStatement.setString(6, coordinate.getAlt());
-
-		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<Mutation> mutations = makeModel(rs);
-		preparedStatement.close();
-		return mutations;
-	}
-
-	public static ArrayList<Mutation> getMutationDataByQuery(String assay, String orderNumber, String lastName, String firstName, String gene, String cosmicID, String cDNA, String codon) throws Exception{
-		String query =
-				"select " +
-
-				//sampleVariant fields
-				"sampleVariants.reported, sampleVariants.gene, sampleVariants.exon, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.dbSNPID, " +
-				"sampleVariants.type, sampleVariants.impact, sampleVariants.altFreq, sampleVariants.readDepth, sampleVariants.altReadDepth, sampleVariants.pubmed," +
-				"sampleVariants.chr, sampleVariants.pos, sampleVariants.ref, sampleVariants.alt, sampleVariants.consequence, sampleVariants.Sift, sampleVariants.PolyPhen, " +
-
-				//sample fields
-				"samples.lastName, samples.firstName, samples.orderNumber, samples.tumorSource, samples.tumorPercent, sampleVariants.sampleID, assays.assayName, " +
-
-				//reference database fields
-				"g1000Table.altCount, g1000Table.totalCount, g1000Table.altGlobalFreq, g1000Table.americanFreq, g1000Table.asianFreq, g1000Table.afrFreq, g1000Table.eurFreq, " +
-				"clinvarTable.origin, clinvarTable.clinicalAllele, clinvarTable.clinicalSig, clinvarTable.clinicalAcc " +
-
-				"from sampleVariants " + 
-
-				//joins
-				"left join db_g1000 as g1000Table " +
-				"on sampleVariants.chr = g1000Table.chr and sampleVariants.pos = g1000Table.pos and sampleVariants.ref = g1000Table.ref and sampleVariants.alt = g1000Table.alt " +
-
-				"left join db_clinvar as clinvarTable " +
-				"on sampleVariants.chr = clinvarTable.chr and sampleVariants.pos = clinvarTable.pos and sampleVariants.ref = clinvarTable.ref and sampleVariants.alt = clinvarTable.alt " +
-
-				"left join samples " +
-				"on sampleVariants.sampleID = samples.sampleID " +
-
-				"left join assays " +
-				"on samples.assayID = assays.assayID ";
-
-		String whereClause = "";
-
-		if(!assay.equals("All")){
-			whereClause += String.format(" and assays.assayName = '%s'", assay);
-		}
-		if(!orderNumber.equals("")){
-			whereClause += String.format(" and samples.orderNumber = '%s'", orderNumber);
-		}
-		if(!lastName.equals("")){
-			whereClause += String.format(" and samples.lastName = '%s'", lastName);
-		}
-		if(!firstName.equals("")){
-			whereClause += String.format(" and samples.firstName = '%s'", firstName);
-		}
-		if(!gene.equals("")){
-			whereClause += String.format(" and sampleVariants.gene = '%s'", gene);
-		}
-		if(!cosmicID.equals("")){
-			whereClause += String.format(" and cosmicTable.cosmicID like '%%%s%%'", cosmicID);
-		}
-		if(!cDNA.equals("")){
-			whereClause += String.format(" and sampleVariants.HGVSc like '%%%s%%'", cDNA);
-		}
-		if(!codon.equals("")){
-			whereClause += String.format(" and sampleVariants.HGVSp like '%%%s%%'", codon);
-		}
-		if(whereClause.equals("")){
-			throw new Exception("You need to specify at least one search term");
-		}else{
-			String whereClauseFinal = "where" + whereClause.replaceFirst("and", "");
-			query += whereClauseFinal;	
-		}
-
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		ResultSet resultSet = preparedStatement.executeQuery();
-		ArrayList<Mutation> mutations = makeModel(resultSet);
-		preparedStatement.close();
-		return mutations;
 	}
 
 	private static ArrayList<Mutation> makeModel(ResultSet rs) throws Exception{

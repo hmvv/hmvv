@@ -27,8 +27,8 @@ public class EditSampleFrame extends JFrame {
 	private JTextField textSource;
 	private JTextField textPercent;
 	private JTextArea textPatientHistory;
-	private JTextField textDiagnosis;
-	private JTextField textNote;
+	private JTextArea textDiagnosis;
+	private JTextArea textNote;
 	private JLabel labelID1;
 	private JLabel labelAssay1;
 	private JLabel labelInstrument1;
@@ -47,7 +47,7 @@ public class EditSampleFrame extends JFrame {
 		this.sample = sample;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 570, 600);
+		setBounds(100, 100, 570, 700);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -125,17 +125,17 @@ public class EditSampleFrame extends JFrame {
 
 		JLabel lblPatientHistory = new JLabel("Patient History");
 		lblPatientHistory.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblPatientHistory.setBounds(42, 400, 127, 14);
+		lblPatientHistory.setBounds(42, 410, 127, 14);
 		contentPane.add(lblPatientHistory);
 
 		JLabel lblDiagnosis = new JLabel("Diagnosis");
 		lblDiagnosis.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblDiagnosis.setBounds(42, 460, 127, 14);
+		lblDiagnosis.setBounds(42, 470, 127, 14);
 		contentPane.add(lblDiagnosis);
 
 		JLabel lblNote = new JLabel("Note");
 		lblNote.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblNote.setBounds(42, 490, 127, 14);
+		lblNote.setBounds(42, 530, 127, 14);
 		contentPane.add(lblNote);
 
 		labelInstrument1 = new JLabel(sample.instrument);
@@ -194,23 +194,31 @@ public class EditSampleFrame extends JFrame {
 		textPatientHistory.setWrapStyleWord(true);
 		textPatientHistory.setColumns(10);
 		JScrollPane textPatientHistoryScroll = new JScrollPane(textPatientHistory);
-		textPatientHistoryScroll.setBounds(207, 400, 218, 40);
+		textPatientHistoryScroll.setBounds(207, 410, 218, 40);
 		contentPane.add(textPatientHistoryScroll);
 
 
-		textDiagnosis = new JTextField(sample.getDiagnosis());
+		textDiagnosis = new JTextArea();
+		textDiagnosis.setText(sample.getDiagnosis());
+		textDiagnosis.setLineWrap(true);
+		textDiagnosis.setWrapStyleWord(true);
 		textDiagnosis.setColumns(10);
-		textDiagnosis.setBounds(207, 460, 218, 20);
-		contentPane.add(textDiagnosis);
+		JScrollPane textDiagnosisScroll = new JScrollPane(textDiagnosis);
+		textDiagnosisScroll.setBounds(207, 470, 218, 40);
+		contentPane.add(textDiagnosisScroll);
 
-		textNote = new JTextField(sample.getNote());
+		textNote = new JTextArea();
+		textNote.setText(sample.getNote());
+		textNote.setLineWrap(true);
+		textNote.setWrapStyleWord(true);
 		textNote.setColumns(10);
-		textNote.setBounds(207, 490, 218, 20);
-		contentPane.add(textNote);
+		JScrollPane textNoteScroll = new JScrollPane(textNote);
+		textNoteScroll.setBounds(207, 530, 218, 40);
+		contentPane.add(textNoteScroll);
 
 		btnSubmit = new JButton("Update");
 		btnSubmit.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnSubmit.setBounds(267, 530, 89, 23);
+		btnSubmit.setBounds(267, 600, 89, 23);
 		contentPane.add(btnSubmit);
 
 		JButton btnCancel = new JButton("Cancel");
@@ -221,12 +229,12 @@ public class EditSampleFrame extends JFrame {
 			}
 		});
 		btnCancel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnCancel.setBounds(412, 530, 89, 23);
+		btnCancel.setBounds(412, 600, 89, 23);
 		contentPane.add(btnCancel);
 
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnDelete.setBounds(128, 530, 89, 23);
+		btnDelete.setBounds(128, 600, 89, 23);
 		contentPane.add(btnDelete);
 
 		if (Configurations.getEnvironment().equals("ngs_live")){

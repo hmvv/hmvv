@@ -1,32 +1,30 @@
 package hmvv.gui.mutationlist;
 
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
+import hmvv.io.AsynchronousMutationDataIO;
+import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
+import javafx.scene.layout.Border;
 
 public class MutationFilterPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
+
 	private JCheckBox reportedOnlyCheckbox;
 	private JCheckBox cosmicOnlyCheckbox;
-	private JCheckBox filterNomalCheckbox;
-
 
 	private JTextField textFreqFrom;
 	private JTextField textVarFreqTo;
@@ -37,41 +35,60 @@ public class MutationFilterPanel extends JPanel {
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
 	
 	private Sample sample;
+    private MutationListFrame parent;
 	private MutationList mutationList;
 	private MutationListFilters mutationListFilters;
-	private ArrayList<Mutation> mutationsInNormalPair;
+
+    private JButton resetButton;
+    private JButton loadFilteredMutationsButton;
 	
-	MutationFilterPanel(Sample sample, MutationList mutationList, MutationListFilters mutationListFilters, ArrayList<Mutation> mutationsInNormalPair){
-		this.sample = sample;
+	MutationFilterPanel(MutationListFrame parent,Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
+		this.parent=parent;
+	    this.sample = sample;
 		this.mutationList = mutationList;
 		this.mutationListFilters = mutationListFilters;
-		this.mutationsInNormalPair = mutationsInNormalPair;
-		constructCheckBoxFilters();
-		constructTextFieldFilters();
+        constructComponents();
 		layoutComponents();
 	}
 
-	private void constructCheckBoxFilters(){
+	private void constructComponents(){
 		ActionListener actionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				applyRowFilters();
 			}
 		};
 
-		cosmicOnlyCheckbox = new JCheckBox("Show Cosmic Only");
+		cosmicOnlyCheckbox = new JCheckBox("Show Mutations with CosmicIDs Only");
 		cosmicOnlyCheckbox.addActionListener(actionListener);
 		cosmicOnlyCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		reportedOnlyCheckbox = new JCheckBox("Show Reported Only");
+		reportedOnlyCheckbox = new JCheckBox("Show Reported Mutations Only");
 		reportedOnlyCheckbox.addActionListener(actionListener);
 		reportedOnlyCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		filterNomalCheckbox = new JCheckBox("Filter Normal Pair");
-		filterNomalCheckbox.addActionListener(actionListener);
-		filterNomalCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
-	}
+        resetButton = new JButton("Reset all Filters");
+        resetButton.setToolTipText("Reset filters to defaults");
+        resetButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 
-	private void constructTextFieldFilters(){
+        resetButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                resetFilters();
+            }
+        });
+
+        loadFilteredMutationsButton = new JButton("Load Mutations");
+        loadFilteredMutationsButton.setToolTipText("Load Mutations that did not meet the quality filter metrics");
+        loadFilteredMutationsButton.setFont(GUICommonTools.TAHOMA_BOLD_11);
+       // loadFilteredMutationsButton.setEnabled(false);//this will be enabled after the unfiltered variant data is loaded
+
+        loadFilteredMutationsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadFilteredMutationsButton.setEnabled(false);
+                loadFilteredMutationsAsynchronous();
+            }
+        });
+
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
 				applyRowFilters();
@@ -123,83 +140,105 @@ public class MutationFilterPanel extends JPanel {
 		mutationListFilters.addMinOccurrenceFilter(occurenceFromTextField);
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
-		mutationListFilters.addTumorNormalFilter(filterNomalCheckbox, mutationsInNormalPair);
 		mutationListFilters.addVariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo);
 		mutationListFilters.addVariantPredicationClassFilter(predictionFilterComboBox);
 	}
 
 	private void layoutComponents() {
+
 		JPanel leftFilterPanel = new JPanel();
-		leftFilterPanel.setLayout(new GridLayout(0,1));
-		JPanel checkboxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        //leftFilterPanel.setPreferredSize(new Dimension(50, 100));
+		JPanel checkboxPanel = new JPanel(new GridLayout(0,1));
+		JPanel resetButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		resetButtonPanel.add(resetButton);
+        checkboxPanel.add(resetButtonPanel);
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
-
-		if(mutationList.getMutationCount() > 1 && sample.assay.equals("exome")){
-			checkboxPanel.add(filterNomalCheckbox);
-		}
-
 		leftFilterPanel.add(checkboxPanel);
 
+        JPanel middleFilterPanel = new JPanel(new GridLayout(0,1));
+
 		//variant frequency
-		JPanel populationFrequencyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel populationFrequencyLabel = new JLabel("G1000 Max Population Frequency (altGlobalFreq)");
+        JPanel g1000Panel = new JPanel(new GridLayout(0,1));
+        g1000Panel.add(new JLabel("G1000:"));
+
+        JPanel populationFrequencyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel populationFrequencyLabel = new JLabel("Global Allele Frequency Max-");
 		populationFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		populationFrequencyPanel.add(populationFrequencyLabel);
 		populationFrequencyPanel.add(maxPopulationFrequencyG1000TextField);
-		leftFilterPanel.add(populationFrequencyPanel);
+        g1000Panel.add(populationFrequencyPanel);
+
+
+        JPanel gnomadPanel = new JPanel(new GridLayout(0,1));
+        gnomadPanel.add(new JLabel("Gnomad:"));
 
 		JPanel gnomadPopulationFrequencyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel gnomadPopulationFrequencyLabel = new JLabel("Gnomad Max Population Frequency (Allele Freq)");
+		JLabel gnomadPopulationFrequencyLabel = new JLabel("Global Allele Frequency Max-");
 		gnomadPopulationFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		gnomadPopulationFrequencyPanel.add(gnomadPopulationFrequencyLabel);
 		gnomadPopulationFrequencyPanel.add(maxPopulationFrequencyGnomadTextField);
-		leftFilterPanel.add(gnomadPopulationFrequencyPanel);
+        gnomadPanel.add(gnomadPopulationFrequencyPanel);
 
-		JPanel rightFilterPanel = new JPanel();
-		rightFilterPanel.setLayout(new GridLayout(0,1));
+        JPanel hmvvPanel = new JPanel(new GridLayout(0,1));
+        hmvvPanel.add(new JLabel("HMVV:"));
+        JPanel occurencePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel occurenceLabel = new JLabel("Occurence Min-");
+        occurenceLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        occurencePanel.add(occurenceLabel);
+        occurencePanel.add(occurenceFromTextField);
+        hmvvPanel.add(occurencePanel);
 
-		//min read depth and occurrence filters
-		JPanel readDepthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel minReadDepthLabel = new JLabel("Min Read Depth (readDP)");
-		minReadDepthLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		readDepthPanel.add(minReadDepthLabel);
-		readDepthPanel.add(minReadDepthTextField);
+        middleFilterPanel.add(g1000Panel);
+        middleFilterPanel.add(gnomadPanel);
+        middleFilterPanel.add(hmvvPanel);
 
-		JLabel variantFrequencyLabel = new JLabel("Variant Frequency (altFreq)");
-		variantFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		JPanel frequencyLayoutPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		frequencyLayoutPanel.add(variantFrequencyLabel);
-		frequencyLayoutPanel.add(textFreqFrom);
-		frequencyLayoutPanel.add(new JLabel("To"));
-		frequencyLayoutPanel.add(textVarFreqTo);
 
-		JPanel occurencePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel occurenceLabel = new JLabel("Min occurence (occurence)");
-		occurenceLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		occurencePanel.add(occurenceLabel);
-		occurencePanel.add(occurenceFromTextField);
+        JPanel vepPanel = new JPanel(new GridLayout(0,1));
+        vepPanel.add(new JLabel("VEP:"));
 
-		JPanel predictionFilterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel predictionFilterLabel = new JLabel("Min Prediction Class (classification)");
-		predictionFilterLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		predictionFilterPanel.add(predictionFilterLabel);
-		predictionFilterPanel.add(predictionFilterComboBox);
+        JPanel readDepthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel minReadDepthLabel = new JLabel("Read Depth Min-");
+        minReadDepthLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        readDepthPanel.add(minReadDepthLabel);
+        readDepthPanel.add(minReadDepthTextField);
+        vepPanel.add(readDepthPanel);
 
-		rightFilterPanel.add(readDepthPanel);
-		rightFilterPanel.add(frequencyLayoutPanel);
-		rightFilterPanel.add(occurencePanel);
-		rightFilterPanel.add(predictionFilterPanel);
-		
-		setLayout(new GridLayout(1,0));
+        JLabel variantFrequencyLabel = new JLabel("Variant Allele Frequency Range-");
+        variantFrequencyLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        JPanel frequencyLayoutPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        frequencyLayoutPanel.add(variantFrequencyLabel);
+        frequencyLayoutPanel.add(textFreqFrom);
+        frequencyLayoutPanel.add(new JLabel("To"));
+        frequencyLayoutPanel.add(textVarFreqTo);
+        vepPanel.add(frequencyLayoutPanel);
+
+        JPanel predictionFilterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel predictionFilterLabel = new JLabel("Prediction Class Include-");
+        predictionFilterLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        predictionFilterPanel.add(predictionFilterLabel);
+        JPanel predictionFilterComponentsPanel =  new JPanel(new FlowLayout(FlowLayout.CENTER));
+        predictionFilterComponentsPanel.add(predictionFilterComboBox);
+        predictionFilterComponentsPanel.add(loadFilteredMutationsButton);
+        predictionFilterPanel.add(predictionFilterComponentsPanel);
+        vepPanel.add(predictionFilterPanel);
+
+        JPanel rightFilterPanel = new JPanel();
+		rightFilterPanel.add(vepPanel);
+
+        leftFilterPanel.setBorder(new EmptyBorder(1, 15, 1, 30));
 		add(leftFilterPanel);
+        middleFilterPanel.setBorder(new EmptyBorder(1, 15, 1, 30));
+        add(middleFilterPanel);
+        rightFilterPanel.setBorder(new EmptyBorder(1, 15, 1, 30));
 		add(rightFilterPanel);
+
+        setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
 
 	void resetFilters(){
 		cosmicOnlyCheckbox.setSelected(false);
-		reportedOnlyCheckbox.setSelected(false);		
-		filterNomalCheckbox.setSelected(false);
+		reportedOnlyCheckbox.setSelected(false);
 		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
 		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
@@ -216,8 +255,6 @@ public class MutationFilterPanel extends JPanel {
 		cosmicOnlyCheckbox.setToolTipText(tooltip);
 		reportedOnlyCheckbox.setEnabled(false);
 		reportedOnlyCheckbox.setToolTipText(tooltip);
-		filterNomalCheckbox.setEnabled(false);
-		filterNomalCheckbox.setToolTipText(tooltip);
 		textFreqFrom.setEditable(false);
 		textFreqFrom.setToolTipText(tooltip);
 		textVarFreqTo.setEditable(false);
@@ -230,9 +267,12 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.setToolTipText(tooltip);
 		maxPopulationFrequencyGnomadTextField.setEditable(false);
 		maxPopulationFrequencyGnomadTextField.setToolTipText(tooltip);
-
 		predictionFilterComboBox.setEnabled(false);
 		predictionFilterComboBox.setToolTipText(tooltip);
+        resetButton.setEnabled(false);
+        resetButton.setToolTipText(tooltip);
+        loadFilteredMutationsButton.setEnabled(false);
+        loadFilteredMutationsButton.setToolTipText(tooltip);
 	}
 
 	void enableInputAfterAsynchronousLoad() {
@@ -240,8 +280,6 @@ public class MutationFilterPanel extends JPanel {
 		cosmicOnlyCheckbox.setToolTipText("");
 		reportedOnlyCheckbox.setEnabled(true);
 		reportedOnlyCheckbox.setToolTipText("");
-		filterNomalCheckbox.setEnabled(true);
-		filterNomalCheckbox.setToolTipText("");
 		textFreqFrom.setEditable(true);
 		textFreqFrom.setToolTipText("");
 		textVarFreqTo.setEditable(true);
@@ -256,9 +294,57 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyGnomadTextField.setToolTipText("");
 		predictionFilterComboBox.setEnabled(true);
 		predictionFilterComboBox.setToolTipText("");
+        resetButton.setEnabled(true);
+        resetButton.setToolTipText("");
+        loadFilteredMutationsButton.setEnabled(true);
+        loadFilteredMutationsButton.setToolTipText("");
 	}
 	
 	void applyRowFilters(){
 		mutationList.filterMutations(mutationListFilters);
 	}
+
+    private void loadFilteredMutationsAsynchronous() {
+        createLoadFilteredMutationDataThread();
+    }
+
+    private void createLoadFilteredMutationDataThread(){
+        Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
+            @Override
+            public void run() {
+                disableInputForAsynchronousLoad();
+                getFilteredMutationData();
+                enableInputAfterAsynchronousLoad();
+                loadFilteredMutationsButton.setEnabled(false);
+            }
+        });
+        loadFilteredMutationDataThread.start();
+    }
+    private void getFilteredMutationData() {
+        try{
+            loadFilteredMutationsButton.setText("Loading...");
+            ArrayList<Mutation> mutations = DatabaseCommands.getExtraMutationsBySample(sample);
+            for(int i = 0; i < mutations.size(); i++) {
+                if(parent.isCallbackClosed()){
+                    return;
+                }
+                loadFilteredMutationsButton.setText("Loading " + (i+1) + " of " + mutations.size());
+                try{
+                    Mutation mutation = mutations.get(i);
+                    AsynchronousMutationDataIO.getMutationData(mutation);
+                    //no need to call parent.mutationListIndexUpdated() here these mutations are not current displayed
+                    mutationList.addFilteredMutation(mutation);
+
+                }catch(Exception e){
+                    e.printStackTrace();
+                    JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+                }
+            }
+            applyRowFilters();
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(parent, ex.getMessage());
+        }
+        loadFilteredMutationsButton.setText("Filtered mutations loaded");
+    }
+
 }

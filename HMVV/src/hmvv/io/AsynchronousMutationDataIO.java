@@ -34,7 +34,7 @@ public class AsynchronousMutationDataIO {
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
-				callback.showErrorMessage(e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
+				callback.showErrorMessage(e.getMessage() + " : " + e.getClass().getName() + ": Could not load mutation dbs data - main.");
 			}
 		}
 		
@@ -48,7 +48,7 @@ public class AsynchronousMutationDataIO {
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
-				callback.showErrorMessage(e.getMessage() + " : " + e.getClass().getName() + ": Could not load cosmic data.");
+				callback.showErrorMessage(e.getMessage() + " : " + e.getClass().getName() + ": Could not load mutation dbs data - filtered.");
 			}
 		}
 	}
@@ -72,6 +72,4 @@ public class AsynchronousMutationDataIO {
 		DatabaseCommands.updateCivicInfo(mutation);
 		mutation.setCivicID();
 	}
-	
-	
 }

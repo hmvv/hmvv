@@ -1,22 +1,17 @@
 package hmvv.io;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 
 import javax.swing.JOptionPane;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpProgressMonitor;
+import com.jcraft.jsch.*;
 
+import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
+import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
 public class SSHConnection {
@@ -329,6 +324,79 @@ public class SSHConnection {
 			//Ignore this. The user may have the temp folder or the file open.
 		}
 	}
+
+	public static String createTempParametersFile(Sample sample, MutationList mutationList) throws Exception {
+
+	    //create a local temp file
+        File tempFile = File.createTempFile(sample.sampleName+"-"+sample.runID+"-",".params");
+        BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
+        bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
+        bw.newLine();
+
+        for (int index = 0; index < mutationList.getMutationCount(); index++) {
+            Mutation mutation = mutationList.getMutation(index);
+            Integer lower = Integer.parseInt(mutation.getPos()) - 20;
+            Integer higher = Integer.parseInt(mutation.getPos()) + 20;
+            String line = mutation.getChr() + ':' + lower.toString() + '-' + higher.toString();
+            bw.write(line);
+            bw.newLine();
+        }
+        bw.close();
+
+        // load file to server
+        Channel channel = null;
+        try {
+            channel = sshSession.openChannel("sftp");
+            channel.connect();
+            ChannelSftp channelSftp = (ChannelSftp) channel;
+            channelSftp.put(tempFile.getAbsolutePath(), "/home/scratch/hmvv3/igv/"+tempFile.getName());
+
+        } catch (SftpException e) {
+            e.printStackTrace();
+        } catch (JSchException e) {
+            e.printStackTrace();
+        } finally {
+            if (channel != null) {
+                channel.disconnect();
+            }
+        }
+
+        //delete local temp file
+        deleteFile(tempFile);
+
+        createTempBamFileONServer(tempFile.getName());
+
+        return tempFile.getName();
+
+	}
+
+	private static void createTempBamFileONServer(String fileName) throws Exception {
+	    String command = "/var/pipelines_ngs_test/shell/createLocalBam.sh -f "+ fileName;
+        CommandResponse rs = executeCommandAndGetOutput(command);
+        if(rs.exitStatus != 0) {
+            throw new Exception("Error creating local BAM file on server.");
+        }
+    }
+
+    public static File copyTempBamFileONLocal(Sample sample, SftpProgressMonitor progressMonitor, String tempBamFileName ) throws Exception{
+
+        String runIDFolder = temporaryBAMDirectory + File.separator + sample.instrument + File.separator + sample.runID;
+        new File(runIDFolder).mkdirs();
+
+        String serverFileName = tempBamFileName+".bam";
+        String filePath = "/home/scratch/hmvv3/igv/";
+
+        File localBamFile = new File(runIDFolder + File.separator + serverFileName.split("-")[0]+".bam").getAbsoluteFile();
+
+        ChannelSftp channel = (ChannelSftp)sshSession.openChannel("sftp");
+        channel.connect();
+        channel.cd(filePath);
+        channel.get(serverFileName, localBamFile.getAbsolutePath(), progressMonitor);
+        channel.get(serverFileName + ".bai", localBamFile.getAbsolutePath() + ".bai");
+        channel.exit();
+
+        return localBamFile;
+    }
 }
 
 

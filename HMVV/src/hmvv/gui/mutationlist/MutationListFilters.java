@@ -80,10 +80,6 @@ public class MutationListFilters {
 		addFilter(new ReportedOnlyFilter(reportedOnlyCheckbox));
 	}
 	
-	public void addTumorNormalFilter(JCheckBox filterNomalCheckbox, ArrayList<Mutation> mutationsInNormalPair) {
-		addFilter(new TumorNormalFilter(filterNomalCheckbox, mutationsInNormalPair));
-	}
-	
 	public void addVariantAlleleFrequencyFilter(JTextField textFreqFrom, JTextField textVarFreqTo) {
 		addFilter(new VariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo));
 	}
@@ -221,32 +217,6 @@ class ReportedOnlyFilter implements Filter{
 		}
 		return false;
 	}
-
-}
-
-class TumorNormalFilter implements Filter{
-
-	private JCheckBox filterNomalCheckbox;
-	private ArrayList<Mutation> pairedNormalMutations;
-	
-	public TumorNormalFilter(JCheckBox filterNomalCheckbox, ArrayList<Mutation> pairedNormalMutations) {
-		this.filterNomalCheckbox = filterNomalCheckbox;
-		this.pairedNormalMutations = pairedNormalMutations;
-	}
-	
-	@Override
-	public boolean exclude(Mutation mutation) {
-		boolean filterNormalPair = filterNomalCheckbox.isSelected();
-		if(filterNormalPair) {
-			for(Mutation m : pairedNormalMutations) {
-				if(m.getCoordinate().equals(mutation.getCoordinate())){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 }
 
 class VariantAlleleFrequencyFilter implements Filter{
