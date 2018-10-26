@@ -1,25 +1,31 @@
 package hmvv.gui.sampleList;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.main.Configurations;
 import hmvv.model.Sample;
 
-public class EditSampleFrame extends JFrame {
+public class EditSampleFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 
-	private JPanel contentPane;
 	private JTextField textLast;
 	private JTextField textFirst;
 	private JTextField textOrder;
@@ -29,199 +35,58 @@ public class EditSampleFrame extends JFrame {
 	private JTextArea textPatientHistory;
 	private JTextArea textDiagnosis;
 	private JTextArea textNote;
-	private JLabel labelID1;
-	private JLabel labelAssay1;
-	private JLabel labelInstrument1;
-	private JLabel labelRunID1;
-	private JLabel labelSampleID1;
-	private JLabel labelRunDate1;
+	
 	private JButton btnSubmit;
 	private JButton btnDelete;
+	private JButton btnCancel;
 	private Sample sample;
 	
 	/**
 	 * Create the frame.
 	 */
 	public EditSampleFrame(SampleListFrame parent, Sample sample) {
-		super("Edit Sample");
+		super(parent, "Edit Sample");
 		this.sample = sample;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 570, 700);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
-
-		JLabel lblId = new JLabel("ID");
-		lblId.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblId.setBounds(42, 40, 46, 14);
-		contentPane.add(lblId);
-
-		labelID1 = new JLabel("" + sample.sampleID);
-		labelID1.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		labelID1.setBounds(207, 40, 81, 18);
-		contentPane.add(labelID1);
-
-		JLabel lblAssay = new JLabel("Assay");
-		lblAssay.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblAssay.setBounds(42, 70, 46, 14);
-		contentPane.add(lblAssay);
-
-		labelAssay1 = new JLabel(sample.assay);
-		labelAssay1.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		labelAssay1.setBounds(207, 70, 81, 18);
-		contentPane.add(labelAssay1);
-
-		JLabel lblInstrument = new JLabel("Instrument");
-		lblInstrument.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblInstrument.setBounds(42, 100, 81, 14);
-		contentPane.add(lblInstrument);
-
-		JLabel lblRunid = new JLabel("Run ID");
-		lblRunid.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblRunid.setBounds(42, 130, 81, 14);
-		contentPane.add(lblRunid);
-
-		JLabel lblSampleid = new JLabel("Sample ID");
-		lblSampleid.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblSampleid.setBounds(42, 160, 81, 14);
-		contentPane.add(lblSampleid);
-
-		JLabel lblLastname = new JLabel("Last Name");
-		lblLastname.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblLastname.setBounds(42, 220, 81, 14);
-		contentPane.add(lblLastname);
-
-		JLabel lblFirstname = new JLabel("First Name");
-		lblFirstname.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblFirstname.setBounds(42, 250, 81, 14);
-		contentPane.add(lblFirstname);
-
-		JLabel lblOrdernumber = new JLabel("Order Number");
-		lblOrdernumber.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblOrdernumber.setBounds(42, 280, 100, 14);
-		contentPane.add(lblOrdernumber);
-
-		JLabel lblPathologynumber = new JLabel("Pathology Number");
-		lblPathologynumber.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblPathologynumber.setBounds(42, 310, 127, 14);
-		contentPane.add(lblPathologynumber);
-
-		JLabel lblTumorsource = new JLabel("Tumor Source");
-		lblTumorsource.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblTumorsource.setBounds(42, 340, 127, 14);
-		contentPane.add(lblTumorsource);
-
-		JLabel lblTumorpercent = new JLabel("Tumor Percent");
-		lblTumorpercent.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblTumorpercent.setBounds(42, 370, 127, 14);
-		contentPane.add(lblTumorpercent);
-
-		JLabel lblRundate = new JLabel("Run Date");
-		lblRundate.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblRundate.setBounds(42, 190, 127, 14);
-		contentPane.add(lblRundate);
-
-		JLabel lblPatientHistory = new JLabel("Patient History");
-		lblPatientHistory.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblPatientHistory.setBounds(42, 410, 127, 14);
-		contentPane.add(lblPatientHistory);
-
-		JLabel lblDiagnosis = new JLabel("Diagnosis");
-		lblDiagnosis.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblDiagnosis.setBounds(42, 470, 127, 14);
-		contentPane.add(lblDiagnosis);
-
-		JLabel lblNote = new JLabel("Note");
-		lblNote.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblNote.setBounds(42, 530, 127, 14);
-		contentPane.add(lblNote);
-
-		labelInstrument1 = new JLabel(sample.instrument);
-		labelInstrument1.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		labelInstrument1.setBounds(207, 101, 81, 18);
-		contentPane.add(labelInstrument1);
-
-		labelRunID1 = new JLabel(sample.runID);
-		labelRunID1.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		labelRunID1.setBounds(207, 131, 81, 18);
-		contentPane.add(labelRunID1);
-
-		labelSampleID1 = new JLabel(sample.sampleName);
-		labelSampleID1.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		labelSampleID1.setBounds(207, 161, 100, 18);
-		contentPane.add(labelSampleID1);
-
-		labelRunDate1 = new JLabel(sample.runDate);
-		labelRunDate1.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		labelRunDate1.setBounds(207, 190, 150, 18);
-		contentPane.add(labelRunDate1);
-
+		
 		textLast = new JTextField(sample.getLastName());
-		textLast.setBounds(207, 220, 218, 20);
-		contentPane.add(textLast);
 		textLast.setColumns(10);
-
+		
 		textFirst = new JTextField(sample.getFirstName());
 		textFirst.setColumns(10);
-		textFirst.setBounds(207, 250, 218, 20);
-		contentPane.add(textFirst);
 
 		textOrder = new JTextField(sample.getOrderNumber());
 		textOrder.setColumns(10);
-		textOrder.setBounds(207, 280, 218, 20);
-		contentPane.add(textOrder);
 
 		textPathology = new JTextField(sample.getPathNumber());
 		textPathology.setColumns(10);
-		textPathology.setBounds(207, 310, 218, 20);
-		contentPane.add(textPathology);
-
+		
 		textSource = new JTextField(sample.getTumorSource());
-		textSource.setColumns(10);
-		textSource.setBounds(207, 340, 218, 20);
-		contentPane.add(textSource);
-
 		textPercent = new JTextField(sample.getTumorPercent());
-		textPercent.setColumns(10);
-		textPercent.setBounds(207, 370, 218, 20);
-		contentPane.add(textPercent);
-
+		
 		textPatientHistory = new JTextArea();
 		textPatientHistory.setText(sample.getPatientHistory());
 		textPatientHistory.setLineWrap(true);
 		textPatientHistory.setWrapStyleWord(true);
 		textPatientHistory.setColumns(10);
-		JScrollPane textPatientHistoryScroll = new JScrollPane(textPatientHistory);
-		textPatientHistoryScroll.setBounds(207, 410, 218, 40);
-		contentPane.add(textPatientHistoryScroll);
-
-
+		
 		textDiagnosis = new JTextArea();
 		textDiagnosis.setText(sample.getDiagnosis());
 		textDiagnosis.setLineWrap(true);
 		textDiagnosis.setWrapStyleWord(true);
 		textDiagnosis.setColumns(10);
-		JScrollPane textDiagnosisScroll = new JScrollPane(textDiagnosis);
-		textDiagnosisScroll.setBounds(207, 470, 218, 40);
-		contentPane.add(textDiagnosisScroll);
-
+		
 		textNote = new JTextArea();
 		textNote.setText(sample.getNote());
 		textNote.setLineWrap(true);
 		textNote.setWrapStyleWord(true);
 		textNote.setColumns(10);
-		JScrollPane textNoteScroll = new JScrollPane(textNote);
-		textNoteScroll.setBounds(207, 530, 218, 40);
-		contentPane.add(textNoteScroll);
 
 		btnSubmit = new JButton("Update");
 		btnSubmit.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnSubmit.setBounds(267, 600, 89, 23);
-		contentPane.add(btnSubmit);
 
-		JButton btnCancel = new JButton("Cancel");
+		btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -229,25 +94,126 @@ public class EditSampleFrame extends JFrame {
 			}
 		});
 		btnCancel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnCancel.setBounds(412, 600, 89, 23);
-		contentPane.add(btnCancel);
 
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		btnDelete.setBounds(128, 600, 89, 23);
-		contentPane.add(btnDelete);
-
+		
 		if (Configurations.getEnvironment().equals("ngs_live")){
 			btnDelete.setEnabled(false);
 		}
 		
+		layoutComponents();
+		pack();
 		setLocationRelativeTo(parent);
 		setResizable(false);
 	}
+	
+	private Dimension labelDimension = new Dimension(150,20);
+	private JLabel createJLabel(String text) {
+		JLabel label = new JLabel(text);
+		label.setPreferredSize(labelDimension);
+		label.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		return label;
+	}
+	
+	private JPanel createPair(String text, Component component) {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		panel.add(createJLabel(text), BorderLayout.WEST);
+		panel.add(component, BorderLayout.CENTER);
+		return panel;
+	}
+	
+	private void layoutComponents() {
+		//Labels
+		JPanel labelPanel = new JPanel();
+		labelPanel.setBorder(new EmptyBorder(0, 25, 10, 25));
+		BoxLayout boxLayout = new BoxLayout(labelPanel, BoxLayout.PAGE_AXIS);
+		labelPanel.setLayout(boxLayout);
+		
+		Dimension textFieldDimension = new Dimension(300, 20);
+		int strutHeight = 10;
+		
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		labelPanel.add(createPair("Sample ID", createJLabel(sample.sampleID+"")));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Instrument", createJLabel(sample.instrument)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Run ID", createJLabel(sample.runID)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Assay", createJLabel(sample.assay)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Sample Name", createJLabel(sample.sampleName)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Run Date", createJLabel(sample.runDate)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Last Name", textLast));
+		textLast.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("First Name", textFirst));
+		textFirst.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Order Number", textOrder));
+		textOrder.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Pathology Number", textPathology));
+		textPathology.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Tumor Source", textSource));
+		textSource.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Tumor Percent", textPercent));
+		textPercent.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		//jtextArea
+		Dimension textAreaDimension = new Dimension(600, 150);
+		
+		JScrollPane textPatientHistoryScroll = new JScrollPane(textPatientHistory);
+		textPatientHistoryScroll.setPreferredSize(textAreaDimension);
+		labelPanel.add(createPair("Patient History", textPatientHistoryScroll));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		JScrollPane textDiagnosisScroll = new JScrollPane(textDiagnosis);
+		textDiagnosisScroll.setPreferredSize(textAreaDimension);
+		labelPanel.add(createPair("Diagnosis", textDiagnosisScroll));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		JScrollPane textNoteScroll = new JScrollPane(textNote);
+		textNoteScroll.setPreferredSize(textAreaDimension);
+		labelPanel.add(createPair("Note", textNoteScroll));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		JPanel southPanel = new JPanel();
+		GridLayout southLayout = new GridLayout(1,0);
+		southLayout.setHgap(20);
+		southPanel.setLayout(southLayout);
+		southPanel.add(btnDelete);
+		southPanel.add(btnSubmit);
+		southPanel.add(btnCancel);
+		southPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+		
+		setLayout(new BorderLayout());
+		add(labelPanel, BorderLayout.CENTER);
+		add(southPanel, BorderLayout.SOUTH);
+	}
 
 	public Sample getUpdatedSample(){
-		sample.setFirstName(textFirst.getText());
 		sample.setLastName(textLast.getText());
+		sample.setFirstName(textFirst.getText());
 		sample.setOrderNumber(textOrder.getText());
 		sample.setPathNumber(textPathology.getText());
 		sample.setTumorSource(textSource.getText());
