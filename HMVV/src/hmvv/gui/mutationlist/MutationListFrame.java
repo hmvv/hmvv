@@ -117,7 +117,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
-		setMinimumSize(new Dimension(900, getHeight()/2));
+		setMinimumSize(new Dimension(1220, getHeight()/2));
 		
 		this.sample = sample;
 		this.mutationList = mutationList;
@@ -148,7 +148,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		
 		if(sample != null) {
 			mutationFilterPanel = new MutationFilterPanel(this,sample, mutationList, mutationListFilters);
-			mutationFeaturePanel = new MutationFeaturePanel(this, sample, mutationList,mutationFilterPanel);
+			mutationFeaturePanel = new MutationFeaturePanel(this, sample, mutationList);
 		}
 		constructTabs();
 	}

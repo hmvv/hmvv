@@ -18,7 +18,6 @@ import hmvv.main.Configurations;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
-import javafx.scene.layout.Border;
 
 public class MutationFilterPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -225,12 +224,12 @@ public class MutationFilterPanel extends JPanel {
 
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
-
-        leftFilterPanel.setBorder(new EmptyBorder(1, 15, 1, 30));
+		
+        leftFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(leftFilterPanel);
-        middleFilterPanel.setBorder(new EmptyBorder(1, 15, 1, 30));
+        middleFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
         add(middleFilterPanel);
-        rightFilterPanel.setBorder(new EmptyBorder(1, 15, 1, 30));
+        rightFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(rightFilterPanel);
 
         setBorder(BorderFactory.createLineBorder(Color.BLACK));

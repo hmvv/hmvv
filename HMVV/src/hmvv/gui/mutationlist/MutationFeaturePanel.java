@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -16,12 +15,9 @@ import javax.swing.filechooser.FileFilter;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.sampleList.ReportFrame;
-import hmvv.io.AsynchronousMutationDataIO;
-import hmvv.io.DatabaseCommands;
 import hmvv.io.IGVConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.io.SSHConnection;
-import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
 public class MutationFeaturePanel extends JPanel{
@@ -35,14 +31,12 @@ public class MutationFeaturePanel extends JPanel{
 
 	private MutationListFrame parent;
 	private Sample sample;
-	private MutationFilterPanel mutationFilterPanel;
 	private MutationList mutationList;
 	
-	MutationFeaturePanel(MutationListFrame parent, Sample sample, MutationList mutationList, MutationFilterPanel mutationFilterPanel){
+	MutationFeaturePanel(MutationListFrame parent, Sample sample, MutationList mutationList){
 		this.parent = parent;
 		this.sample = sample;
 		this.mutationList = mutationList;
-		this.mutationFilterPanel = mutationFilterPanel;
 		
 		constructButtons();
 		layoutComponents();
@@ -104,14 +98,27 @@ public class MutationFeaturePanel extends JPanel{
 	}
 
 	private void layoutComponents() {
+		Dimension buttonSize = new Dimension(125,30);
+		shortReportButton.setPreferredSize(buttonSize);
+		
+		longReportButton.setPreferredSize(buttonSize);
+		exportButton.setPreferredSize(buttonSize);
+		loadIGVButton.setPreferredSize(buttonSize);
+		
+		FlowLayout flowLayout = new FlowLayout(FlowLayout.LEADING);
+		setLayout(flowLayout);
+		
+		
+		
+		JPanel gridPanel = new JPanel();
 		GridLayout buttonPanelGridLayout = new GridLayout(0,1);
-		buttonPanelGridLayout.setVgap(5);
-		setLayout(buttonPanelGridLayout);
-		add(shortReportButton);
-
-		add(longReportButton);
-		add(exportButton);
-		add(loadIGVButton);
+		buttonPanelGridLayout.setVgap(10);
+		gridPanel.setLayout(buttonPanelGridLayout);
+		gridPanel.add(shortReportButton);
+		gridPanel.add(longReportButton);
+		gridPanel.add(exportButton);
+		gridPanel.add(loadIGVButton);
+		add(gridPanel);
 	}
 
 	private void exportTable() throws IOException{
@@ -160,26 +167,28 @@ public class MutationFeaturePanel extends JPanel{
 
 
 	//TODO disable HTTP access to BAM files
-	private void loadIGVAsynchronous() throws Exception{
-		loadIGVButton.setText("Finding BAM File...");
-		File bamFile = SSHConnection.loadBAMForIGV(sample, loadIGVButton);
-
-		loadIGVButton.setText("Loading File Into IGV...");
-		String response = IGVConnection.loadFileIntoIGV(this, bamFile);
-
-		if(response.equals("OK")) {
-			JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
-		}else if(!response.equals("")){
-			JOptionPane.showMessageDialog(this, response);
-		}
-	}
+//	private void loadIGVAsynchronous() throws Exception{
+//		loadIGVButton.setText("Finding BAM File...");
+//		File bamFile = SSHConnection.loadBAMForIGV(sample, loadIGVButton);
+//
+//		loadIGVButton.setText("Loading File Into IGV...");
+//		String response = IGVConnection.loadFileIntoIGV(this, bamFile);
+//
+//		if(response.equals("OK")) {
+//			JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
+//		}else if(!response.equals("")){
+//			JOptionPane.showMessageDialog(this, response);
+//		}
+//	}
 
 
 	private void loadIGVAsynchronous_2() throws Exception{
 
 		loadIGVButton.setText("Preparing BAM File.");
+		System.out.println(System.currentTimeMillis() + "-" + "Create Temp File");
 		String bamServerFileName = SSHConnection.createTempParametersFile(sample,mutationList);
 
+		System.out.println(System.currentTimeMillis() + "-" + "Copying BAM File");
 		loadIGVButton.setText("Finding BAM File...");
 		File bamLocalFile = SSHConnection.copyTempBamFileONLocal(sample, loadIGVButton,bamServerFileName);
 

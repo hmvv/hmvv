@@ -343,6 +343,7 @@ public class SSHConnection {
         }
         bw.close();
 
+        System.out.println(System.currentTimeMillis() + "-" + "Copying param file");
         // load file to server
         Channel channel = null;
         try {
@@ -360,7 +361,8 @@ public class SSHConnection {
                 channel.disconnect();
             }
         }
-
+        System.out.println(System.currentTimeMillis() + "-" + "Finished copying param file");
+        
         //delete local temp file
         deleteFile(tempFile);
 
@@ -371,8 +373,10 @@ public class SSHConnection {
 	}
 
 	private static void createTempBamFileONServer(String fileName) throws Exception {
+		System.out.println(System.currentTimeMillis() + "-" + "Running creatlocalbam");
 	    String command = "/var/pipelines_ngs_test/shell/createLocalBam.sh -f "+ fileName;
         CommandResponse rs = executeCommandAndGetOutput(command);
+        System.out.println(System.currentTimeMillis() + "-" + "Finished Running creatlocalbam");
         if(rs.exitStatus != 0) {
             throw new Exception("Error creating local BAM file on server.");
         }
