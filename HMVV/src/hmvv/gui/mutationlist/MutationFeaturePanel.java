@@ -3,13 +3,12 @@ package hmvv.gui.mutationlist;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
 import hmvv.gui.GUICommonTools;
@@ -21,6 +20,7 @@ import hmvv.io.SSHConnection;
 import hmvv.model.Sample;
 
 public class MutationFeaturePanel extends JPanel{
+
 	private static final long serialVersionUID = 1L;
 
 
@@ -78,8 +78,7 @@ public class MutationFeaturePanel extends JPanel{
 						public void run() {
 							try{
 								loadIGVButton.setEnabled(false);
-//								loadIGVAsynchronous();
-								loadIGVAsynchronous_2();
+                                handleIGVButtonClickAsynchronous();
 							}catch(Exception ex){
 								JOptionPane.showMessageDialog(parent, ex.getMessage());
 							}
@@ -103,8 +102,7 @@ public class MutationFeaturePanel extends JPanel{
 		
 		longReportButton.setPreferredSize(buttonSize);
 		exportButton.setPreferredSize(buttonSize);
-		loadIGVButton.setPreferredSize(buttonSize);
-		
+
 		FlowLayout flowLayout = new FlowLayout(FlowLayout.LEADING);
 		setLayout(flowLayout);
 		
@@ -118,7 +116,7 @@ public class MutationFeaturePanel extends JPanel{
 		gridPanel.add(longReportButton);
 		gridPanel.add(exportButton);
 		gridPanel.add(loadIGVButton);
-		add(gridPanel);
+        add(gridPanel);
 	}
 
 	private void exportTable() throws IOException{
@@ -165,34 +163,79 @@ public class MutationFeaturePanel extends JPanel{
 		reportPanel.setVisible(true);
 	}
 
+	private void handleIGVButtonClickAsynchronous() throws Exception {
+
+        JPanel checkListPanel = new JPanel(new GridLayout(0, 1));
+        JCheckBox filterChk = new JCheckBox("Load IGV for ONLY filtered mutations");
+        JCheckBox allChk = new JCheckBox("Load IGV for ALL mutations");
+        checkListPanel.add(filterChk);
+        checkListPanel.add(allChk);
+
+
+        filterChk.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    for (Component component : checkListPanel.getComponents()) {
+                        component.setEnabled(false);
+                    }
+                }
+            }
+        });
+
+        allChk.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    for (Component component : checkListPanel.getComponents()) {
+                        component.setEnabled(false);
+                    }
+                }
+            }
+        });
+
+        String msg = "Please Choose the options to load IGV:";
+        Object[] msgContent = {msg, checkListPanel};
+        int request = JOptionPane.showConfirmDialog(parent, msgContent, "Load IGV Options", JOptionPane.OK_CANCEL_OPTION);
+
+        if (request == JOptionPane.OK_OPTION) {
+
+            if (filterChk.isSelected()) {
+                System.out.println("filter is selected");
+            } else if (allChk.isSelected()) {
+                System.out.println("all mutations is selected");
+                loadIGVAsynchronous();
+            }
+        }
+    }
 
 	//TODO disable HTTP access to BAM files
-//	private void loadIGVAsynchronous() throws Exception{
-//		loadIGVButton.setText("Finding BAM File...");
-//		File bamFile = SSHConnection.loadBAMForIGV(sample, loadIGVButton);
-//
-//		loadIGVButton.setText("Loading File Into IGV...");
-//		String response = IGVConnection.loadFileIntoIGV(this, bamFile);
-//
-//		if(response.equals("OK")) {
-//			JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
-//		}else if(!response.equals("")){
-//			JOptionPane.showMessageDialog(this, response);
-//		}
-//	}
+	private void loadIGVAsynchronous() throws Exception{
+		loadIGVButton.setText("Finding BAM File...");
+		File bamFile = SSHConnection.loadBAMForIGV(sample, loadIGVButton);
+
+		loadIGVButton.setText("Loading File Into IGV...");
+		String response = IGVConnection.loadFileIntoIGV(this, bamFile);
+
+		if(response.equals("OK")) {
+			JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
+		}else if(!response.equals("")){
+			JOptionPane.showMessageDialog(this, response);
+		}
+	}
 
 
 	private void loadIGVAsynchronous_2() throws Exception{
 
-		loadIGVButton.setText("Preparing BAM File.");
+        loadIGVButton.setText("Preparing BAM File.");
 		System.out.println(System.currentTimeMillis() + "-" + "Create Temp File");
 		String bamServerFileName = SSHConnection.createTempParametersFile(sample,mutationList);
 
 		System.out.println(System.currentTimeMillis() + "-" + "Copying BAM File");
-		loadIGVButton.setText("Finding BAM File...");
+        loadIGVButton.setText("Finding BAM File...");
 		File bamLocalFile = SSHConnection.copyTempBamFileONLocal(sample, loadIGVButton,bamServerFileName);
 
-		loadIGVButton.setText("Loading File Into IGV...");
+        loadIGVButton.setText("Loading File Into IGV...");
 		String response = IGVConnection.loadFileIntoIGV(this, bamLocalFile);
 
 		if(response.equals("OK")) {
