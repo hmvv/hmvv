@@ -85,6 +85,11 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(Mutation mutation) -> mutation.getChr() + ":" + mutation.getPos());
 
+	public static final MutationTableModelColumn igvLoadColumn = new MutationTableModelColumn("Check to indicate this mutation is included for downloading BAM file.",
+			"Load IGV",
+			Boolean.class,
+			(Mutation mutation) -> mutation.isSelected());
+
 	//VEP
 
 	public static final MutationTableModelColumn geneColumn = new MutationTableModelColumn("The name of the gene this mutation is located on.",

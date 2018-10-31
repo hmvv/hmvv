@@ -8,7 +8,7 @@ public class BasicTableModel extends CommonTableModel {
 	public BasicTableModel(MutationList mutationList){
 		super(mutationList);
 	}
-	
+
 	protected ArrayList<MutationTableModelColumn> constructColumns(){
 		ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
 		columns.add(MutationTableModelColumn.reportedColumn);
@@ -33,6 +33,8 @@ public class BasicTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.somaticColumn);
 		columns.add(MutationTableModelColumn.classificationColumn);
 		columns.add(MutationTableModelColumn.gotoIGVColumn);
+		columns.add(MutationTableModelColumn.igvLoadColumn);
+
 		return columns;
 	}
 }

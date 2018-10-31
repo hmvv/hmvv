@@ -25,7 +25,7 @@ public class MutationList {
 		mutation.setReported(reported);
 		notifyReportedStatusChanged(index);
 	}
-	
+
 	public void sortModel(int[] newOrder){
 		ArrayList<Mutation> newSortedOrder = new ArrayList<Mutation>(mutations);
 		
@@ -55,6 +55,17 @@ public class MutationList {
 	public int getMutationCount() {
 		return mutations.size();
 	}
+
+	public int getSelectedMuatationCount() {
+		int count = 0;
+		for (int i = 0; i < mutations.size(); i++) {
+			Mutation mutation = mutations.get(i);
+			if (mutation.isSelected()) {
+				count++;
+			}
+		}
+		return count;
+	}
 	
 	public int getFilteredMutationCount() {
 		return filteredMutations.size();
@@ -73,7 +84,7 @@ public class MutationList {
 			listener.mutationReportedStatusChanged(index);
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private void notifyRowUpdated(int index){
 		for(MutationListListener listener : listeners){

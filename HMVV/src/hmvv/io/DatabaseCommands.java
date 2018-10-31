@@ -410,7 +410,7 @@ public class DatabaseCommands {
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
 			if(gnomadAllFreq != null) {
-				mutation.setGnomad_allfreq(100*gnomadAllFreq);//Multiply by 100 because these are stored as decimals in the database				
+				mutation.setGnomad_allfreq(100*gnomadAllFreq);//Multiply by 100 because these are stored as decimals in the database
 			}
 
 			mutations.add(mutation);

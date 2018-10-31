@@ -1,6 +1,6 @@
 package hmvv.gui.mutationlist.tables;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
@@ -18,10 +18,21 @@ public class BasicTable extends CommonTable{
 	protected HMVVTableColumn[] constructCustomColumns(){
 		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 11, 13, 16);
 	}
-	
+
+	@Override
+	public boolean isCellEditable(int row, int column) {
+		if (column == 0){
+			return true;
+		} else if (column == 17){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	@Override
 	protected void handleMouseClick(int column) throws Exception{
-		if (column == 11){
+		if (column == 11) {
 			searchCosmic();
 		}else if(column == 13){
 			handleAnnotationClick();
@@ -35,6 +46,8 @@ public class BasicTable extends CommonTable{
 					}
 				}
 			}).start();			
+		}else if (column ==17) {
+			handleLoadIGVCheckBoxClick();
 		}
 	}
 
@@ -51,6 +64,15 @@ public class BasicTable extends CommonTable{
 		String result = IGVConnection.loadCoordinateIntoIGV_2(this, mutation.getCoordinate());
 		if(result.length() > 0) {
 			JOptionPane.showMessageDialog(this, result);
+		}
+	}
+
+	private void handleLoadIGVCheckBoxClick(){
+		Mutation mutation = getSelectedMutation();
+		if (mutation.isSelected()){
+			mutation.setSelected(false);
+		}else{
+			mutation.setSelected(true);
 		}
 	}
 }

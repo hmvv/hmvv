@@ -14,6 +14,7 @@ public class Mutation {
     private String exons;
 
     // custom
+    private boolean selected;
     private Integer occurrence;
     private ArrayList<Annotation> annotationHistory;
     private Annotation latestAnnotation;
@@ -95,6 +96,14 @@ public class Mutation {
 
     public void setReported(boolean reported) {
         this.reported = reported;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public String getGene() {

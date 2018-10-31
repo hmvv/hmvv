@@ -24,6 +24,7 @@ public class MutationFilterPanel extends JPanel {
 
 	private JCheckBox reportedOnlyCheckbox;
 	private JCheckBox cosmicOnlyCheckbox;
+	private JCheckBox selectAllCheckbox;
 
 	private JTextField textFreqFrom;
 	private JTextField textVarFreqTo;
@@ -65,7 +66,19 @@ public class MutationFilterPanel extends JPanel {
 		reportedOnlyCheckbox.addActionListener(actionListener);
 		reportedOnlyCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-        resetButton = new JButton("Reset all Filters");
+		selectAllCheckbox = new JCheckBox("Select all mutations for IGV");
+		selectAllCheckbox.addActionListener(actionListener);
+		selectAllCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
+
+		selectAllCheckbox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+					handleSelectAllClick(selectAllCheckbox.isSelected());
+			}
+		});
+
+
+		resetButton = new JButton("Reset all Filters");
         resetButton.setToolTipText("Reset filters to defaults");
         resetButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 
@@ -153,6 +166,7 @@ public class MutationFilterPanel extends JPanel {
         checkboxPanel.add(resetButtonPanel);
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
+		checkboxPanel.add(selectAllCheckbox);
 		leftFilterPanel.add(checkboxPanel);
 
         JPanel middleFilterPanel = new JPanel(new GridLayout(0,1));
@@ -238,6 +252,7 @@ public class MutationFilterPanel extends JPanel {
 	void resetFilters(){
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);
+		selectAllCheckbox.setSelected(false);
 		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
 		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
@@ -246,6 +261,7 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
 		applyRowFilters();
+		handleSelectAllClick(false);
 	}
 
 	void disableInputForAsynchronousLoad() {
@@ -254,6 +270,8 @@ public class MutationFilterPanel extends JPanel {
 		cosmicOnlyCheckbox.setToolTipText(tooltip);
 		reportedOnlyCheckbox.setEnabled(false);
 		reportedOnlyCheckbox.setToolTipText(tooltip);
+		selectAllCheckbox.setEnabled(false);
+		selectAllCheckbox.setToolTipText(tooltip);
 		textFreqFrom.setEditable(false);
 		textFreqFrom.setToolTipText(tooltip);
 		textVarFreqTo.setEditable(false);
@@ -279,6 +297,8 @@ public class MutationFilterPanel extends JPanel {
 		cosmicOnlyCheckbox.setToolTipText("");
 		reportedOnlyCheckbox.setEnabled(true);
 		reportedOnlyCheckbox.setToolTipText("");
+		selectAllCheckbox.setEnabled(true);
+		selectAllCheckbox.setToolTipText("");
 		textFreqFrom.setEditable(true);
 		textFreqFrom.setToolTipText("");
 		textVarFreqTo.setEditable(true);
@@ -346,4 +366,11 @@ public class MutationFilterPanel extends JPanel {
         loadFilteredMutationsButton.setText("Filtered mutations loaded");
     }
 
+    private void handleSelectAllClick(boolean choice) {
+		for (int i = 0; i < mutationList.getMutationCount(); i++) {
+			Mutation mutation = mutationList.getMutation(i);
+			if (choice==true){mutation.setSelected(true);}
+			else {mutation.setSelected(false);}
+		}
+	}
 }

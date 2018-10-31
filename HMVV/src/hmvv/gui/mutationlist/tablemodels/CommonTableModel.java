@@ -33,8 +33,8 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 		}
 	}
 	
-	@Override 
-	public final boolean isCellEditable(int row, int column) {
+	@Override
+	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
 	

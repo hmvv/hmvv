@@ -71,5 +71,8 @@ public class AsynchronousMutationDataIO {
 		//civic
 		DatabaseCommands.updateCivicInfo(mutation);
 		mutation.setCivicID();
+
+		// default selection
+		mutation.setSelected(false);
 	}
 }

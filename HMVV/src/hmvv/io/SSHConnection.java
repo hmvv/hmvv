@@ -4,10 +4,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 import com.jcraft.jsch.*;
 
+import hmvv.gui.mutationlist.MutationFeaturePanel;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
@@ -325,10 +326,10 @@ public class SSHConnection {
 		}
 	}
 
-	public static String createTempParametersFile(Sample sample, MutationList mutationList) throws Exception {
+	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, MutationFeaturePanel.ServerTask serverTask) throws Exception {
 
 	    //create a local temp file
-        File tempFile = File.createTempFile(sample.sampleName+"-"+sample.runID+"-",".params");
+        File tempFile = File.createTempFile(sample.sampleName+"_"+sample.runID+"_",".params");
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
         bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
         bw.newLine();
@@ -343,6 +344,8 @@ public class SSHConnection {
         }
         bw.close();
 
+
+		loadIGVButton.setText("Sending mutations to server.");
         System.out.println(System.currentTimeMillis() + "-" + "Copying param file");
         // load file to server
         Channel channel = null;
@@ -366,7 +369,13 @@ public class SSHConnection {
         //delete local temp file
         deleteFile(tempFile);
 
+		loadIGVButton.setText("Server started.");
+
         createTempBamFileONServer(tempFile.getName());
+
+		loadIGVButton.setText("Finished server work.");
+
+		serverTask.setStatus(1);
 
         return tempFile.getName();
 
@@ -384,13 +393,14 @@ public class SSHConnection {
 
     public static File copyTempBamFileONLocal(Sample sample, SftpProgressMonitor progressMonitor, String tempBamFileName ) throws Exception{
 
-        String runIDFolder = temporaryBAMDirectory + File.separator + sample.instrument + File.separator + sample.runID;
+        String runIDFolder = temporaryBAMDirectory + File.separator + sample.instrument + File.separator + sample.runID + "_filtered";
         new File(runIDFolder).mkdirs();
 
         String serverFileName = tempBamFileName+".bam";
         String filePath = "/home/scratch/hmvv3/igv/";
 
-        File localBamFile = new File(runIDFolder + File.separator + serverFileName.split("-")[0]+".bam").getAbsoluteFile();
+//        File localBamFile = new File(runIDFolder + File.separator + serverFileName.split("-")[0]+".bam").getAbsoluteFile();
+		File localBamFile = new File(runIDFolder + File.separator + serverFileName);
 
         ChannelSftp channel = (ChannelSftp)sshSession.openChannel("sftp");
         channel.connect();
