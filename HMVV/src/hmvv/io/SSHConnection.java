@@ -334,8 +334,10 @@ public class SSHConnection {
         bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
         bw.newLine();
 
-        for (int index = 0; index < mutationList.getMutationCount(); index++) {
-            Mutation mutation = mutationList.getMutation(index);
+        ArrayList<Mutation> selectedMutations = mutationList.getSelectedMutations();
+
+        for (int index = 0; index < selectedMutations.size(); index++) {
+            Mutation mutation = selectedMutations.get(index);
             Integer lower = Integer.parseInt(mutation.getPos()) - 20;
             Integer higher = Integer.parseInt(mutation.getPos()) + 20;
             String line = mutation.getChr() + ':' + lower.toString() + '-' + higher.toString();

@@ -17,6 +17,7 @@ public class Mutation {
     private boolean selected;
     private Integer occurrence;
     private ArrayList<Annotation> annotationHistory;
+    private Annotation latestAnnotation;
 
    //vep
     private String type;
@@ -434,6 +435,7 @@ public class Mutation {
 
     public void addAnnotation(Annotation annotation) {
         annotationHistory.add(annotation);
+        this.latestAnnotation = annotation;
     }
 
     public int getAnnotationHistorySize() {
@@ -446,13 +448,17 @@ public class Mutation {
 
     public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
         this.annotationHistory = annotationHistory;
+        if (annotationHistory.size() > 0) {
+            this.latestAnnotation = annotationHistory.get(annotationHistory.size() - 1);
+        }
+    }
+
+    public void setLatestAnnotation(Annotation latestAnnotation) {
+        this.latestAnnotation = latestAnnotation;
     }
 
     public Annotation getLatestAnnotation() {
-    	if (annotationHistory.size() == 0) {
-            return null;
-        }
-    	return  annotationHistory.get(annotationHistory.size() - 1);
+        return latestAnnotation;
     }
 
     public Double getGnomad_allfreq() {

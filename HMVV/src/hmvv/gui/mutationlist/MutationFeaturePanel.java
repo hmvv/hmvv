@@ -164,13 +164,13 @@ public class MutationFeaturePanel extends JPanel {
 
 	private void handleIGVButtonClickAsynchronous() throws Exception {
 
-		String msg = "You have selected "+ mutationList.getSelectedMuatationCount() + " mutations";
-		Object[] msgContent = {msg};
-		int request = JOptionPane.showConfirmDialog(parent, msgContent, "Load IGV Confirmation", JOptionPane.YES_NO_OPTION);
+		String msg = "You have selected "+ mutationList.getSelectedMutationCount() + " mutations to load on IGV.";
+		int request = JOptionPane.showConfirmDialog(parent, msg, "Load IGV Confirmation", JOptionPane.YES_NO_OPTION);
 
 		if (request == JOptionPane.YES_OPTION) {
-
-			if(mutationList.getMutationCount() == mutationList.getSelectedMuatationCount()){
+			if (mutationList.getSelectedMutationCount() == 0 ){
+				JOptionPane.showMessageDialog(null, "IGV cannot be loaded for 0 mutations.");
+			}else if(mutationList.getMutationCount() == mutationList.getSelectedMutationCount()){
 				loadIGVAsynchronous();
 			}else{
 				loadIGVAsynchronous_Filtered();
@@ -180,6 +180,7 @@ public class MutationFeaturePanel extends JPanel {
 
 	//TODO disable HTTP access to BAM files
 	private void loadIGVAsynchronous() throws Exception {
+
 		loadIGVButton.setText("Finding BAM File...");
 		File bamFile = SSHConnection.loadBAMForIGV(sample, loadIGVButton);
 
@@ -216,7 +217,7 @@ public class MutationFeaturePanel extends JPanel {
 	}
 
 	private void loadIGVButtonTimerLabel(ServerTask task) {
-		int seconds = 3 * mutationList.getSelectedMuatationCount();
+		int seconds = 3 * mutationList.getSelectedMutationCount();
 		final long duration = seconds * 1000;   // calculate to milliseconds
 		final Timer timer = new Timer(1, new ActionListener() {
 			long startTime = -1;

@@ -227,6 +227,9 @@ public abstract class CommonTable extends JTable{
 		Mutation mutation = getSelectedMutation();		
 		String gene = mutation.getGene();
 		
+		ArrayList<Annotation> annotationHistory = DatabaseCommands.getVariantAnnotationHistory(mutation.getCoordinate());
+		mutation.setAnnotationHistory(annotationHistory);
+		
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
 		
 		boolean readOnly = !SSHConnection.isSuperUser();

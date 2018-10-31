@@ -184,6 +184,8 @@ public class DatabaseCommands {
 
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
 
+				+ " max(t7.annotationID) as annotationID, t7.classification, t7.curation, t7.somatic, t7.enteredBy, t7.enterDate, "
+
 				+ " t8.AF "
 
 				+ " from sampleVariants as t2"
@@ -196,6 +198,8 @@ public class DatabaseCommands {
 				+ " left join db_clinvar_new as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 
+				+ " left join variantAnnotation as t7 on t2.chr = t7.chr and t2.pos = t7.pos and t2.ref = t7.ref and t2.alt = t7.alt "
+
 				+ " left join db_gnomad as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 
 				+ " where t2.sampleID = ? ";
@@ -205,6 +209,7 @@ public class DatabaseCommands {
 			where = " !" + where;
 		}
 		query = query + " and " + where;
+		query = query + " group by t2.sampleVariantID ";
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
@@ -384,10 +389,23 @@ public class DatabaseCommands {
 			//temp holder fields - filled later separately
 			mutation.setCosmicID(getStringOrBlank(rs, "cosmicID"));
 			mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
-			
-			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate());
-			mutation.setAnnotationHistory(annotationHistory);
+
+
+			//If annotation fields were also in the query
+			try {				
+				Annotation annotation = new Annotation(
+						Integer.parseInt(rs.getString("annotationID")), 
+						new Coordinate(getStringOrBlank(rs, "chr"), getStringOrBlank(rs, "pos"), getStringOrBlank(rs, "ref"), getStringOrBlank(rs, "alt")),
+						getStringOrBlank(rs, "classification"),
+						getStringOrBlank(rs, "curation"),
+						getStringOrBlank(rs, "somatic"),
+						getStringOrBlank(rs, "enteredBy"),
+						rs.getDate("enterDate")
+						);
+				mutation.setLatestAnnotation(annotation);
+			}catch(Exception e) {
+
+			}
 
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
@@ -577,7 +595,7 @@ public class DatabaseCommands {
 		return geneannotations;
 	}
 
-	private static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate) throws Exception{
+	public static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate) throws Exception{
 		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
 		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from variantAnnotation where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc");
 		selectStatement.setString(1, coordinate.getChr());

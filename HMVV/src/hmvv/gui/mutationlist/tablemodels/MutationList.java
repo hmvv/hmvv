@@ -56,7 +56,7 @@ public class MutationList {
 		return mutations.size();
 	}
 
-	public int getSelectedMuatationCount() {
+	public int getSelectedMutationCount() {
 		int count = 0;
 		for (int i = 0; i < mutations.size(); i++) {
 			Mutation mutation = mutations.get(i);
@@ -65,6 +65,19 @@ public class MutationList {
 			}
 		}
 		return count;
+	}
+
+	public ArrayList<Mutation> getSelectedMutations() {
+
+		ArrayList<Mutation> selectedMutations = new ArrayList<Mutation>();
+
+		for (int i = 0; i < mutations.size(); i++){
+			Mutation m = mutations.get(i);
+			if (m.isSelected()) {
+				selectedMutations.add(m);
+			}
+		}
+		return selectedMutations;
 	}
 	
 	public int getFilteredMutationCount() {
