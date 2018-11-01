@@ -31,7 +31,7 @@ public class VEPTable extends CommonTable{
            }
         }
 
-    private void searchPubmed(){
+    private void searchPubmed() throws Exception{
         Mutation mutation = getSelectedMutation();
         String pubmed = mutation.getPubmed();
         if(!pubmed.equals("") && !pubmed.equals("null")){

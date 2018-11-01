@@ -15,6 +15,7 @@ import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.HMVVDefectReportFrame;
 
 public class CreateAssay extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -117,7 +118,7 @@ public class CreateAssay extends JFrame {
 			JOptionPane.showMessageDialog(this, "Done");
 		}
 		catch(Exception e){
-			JOptionPane.showMessageDialog(this, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
 		}
 	}
 }

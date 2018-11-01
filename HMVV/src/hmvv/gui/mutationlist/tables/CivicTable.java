@@ -25,7 +25,7 @@ public class CivicTable extends CommonTable {
         }
     }
 
-    private void searchCivic() {
+    private void searchCivic() throws Exception {
         Mutation mutation = getSelectedMutation();
         String civic_url = mutation.getCivic_variant_url();
         if (!civic_url.equals("") && !civic_url.equals("null")) {

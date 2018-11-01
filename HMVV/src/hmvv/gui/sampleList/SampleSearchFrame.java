@@ -11,7 +11,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
@@ -24,6 +23,7 @@ import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
 
 
@@ -140,7 +140,7 @@ public class SampleSearchFrame extends JFrame {
 				assayComboBox.addItem(assay);
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
 			return;
 		}
 		

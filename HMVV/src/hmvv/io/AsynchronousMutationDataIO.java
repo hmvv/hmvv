@@ -34,7 +34,7 @@ public class AsynchronousMutationDataIO {
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
-				callback.showErrorMessage(e.getMessage() + " : " + e.getClass().getName() + ": Could not load mutation dbs data - main.");
+				callback.showErrorMessage(e, "Could not load mutation dbs data - main.");
 			}
 		}
 		
@@ -48,7 +48,7 @@ public class AsynchronousMutationDataIO {
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
-				callback.showErrorMessage(e.getMessage() + " : " + e.getClass().getName() + ": Could not load mutation dbs data - filtered.");
+				callback.showErrorMessage(e, "Could not load mutation dbs data - filtered.");
 			}
 		}
 	}

@@ -25,7 +25,7 @@ public class ClinVarTable extends CommonTable{
 		}
 	}
 
-    private void searchClinVar(){
+    private void searchClinVar() throws Exception{
         Mutation mutation = getSelectedMutation();
         String id = mutation.getClinvarID();
         if(!id.equals("") && !id.equals("null")){

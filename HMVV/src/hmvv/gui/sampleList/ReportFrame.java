@@ -13,7 +13,6 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -22,6 +21,7 @@ import javax.swing.filechooser.FileFilter;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.MutationListFrame;
+import hmvv.main.HMVVDefectReportFrame;
 
 public class ReportFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -58,7 +58,7 @@ public class ReportFrame extends JFrame {
 				try {
 		            exportReport(textArea.getText());
 		        } catch (IOException ex) {
-		        	JOptionPane.showMessageDialog(parent, ex.getMessage());
+		        	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
 		        }
 			}
 		});

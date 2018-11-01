@@ -7,7 +7,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -29,6 +28,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
@@ -102,7 +102,7 @@ public abstract class CommonTable extends JTable{
 					}
 					handleMouseClick(column);
 				}catch(Exception e){
-					JOptionPane.showMessageDialog(CommonTable.this, e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 				}
 			}
 		});
@@ -171,20 +171,20 @@ public abstract class CommonTable extends JTable{
 	    }
 	}
 	
-	protected void searchGoogleForGene(){
+	protected void searchGoogleForGene() throws Exception{
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
 		String gene = (getModel().getValueAt(modelRow, 1)).toString();
 		InternetCommands.searchGoogle(gene);
 	}
 
-	protected void searchGoogleForDNAChange(){
+	protected void searchGoogleForDNAChange() throws Exception{
 		Mutation mutation = getSelectedMutation();
 		String change = mutation.getHGVSc();
 		searchGoogleForMutation(mutation, change);
 	}
 
-	protected void searchGoogleForProteinChange(){
+	protected void searchGoogleForProteinChange() throws Exception{
 		Mutation mutation = getSelectedMutation();
 		String change = mutation.getHGVSp();
 		searchGoogleForMutation(mutation, change);
@@ -193,7 +193,7 @@ public abstract class CommonTable extends JTable{
 		searchGoogleForMutation(mutation, abbreviatedChange);
 	}
 	
-	protected void searchGoogleForMutation(Mutation mutation, String change){
+	protected void searchGoogleForMutation(Mutation mutation, String change) throws Exception{
 		String gene = mutation.getGene();
 		String changeOnly = change.replaceAll(".*:", "");
 		String changeFinal = changeOnly.replaceAll(">", "%3E");
@@ -201,7 +201,7 @@ public abstract class CommonTable extends JTable{
 		InternetCommands.searchGoogle(search);
 	}
 	
-	protected void searchSNP(){
+	protected void searchSNP() throws Exception{
 		Mutation mutation = getSelectedMutation();
 		String dbSNP = mutation.getDbSNPID();
 		if(!dbSNP.equals("")){
@@ -216,8 +216,7 @@ public abstract class CommonTable extends JTable{
 			try {
 				CosmicInfoPopup.handleCosmicClick(parent, cosmic);
 			} catch (Exception e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(parent, "Error locating Cosmic Info: " + e.getMessage());
+				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error locating Cosmic Info.");
 			}
 		}
 	}
@@ -258,7 +257,7 @@ public abstract class CommonTable extends JTable{
 					DatabaseCommands.updateReportedStatus(reported, sampleID, coordinate);
 				}
 			} catch (Exception e1) {
-				JOptionPane.showMessageDialog(CommonTable.this, e1);
+				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e1);
 			}
 		}
 	}

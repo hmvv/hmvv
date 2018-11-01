@@ -24,6 +24,7 @@ import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Annotation;
 import hmvv.model.CommonAnnotation;
 import hmvv.model.GeneAnnotation;
@@ -293,7 +294,7 @@ public class AnnotationFrame extends JFrame {
 					AnnotationFrame.this.setVisible(false);
 					saveRecord();
 				}catch(Exception e){
-					JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
 				}
 			}
 		});
@@ -311,7 +312,7 @@ public class AnnotationFrame extends JFrame {
 				try{
 					showAnnotationDraftFrame();
 				}catch(Exception e){
-					JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
 				}
 			}
 		});
@@ -319,7 +320,6 @@ public class AnnotationFrame extends JFrame {
 		ActionListener historyActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					
 					if(e.getSource() == previousGeneAnnotationButton) {
 						showGeneAnnotationPrevious();
 					}else if(e.getSource() == nextGeneAnnotationButton) {
@@ -329,9 +329,8 @@ public class AnnotationFrame extends JFrame {
 					}else if(e.getSource() == nextAnnotationButton) {
 						showAnnotationNext();
 					}
-					
 				} catch (Exception exception) {
-					JOptionPane.showMessageDialog(AnnotationFrame.this, exception.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, exception);
 				}
 			}
 		};
@@ -352,7 +351,7 @@ public class AnnotationFrame extends JFrame {
 		
 		if(!SSHConnection.isSuperUser()){
 			//readOnly should prevent this, but just in case
-			JOptionPane.showMessageDialog(null, "Only authorized user can edit annotation");
+			JOptionPane.showMessageDialog(this, "Only authorized user can edit annotation");
 			return;
 		}
 		

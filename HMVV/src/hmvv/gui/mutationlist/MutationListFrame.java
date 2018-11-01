@@ -10,7 +10,6 @@ import java.io.IOException;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -25,6 +24,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.AsynchronousCallback;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.MutationReportGenerator;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
 
 public class MutationListFrame extends JDialog implements AsynchronousCallback{
@@ -301,8 +301,8 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		basicTabTableModel.fireTableRowsUpdated(index, index);
 	}
 	
-	public void showErrorMessage(String message) {
-		JOptionPane.showMessageDialog(this, message);
+	public void showErrorMessage(Exception e, String message) {
+		HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, message);
 	}
 	
 	public boolean isCallbackClosed() {

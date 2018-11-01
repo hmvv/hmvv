@@ -162,7 +162,11 @@ public class HMVVLoginFrame extends JFrame {
 		lblhmvv_version.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				InternetCommands.hmvvHome();
+				try {
+					InternetCommands.hmvvHome();
+				} catch (Exception e1) {
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVLoginFrame.this, e1);
+				}
 			}
 		});
 		lblhmvv_version.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -187,7 +191,7 @@ public class HMVVLoginFrame extends JFrame {
 			loginButton.setText("Connecting to database...");
 			DatabaseCommands.connect();
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Database connection failed (" + e.getMessage() + ")." + " Please contact the system administrator.");
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Database connection failed. Please contact the system administrator.");
 			return;
 		}
 		
@@ -197,7 +201,7 @@ public class HMVVLoginFrame extends JFrame {
 			sampleList.setVisible(true);
 			dispose();
 		}catch(Exception e){
-			JOptionPane.showMessageDialog(this, "Could not construct sample list (" + e.getMessage() + ")." + " Please contact the system administrator.");
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Could not construct sample list. Please contact the system administrator.");
 		}
 	}
 }

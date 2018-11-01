@@ -51,13 +51,13 @@ public class BasicTable extends CommonTable{
 		}
 	}
 
-	private void handleIGVClick() throws Exception{
-		Mutation mutation = getSelectedMutation();
-		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
-		if(result.length() > 0) {
-			JOptionPane.showMessageDialog(this, result);
-		}
-	}
+//	private void handleIGVClick() throws Exception{
+//		Mutation mutation = getSelectedMutation();
+//		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
+//		if(result.length() > 0) {
+//			JOptionPane.showMessageDialog(this, result);
+//		}
+//	}
 
 	private void handleIGVClick_2() throws Exception{
 		Mutation mutation = getSelectedMutation();

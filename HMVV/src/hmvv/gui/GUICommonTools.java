@@ -25,11 +25,12 @@ public class GUICommonTools {
 	public static final Color PROGRESS_BACKGROUND_COLOR = Color.YELLOW;
 	public static final Color PROGRESS_FOREGROUND_COLOR = Color.GREEN.darker();
 	
-	public static Font TAHOMA_PLAIN_13 = new Font("Tahoma", Font.BOLD, 13);
+	public static Font TAHOMA_PLAIN_13 = new Font("Tahoma", Font.PLAIN, 13);
 	public static Font TAHOMA_BOLD_11 = new Font("Tahoma", Font.BOLD, 11);
 	public static Font TAHOMA_BOLD_12 = new Font("Tahoma", Font.BOLD, 12);
 	public static Font TAHOMA_BOLD_13 = new Font("Tahoma", Font.BOLD, 13);
 	public static Font TAHOMA_BOLD_14 = new Font("Tahoma", Font.BOLD, 14);
+	public static Font TAHOMA_BOLD_17 = new Font("Tahoma", Font.BOLD, 17);
 	public static Font TAHOMA_BOLD_20 = new Font("Tahoma", Font.BOLD, 20);
 	
 	public static final SimpleDateFormat extendedDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

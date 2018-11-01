@@ -15,6 +15,7 @@ import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
@@ -355,13 +356,12 @@ public class MutationFilterPanel extends JPanel {
                     mutationList.addFilteredMutation(mutation);
 
                 }catch(Exception e){
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, e.getMessage() + " : " + e.getClass().getName() + ": Could not load additional mutation data.");
+                	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Could not load additional mutation data.");
                 }
             }
             applyRowFilters();
         }catch(Exception ex){
-            JOptionPane.showMessageDialog(parent, ex.getMessage());
+        	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
         }
         loadFilteredMutationsButton.setText("Filtered mutations loaded");
     }

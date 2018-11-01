@@ -237,22 +237,18 @@ public class SSHConnection {
 		responseLines.addAll(sampleList);
 	}
 	
-	private static String sendCommand(String command){
+	private static String sendCommand(String command) throws Exception{
 		StringBuilder outputBuffer = new StringBuilder();
-		try{
-			com.jcraft.jsch.Channel channel = sshSession.openChannel("exec");
-			((ChannelExec)channel).setCommand(command);
-			InputStream commandOutput = channel.getInputStream();
-			channel.connect();
-			int readByte = commandOutput.read();
-			while(readByte != 0xffffffff){
-				outputBuffer.append((char)readByte);
-				readByte = commandOutput.read();
-			}
-			channel.disconnect();
-		}catch(Exception e){
-			JOptionPane.showMessageDialog(null, e);
+		com.jcraft.jsch.Channel channel = sshSession.openChannel("exec");
+		((ChannelExec)channel).setCommand(command);
+		InputStream commandOutput = channel.getInputStream();
+		channel.connect();
+		int readByte = commandOutput.read();
+		while(readByte != 0xffffffff){
+			outputBuffer.append((char)readByte);
+			readByte = commandOutput.read();
 		}
+		channel.disconnect();		
 		return outputBuffer.toString();
 	}
 	

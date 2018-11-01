@@ -2,6 +2,7 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Annotation;
 
 import javax.swing.*;
@@ -36,14 +37,13 @@ public class AnnotationDraftFrame extends JFrame {
         setLocationRelativeTo(parent);
     }
     private void createComponents(){
-
         annotationTextArea = new JTextArea();
         annotationTextArea.setWrapStyleWord(true);
         annotationTextArea.setLineWrap(true);
         try {
             annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(latestAnnotation.coordinate));
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(AnnotationDraftFrame.this, e.getMessage());
+        	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
         }
 
         clearButton = new JButton("Clear");
@@ -91,7 +91,7 @@ public class AnnotationDraftFrame extends JFrame {
                 try {
                     annotationTextArea.setText("");
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(AnnotationDraftFrame.this, e.getMessage());
+                	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
                 }
             }
         });
@@ -99,13 +99,11 @@ public class AnnotationDraftFrame extends JFrame {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-
                 try {
                     DatabaseCommands.addVariantAnnotationDraft(latestAnnotation.coordinate,annotationTextArea.getText());
                     AnnotationDraftFrame.this.dispose();
-
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(AnnotationDraftFrame.this, e.getMessage());
+                	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
                 }
 
             }

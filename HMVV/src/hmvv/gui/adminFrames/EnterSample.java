@@ -26,6 +26,7 @@ import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
 
 public class EnterSample extends JDialog {
@@ -80,7 +81,7 @@ public class EnterSample extends JDialog {
 			}
 			comboBoxAssay.setSelectedItem(Configurations.DEFAULT_ASSAY);
 		}catch(Exception e){
-			JOptionPane.showMessageDialog(parent, "Error getting Assays from database: " + e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error getting Assays from database");
 			dispose();
 			return;
 		}
@@ -88,7 +89,7 @@ public class EnterSample extends JDialog {
 		try {
 			findInstrument();
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(parent, "Error getting Instruments from database: " + e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error getting Instruments from database");
 			dispose();
 			return;
 		}
@@ -197,7 +198,7 @@ public class EnterSample extends JDialog {
 								enterData();
 								enterSampleButton.setText("Completed");
 							} catch (Exception e) {
-								JOptionPane.showMessageDialog(EnterSample.this, "Error entering sample data: " + e.getMessage());
+								HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error entering sample data");
 								enterSampleButton.setText("Enter Sample");
 								enterSampleButton.setEnabled(true);
 							}
@@ -222,7 +223,7 @@ public class EnterSample extends JDialog {
 					clearAndDisableAll();
 					findInstrument();
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(EnterSample.this, e1.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e1);
 				}
 			}
 		});

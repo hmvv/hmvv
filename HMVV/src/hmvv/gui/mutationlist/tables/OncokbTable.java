@@ -25,7 +25,7 @@ public class OncokbTable extends CommonTable {
         }
     }
 
-    private void searchOncokb() {
+    private void searchOncokb() throws Exception {
         Mutation mutation = getSelectedMutation();
         String onco_id = mutation.getOncokbID();
         if (!onco_id.equals("") && !onco_id.equals("null")) {

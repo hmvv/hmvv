@@ -56,6 +56,7 @@ import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVLoginFrame;
 import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.Mutation;
@@ -214,7 +215,7 @@ public class SampleListFrame extends JFrame {
 							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
 							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
 						} catch (Exception e1) {
-							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 						}
 					}
 				});
@@ -230,7 +231,7 @@ public class SampleListFrame extends JFrame {
 							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
 							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
 						} catch (Exception e1) {
-							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 						}
 					}
 				});
@@ -265,7 +266,7 @@ public class SampleListFrame extends JFrame {
 						}
 					}
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 				}
 			}
 		};
@@ -346,7 +347,7 @@ public class SampleListFrame extends JFrame {
 				assayComboBox.addItem(item);	
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
 		}
 		
 		sampleSearchButton = new JButton("Sample Search");
@@ -512,7 +513,7 @@ public class SampleListFrame extends JFrame {
 				handleEditSampleClick();
 			}
 		}catch (Exception e){
-			JOptionPane.showMessageDialog(this, e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
 		}
 	}
 
@@ -525,7 +526,7 @@ public class SampleListFrame extends JFrame {
 					MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
 					monitorpipelines.setVisible(true);
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading Monitor Pipeline window: " + e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading Monitor Pipeline window.");
 				}
 				setCursor(Cursor.getDefaultCursor());
 			}
@@ -548,7 +549,7 @@ public class SampleListFrame extends JFrame {
 					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
 					mutationListFrame.setVisible(true);
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading mutation data: " + e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading mutation data.");
 				}
 				table.setCursor(Cursor.getDefaultCursor());
 			}
@@ -564,7 +565,7 @@ public class SampleListFrame extends JFrame {
 			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
 			amplicon.setVisible(true);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(SampleListFrame.this, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
 		}
         table.setCursor(Cursor.getDefaultCursor());
 	}
@@ -591,7 +592,7 @@ public class SampleListFrame extends JFrame {
 					DatabaseCommands.updateSample(updatedSample);
 					tableModel.updateSample(modelRow, updatedSample);
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, e1);
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
 				}
 				editSample.dispose();
 			}
@@ -602,7 +603,7 @@ public class SampleListFrame extends JFrame {
 					DatabaseCommands.deleteSample(sample.sampleID);
 					tableModel.deleteSample(modelRow);
 				} catch (SQLException e1) {
-					JOptionPane.showMessageDialog(editSample, e1);
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
 				}
 				editSample.dispose();
 			}

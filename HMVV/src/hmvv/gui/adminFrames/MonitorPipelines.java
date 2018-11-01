@@ -14,6 +14,7 @@ import javax.swing.table.*;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineProgram;
 import hmvv.model.PipelineStatus;
@@ -167,7 +168,7 @@ public class MonitorPipelines extends JDialog {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					handlePipelineSelectionClick();
 				}catch (Exception e){
-					JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(MonitorPipelines.this, e);
 				}
 				table.setCursor(Cursor.getDefaultCursor());
 			}
@@ -180,7 +181,7 @@ public class MonitorPipelines extends JDialog {
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     buildModelFromDatabase();
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
+                	HMVVDefectReportFrame.showHMVVDefectReportFrame(MonitorPipelines.this, e);
                 }
                 setCursor(Cursor.getDefaultCursor());
             }
@@ -194,7 +195,7 @@ public class MonitorPipelines extends JDialog {
 				tableModel.addOrUpdatePipeline(p);
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(MonitorPipelines.this, "Failure to update pipeline status details. Please contact the administrator.");
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(MonitorPipelines.this, e, "Failure to update pipeline status details. Please contact the administrator.");
 		}
 	}
 

@@ -25,7 +25,7 @@ public class GnomadTable extends CommonTable{
 		}
 	}
 
-	private void searchGnomad(){
+	private void searchGnomad() throws Exception{
 		Mutation mutation = getSelectedMutation();
 		String gnomad_id = mutation.getGnomadID();
 		if(!gnomad_id.equals("") && !gnomad_id.equals("null")){

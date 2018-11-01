@@ -3,8 +3,6 @@ package hmvv.gui.mutationlist;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -18,6 +16,7 @@ import hmvv.gui.sampleList.ReportFrame;
 import hmvv.io.IGVConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
 
 public class MutationFeaturePanel extends JPanel {
@@ -71,7 +70,7 @@ public class MutationFeaturePanel extends JPanel {
 					try {
 						exportTable();
 					} catch (IOException ex) {
-						JOptionPane.showMessageDialog(parent, ex.getMessage());
+						HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
 					}
 				} else if (e.getSource() == loadIGVButton) {
 					new Thread(new Runnable() {
@@ -144,7 +143,7 @@ public class MutationFeaturePanel extends JPanel {
 			String report = MutationReportGenerator.generateShortReport(mutationList);
 			showReportFrame(report);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 	}
 
@@ -153,7 +152,7 @@ public class MutationFeaturePanel extends JPanel {
 			String report = MutationReportGenerator.generateLongReport(mutationList);
 			showReportFrame(report);
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 	}
 
@@ -163,18 +162,20 @@ public class MutationFeaturePanel extends JPanel {
 	}
 
 	private void handleIGVButtonClickAsynchronous() throws Exception {
-
-		String msg = "You have selected "+ mutationList.getSelectedMutationCount() + " mutations to load on IGV.";
-		int request = JOptionPane.showConfirmDialog(parent, msg, "Load IGV Confirmation", JOptionPane.YES_NO_OPTION);
-
-		if (request == JOptionPane.YES_OPTION) {
-			if (mutationList.getSelectedMutationCount() == 0 ){
-				JOptionPane.showMessageDialog(null, "IGV cannot be loaded for 0 mutations.");
-			}else if(mutationList.getMutationCount() == mutationList.getSelectedMutationCount()){
+		if (mutationList.getSelectedMutationCount() == 0 ){
+			String msg = "You have not selected any mutations. Would you like to load the entire BAM file?";
+			int request = JOptionPane.showConfirmDialog(parent, msg, "Load the entire BAM file Confirmation", JOptionPane.YES_NO_OPTION);
+			if (request == JOptionPane.YES_OPTION) {
 				loadIGVAsynchronous();
-			}else{
-				loadIGVAsynchronous_Filtered();
 			}
+			return;
+		}
+		
+		String msg = "You have selected " + mutationList.getSelectedMutationCount() + " mutation(s) to load into IGV. Would you like to load the BAM file for these coordinates?";
+		int request = JOptionPane.showConfirmDialog(parent, msg, "Load IGV Confirmation", JOptionPane.YES_NO_OPTION);
+		
+		if (request == JOptionPane.YES_OPTION) {
+			loadIGVAsynchronous_Filtered();
 		}
 	}
 
@@ -221,7 +222,7 @@ public class MutationFeaturePanel extends JPanel {
 		final long duration = seconds * 1000;   // calculate to milliseconds
 		final Timer timer = new Timer(1, new ActionListener() {
 			long startTime = -1;
-
+			private SimpleDateFormat minuteSecondDateFormat = new SimpleDateFormat("mm:ss");
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				if (startTime < 0) {
@@ -233,8 +234,11 @@ public class MutationFeaturePanel extends JPanel {
 					((Timer) event.getSource()).stop();
 					return;
 				}
-				SimpleDateFormat df = new SimpleDateFormat("mm:ss");
-				loadIGVButton.setText(String.format("Processing...%s", df.format(duration - clockTime)));
+				long interval = duration - clockTime;
+				if(interval < 0) {
+					interval = 1000;
+				}
+				loadIGVButton.setText(String.format("Processing...%s", minuteSecondDateFormat.format(interval)));
 			}
 		});
 		timer.start();
