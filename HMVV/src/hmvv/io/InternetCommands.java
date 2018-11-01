@@ -82,12 +82,12 @@ public class InternetCommands {
 	}
 
 	public static void hmvvHome() throws Exception{
-		String search = "http://10.110.21.70/hmvv3";
+		String search = "http://" + Configurations.SSH_SERVER_ADDRESS + "/hmvv3";
 		browseToURL(search);
 	}
 	
 	public static void hmvvBugsReport() throws Exception{
-		String search = "http://10.110.21.70/hmvv3/bugs.html";
+		String search = "http://" + Configurations.SSH_SERVER_ADDRESS + "/hmvv3/bugs.html";
 		browseToURL(search);
 	}
 }
