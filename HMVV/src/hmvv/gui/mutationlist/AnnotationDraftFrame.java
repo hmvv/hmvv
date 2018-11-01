@@ -22,20 +22,22 @@ public class AnnotationDraftFrame extends JFrame {
     private JButton clearButton;
     private JButton saveButton;
 
-    Annotation latestAnnotation;
-
+    private Annotation latestAnnotation;
+    private AnnotationFrame parent;
+    
     public AnnotationDraftFrame( AnnotationFrame parent, Annotation latestAnnotation) throws HeadlessException {
         this.latestAnnotation = latestAnnotation;
-
+        this.parent = parent;
+        
         createComponents();
         layoutComponents();
         activateComponents();
-
 
         pack();
         setResizable(false);
         setLocationRelativeTo(parent);
     }
+    
     private void createComponents(){
         annotationTextArea = new JTextArea();
         annotationTextArea.setWrapStyleWord(true);
@@ -43,7 +45,7 @@ public class AnnotationDraftFrame extends JFrame {
         try {
             annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(latestAnnotation.coordinate));
         } catch (Exception e) {
-        	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
+        	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
         }
 
         clearButton = new JButton("Clear");
