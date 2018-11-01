@@ -233,7 +233,7 @@ public class AnnotationFrame extends JFrame {
 		itemPanel.add(new JLabel());
 		itemPanel.add(new JLabel());
 		
-		Dimension textAreaDimension = new Dimension(400,400);
+		Dimension textAreaDimension = new Dimension(450,400);
 		
 		JPanel textAreaPanel = new JPanel();
 		//Annotation
