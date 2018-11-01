@@ -15,8 +15,7 @@ import java.text.SimpleDateFormat;
 import javax.swing.JTextField;
 
 public class GUICommonTools {
-//	public static final Color ERROR_COLOR = new Color(255,51,51);
-//	public static final Color COMPLETE_COLOR = new Color(102,255,102);
+
 	public static final Color ERROR_COLOR = new Color(255,204,204);
 	public static final Color COMPLETE_COLOR = new Color(204,255,204);
 	public static final Color WHITE_COLOR = Color.WHITE;

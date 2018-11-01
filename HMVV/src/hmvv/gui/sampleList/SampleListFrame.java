@@ -47,10 +47,7 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.adminFrames.CreateAssay;
-import hmvv.gui.adminFrames.EnterSample;
-import hmvv.gui.adminFrames.MonitorPipelines;
-import hmvv.gui.adminFrames.QualityControlFrame;
+import hmvv.gui.adminFrames.*;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
@@ -76,7 +73,9 @@ public class SampleListFrame extends JFrame {
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
+    private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
+
 	
 	//Table
 	private JTable table;
@@ -186,6 +185,7 @@ public class SampleListFrame extends JFrame {
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
+        databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
@@ -243,6 +243,7 @@ public class SampleListFrame extends JFrame {
 		}
 		
 		adminMenu.addSeparator();
+		adminMenu.add(databaseInformationMenuItem);
 		adminMenu.add(refreshLabel);
 		
 		setJMenuBar(menuBar);
@@ -255,8 +256,10 @@ public class SampleListFrame extends JFrame {
 					if(e.getSource() == enterSampleMenuItem){
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
-					}else if(e.getSource() == monitorPipelinesItem){
-						handleMonitorPipelineClick();
+					}else if(e.getSource() == monitorPipelinesItem) {
+                        handleMonitorPipelineClick();
+                    }else if(e.getSource() == databaseInformationMenuItem){
+                            handledatabaseInformationClick();
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -275,6 +278,7 @@ public class SampleListFrame extends JFrame {
 		newAssayMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);
+        databaseInformationMenuItem.addActionListener(listener);
 	}
 	
 	public void addSample(Sample sample){
@@ -533,7 +537,13 @@ public class SampleListFrame extends JFrame {
 		});
 		monitorPipelineThread.start();
 	}
-	
+
+
+	private void handledatabaseInformationClick() throws Exception {
+        DatabaseInformation dbinfo = new DatabaseInformation(this);
+        dbinfo.setVisible(true);
+    }
+
 	private void handleMutationClick() throws Exception{
 		Thread mutationListThread = new Thread(new Runnable() {
 			@Override

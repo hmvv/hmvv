@@ -12,6 +12,7 @@ import hmvv.gui.mutationlist.MutationFeaturePanel;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.model.CommandResponse;
+import hmvv.model.Database;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 
@@ -409,6 +410,28 @@ public class SSHConnection {
 
         return localBamFile;
     }
+
+    public static ArrayList<Database> getDatabaseInformation() throws Exception {
+
+		String command = "tail -n +2 /var/pipelines_"+Configurations.getEnvironment()+"/run_files/db_version.csv";
+		CommandResponse rs = executeCommandAndGetOutput(command);
+
+		if(rs.exitStatus != 0) {
+			throw new Exception(String.format("Error finding database information file."));
+		}
+
+		ArrayList<Database> databases = new ArrayList<Database>();
+
+		for (String line : rs.responseLines){
+			Database database = new Database();
+			String[] dbInfoColumns = line.split(",");
+			database.setName(dbInfoColumns[0]);
+			database.setVersion(dbInfoColumns[1]);
+			database.setRelease(dbInfoColumns[2]);
+			databases.add(database);
+		}
+		return databases;
+	}
 }
 
 
