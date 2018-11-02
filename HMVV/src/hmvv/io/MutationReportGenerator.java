@@ -11,11 +11,7 @@ import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
 import hmvv.gui.mutationlist.tablemodels.G1000TableModel;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.model.Annotation;
-import hmvv.model.Coordinate;
-import hmvv.model.GeneAnnotation;
-import hmvv.model.Mutation;
-import hmvv.model.VariantPredictionClass;
+import hmvv.model.*;
 
 public class MutationReportGenerator{
 	public static String generateLongReport(MutationList mutationList) throws Exception{
@@ -58,6 +54,12 @@ public class MutationReportGenerator{
 			}
 			
 			report.append("\n");
+		}
+		report.append("Database Information: \n");
+
+		ArrayList<Database>  databases = SSHConnection.getDatabaseInformation();
+		for (Database d: databases){
+			report.append( d.getName() +"(" + d.getVersion() + ")" + "\n");
 		}
 
 		return report.toString();

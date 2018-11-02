@@ -79,6 +79,9 @@ public class DatabaseCommands {
 			sampleCount += 1;
 			break;
 		}
+		pstCheckSample.close();
+
+
 		if(sampleCount != 0) {
 			throw new Exception("Error: Supplied sample exists in database; data not entered");
 		}
@@ -89,6 +92,7 @@ public class DatabaseCommands {
 				runID, sampleName, coverageID, variantCallerID, lastName, firstName, orderNumber, pathologyNumber, tumorSource, tumorPercent, runDate, note, enteredBy);
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
 		pstEnterSample.executeUpdate();
+		pstEnterSample.close();
 
 		//get ID
 		String findID = String.format("select samples.sampleID from samples " +
@@ -112,6 +116,7 @@ public class DatabaseCommands {
 		if(count == 0){
 			throw new Exception("Error2: Problem locating the entered sample; data not entered");
 		}
+		pstFindID.close();
 
 		queueSampleForRunningPipeline(sample);
 	}
@@ -122,6 +127,8 @@ public class DatabaseCommands {
 
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.executeUpdate();
+		pstQueueSample.close();
+
 	}
 
 	/* ************************************************************************
@@ -130,12 +137,12 @@ public class DatabaseCommands {
 	public static ArrayList<String> getAllAssays() throws Exception{
 		ArrayList<String> assays = new ArrayList<String>();
 		String getAssay = "select distinct assayName from assays order by assayName";
-		PreparedStatement pst = databaseConnection.prepareStatement(getAssay);
-		ResultSet rs = pst.executeQuery();
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(getAssay);
+		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 			assays.add(rs.getString(1));
 		}
-		pst.close();
+		preparedStatement.close();
 		return assays;
 	}
 
@@ -231,7 +238,7 @@ public class DatabaseCommands {
 			String result = rs.getString(1);
 			cosmicIDs.add(result);
 		}
-		rs.close();
+		preparedStatement.close();
 		return cosmicIDs;
 	}
 
@@ -244,7 +251,7 @@ public class DatabaseCommands {
 		if(rs.next()){
 			info = rs.getString("info");
 		}
-		rs.close();
+		preparedStatement.close();
 		return info;
 	}
 
@@ -273,7 +280,7 @@ public class DatabaseCommands {
 			mutation.setOncogenicity(getStringOrBlank(rs, "Oncogenicity"));
 			mutation.setOnco_MutationEffect(getStringOrBlank(rs, "Mutation_Effect"));
 		}
-		rs.close();
+		preparedStatement.close();
 	}
 
 	public static void updateCivicInfo(Mutation mutation) throws Exception{
@@ -295,7 +302,7 @@ public class DatabaseCommands {
 			mutation.setCivic_variant_origin(getStringOrBlank(rs, "variant_origin"));
 			mutation.setCivic_variant_url(getStringOrBlank(rs, "variant_civic_url"));
 		}
-		rs.close();
+		preparedStatement.close();
 	}
 
 	/**
@@ -575,6 +582,7 @@ public class DatabaseCommands {
 		while(rs.next()){
 			geneannotations.add(new GeneAnnotation(rs.getInt("geneAnnotationID") , rs.getString("gene") , rs.getString("curation") , rs.getString("enteredBy") , rs.getTimestamp("enterDate")));
 		}
+		selectStatement.close();
 		return geneannotations;
 	}
 
@@ -589,6 +597,7 @@ public class DatabaseCommands {
 		while(rs.next()){
 			annotations.add(new Annotation(rs.getInt("annotationID"),coordinate, rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getTimestamp(6)));
 		}
+		selectStatement.close();
 		return annotations;
 	}
 
@@ -603,6 +612,7 @@ public class DatabaseCommands {
 		if(rs.next()){
 			draft=rs.getString(1);
 		}
+		selectStatement.close();
 		return draft;
 	}
 

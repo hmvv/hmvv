@@ -68,8 +68,8 @@ public class MutationListFilters {
 		addFilter(new MaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField));
 	}
 	
-	public void addMinOccurrenceFilter(JTextField occurenceFromTextField) {
-		addFilter(new MinOccurrenceFilter(occurenceFromTextField));
+	public void addMaxOccurrenceFilter(JTextField occurenceFromTextField) {
+		addFilter(new MaxOccurrenceFilter(occurenceFromTextField));
 	}
 	
 	public void addMinReadDepthFilter(JTextField minReadDepthTextField) {
@@ -159,20 +159,20 @@ class MaxGnomadFrequencyFilter implements Filter{
 	}
 }
 
-class MinOccurrenceFilter implements Filter{
+class MaxOccurrenceFilter implements Filter{
 
-	private JTextField minOccurrenceTextField;
+	private JTextField maxOccurrenceTextField;
 	
-	public MinOccurrenceFilter(JTextField minOccurrenceTextField) {
-		this.minOccurrenceTextField = minOccurrenceTextField;
+	public MaxOccurrenceFilter(JTextField maxOccurrenceTextField) {
+		this.maxOccurrenceTextField = maxOccurrenceTextField;
 	}
 	
 	@Override
 	public boolean exclude(Mutation mutation) {
-		int minOccurence = GUICommonTools.getNumber(minOccurrenceTextField, Configurations.MIN_OCCURENCE_FILTER);
+		int maxOccurence = GUICommonTools.getNumber(maxOccurrenceTextField, Configurations.MIN_OCCURENCE_FILTER);
 		if(mutation.getOccurrence() != null){
 			int occurrence = mutation.getOccurrence();
-			if(minOccurence > occurrence){
+			if(maxOccurence < occurrence){
 				return true;
 			}
 		}

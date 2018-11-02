@@ -150,7 +150,7 @@ public class MutationFilterPanel extends JPanel {
 		mutationListFilters.addCosmicIDFilter(cosmicOnlyCheckbox);
 		mutationListFilters.addMaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField);
 		mutationListFilters.addMaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField);
-		mutationListFilters.addMinOccurrenceFilter(occurenceFromTextField);
+		mutationListFilters.addMaxOccurrenceFilter(occurenceFromTextField);
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
 		mutationListFilters.addVariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo);
@@ -197,7 +197,7 @@ public class MutationFilterPanel extends JPanel {
         JPanel hmvvPanel = new JPanel(new GridLayout(0,1));
         hmvvPanel.add(new JLabel("HMVV:"));
         JPanel occurencePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JLabel occurenceLabel = new JLabel("Occurence Min-");
+        JLabel occurenceLabel = new JLabel("Occurence Max-");
         occurenceLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
         occurencePanel.add(occurenceLabel);
         occurencePanel.add(occurenceFromTextField);

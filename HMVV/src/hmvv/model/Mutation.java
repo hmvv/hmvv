@@ -1,5 +1,7 @@
 package hmvv.model;
 
+import hmvv.gui.GUICommonTools;
+
 import java.util.ArrayList;
 
 public class Mutation {
@@ -495,6 +497,13 @@ public class Mutation {
     public void setOncokbID() {
        if (this.getOnco_Protein_Change() != null) {
             this.oncokbID = this.getGene() + "-" + this.getOnco_Protein_Change();
+       } else{
+           String[] getHGVSpArray = this.getHGVSp().split("\\.");
+           String ENSP="None";
+           if(getHGVSpArray.length > 1) {
+               ENSP = getHGVSpArray[2];
+           }
+           this.oncokbID = this.getGene() + "-" + GUICommonTools.abbreviationtoLetter(ENSP);
        }
     }
 

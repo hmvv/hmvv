@@ -15,18 +15,18 @@ public class VEPTable extends CommonTable{
 
         @Override
         protected HMVVTableColumn[] constructCustomColumns(){
-            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 15, 16, 17, 18);
+            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 7, 8, 9, 10);
         }
 
         @Override
         protected void handleMouseClick(int column) throws Exception{
-           if(column == 15){
+           if(column == 7){
+               searchGoogleForDNAChange();
+           }else if(column == 8){
                 searchGoogleForProteinChange();
-           }else if(column == 16){
-                searchGoogleForProteinChange();
-           }else if(column == 17) {
+           }else if(column == 9) {
                searchSNP();
-           }else if (column == 18){
+           }else if (column == 10){
                searchPubmed();
            }
         }
