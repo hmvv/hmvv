@@ -74,7 +74,8 @@ public class MutationFilterPanel extends JPanel {
 		selectAllCheckbox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-					handleSelectAllClick(selectAllCheckbox.isSelected());
+
+				handleSelectAllClick(selectAllCheckbox.isSelected());
 			}
 		});
 
@@ -257,7 +258,7 @@ public class MutationFilterPanel extends JPanel {
 		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
 		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
-		occurenceFromTextField.setText(Configurations.MIN_OCCURENCE_FILTER+"");
+		occurenceFromTextField.setText(Configurations.MAX_OCCURENCE_FILTER+"");
 		maxPopulationFrequencyG1000TextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
@@ -369,7 +370,7 @@ public class MutationFilterPanel extends JPanel {
     private void handleSelectAllClick(boolean choice) {
 		for (int i = 0; i < mutationList.getMutationCount(); i++) {
 			Mutation mutation = mutationList.getMutation(i);
-			if (choice==true){mutation.setSelected(true);}
+			if (choice){mutation.setSelected(true);}
 			else {mutation.setSelected(false);}
 		}
 	}

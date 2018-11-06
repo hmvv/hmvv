@@ -187,7 +187,7 @@ public class DatabaseCommands {
 
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, t1.tumorSource, t1.tumorPercent,"
 
-				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.asianFreq, t4.afrFreq, t4.eurFreq,"
+				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
 
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
 
@@ -376,7 +376,8 @@ public class DatabaseCommands {
 			mutation.setTotalCount(getIntegerOrNull(rs, "totalCount"));
 			mutation.setAltGlobalFreq(getDoubleOrNull(rs, "altGlobalFreq"));
 			mutation.setAmericanFreq(getDoubleOrNull(rs, "americanFreq"));
-			mutation.setAsianFreq(getDoubleOrNull(rs, "asianFreq"));
+			mutation.setEastAsianFreq(getDoubleOrNull(rs, "eastAsianFreq"));
+			mutation.setSouthAsianFreq(getDoubleOrNull(rs, "southAsianFreq"));
 			mutation.setAfricanFreq(getDoubleOrNull(rs, "afrFreq"));
 			mutation.setEurFreq(getDoubleOrNull(rs, "eurFreq"));
 

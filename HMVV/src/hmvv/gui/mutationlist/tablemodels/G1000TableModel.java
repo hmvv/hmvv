@@ -25,7 +25,8 @@ public class G1000TableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.totalCountColumn);
 		columns.add(MutationTableModelColumn.altGlobalFreqColumn);
 		columns.add(MutationTableModelColumn.americanFreqColumn);
-		columns.add(MutationTableModelColumn.asianFreqColumn);
+		columns.add(MutationTableModelColumn.eastAsianFreqColumn);
+		columns.add(MutationTableModelColumn.southAsianFreqColumn);
 		columns.add(MutationTableModelColumn.afrFreqColumn);
 		columns.add(MutationTableModelColumn.eurFreqColumn);
 		return columns;

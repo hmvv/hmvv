@@ -49,7 +49,8 @@ public class Mutation {
     private Integer totalCount;
     private Double altGlobalFreq;
     private Double americanFreq;
-    private Double asianFreq;
+    private Double eastAsianFreq;
+    private Double southAsianFreq;
     private Double afrFreq;
     private Double eurFreq;
 
@@ -354,12 +355,16 @@ public class Mutation {
         this.americanFreq = americanFreq;
     }
 
-    public Double getAsianFreq() {
-        return asianFreq;
+    public Double getEastAsianFreq() {
+        return eastAsianFreq;
     }
+    public Double getSouthAsianFreq() { return southAsianFreq; }
 
-    public void setAsianFreq(Double asianFreq) {
-        this.asianFreq = asianFreq;
+    public void setEastAsianFreq(Double eastAsianFreq) {
+        this.eastAsianFreq = eastAsianFreq;
+    }
+    public void setSouthAsianFreq(Double southAsianFreq) {
+        this.southAsianFreq = southAsianFreq;
     }
 
     public Double getAfricanFreq() {

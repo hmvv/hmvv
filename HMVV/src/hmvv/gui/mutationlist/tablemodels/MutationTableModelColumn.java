@@ -220,10 +220,15 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			Double.class,
 			(Mutation mutation) -> mutation.getAmericanFreq());
 	
-	public static final MutationTableModelColumn asianFreqColumn = new MutationTableModelColumn("1000 Genomes Project: Asian Freqency",
-			"g1-asianFreq",
+	public static final MutationTableModelColumn eastAsianFreqColumn = new MutationTableModelColumn("1000 Genomes Project:  East Asian Freqency",
+			"g1-eastAsianFreq",
 			Double.class,
-			(Mutation mutation) -> mutation.getAsianFreq());
+			(Mutation mutation) -> mutation.getEastAsianFreq());
+
+	public static final MutationTableModelColumn southAsianFreqColumn = new MutationTableModelColumn("1000 Genomes Project: South Asian Freqency",
+			"g1-southAsianFreq",
+			Double.class,
+			(Mutation mutation) -> mutation.getSouthAsianFreq());
 	
 	public static final MutationTableModelColumn afrFreqColumn = new MutationTableModelColumn("1000 Genomes Project: African Freqency",
 			"g1-afrFreq",

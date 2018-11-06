@@ -112,6 +112,7 @@ public class AnnotationFrame extends JFrame {
 		mutationTypeComboBox.addItem("Germline");
 		mutationTypeComboBox.addItem("Unknown");
 		mutationTypeComboBox.addItem("Artifact");
+		mutationTypeComboBox.addItem("Not Confirmed Somatic");
 		
 		previousGeneAnnotationButton = new JButton("Previous");
 		if (geneAnnotationHistory.size() <= 1) { 	

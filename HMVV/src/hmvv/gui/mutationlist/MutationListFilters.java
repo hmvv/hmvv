@@ -169,7 +169,7 @@ class MaxOccurrenceFilter implements Filter{
 	
 	@Override
 	public boolean exclude(Mutation mutation) {
-		int maxOccurence = GUICommonTools.getNumber(maxOccurrenceTextField, Configurations.MIN_OCCURENCE_FILTER);
+		int maxOccurence = GUICommonTools.getNumber(maxOccurrenceTextField, Configurations.MAX_OCCURENCE_FILTER);
 		if(mutation.getOccurrence() != null){
 			int occurrence = mutation.getOccurrence();
 			if(maxOccurence < occurrence){
