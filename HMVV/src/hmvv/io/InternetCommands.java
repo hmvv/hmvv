@@ -27,6 +27,11 @@ public class InternetCommands {
 		browseToURL("http://oncokb.org/#/gene/"+terms[0]+"/alteration/"+ terms[1] );
 	}
 
+	public static void searchPmkb(String term) throws Exception{
+		String[] terms = term.split("-");
+		browseToURL("https://pmkb.weill.cornell.edu/search?utf8=&search="+terms[0]+"+"+ terms[1] );
+	}
+
 	public static void searchGoogle(String term) throws Exception{
 		browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
 	}

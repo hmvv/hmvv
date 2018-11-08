@@ -54,6 +54,9 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private CivicTable civicTabTable;
 	private CivicTableModel civicTabTableModel;
 
+	private PmkbTable pmkbTabTable;
+	private PmkbTableModel pmkbTabTableModel;
+
 	private JScrollPane basicTabScrollPane;
 	private JScrollPane vepTabScrollPane;
 	private JScrollPane cosmicTabScrollPane;
@@ -62,6 +65,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private JScrollPane gnomadTabScrollPane;
 	private JScrollPane oncokbTabScrollPane;
 	private JScrollPane civicTabScrollPane;
+	private JScrollPane pmkbTabScrollPane;
 
 	private MutationList mutationList;
 	private MutationListFilters mutationListFilters;
@@ -185,6 +189,10 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		civicTabTableModel = new CivicTableModel(mutationList);
 		civicTabTable = new CivicTable(this, civicTabTableModel);
 		civicTabTable.setAutoCreateRowSorter(true);
+
+		pmkbTabTableModel = new PmkbTableModel(mutationList);
+		pmkbTabTable = new PmkbTable(this, pmkbTabTableModel);
+		pmkbTabTable.setAutoCreateRowSorter(true);
 	}
 	
 	private void layoutComponents(){
@@ -196,6 +204,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		gnomadTabScrollPane = new JScrollPane(gnomadTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		oncokbTabScrollPane = new JScrollPane(oncokbTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		civicTabScrollPane = new JScrollPane(civicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		pmkbTabScrollPane =  new JScrollPane(pmkbTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Basic", null, basicTabScrollPane, null);
@@ -206,6 +215,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		tabbedPane.addTab("Gnomad", null, gnomadTabScrollPane, null);
 		tabbedPane.addTab("Oncokb", null, oncokbTabScrollPane, null);
 		tabbedPane.addTab("Civic", null, civicTabScrollPane, null);
+		tabbedPane.addTab("PMKB", null, pmkbTabScrollPane, null);
 
 		selectedTable = basicTabTable;
 		selectedScrollPane = basicTabScrollPane;
@@ -264,7 +274,10 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 				}else if(selectedIndex == 7){
 					selectedTable = civicTabTable;
 					selectedScrollPane = civicTabScrollPane;
-	        	}else{
+	        	}else if(selectedIndex == 8){
+					selectedTable = pmkbTabTable;
+					selectedScrollPane = pmkbTabScrollPane;
+				}else{
 	        		//undefined
 	        		return;
 	        	}

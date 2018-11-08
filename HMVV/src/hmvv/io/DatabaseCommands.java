@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import hmvv.gui.GUICommonTools;
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
@@ -200,7 +201,7 @@ public class DatabaseCommands {
 				+ " left join db_g1000 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
 
-				+ " left join db_clinvar_new as t5"
+				+ " left join db_clinvar as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				
 				+ " left join db_gnomad as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
@@ -211,7 +212,7 @@ public class DatabaseCommands {
 		if(getFilteredData) {
 			where = " !" + where;
 		}
-		query = query + " and " + where;
+		query = query + " and " + where ;
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
@@ -279,6 +280,29 @@ public class DatabaseCommands {
 			mutation.setOnco_Protein_Change_LF(getStringOrBlank(rs, "Protein_Change_LF"));
 			mutation.setOncogenicity(getStringOrBlank(rs, "Oncogenicity"));
 			mutation.setOnco_MutationEffect(getStringOrBlank(rs, "Mutation_Effect"));
+		}
+		preparedStatement.close();
+	}
+
+	public static void updatePmkbInfo(Mutation mutation) throws Exception{
+
+		String ENSP = "";
+		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
+		if(getHGVSpArray.length > 1) {
+			ENSP = GUICommonTools.abbreviationtoLetter(getHGVSpArray[2]);
+		}else {
+			//TODO What to do here?
+			return;
+		}
+
+		String query = "select tumor_type,tissue_type from db_pmkb where gene = ? and variant = ? limit 1";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, mutation.getGene());
+		preparedStatement.setString(2, ENSP);
+		ResultSet rs = preparedStatement.executeQuery();
+		if(rs.next()){
+			mutation.setPmkb_tumor_type(getStringOrBlank(rs, "tumor_type"));
+			mutation.setPmkb_tissue_type(getStringOrBlank(rs, "tissue_type"));
 		}
 		preparedStatement.close();
 	}

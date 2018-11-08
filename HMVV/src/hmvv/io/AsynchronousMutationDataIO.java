@@ -72,6 +72,10 @@ public class AsynchronousMutationDataIO {
 		DatabaseCommands.updateCivicInfo(mutation);
 		mutation.setCivicID();
 
+		//pmkb
+		DatabaseCommands.updatePmkbInfo(mutation);
+		mutation.setPmkbID();
+
 		// default selection
 		mutation.setSelected(false);
 	}

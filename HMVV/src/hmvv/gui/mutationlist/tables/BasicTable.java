@@ -16,14 +16,14 @@ public class BasicTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 13, 15, 18);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 9, 11, 14);
 	}
 
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		if (column == 0){
 			return true;
-		} else if (column == 19){
+		} else if (column == 15){
 			return true;
 		} else {
 			return false;
@@ -32,11 +32,11 @@ public class BasicTable extends CommonTable{
 
 	@Override
 	protected void handleMouseClick(int column) throws Exception{
-		if (column == 13) {
+		if (column == 9) {
 			searchCosmic();
-		}else if(column == 15){
+		}else if(column == 11){
 			handleAnnotationClick();
-		}else if(column == 18){
+		}else if(column == 14){
 			new Thread(new Runnable() {
 				public void run() {
 					try {
@@ -46,7 +46,7 @@ public class BasicTable extends CommonTable{
 					}
 				}
 			}).start();			
-		}else if (column ==19) {
+		}else if (column ==15) {
 			handleLoadIGVCheckBoxClick();
 		}
 	}

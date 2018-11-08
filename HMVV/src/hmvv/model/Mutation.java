@@ -79,6 +79,11 @@ public class Mutation {
     private String civic_variant_origin;
     private String civic_variant_url;
 
+    //pmkb
+    private String pmkbID;
+    private String pmkb_tumor_type;
+    private String pmkb_tissue_type;
+
     public Mutation() {
 
     }
@@ -553,5 +558,29 @@ public class Mutation {
 
     public void setCivic_variant_url(String civic_variant_url) {
         this.civic_variant_url = civic_variant_url;
+    }
+
+    public String getPmkbID() {
+        return pmkbID;
+    }
+
+    public String getPmkb_tumor_type() {
+        return pmkb_tumor_type;
+    }
+
+    public String getPmkb_tissue_type() {
+        return pmkb_tissue_type;
+    }
+
+    public void setPmkbID() {
+        this.pmkbID = this.getOncokbID();
+    }
+
+    public void setPmkb_tumor_type(String pmkb_tumor_type) {
+        this.pmkb_tumor_type = pmkb_tumor_type;
+    }
+
+    public void setPmkb_tissue_type(String pmkb_tissue_type) {
+        this.pmkb_tissue_type = pmkb_tissue_type;
     }
 }

@@ -16,11 +16,6 @@ public class BasicTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.geneColumn);
 		columns.add(MutationTableModelColumn.exonsColumn);
 
-		columns.add(MutationTableModelColumn.chrColumn);
-		columns.add(MutationTableModelColumn.posColumn);
-		columns.add(MutationTableModelColumn.refColumn);
-		columns.add(MutationTableModelColumn.altColumn);
-
 		columns.add(MutationTableModelColumn.typeColumn);
 		columns.add(MutationTableModelColumn.altFreqColumn);
 		columns.add(MutationTableModelColumn.altGlobalFreqColumn);

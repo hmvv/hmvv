@@ -326,6 +326,7 @@ public class SSHConnection {
 	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, MutationFeaturePanel.ServerTask serverTask) throws Exception {
 
 	    //create a local temp file
+		int bamCoverage = 50;
         File tempFile = File.createTempFile(sample.sampleName+"_"+sample.runID+"_",".params");
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
         bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
@@ -335,8 +336,8 @@ public class SSHConnection {
 
         for (int index = 0; index < selectedMutations.size(); index++) {
             Mutation mutation = selectedMutations.get(index);
-            Integer lower = Integer.parseInt(mutation.getPos()) - 20;
-            Integer higher = Integer.parseInt(mutation.getPos()) + 20;
+            Integer lower = Integer.parseInt(mutation.getPos()) - bamCoverage;
+            Integer higher = Integer.parseInt(mutation.getPos()) + bamCoverage;
             String line = mutation.getChr() + ':' + lower.toString() + '-' + higher.toString();
             bw.write(line);
             bw.newLine();
