@@ -859,7 +859,7 @@ public class DatabaseCommands {
 
 		return geneAmpliconTrends;
 	}
-
+	
 	/**
 	 *
 	 * @param assay
@@ -878,8 +878,9 @@ public class DatabaseCommands {
 		String geneFilter;
 		if(assay.equals("heme")) {
 			geneFilter =
-					//TODO choose between COSM1135366 and COSM521? COSM1140132 and COSM532? They have the same coordinates and seem to track together.
-					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM1135366' or cosmicID = 'COSM521' or cosmicID = 'COSM1140132' or cosmicID = 'COSM532')"
+					//COSM1140132 and COSM532 have the same coordinates and track together
+					//COSM1135366 and COSM521 have the same coordinates and track together
+					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM521' or cosmicID = 'COSM532')"
 					+ " and assays.assayName = 'heme' ";
 		}else if(assay.equals("gene50")) {
 			geneFilter =
@@ -920,7 +921,4 @@ public class DatabaseCommands {
 
 		return geneVariantTrends;
 	}
-
-
-
 }

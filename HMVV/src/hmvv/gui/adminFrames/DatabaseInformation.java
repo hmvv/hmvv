@@ -46,7 +46,9 @@ public class DatabaseInformation extends JDialog {
 
     private void createComponents() {
         table = new JTable(tableModel){
-        @Override
+			private static final long serialVersionUID = 1L;
+
+		@Override
         public Component prepareRenderer (TableCellRenderer renderer,int row, int column){
             try {
                 Component c = super.prepareRenderer(renderer, row, column);

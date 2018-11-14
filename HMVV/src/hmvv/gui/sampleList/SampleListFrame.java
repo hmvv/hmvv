@@ -206,37 +206,38 @@ public class SampleListFrame extends JFrame {
 					continue;
 				}
 				
-				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
-				qualityControlMenuItem.add(assayMenuItem);
-				assayMenuItem.addActionListener(new ActionListener(){
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						try {
-							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
-							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
-						} catch (Exception e1) {
-							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
-						}
-					}
-				});
-				if(assay.equals("neuro")) {
-					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
-				}
-				assayMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
-				qualityControlMenuItem.add(assayMenuItem);
-				assayMenuItem.addActionListener(new ActionListener(){
+//				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
+//				qualityControlMenuItem.add(assayMenuItem);
+//				assayMenuItem.addActionListener(new ActionListener(){
+//					@Override
+//					public void actionPerformed(ActionEvent e) {
+//						try {
+//							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
+//							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
+//						} catch (Exception e1) {
+//							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
+//						}
+//					}
+//				});
+//				if(assay.equals("neuro")) {
+//					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
+//				}
+				JMenuItem variantAlleleFrequencyMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
+				qualityControlMenuItem.add(variantAlleleFrequencyMenuItem);
+				variantAlleleFrequencyMenuItem.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try {
 							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
-							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+							QualityControlFrame qcFrame = new QualityControlFrame(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+							qcFrame.setVisible(true);
 						} catch (Exception e1) {
 							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 						}
 					}
 				});
 				
-				qualityControlMenuItem.addSeparator();
+//				qualityControlMenuItem.addSeparator();
 			}
 		}catch(Exception e){
 			//unable to get assays
