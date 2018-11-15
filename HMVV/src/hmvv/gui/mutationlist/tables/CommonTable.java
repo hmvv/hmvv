@@ -175,7 +175,7 @@ public abstract class CommonTable extends JTable{
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
 		String gene = (getModel().getValueAt(modelRow, 1)).toString();
-		InternetCommands.searchGoogle(gene);
+		InternetCommands.searchGene(gene);
 	}
 
 	protected void searchGoogleForDNAChange() throws Exception{

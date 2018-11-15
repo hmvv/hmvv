@@ -326,7 +326,7 @@ public class SSHConnection {
 	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, MutationFeaturePanel.ServerTask serverTask) throws Exception {
 
 	    //create a local temp file
-		int bamCoverage = 50;
+		int bamCoverage = 25;
         File tempFile = File.createTempFile(sample.sampleName+"_"+sample.runID+"_",".params");
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
         bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
@@ -346,7 +346,7 @@ public class SSHConnection {
 
 
 		loadIGVButton.setText("Sending mutations to server.");
-        System.out.println(System.currentTimeMillis() + "-" + "Copying param file");
+
         // load file to server
         Channel channel = null;
         try {
@@ -364,7 +364,6 @@ public class SSHConnection {
                 channel.disconnect();
             }
         }
-        System.out.println(System.currentTimeMillis() + "-" + "Finished copying param file");
         
         //delete local temp file
         deleteFile(tempFile);
@@ -382,10 +381,8 @@ public class SSHConnection {
 	}
 
 	private static void createTempBamFileONServer(String fileName) throws Exception {
-		System.out.println(System.currentTimeMillis() + "-" + "Running creatlocalbam");
 	    String command = "/var/pipelines_ngs_test/shell/createLocalBam.sh -f "+ fileName;
         CommandResponse rs = executeCommandAndGetOutput(command);
-        System.out.println(System.currentTimeMillis() + "-" + "Finished Running creatlocalbam");
         if(rs.exitStatus != 0) {
             throw new Exception("Error creating local BAM file on server.");
         }

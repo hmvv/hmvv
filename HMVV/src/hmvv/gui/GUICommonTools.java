@@ -20,6 +20,7 @@ public class GUICommonTools {
 	public static final Color COMPLETE_COLOR = new Color(204,255,204);
 	public static final Color WHITE_COLOR = Color.WHITE;
 	public static final Color RUNNING_COLOR = new Color(255,255,204);
+	public static final Color BLACK_COLOR = new Color(0,0,0);
 	
 	public static final Color PROGRESS_BACKGROUND_COLOR = Color.YELLOW;
 	public static final Color PROGRESS_FOREGROUND_COLOR = Color.GREEN.darker();

@@ -17,11 +17,12 @@ public class BasicTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.exonsColumn);
 
 		columns.add(MutationTableModelColumn.typeColumn);
+		columns.add(MutationTableModelColumn.variantClassificationColumn);
 		columns.add(MutationTableModelColumn.altFreqColumn);
 		columns.add(MutationTableModelColumn.altGlobalFreqColumn);
 		columns.add(MutationTableModelColumn.gnomadAltFreqColumn);
 		columns.add(MutationTableModelColumn.readDPColumn);
-		columns.add(MutationTableModelColumn.variantClassificationColumn);
+		columns.add(MutationTableModelColumn.altReadDPColumn);
 
 		columns.add(MutationTableModelColumn.cosmicIDColumn);
 

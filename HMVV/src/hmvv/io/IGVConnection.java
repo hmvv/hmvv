@@ -77,25 +77,6 @@ public class IGVConnection {
 		if(igvBusy.get()) {
 			return "Command ignored. Previous IGV command still in process.";
 		}
-		
-		try{
-			int soTimeout = 10*1000;//10 seconds
-			igvBusy.set(true);
-			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			return executeCommand("goto " + coordinate.getChr() + ":" + coordinate.getPos(), soTimeout);
-		}catch(ConnectException e1){
-			throw new Exception("Coordinate not loaded. Please make sure IGV is running.");
-		}finally {
-			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			igvBusy.set(false);
-		}
-	}
-
-	public static String loadCoordinateIntoIGV_2(Component parent, Coordinate coordinate) throws Exception {
-		if(igvBusy.get()) {
-			return "Command ignored. Previous IGV command still in process.";
-		}
-
 		try{
 			int soTimeout = 10*1000;//10 seconds
 			igvBusy.set(true);

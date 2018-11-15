@@ -3,11 +3,8 @@ import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.SSHConnection;
 import hmvv.model.Database;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JTable;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
+
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.Rectangle;
@@ -33,7 +30,7 @@ public class DatabaseInformation extends JDialog {
         databases = new ArrayList<Database>();
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.60), (int)(bounds.height*.2));
+        setSize((int)(bounds.width*.80), (int)(bounds.height*.30));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setModalityType(ModalityType.APPLICATION_MODAL);
@@ -45,50 +42,45 @@ public class DatabaseInformation extends JDialog {
     }
 
     private void createComponents() {
-        table = new JTable(tableModel){
-			private static final long serialVersionUID = 1L;
-
-		@Override
-        public Component prepareRenderer (TableCellRenderer renderer,int row, int column){
-            try {
-                Component c = super.prepareRenderer(renderer, row, column);
-                if (isCellSelected(row, column)) {
-                    c.setBackground(new Color(51, 153, 255));
-                }
-                return c;
-            } catch (Exception e) {
-                return null; }
-            }
-        };
-
+        table = new JTable(tableModel);
+        table.setRowHeight(25);
         table.setDefaultRenderer(Object.class, new TableCellRenderer(){
             private DefaultTableCellRenderer DEFAULT_RENDERER =  new DefaultTableCellRenderer();
 
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = DEFAULT_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
+                DEFAULT_RENDERER.setHorizontalAlignment(JLabel.CENTER);
                 if((column==3) && (Integer.parseInt(value.toString()) > 24)){
                     c.setBackground(GUICommonTools.ERROR_COLOR);
+                    c.setForeground(GUICommonTools.BLACK_COLOR);
                 }else if((column==3) && (Integer.parseInt(value.toString()) > 11)){
                     c.setBackground(GUICommonTools.RUNNING_COLOR);
+                    c.setForeground(GUICommonTools.BLACK_COLOR);
                 }else if((column==3) && (Integer.parseInt(value.toString()) <= 11)){
                     c.setBackground(GUICommonTools.COMPLETE_COLOR);
+                    c.setForeground(GUICommonTools.BLACK_COLOR);
                 }else{
                     c.setBackground(GUICommonTools.WHITE_COLOR);
+                    c.setForeground(GUICommonTools.BLACK_COLOR);
                 }
                 return c;
             }
         });
+
         ((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment( JLabel.CENTER );
+        table.setDefaultRenderer(String.class, centerRenderer);
+
         tableScrollPane = new JScrollPane();
         tableScrollPane.setViewportView(table);
-        table.getTableHeader().setFont(GUICommonTools.TAHOMA_BOLD_12);
-        table.setFont(GUICommonTools.TAHOMA_BOLD_11);
+        table.getTableHeader().setFont(GUICommonTools.TAHOMA_BOLD_17);
+        table.setFont(GUICommonTools.TAHOMA_BOLD_14);
     }
 
     private void layoutComponents(){
-    add(tableScrollPane);
+        add(tableScrollPane);
     }
 
     private void buildDatabaseModelFromCSV() throws Exception {

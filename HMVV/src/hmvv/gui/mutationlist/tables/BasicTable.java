@@ -16,14 +16,14 @@ public class BasicTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 9, 11, 14);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1,10, 12, 15);
 	}
 
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		if (column == 0){
 			return true;
-		} else if (column == 15){
+		} else if (column == 16){
 			return true;
 		} else {
 			return false;
@@ -32,36 +32,30 @@ public class BasicTable extends CommonTable{
 
 	@Override
 	protected void handleMouseClick(int column) throws Exception{
-		if (column == 9) {
+		if (column == 1) {
+			searchGoogleForGene();
+		}else if (column == 10) {
 			searchCosmic();
-		}else if(column == 11){
+		}else if(column == 12){
 			handleAnnotationClick();
-		}else if(column == 14){
+		}else if(column == 15){
 			new Thread(new Runnable() {
 				public void run() {
 					try {
-						handleIGVClick_2();
+						handleIGVClick();
 					}catch(Exception e) {
 						JOptionPane.showMessageDialog(BasicTable.this, e.getMessage());
 					}
 				}
 			}).start();			
-		}else if (column ==15) {
+		}else if (column ==16) {
 			handleLoadIGVCheckBoxClick();
 		}
 	}
 
-//	private void handleIGVClick() throws Exception{
-//		Mutation mutation = getSelectedMutation();
-//		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
-//		if(result.length() > 0) {
-//			JOptionPane.showMessageDialog(this, result);
-//		}
-//	}
-
-	private void handleIGVClick_2() throws Exception{
+	private void handleIGVClick() throws Exception{
 		Mutation mutation = getSelectedMutation();
-		String result = IGVConnection.loadCoordinateIntoIGV_2(this, mutation.getCoordinate());
+		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
 		if(result.length() > 0) {
 			JOptionPane.showMessageDialog(this, result);
 		}

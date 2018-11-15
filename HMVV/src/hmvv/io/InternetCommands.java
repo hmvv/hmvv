@@ -35,7 +35,9 @@ public class InternetCommands {
 	public static void searchGoogle(String term) throws Exception{
 		browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
 	}
-
+	public static void searchGene(String term) throws Exception{
+		browseToURL("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + term );
+	}
 	public static void searchSNP(String ID) throws Exception{
 		if(ID.contains(",")){
 			String searchTerm = "";
