@@ -198,10 +198,10 @@ public class DatabaseCommands {
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
 				+ " join assays as t6 on t1.assayID = t6.assayID"
 
-				+ " left join db_g1000 as t4"
+				+ " left join db_g1000_phase3v1 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
 
-				+ " left join db_clinvar as t5"
+				+ " left join db_clinvar_72018 as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				
 				+ " left join db_gnomad as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
