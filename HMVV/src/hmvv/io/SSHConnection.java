@@ -430,9 +430,21 @@ public class SSHConnection {
 		}
 		return databases;
 	}
+    
+    public static ArrayList<String> readConfigurationFile() throws Exception{
+    	String command = "cat /var/pipelines_" + Configurations.getEnvironment() + "/config/config.ini";
+		CommandResponse rs = executeCommandAndGetOutput(command);
+		if(rs.exitStatus != 0) {
+			throw new Exception(String.format("Error finding or reading configuration file."));
+		}
+		
+		ArrayList<String> configurations = new ArrayList<String>();
+		for(String line : rs.responseLines) {
+			if(line.equals("")){
+				continue;
+			}
+			configurations.add(line);
+		}
+		return configurations;
+    }
 }
-
-
-
-
-

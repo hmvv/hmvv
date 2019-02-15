@@ -9,7 +9,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.Rectangle;
 import java.awt.Component;
-import java.awt.Color;
 import java.util.ArrayList;
 
 public class DatabaseInformation extends JDialog {

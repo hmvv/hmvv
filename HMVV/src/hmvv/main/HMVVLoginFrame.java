@@ -22,6 +22,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
+import hmvv.io.LIS.LISConnection;
 
 public class HMVVLoginFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -51,7 +52,7 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try {
-			Configurations.loadConfigurations(null, configurationStream);
+			Configurations.loadLocalConfigurations(null, configurationStream);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage() + "\nShutting down.");
 			return;
@@ -188,11 +189,27 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try {
+			loginButton.setText("Getting configuration...");
+			Configurations.loadServerConfigurations();
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Server configuration load failed. Please contact the system administrator.");
+			return;
+		}
+		
+		try {
 			loginButton.setText("Connecting to database...");
 			DatabaseCommands.connect();
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Database connection failed. Please contact the system administrator.");
 			return;
+		}
+		
+		try {
+			loginButton.setText("Connecting to LIS...");
+			LISConnection.connect();
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "LIS connection failed. Please contact the system administrator.");
+			//Don't return, as LIS connection is not critical
 		}
 		
 		try{

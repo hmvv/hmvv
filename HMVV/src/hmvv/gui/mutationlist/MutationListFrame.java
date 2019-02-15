@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -80,59 +81,27 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private MutationFeaturePanel mutationFeaturePanel;
 	
 	private volatile boolean isWindowClosed;
-	
-	//TODO Refactor common code isntead of using sample == null so can be used for MutationList or MutationSearch.
-	public MutationListFrame(SampleListFrame parent, MutationList mutationList){
-		super(parent);
-		String title = "Mutation Search Results";
-		setTitle(title);
 		
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		
-		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
-		setMinimumSize(new Dimension(900, getHeight()/2));
-		
-		this.mutationList = mutationList;
-		
-		constructComponents();
-		layoutComponents();
-		createSortChangeListener();
-		setLocationRelativeTo(parent);
-		
-		isWindowClosed = false;
-		addWindowListener(new WindowAdapter(){
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				isWindowClosed = true;
-			}
-		});
-		
-		AsynchronousMutationDataIO.loadMissingDataAsynchronous(mutationList, this);
-	}
-	
 	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
 		super(parent);
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
 		setTitle(title);
 		
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		
-		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
-		setMinimumSize(new Dimension(1220, getHeight()/2));
-		
-		this.sample = sample;
 		this.mutationList = mutationList;
+		this.sample = sample;
 		this.mutationListFilters = new MutationListFilters();
 		
 		constructComponents();
 		layoutComponents();
 		createSortChangeListener();
-		setLocationRelativeTo(parent);
 		
-		mutationFilterPanel.resetFilters();
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		Rectangle bounds = GUICommonTools.getBounds(parent);
+		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
+		setMinimumSize(new Dimension(700, getHeight()/3));
+		
+		setLocationRelativeTo(parent);
 		
 		isWindowClosed = false;
 		addWindowListener(new WindowAdapter(){
@@ -150,10 +119,11 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		
-		if(sample != null) {
-			mutationFilterPanel = new MutationFilterPanel(this,sample, mutationList, mutationListFilters);
-			mutationFeaturePanel = new MutationFeaturePanel(this, sample, mutationList);
-		}
+		mutationFilterPanel = new MutationFilterPanel(this,sample, mutationList, mutationListFilters);
+		mutationFilterPanel.resetFilters();
+		
+		mutationFeaturePanel = new MutationFeaturePanel(this, sample, mutationList);
+		
 		constructTabs();
 	}
 	
@@ -196,7 +166,9 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	}
 	
 	private void layoutComponents(){
-		basicTabScrollPane = new JScrollPane(basicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		basicTabScrollPane = new JScrollPane(basicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		basicTabTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+		
 		vepTabScrollPane = new JScrollPane(vepTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		cosmicTabScrollPane = new JScrollPane(cosmicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		g1000TabScrollPane = new JScrollPane(g1000TabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -222,10 +194,8 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
-		if(sample != null) {
-			northPanel.add(mutationFilterPanel, BorderLayout.WEST);
-			northPanel.add(mutationFeaturePanel, BorderLayout.CENTER);
-		}
+		northPanel.add(mutationFilterPanel, BorderLayout.WEST);
+		northPanel.add(mutationFeaturePanel, BorderLayout.CENTER);
 		
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BorderLayout());

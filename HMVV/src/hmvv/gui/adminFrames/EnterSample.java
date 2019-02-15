@@ -7,6 +7,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -25,6 +26,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.io.LIS.LISConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
@@ -143,10 +145,10 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("CoverageID", comboBoxCoverageIDList));
 		mainPanel.add(new RowPanel("VariantCallerID", comboBoxVariantCallerIDList));
 		mainPanel.add(new RowPanel("SampleName", comboBoxSample));
+		mainPanel.add(new RowPanel("Pathology Number", textPathologyNumber));
+		mainPanel.add(new RowPanel("Order Number", textOrderNumber));
 		mainPanel.add(new RowPanel("Last Name", textlastName));
 		mainPanel.add(new RowPanel("First Name", textFirstName));
-		mainPanel.add(new RowPanel("Order Number", textOrderNumber));
-		mainPanel.add(new RowPanel("Pathology Number", textPathologyNumber));
 		mainPanel.add(new RowPanel("Tumor Source", textTumorSource));
 		mainPanel.add(new RowPanel("Tumor Percent", textPercent));
 		mainPanel.add(new RowPanel("Patient History", textPatientHistory));
@@ -268,6 +270,31 @@ public class EnterSample extends JDialog {
 			public void keyTyped(KeyEvent arg0) {}
 		});
 		sampleIDSelectionChanged();
+		//TODO Work on barcode integration
+		textPathologyNumber.addKeyListener(new KeyListener() {
+			@Override
+			public void keyPressed(KeyEvent arg0) {
+				if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+					if(textPathologyNumber.getText().length() > 0) {
+						try {
+							String pathNumber = textPathologyNumber.getText();
+							String labOrderNumber = LISConnection.getLabOrderNumber(pathNumber);
+							if(labOrderNumber != null) {
+								updateFieldsFromLIS(labOrderNumber);
+							}
+						}catch(Exception e) {
+							JOptionPane.showMessageDialog(EnterSample.this, e.getMessage());
+						}
+					}
+				}
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent arg0) {}
+
+			@Override
+			public void keyTyped(KeyEvent arg0) {}
+		});
 	}
 	
 	private void findInstrument() throws Exception{
@@ -331,7 +358,7 @@ public class EnterSample extends JDialog {
 		ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runID, variantCallerID);
 		fillSample(sampleIDList);
 	}
-
+	
 	private void fillSample(ArrayList<String> samples){
 		comboBoxSample.removeAllItems();
 		for(int i =0; i < samples.size(); i++){
@@ -354,6 +381,7 @@ public class EnterSample extends JDialog {
 	private void sampleIDSelectionChanged(){
 		enterSampleButton.setText("Enter Sample");
 		String runID = textRunID.getText();
+		String assay = (String)comboBoxAssay.getSelectedItem();
 		String instrument = (String)comboBoxInstrument.getSelectedItem();
 		String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
 		String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
@@ -374,7 +402,25 @@ public class EnterSample extends JDialog {
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
 		}else{
 			clearFields(true);
+			
+			//TODO refactor this workflow logic somehow
+			try {
+				if(assay.equals("heme")) {
+					textOrderNumber.setText(sampleName);
+					updateFieldsFromLIS(sampleName);
+				}else {
+					//need to wait for path number
+				}
+			}catch(Exception e) {
+				JOptionPane.showMessageDialog(EnterSample.this, e.getMessage());
+			}
 		}
+	}
+	
+	private void updateFieldsFromLIS(String labOrderNumber) throws SQLException {
+		String[] patientName = LISConnection.getPatientName(labOrderNumber);
+		textFirstName.setText(patientName[0]);
+		textlastName.setText(patientName[1]);
 	}
 	
 	private void updateFields(String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String note, boolean editable){

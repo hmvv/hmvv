@@ -338,7 +338,8 @@ public class DatabaseCommands {
 		String query = "select count(*) as occurrence from sampleVariants"
 				+ " join samples on samples.sampleID = sampleVariants.sampleID "
 				+ " join assays on assays.assayID = samples.assayID "
-				+ " where sampleVariants.impact != 'No Call' and sampleVariants.chr = ? and sampleVariants.pos = ? and sampleVariants.ref = ? and sampleVariants.alt = ? and assays.assayName = ?";
+				+ " where sampleVariants.impact != 'No Call' and sampleVariants.chr = ? and sampleVariants.pos = ? and sampleVariants.ref = ? and sampleVariants.alt = ? and assays.assayName = ?"
+				+ " and sampleVariants.altFreq >= " + Configurations.ALLELE_FREQ_FILTER;
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());

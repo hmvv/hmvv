@@ -19,6 +19,7 @@ public class GUICommonTools {
 	public static final Color ERROR_COLOR = new Color(255,204,204);
 	public static final Color COMPLETE_COLOR = new Color(204,255,204);
 	public static final Color WHITE_COLOR = Color.WHITE;
+	public static final Color LIGHT_GRAY = new Color(240,240,240);
 	public static final Color RUNNING_COLOR = new Color(255,255,204);
 	public static final Color BLACK_COLOR = new Color(0,0,0);
 	

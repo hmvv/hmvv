@@ -611,12 +611,21 @@ public class SampleListFrame extends JFrame {
 		editSample.addDeleteListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					DatabaseCommands.deleteSample(sample.sampleID);
-					tableModel.deleteSample(modelRow);
+					String result = JOptionPane.showInputDialog(SampleListFrame.this, "Type DELETE to delete this sample.", "Delete sample?", JOptionPane.QUESTION_MESSAGE);
+					if(result == null) {
+						return;
+					}
+					if(result.equals("DELETE")) {
+						DatabaseCommands.deleteSample(sample.sampleID);
+						tableModel.deleteSample(modelRow);
+						JOptionPane.showMessageDialog(SampleListFrame.this, "Sample deleted.");
+						editSample.dispose();
+					}else {
+						JOptionPane.showMessageDialog(SampleListFrame.this, result + " is not DELETE. Deletion cancelled.");
+					}
 				} catch (SQLException e1) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
 				}
-				editSample.dispose();
 			}
 		});
 	}

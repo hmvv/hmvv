@@ -20,7 +20,6 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.main.Configurations;
 import hmvv.model.Sample;
 
 public class EditSampleFrame extends JDialog {
@@ -97,10 +96,6 @@ public class EditSampleFrame extends JDialog {
 
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		
-		if (Configurations.getEnvironment().equals("ngs_live")){
-			btnDelete.setEnabled(false);
-		}
 		
 		layoutComponents();
 		pack();

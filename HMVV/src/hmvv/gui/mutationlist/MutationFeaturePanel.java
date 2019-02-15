@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -13,16 +14,21 @@ import javax.swing.filechooser.FileFilter;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.sampleList.ReportFrame;
+import hmvv.gui.sampleList.ReportFramePatientHistory;
+import hmvv.gui.sampleList.ReportFrameText;
 import hmvv.io.IGVConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.io.SSHConnection;
+import hmvv.io.LIS.LISConnection;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.model.PatientHistory;
 import hmvv.model.Sample;
 
 public class MutationFeaturePanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
+	private JButton patientHistoryButton;
 	private JButton shortReportButton;
 	private JButton longReportButton;
 	private JButton exportButton;
@@ -42,6 +48,13 @@ public class MutationFeaturePanel extends JPanel {
 	}
 
 	private void constructButtons() {
+		patientHistoryButton = new JButton("Patient History");
+		patientHistoryButton.setToolTipText("Obtain the patient's history from the LIS");
+		patientHistoryButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		if(sample.getOrderNumber().length() == 0 && sample.getPathNumber().length() == 0) {
+			patientHistoryButton.setEnabled(false);
+		}
+		
 		shortReportButton = new JButton("Short Report");
 		shortReportButton.setToolTipText("Generate a short report for the mutations marked as reported");
 		shortReportButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
@@ -62,7 +75,9 @@ public class MutationFeaturePanel extends JPanel {
 		ActionListener actionListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (e.getSource() == shortReportButton) {
+				if (e.getSource() == patientHistoryButton) {
+					showPatientHistory();
+				} else if (e.getSource() == shortReportButton) {
 					showShortReportFrame();
 				} else if (e.getSource() == longReportButton) {
 					showLongReportFrame();
@@ -89,6 +104,7 @@ public class MutationFeaturePanel extends JPanel {
 			}
 		};
 
+		patientHistoryButton.addActionListener(actionListener);
 		shortReportButton.addActionListener(actionListener);
 		longReportButton.addActionListener(actionListener);
 		exportButton.addActionListener(actionListener);
@@ -96,9 +112,9 @@ public class MutationFeaturePanel extends JPanel {
 	}
 
 	private void layoutComponents() {
-		Dimension buttonSize = new Dimension(125, 30);
+		Dimension buttonSize = new Dimension(150, 30);
+		patientHistoryButton.setPreferredSize(buttonSize);
 		shortReportButton.setPreferredSize(buttonSize);
-
 		longReportButton.setPreferredSize(buttonSize);
 		exportButton.setPreferredSize(buttonSize);
 
@@ -110,6 +126,7 @@ public class MutationFeaturePanel extends JPanel {
 		GridLayout buttonPanelGridLayout = new GridLayout(0, 1);
 		buttonPanelGridLayout.setVgap(10);
 		gridPanel.setLayout(buttonPanelGridLayout);
+		gridPanel.add(patientHistoryButton);
 		gridPanel.add(shortReportButton);
 		gridPanel.add(longReportButton);
 		gridPanel.add(exportButton);
@@ -138,10 +155,24 @@ public class MutationFeaturePanel extends JPanel {
 		}
 	}
 
+	private void showPatientHistory() {
+		try {
+			String labOrderNumber = sample.getOrderNumber();
+			if(labOrderNumber.length() == 0) {
+				labOrderNumber = LISConnection.getLabOrderNumber(sample.getPathNumber());
+			}
+			ArrayList<PatientHistory> history = LISConnection.getPatientHistory(labOrderNumber);
+			ReportFramePatientHistory reportFrame = new ReportFramePatientHistory(parent, history);
+			reportFrame.setVisible(true);
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
+		}
+	}
+	
 	private void showShortReportFrame() {
 		try {
 			String report = MutationReportGenerator.generateShortReport(mutationList);
-			showReportFrame(report);
+			showReportFrameText("Short Variant Report", report);
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
@@ -150,17 +181,17 @@ public class MutationFeaturePanel extends JPanel {
 	private void showLongReportFrame() {
 		try {
 			String report = MutationReportGenerator.generateLongReport(mutationList);
-			showReportFrame(report);
+			showReportFrameText("Long Variant Report", report);
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 	}
-
-	private void showReportFrame(String report) {
-		ReportFrame reportPanel = new ReportFrame(parent, report);
+	
+	private void showReportFrameText(String title, String report) {
+		ReportFrame reportPanel = new ReportFrameText(parent, title, report);
 		reportPanel.setVisible(true);
 	}
-
+	
 	private void handleIGVButtonClickAsynchronous() throws Exception {
 		if (mutationList.getSelectedMutationCount() == 0 ){
 			String msg = "You have not selected any mutations. Would you like to load the entire BAM file?";
