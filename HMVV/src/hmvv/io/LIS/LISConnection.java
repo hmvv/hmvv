@@ -24,7 +24,11 @@ public class LISConnection{
 		return connection.getPatientHistory(orderNumber);
 	}
 
-	public static String getLabOrderNumber(String pathOrderNumber) throws SQLException{
-		return connection.getLabOrderNumber(pathOrderNumber);
+	public static String getLabOrderNumber(String assay, String enteredPathNumber, String sampleName) throws SQLException{
+		return connection.getLabOrderNumber(assay, enteredPathNumber, sampleName);
+	}
+	
+	public static ArrayList<String> getPathOrderNumbers(String assay, String labOrderNumber, String enteredPathologyNumber) throws SQLException{
+		return connection.getPathOrderNumbers(assay, labOrderNumber, enteredPathologyNumber);
 	}
 }

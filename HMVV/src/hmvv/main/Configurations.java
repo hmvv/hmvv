@@ -209,8 +209,6 @@ public class Configurations {
 		}
 	}
 	
-	public static String DEFAULT_ASSAY = "heme";
-	
 	/*
 	 * SSH server configurations
 	 */

@@ -7,7 +7,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -27,7 +26,6 @@ import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.io.LIS.LISConnection;
-import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
 
@@ -46,8 +44,8 @@ public class EnterSample extends JDialog {
 	private JTextField textDiagnosis;
 	private JTextField textNote;
 	
-	private JComboBox<String> comboBoxAssay;
 	private JComboBox<String> comboBoxInstrument;
+	private JComboBox<String> comboBoxAssay;
 	private JComboBox<String> comboBoxCoverageIDList;
 	private JComboBox<String> comboBoxVariantCallerIDList;
 	private JComboBox<String> comboBoxSample;
@@ -76,25 +74,7 @@ public class EnterSample extends JDialog {
 		createComponents();
 		layoutComponents();
 		activateComponents();
-
-		try{
-			for(String assay : DatabaseCommands.getAllAssays()){
-				comboBoxAssay.addItem(assay);
-			}
-			comboBoxAssay.setSelectedItem(Configurations.DEFAULT_ASSAY);
-		}catch(Exception e){
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error getting Assays from database");
-			dispose();
-			return;
-		}
-		
-		try {
-			findInstrument();
-		} catch (Exception e) {
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error getting Instruments from database");
-			dispose();
-			return;
-		}
+		enableComboBoxes(false, false, false);
 		
 		pack();
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -104,13 +84,28 @@ public class EnterSample extends JDialog {
 	}
 	
 	private void createComponents(){
-		comboBoxAssay = new JComboBox<String>();
 		comboBoxInstrument = new JComboBox<String>();
+		try{
+			for(String instrument : DatabaseCommands.getAllInstruments()){
+				comboBoxInstrument.addItem(instrument);
+			}
+		}catch(Exception e){
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error getting Instruments from database");
+			dispose();
+			return;
+		}
+		
 		textRunID = new JTextField();
 		btnFindRun = new JButton("Find Run");
 		comboBoxCoverageIDList = new JComboBox<String>();
 		comboBoxVariantCallerIDList = new JComboBox<String>();
 		comboBoxSample = new JComboBox<String>();
+		
+		comboBoxAssay = new JComboBox<String>();
+		try {
+			findAssays();
+		} catch (Exception e) {}
+		
 		textlastName = new JTextField();
 		textFirstName = new JTextField();
 		textOrderNumber = new JTextField();
@@ -139,12 +134,12 @@ public class EnterSample extends JDialog {
 		GridLayout gridLayout = new GridLayout(0,1);
 		gridLayout.setVgap(10);
 		mainPanel.setLayout(gridLayout);
-		mainPanel.add(new RowPanel("Assay", comboBoxAssay));
 		mainPanel.add(new RowPanel("Instrument", comboBoxInstrument));
 		mainPanel.add(new RowPanel("RunID", runIDPanel));
 		mainPanel.add(new RowPanel("CoverageID", comboBoxCoverageIDList));
 		mainPanel.add(new RowPanel("VariantCallerID", comboBoxVariantCallerIDList));
 		mainPanel.add(new RowPanel("SampleName", comboBoxSample));
+		mainPanel.add(new RowPanel("Assay", comboBoxAssay));
 		mainPanel.add(new RowPanel("Pathology Number", textPathologyNumber));
 		mainPanel.add(new RowPanel("Order Number", textOrderNumber));
 		mainPanel.add(new RowPanel("Last Name", textlastName));
@@ -173,23 +168,40 @@ public class EnterSample extends JDialog {
 	}
 	
 	private void activateComponents(){
+		comboBoxInstrument.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				try {
+					if(e.getStateChange() == ItemEvent.SELECTED) {
+						clearAndDisableAll();
+						findAssays();
+					}
+				} catch (Exception e1) {
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e1);
+				}
+			}
+		});
+		
+		btnFindRun.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				findRunThread = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							findRun();
+						} catch (Exception e) {
+							JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
+						}
+					}
+				});
+				findRunThread.start();
+			}
+		});
+		
 		ActionListener actionListener = new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(e.getSource() == btnFindRun) {
-					findRunThread = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								findRun();
-							} catch (Exception e) {
-								JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
-							}
-						}
-					});
-					findRunThread.start();
-
-				}else if(e.getSource() == enterSampleButton) {
+				if(e.getSource() == enterSampleButton) {
 					enterSampleThread = new Thread(new Runnable() {
 						@Override
 						public void run() {
@@ -208,37 +220,18 @@ public class EnterSample extends JDialog {
 						}
 					});
 					enterSampleThread.start();
-
 				}else if(e.getSource() == cancelButton) {
 					dispose();
 				}
 			}
 		};
 		
-		btnFindRun.addActionListener(actionListener);
 		enterSampleButton.addActionListener(actionListener);
 		cancelButton.addActionListener(actionListener);
 		
-		comboBoxAssay.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				try {
-					clearAndDisableAll();
-					findInstrument();
-				} catch (Exception e1) {
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e1);
-				}
-			}
-		});
-		
-		comboBoxInstrument.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				clearAndDisableAll();
-			}
-		});
-		
 		comboBoxVariantCallerIDList.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if(comboBoxVariantCallerIDList.getSelectedItem() != null){
+				if(e.getStateChange() == ItemEvent.SELECTED && comboBoxVariantCallerIDList.getSelectedItem() != null) {
 					try{
 						fillSampleIon();
 					} catch (Exception e1) {
@@ -251,7 +244,9 @@ public class EnterSample extends JDialog {
 		comboBoxSample.addItemListener(new ItemListener(){
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
-				sampleIDSelectionChanged();
+				if(arg0.getStateChange() == ItemEvent.SELECTED) {
+					sampleIDSelectionChanged();
+				}
 			}
 		});
 		
@@ -269,23 +264,14 @@ public class EnterSample extends JDialog {
 			@Override
 			public void keyTyped(KeyEvent arg0) {}
 		});
+		
 		sampleIDSelectionChanged();
-		//TODO Work on barcode integration
+		
 		textPathologyNumber.addKeyListener(new KeyListener() {
 			@Override
 			public void keyPressed(KeyEvent arg0) {
 				if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
-					if(textPathologyNumber.getText().length() > 0) {
-						try {
-							String pathNumber = textPathologyNumber.getText();
-							String labOrderNumber = LISConnection.getLabOrderNumber(pathNumber);
-							if(labOrderNumber != null) {
-								updateFieldsFromLIS(labOrderNumber);
-							}
-						}catch(Exception e) {
-							JOptionPane.showMessageDialog(EnterSample.this, e.getMessage());
-						}
-					}
+					runLISIntegration();
 				}
 			}
 			
@@ -297,11 +283,11 @@ public class EnterSample extends JDialog {
 		});
 	}
 	
-	private void findInstrument() throws Exception{
-		String assay = comboBoxAssay.getSelectedItem().toString();
-		comboBoxInstrument.removeAllItems();
-		for(String instrument : DatabaseCommands.getInstrumentsForAssay(assay)){
-			comboBoxInstrument.addItem(instrument);
+	private void findAssays() throws Exception{
+		String instrument = comboBoxInstrument.getSelectedItem().toString();
+		comboBoxAssay.removeAllItems();
+		for(String assay : DatabaseCommands.getAssaysForInstrument(instrument)){
+			comboBoxAssay.addItem(assay);
 		}
 	}
 	
@@ -310,7 +296,6 @@ public class EnterSample extends JDialog {
 		clearFields(false);
 		enableComboBoxes(false, false, false);
 		
-		String assay = comboBoxAssay.getSelectedItem().toString();
 		String instrument = comboBoxInstrument.getSelectedItem().toString();
 		String runID = textRunID.getText();
 		
@@ -325,7 +310,7 @@ public class EnterSample extends JDialog {
 		}else if(instrument.equals("pgm") || instrument.equals("proton")){
 			findRunIon(instrument, runID);
 		}else {
-			throw new Exception(String.format("Unsupported instrument/assay combination (%s,%s)", instrument, assay));
+			throw new Exception(String.format("Unsupported instrument (%s)", instrument));
 		}
 	}
 	
@@ -381,14 +366,13 @@ public class EnterSample extends JDialog {
 	private void sampleIDSelectionChanged(){
 		enterSampleButton.setText("Enter Sample");
 		String runID = textRunID.getText();
-		String assay = (String)comboBoxAssay.getSelectedItem();
 		String instrument = (String)comboBoxInstrument.getSelectedItem();
 		String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
 		String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
 		String sampleName = (String)comboBoxSample.getSelectedItem();
 		
 		if(runID.equals("") || sampleName == null){
-			updateFields("", "", "", "", "", "", "", false);
+			updateFields("", "", "", "", "", "", "", "", "", false);
 			return;
 		}
 		
@@ -399,37 +383,60 @@ public class EnterSample extends JDialog {
 		
 		Sample sample = sampleListTableModel.getSample(instrument, runID, coverageID, variantCallerID, sampleName);
 		if(sample != null){
-			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
+			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
 		}else{
 			clearFields(true);
-			
-			//TODO refactor this workflow logic somehow
-			try {
-				if(assay.equals("heme")) {
-					textOrderNumber.setText(sampleName);
-					updateFieldsFromLIS(sampleName);
-				}else {
-					//need to wait for path number
-				}
-			}catch(Exception e) {
-				JOptionPane.showMessageDialog(EnterSample.this, e.getMessage());
-			}
+			runLISIntegration();
 		}
 	}
 	
-	private void updateFieldsFromLIS(String labOrderNumber) throws SQLException {
-		String[] patientName = LISConnection.getPatientName(labOrderNumber);
-		textFirstName.setText(patientName[0]);
-		textlastName.setText(patientName[1]);
+	private void runLISIntegration() {
+		String assay = (String)comboBoxAssay.getSelectedItem();
+		String sampleName = (String)comboBoxSample.getSelectedItem();
+		comboBoxSample.hidePopup();
+		
+		try {
+			//fill order number
+			String labOrderNumber = LISConnection.getLabOrderNumber(assay, textPathologyNumber.getText(), sampleName);
+			textOrderNumber.setText(labOrderNumber);
+			
+			//fill pathology number
+			ArrayList<String> pathOrderNumbers = LISConnection.getPathOrderNumbers(assay, labOrderNumber, textPathologyNumber.getText());
+			if(pathOrderNumbers.size() == 0) {
+				//No pathology orders found for this sample
+			}else if(pathOrderNumbers.size() == 1) {
+				textPathologyNumber.setText(pathOrderNumbers.get(0));
+			}else {
+				String[] choices = pathOrderNumbers.toArray(new String[pathOrderNumbers.size() + 20]);//add 20 to force JOptionPane into JList
+				String choice = (String) JOptionPane.showInputDialog(this, "Choose the Path Number:",
+						"Choose the Path Number", JOptionPane.QUESTION_MESSAGE, null,
+						choices, // Array of choices
+						choices[0]); // Initial choice
+				if(choice != null) {
+					textPathologyNumber.setText(choice);
+				}
+			}
+
+			//fill patient name
+			if(labOrderNumber != null) {
+				String[] patientName = LISConnection.getPatientName(labOrderNumber);
+				textFirstName.setText(patientName[0]);
+				textlastName.setText(patientName[1]);
+			}
+		}catch(Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "LIS Integration Error");
+		}
 	}
 	
-	private void updateFields(String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String note, boolean editable){
+	private void updateFields(String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String patientHistory, String diagnosis, String note, boolean editable){
 		textlastName.setText(lastName);
 		textFirstName.setText(firstName);
 		textOrderNumber.setText(orderNumber);
 		textPathologyNumber.setText(pathologyNumber);
 		textTumorSource.setText(tumorSource);
 		textPercent.setText(tumorPercent);
+		textPatientHistory.setText(patientHistory);
+		textDiagnosis.setText(diagnosis);
 		textNote.setText(note);
 		
 		textlastName.setEditable(editable);
@@ -445,8 +452,8 @@ public class EnterSample extends JDialog {
 	}
 	
 	private void clearComboBoxes(){
-		comboBoxVariantCallerIDList.removeAllItems();
 		comboBoxCoverageIDList.removeAllItems();
+		comboBoxVariantCallerIDList.removeAllItems();
 		comboBoxSample.removeAllItems();
 	}
 	
@@ -463,7 +470,7 @@ public class EnterSample extends JDialog {
 	}
 	
 	private void clearFields(boolean editable) {
-		updateFields("", "", "", "", "", "", "", editable);
+		updateFields("", "", "", "", "", "", "", "", "", editable);
 	}
 	
 	private void enterData() throws Exception{
@@ -475,7 +482,7 @@ public class EnterSample extends JDialog {
 			parent.addSample(sample);
 
 			//call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
-			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getNote(), false);
+			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
 		}finally {
 			setEnabled(true);
 		}

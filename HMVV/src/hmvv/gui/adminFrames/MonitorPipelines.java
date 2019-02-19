@@ -201,13 +201,18 @@ public class MonitorPipelines extends JDialog {
 
 	private Pipeline getCurrentlySelectedPipeline(){
 		int viewRow = table.getSelectedRow();
+		if(viewRow == -1) {
+			return null;
+		}
 		int modelRow = table.convertRowIndexToModel(viewRow);
 		return tableModel.getPipeline(modelRow);
 	}
 
 	private void handlePipelineSelectionClick() throws Exception{
 		Pipeline currentPipeline = getCurrentlySelectedPipeline();
-
+		if(currentPipeline == null) {
+			return;
+		}
 		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(currentPipeline.queueID);
 
 		DefaultTableModel tableModel = new DefaultTableModel(){

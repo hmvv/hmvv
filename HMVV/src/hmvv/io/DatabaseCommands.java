@@ -65,15 +65,21 @@ public class DatabaseCommands {
 		String coverageID = sample.coverageID;//no coverageID on nextseq
 		String variantCallerID = sample.callerID;//no variant caller on nextseq
 		String runDate = sample.runDate;
+		String patientHistory = sample.getPatientHistory();
+		String diagnosis = sample.getDiagnosis();
 		String note = sample.getNote();
 		String enteredBy = sample.enteredBy;
 
 		//check if sample is already present in data
-		String checkSample = String.format("select samples.runID, samples.sampleName, assays.assayName, instruments.instrumentName from samples " +
+		String checkSample = "select samples.runID, samples.sampleName, assays.assayName, instruments.instrumentName from samples " +
 				"join instruments on instruments.instrumentID = samples.instrumentID " +
 				"join assays on assays.assayID = samples.assayID " +
-				"where instruments.instrumentName = '%s' and assays.assayName = '%s' and samples.runID = '%s' and samples.sampleName = '%s' ", instrument, assay, runID, sampleName);
+				"where instruments.instrumentName = ? and assays.assayName = ? and samples.runID = ? and samples.sampleName = ? ";
 		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
+		pstCheckSample.setString(1, instrument);
+		pstCheckSample.setString(2, assay);
+		pstCheckSample.setString(3, runID);
+		pstCheckSample.setString(4, sampleName);
 		ResultSet rsCheckSample = pstCheckSample.executeQuery();
 		Integer sampleCount = 0;
 		while(rsCheckSample.next()){
@@ -87,21 +93,45 @@ public class DatabaseCommands {
 			throw new Exception("Error: Supplied sample exists in database; data not entered");
 		}
 
-		String enterSample = String.format("insert into samples "
-				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy) "
-				+ "values ( (select assayID from assays where assayName='"+assay+"'), (select instrumentID from instruments where instrumentName='"+instrument+"'), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )",
-				runID, sampleName, coverageID, variantCallerID, lastName, firstName, orderNumber, pathologyNumber, tumorSource, tumorPercent, runDate, note, enteredBy);
+		String enterSample = "insert into samples "
+				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis) "
+				+ "values ("
+				+ "	(select assayID from assays where assayName = ?),"
+				+ "	(select instrumentID from instruments where instrumentName = ? ),"
+				+ "	?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
+		pstEnterSample.setString(1, assay);
+		pstEnterSample.setString(2, instrument);
+		pstEnterSample.setString(3, runID);
+		pstEnterSample.setString(4, sampleName);
+		pstEnterSample.setString(5, coverageID);
+		pstEnterSample.setString(6, variantCallerID);
+		pstEnterSample.setString(7, lastName);
+		pstEnterSample.setString(8, firstName);
+		pstEnterSample.setString(9, orderNumber);
+		pstEnterSample.setString(10, pathologyNumber);
+		pstEnterSample.setString(11, tumorSource);
+		pstEnterSample.setString(12, tumorPercent);
+		pstEnterSample.setString(13, runDate);
+		pstEnterSample.setString(14, note);
+		pstEnterSample.setString(15, enteredBy);
+		pstEnterSample.setString(16, patientHistory);
+		pstEnterSample.setString(17, diagnosis);
+		
 		pstEnterSample.executeUpdate();
 		pstEnterSample.close();
 
 		//get ID
-		String findID = String.format("select samples.sampleID from samples " +
+		String findID = "select samples.sampleID from samples " +
 				"join instruments on instruments.instrumentID = samples.instrumentID " +
 				"join assays on assays.assayID = samples.assayID " +
-				"where instruments.instrumentName = '%s' and assays.assayName = '%s' and samples.runID = '%s' and samples.sampleName = '%s'", instrument, assay, runID, sampleName);
-
+				"where instruments.instrumentName = ? and assays.assayName = ? and samples.runID = ? and samples.sampleName = ?";
 		PreparedStatement pstFindID = databaseConnection.prepareStatement(findID);
+		pstFindID.setString(1, instrument);
+		pstFindID.setString(2, assay);
+		pstFindID.setString(3, runID);
+		pstFindID.setString(4, sampleName);
+		
 		ResultSet rsFindID = pstFindID.executeQuery();
 		Integer count = 0;
 		String sampleID = "";
@@ -123,10 +153,12 @@ public class DatabaseCommands {
 	}
 
 	private static void queueSampleForRunningPipeline(Sample sample) throws Exception{
-		String queueSample = String.format("INSERT INTO pipelineQueue "
-				+ "(sampleID,timeSubmitted) VALUES ('%s', now() )",sample.getSampleID());
-
+		String queueSample = 
+				"INSERT INTO pipelineQueue "
+				+ "(sampleID,timeSubmitted) VALUES (?, now() )";
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
+		pstQueueSample.setInt(1, sample.getSampleID());
+		
 		pstQueueSample.executeUpdate();
 		pstQueueSample.close();
 
@@ -135,6 +167,18 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Assay Queries
 	 *************************************************************************/
+	public static ArrayList<String> getAllInstruments() throws Exception{
+		ArrayList<String> instruments = new ArrayList<String>();
+		String getAssay = "select distinct instrumentName from instruments order by instrumentName";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(getAssay);
+		ResultSet rs = preparedStatement.executeQuery();
+		while(rs.next()){
+			instruments.add(rs.getString(1));
+		}
+		preparedStatement.close();
+		return instruments;
+	}
+	
 	public static ArrayList<String> getAllAssays() throws Exception{
 		ArrayList<String> assays = new ArrayList<String>();
 		String getAssay = "select distinct assayName from assays order by assayName";
@@ -147,19 +191,19 @@ public class DatabaseCommands {
 		return assays;
 	}
 
-	public static ArrayList<String> getInstrumentsForAssay(String assay) throws Exception{
-		ArrayList<String> instruments = new ArrayList<String>();
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instruments.instrumentName from instruments " +
-				"join assayInstrument on assayInstrument.instrumentID = instruments.instrumentID " +
-				"join assays on assays.assayID = assayInstrument.assayID " +
-				"where assays.assayName = ?");
-		preparedStatement.setString(1, assay);
+	public static ArrayList<String> getAssaysForInstrument(String instrument) throws Exception{
+		ArrayList<String> assays = new ArrayList<String>();
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select assays.assayName from assays " +
+				"join assayInstrument on assayInstrument.assayID = assays.assayID " +
+				"join instruments on instruments.instrumentID = assayInstrument.instrumentID " +
+				"where instruments.instrumentName = ?");
+		preparedStatement.setString(1, instrument);
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
-			instruments.add(rs.getString(1));
+			assays.add(rs.getString(1));
 		}
 		preparedStatement.close();
-		return instruments;
+		return assays;
 	}
 
 	public static void createAssay(String instrument, String assay) throws Exception{

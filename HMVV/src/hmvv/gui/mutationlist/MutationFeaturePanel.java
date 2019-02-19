@@ -158,9 +158,6 @@ public class MutationFeaturePanel extends JPanel {
 	private void showPatientHistory() {
 		try {
 			String labOrderNumber = sample.getOrderNumber();
-			if(labOrderNumber.length() == 0) {
-				labOrderNumber = LISConnection.getLabOrderNumber(sample.getPathNumber());
-			}
 			ArrayList<PatientHistory> history = LISConnection.getPatientHistory(labOrderNumber);
 			ReportFramePatientHistory reportFrame = new ReportFramePatientHistory(parent, history);
 			reportFrame.setVisible(true);

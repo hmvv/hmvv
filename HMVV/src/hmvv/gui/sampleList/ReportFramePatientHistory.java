@@ -122,13 +122,18 @@ public class ReportFramePatientHistory extends ReportFrame{
 	    }
 
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	    	
+	    	
 	    	if ((row+1) % 2 == 0) {
 				setBackground(GUICommonTools.LIGHT_GRAY);
 			}else {
 				setBackground(GUICommonTools.WHITE_COLOR);
 			}
+	    	
+	    	if(value != null) {
+				setText(value.toString());
+			}
 			
-	        setText(value.toString());
 	        setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
 	        if (table.getRowHeight(row) != getPreferredSize().height) {
 	            table.setRowHeight(row, getPreferredSize().height);
