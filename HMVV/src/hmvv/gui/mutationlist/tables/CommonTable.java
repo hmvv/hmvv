@@ -48,7 +48,7 @@ public abstract class CommonTable extends JTable{
 		this.model = model;
 		setModel(model);
 		
-		//setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 		customColumns = constructCustomColumns();
