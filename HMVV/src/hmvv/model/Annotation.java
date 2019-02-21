@@ -4,21 +4,21 @@ import java.util.Date;
 
 public class Annotation extends CommonAnnotation{
 	
-	public final Coordinate coordinate;
+	public final Mutation mutation;
 	public final String classification;
 	public final String curation;
 	public final String somatic;
 	
-	public Annotation(Integer annotationID, Coordinate coordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate) {
+	public Annotation(Integer annotationID, Mutation mutation, String classification, String curation, String somatic, String enteredBy, Date enterDate) {
 		super(annotationID, enteredBy, enterDate);
-		this.coordinate = coordinate;
+		this.mutation = mutation;
 		this.classification = classification;
 		this.curation = curation;
 		this.somatic = somatic;
 	}
 	
-	public Annotation(Coordinate coordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate) {
-		this(-1, coordinate, classification, curation, somatic, enteredBy, enterDate);
+	public Annotation(Mutation mutation, String classification, String curation, String somatic, String enteredBy, Date enterDate) {
+		this(-1, mutation, classification, curation, somatic, enteredBy, enterDate);
 	}
 	
 	public String getSomaticDisplayText() {
@@ -46,7 +46,7 @@ public class Annotation extends CommonAnnotation{
 	public boolean equals(Object o) {
 		if(o instanceof Annotation) {
 			Annotation other = (Annotation) o;
-			if(!other.coordinate.equals(coordinate)) {
+			if(!other.mutation.getCoordinate().equals(mutation.getCoordinate())) {
 				return false;
 			}
 			if(!other.classification.equals(classification)) {

@@ -464,7 +464,7 @@ public class DatabaseCommands {
 
 
 			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate());
+			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation);
 			mutation.setAnnotationHistory(annotationHistory);
 
 			//gnomad
@@ -656,7 +656,8 @@ public class DatabaseCommands {
 		return geneannotations;
 	}
 
-	private static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate) throws Exception{
+	private static ArrayList<Annotation> getVariantAnnotationHistory(Mutation mutation) throws Exception{
+		Coordinate coordinate = mutation.getCoordinate();
 		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
 		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from variantAnnotation where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc");
 		selectStatement.setString(1, coordinate.getChr());
@@ -665,7 +666,7 @@ public class DatabaseCommands {
 		selectStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = selectStatement.executeQuery();
 		while(rs.next()){
-			annotations.add(new Annotation(rs.getInt("annotationID"),coordinate, rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getTimestamp(6)));
+			annotations.add(new Annotation(rs.getInt("annotationID"), mutation, rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getTimestamp(6)));
 		}
 		selectStatement.close();
 		return annotations;
@@ -700,7 +701,7 @@ public class DatabaseCommands {
 	}
 
 	public static void addVariantAnnotationCuration(Annotation annotation) throws Exception{
-		Coordinate coordinate = annotation.coordinate;
+		Coordinate coordinate = annotation.mutation.getCoordinate();
 		String chr = coordinate.getChr();
 		String pos = coordinate.getPos();
 		String ref = coordinate.getRef();

@@ -364,7 +364,7 @@ public class AnnotationFrame extends JFrame {
 		if(currentAnnotationIndex == mutation.getAnnotationHistorySize() - 1 || mutation.getAnnotationHistorySize() == 0) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
 			//annotation update
 			Annotation newAnnotation = new Annotation(
-					mutation.getCoordinate(),
+					mutation,
 					pathogenicityComboBox.getSelectedItem().toString(),
 					annotationTextArea.getText(),
 					mutationTypeComboBox.getSelectedItem().toString(),
@@ -501,7 +501,7 @@ public class AnnotationFrame extends JFrame {
 	}
 
 	private void showAnnotationDraftFrame(){
-		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this,mutation.getLatestAnnotation());
+		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);
 		annotationdraftframe.setVisible(true);
 	}
 }

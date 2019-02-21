@@ -272,17 +272,27 @@ public class EnterSample extends JDialog {
 		sampleIDSelectionChanged();
 		
 		textBarcode.addKeyListener(new KeyListener() {
+			volatile boolean isEntered = false;
 			@Override
 			public void keyPressed(KeyEvent arg0) {
+				if(isEntered) {
+					textBarcode.setText("");
+					isEntered = false;
+				}
 				if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
 					String barcodeText = textBarcode.getText();
 					clearFields(true);
+					textBarcode.setText(barcodeText);
 					runLISIntegration(barcodeText);
 				}
 			}
 			
 			@Override
-			public void keyReleased(KeyEvent arg0) {}
+			public void keyReleased(KeyEvent arg0) {
+				if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+					isEntered = true;
+				}
+			}
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {}
