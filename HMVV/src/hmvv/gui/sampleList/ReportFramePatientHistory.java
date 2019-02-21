@@ -28,7 +28,7 @@ public class ReportFramePatientHistory extends ReportFrame{
 		table.setAutoCreateRowSorter(true);
 		table.resizeColumnWidths();
 		
-		constructFrame();
+		constructFrame(.75);
 	}	
 	
 	@Override

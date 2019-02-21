@@ -43,6 +43,7 @@ public class EnterSample extends JDialog {
 	private JTextField textPatientHistory;
 	private JTextField textDiagnosis;
 	private JTextField textNote;
+	private JTextField textBarcode;
 	
 	private JComboBox<String> comboBoxInstrument;
 	private JComboBox<String> comboBoxAssay;
@@ -115,6 +116,7 @@ public class EnterSample extends JDialog {
 		textPatientHistory = new JTextField();
 		textDiagnosis = new JTextField();
 		textNote = new JTextField();
+		textBarcode = new JTextField();
 		
 		enterSampleButton = new JButton("Enter Sample");
 		enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
@@ -140,6 +142,9 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("VariantCallerID", comboBoxVariantCallerIDList));
 		mainPanel.add(new RowPanel("SampleName", comboBoxSample));
 		mainPanel.add(new RowPanel("Assay", comboBoxAssay));
+		RowPanel barcodeRowPanel = new RowPanel("Barcode", textBarcode);
+		barcodeRowPanel.left.setToolTipText(LISConnection.getBarcodeHelpText());
+		mainPanel.add(barcodeRowPanel);
 		mainPanel.add(new RowPanel("Pathology Number", textPathologyNumber));
 		mainPanel.add(new RowPanel("Order Number", textOrderNumber));
 		mainPanel.add(new RowPanel("Last Name", textlastName));
@@ -149,7 +154,6 @@ public class EnterSample extends JDialog {
 		mainPanel.add(new RowPanel("Patient History", textPatientHistory));
 		mainPanel.add(new RowPanel("Diagnosis", textDiagnosis));
 		mainPanel.add(new RowPanel("Note", textNote));
-
 
 		JPanel southPanel = new JPanel();
 		GridLayout southGridLayout = new GridLayout(1,0);
@@ -267,11 +271,13 @@ public class EnterSample extends JDialog {
 		
 		sampleIDSelectionChanged();
 		
-		textPathologyNumber.addKeyListener(new KeyListener() {
+		textBarcode.addKeyListener(new KeyListener() {
 			@Override
 			public void keyPressed(KeyEvent arg0) {
 				if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
-					runLISIntegration();
+					String barcodeText = textBarcode.getText();
+					clearFields(true);
+					runLISIntegration(barcodeText);
 				}
 			}
 			
@@ -385,23 +391,26 @@ public class EnterSample extends JDialog {
 		if(sample != null){
 			updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
 		}else{
+			String barcodeText = textBarcode.getText();
 			clearFields(true);
-			runLISIntegration();
+			runLISIntegration(barcodeText);
 		}
 	}
 	
-	private void runLISIntegration() {
+	private void runLISIntegration(String barcodeText) {
 		String assay = (String)comboBoxAssay.getSelectedItem();
 		String sampleName = (String)comboBoxSample.getSelectedItem();
 		comboBoxSample.hidePopup();
 		
 		try {
 			//fill order number
-			String labOrderNumber = LISConnection.getLabOrderNumber(assay, textPathologyNumber.getText(), sampleName);
+			String labOrderNumber = LISConnection.getLabOrderNumber(assay, barcodeText, sampleName);
 			textOrderNumber.setText(labOrderNumber);
-			
+			if(labOrderNumber.equals("")) {
+				return;
+			}
 			//fill pathology number
-			ArrayList<String> pathOrderNumbers = LISConnection.getPathOrderNumbers(assay, labOrderNumber, textPathologyNumber.getText());
+			ArrayList<String> pathOrderNumbers = LISConnection.getPathOrderNumbers(assay, labOrderNumber);
 			if(pathOrderNumbers.size() == 0) {
 				//No pathology orders found for this sample
 			}else if(pathOrderNumbers.size() == 1) {
@@ -429,6 +438,7 @@ public class EnterSample extends JDialog {
 	}
 	
 	private void updateFields(String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String patientHistory, String diagnosis, String note, boolean editable){
+		textBarcode.setText("");
 		textlastName.setText(lastName);
 		textFirstName.setText(firstName);
 		textOrderNumber.setText(orderNumber);
@@ -439,6 +449,7 @@ public class EnterSample extends JDialog {
 		textDiagnosis.setText(diagnosis);
 		textNote.setText(note);
 		
+		textBarcode.setEditable(editable);
 		textlastName.setEditable(editable);
 		textFirstName.setEditable(editable);
 		textOrderNumber.setEditable(editable);

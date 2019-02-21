@@ -16,6 +16,10 @@ public class LISConnection{
 		connection = ((LISCommands)o);
 	}
 
+	public static String getBarcodeHelpText() {
+		return connection.getBarcodeHelpText();
+	}
+	
 	public static String[] getPatientName(String orderNumber) throws SQLException {
 		return connection.getPatientName(orderNumber);
 	}
@@ -24,11 +28,11 @@ public class LISConnection{
 		return connection.getPatientHistory(orderNumber);
 	}
 
-	public static String getLabOrderNumber(String assay, String enteredPathNumber, String sampleName) throws SQLException{
-		return connection.getLabOrderNumber(assay, enteredPathNumber, sampleName);
+	public static String getLabOrderNumber(String assay, String barcode, String sampleName) throws SQLException{
+		return connection.getLabOrderNumber(assay, barcode, sampleName);
 	}
 	
-	public static ArrayList<String> getPathOrderNumbers(String assay, String labOrderNumber, String enteredPathologyNumber) throws SQLException{
-		return connection.getPathOrderNumbers(assay, labOrderNumber, enteredPathologyNumber);
+	public static ArrayList<String> getPathOrderNumbers(String assay, String labOrderNumber) throws SQLException{
+		return connection.getPathOrderNumbers(assay, labOrderNumber);
 	}
 }

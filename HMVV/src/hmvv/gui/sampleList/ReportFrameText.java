@@ -20,7 +20,7 @@ public class ReportFrameText extends ReportFrame{
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
 		
-		constructFrame();
+		constructFrame(.50);
 	}
 
 	@Override

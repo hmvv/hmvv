@@ -150,6 +150,9 @@ public abstract class CommonTable extends JTable{
 	public void resizeColumnWidths() {
 	    TableColumnModel columnModel = getColumnModel();    
 	    int buffer = 12;
+	    if(parent.getWidth() < 1200) {
+	    	buffer = 0;
+	    }
 	    
 	    for (int column = 0; column < getColumnCount(); column++) {
 	        TableColumn tableColumn = columnModel.getColumn(column);

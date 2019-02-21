@@ -37,9 +37,9 @@ public abstract class ReportFrame extends JDialog {
 		this.parent = parent;
 	}
 	
-	protected void constructFrame() {
+	protected void constructFrame(double widthPercentOfParent) {
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.50), (int)(bounds.height*.90));
+		setSize((int)(bounds.width*widthPercentOfParent), (int)(bounds.height*.90));
 		
 		setLocationRelativeTo(parent);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

@@ -211,7 +211,8 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			(Mutation mutation) -> mutation.getTotalCount());
 	
 	public static final MutationTableModelColumn altGlobalFreqColumn = new MutationTableModelColumn("1000 Genomes Project: Global Freqency",
-			"g1000-AltFreq",
+			//"g1000-AltFreq",
+			"g1000",//This will shrink the column width
 			Double.class,
 			(Mutation mutation) -> mutation.getAltGlobalFreq());
 	
@@ -283,7 +284,8 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			(Mutation mutation) -> mutation.getGnomadID());
 
 	public static final MutationTableModelColumn gnomadAltFreqColumn = new MutationTableModelColumn("The global allele frequency",
-			"gnomad-AltFreq",
+			//"gnomad-AltFreq",
+			"gnomad",//This will shrink the column width
 			Double.class,
 			(Mutation mutation) -> mutation.getGnomad_allfreq());
 
