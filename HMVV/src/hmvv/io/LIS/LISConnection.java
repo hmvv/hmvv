@@ -27,6 +27,10 @@ public class LISConnection{
 	public static ArrayList<PatientHistory> getPatientHistory(String orderNumber) throws SQLException{
 		return connection.getPatientHistory(orderNumber);
 	}
+	
+	public static ArrayList<PatientHistory> getLegacyPatientHistory(String orderNumber) throws SQLException{
+		return connection.getLegacyPatientHistory(orderNumber);
+	}
 
 	public static String getLabOrderNumber(String assay, String barcode, String sampleName) throws SQLException{
 		return connection.getLabOrderNumber(assay, barcode, sampleName);

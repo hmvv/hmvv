@@ -27,7 +27,8 @@ public abstract class ReportFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
-	private MutationListFrame parent;
+	private JPanel buttonPanel;
+	protected MutationListFrame parent;
 	
 	/**
 	 * Create the frame.
@@ -62,7 +63,7 @@ public abstract class ReportFrame extends JDialog {
 			}
 		});
 		
-		JPanel buttonPanel = new JPanel();
+		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new GridLayout(1,0));
 		buttonPanel.add(new JPanel());
 		buttonPanel.add(new JPanel());
@@ -73,6 +74,10 @@ public abstract class ReportFrame extends JDialog {
 		
 		contentPane.add(buttonPanel, BorderLayout.NORTH);
 		contentPane.add(getReport(), BorderLayout.CENTER);
+	}
+	
+	protected void addButton(JButton button) {
+		buttonPanel.add(button);
 	}
 	
 	public abstract Component getReport();

@@ -1,35 +1,81 @@
 package hmvv.gui.sampleList;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.MutationListFrame;
+import hmvv.io.LIS.LISConnection;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.PatientHistory;
 
 public class ReportFramePatientHistory extends ReportFrame{
 	private static final long serialVersionUID = 1L;
 	
+	
 	private Table table;
 	private ArrayList<PatientHistory> patientHistory;
+	private String labOrderNumber;
 	
-	public ReportFramePatientHistory(MutationListFrame parent, ArrayList<PatientHistory> patientHistory) {
+	public ReportFramePatientHistory(MutationListFrame parent, String labOrderNumber, ArrayList<PatientHistory> patientHistory) {
 		super(parent, "Patient History");
+		this.labOrderNumber = labOrderNumber;
 		this.patientHistory = patientHistory;
 		table = new Table();
 		table.setAutoCreateRowSorter(true);
 		table.resizeColumnWidths();
 		
 		constructFrame(.75);
-	}	
+		constructComponents();
+	}
+	
+	private void constructComponents() {
+		JButton getLegacyDataButton = new JButton("Load legacy LIS data");
+		getLegacyDataButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				
+				SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>() {
+				    @Override
+				    public Boolean doInBackground() {
+				    	try {
+				    		getLegacyDataButton.setEnabled(false);
+				    		getLegacyDataButton.setText("Loading...");
+							ArrayList<PatientHistory> history = LISConnection.getLegacyPatientHistory(labOrderNumber);
+							if(history.size() > 0) {
+								patientHistory.addAll(history);
+								table.tableModel.fireTableDataChanged();
+							}
+						} catch (SQLException e) {
+							HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
+							return false;
+						}
+				    	return true;
+				    }
+
+				    @Override
+				    public void done() {
+				    	getLegacyDataButton.setText("Loaded");
+				    }
+				};
+				worker.execute();
+			}
+		});
+		addButton(getLegacyDataButton);
+	}
 	
 	@Override
 	public Component getReport() {

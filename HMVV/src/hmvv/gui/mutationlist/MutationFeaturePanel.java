@@ -162,7 +162,7 @@ public class MutationFeaturePanel extends JPanel {
 				labOrderNumber = LISConnection.getLabOrderNumber(sample.assay, sample.getPathNumber(), sample.sampleName);
 			}
 			ArrayList<PatientHistory> history = LISConnection.getPatientHistory(labOrderNumber);
-			ReportFramePatientHistory reportFrame = new ReportFramePatientHistory(parent, history);
+			ReportFramePatientHistory reportFrame = new ReportFramePatientHistory(parent, labOrderNumber, history);
 			reportFrame.setVisible(true);
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
