@@ -36,7 +36,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			Boolean.class,
 			(Mutation mutation) -> mutation.isReported());
 
-	public static final MutationTableModelColumn occurrenceColumn = new MutationTableModelColumn("Number of previous occurrences of the detected variant in our database.",
+	public static final MutationTableModelColumn occurrenceColumn = new MutationTableModelColumn("Number of previous occurrences of the detected variant in our database (excluding control samples).",
 			"occurrence",
 			Integer.class,
 			(Mutation mutation) -> mutation.getOccurrence());
