@@ -379,17 +379,22 @@ public class DatabaseCommands {
 	public static int getOccurrenceCount(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
 		String assay = mutation.getAssay();
-		String query = "select count(*) as occurrence from sampleVariants"
+		String query = "select count(*) as occurrence "
+				
+				+ " from sampleVariants"
 				+ " join samples on samples.sampleID = sampleVariants.sampleID "
 				+ " join assays on assays.assayID = samples.assayID "
+				
 				+ " where sampleVariants.impact != 'No Call' and sampleVariants.chr = ? and sampleVariants.pos = ? and sampleVariants.ref = ? and sampleVariants.alt = ? and assays.assayName = ?"
-				+ " and sampleVariants.altFreq >= " + Configurations.ALLELE_FREQ_FILTER;
+				+ " and sampleVariants.altFreq >= " + Configurations.ALLELE_FREQ_FILTER
+				+ " and samples.lastName not like 'Horizon%' ";//Filter control samples from occurrence count
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
 		preparedStatement.setString(3, coordinate.getRef());
 		preparedStatement.setString(4, coordinate.getAlt());
 		preparedStatement.setString(5, assay);
+		
 		ResultSet rs = preparedStatement.executeQuery();
 		if(rs.next()){
 			String result = rs.getString(1);

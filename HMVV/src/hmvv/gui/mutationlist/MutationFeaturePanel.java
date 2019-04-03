@@ -209,8 +209,7 @@ public class MutationFeaturePanel extends JPanel {
 			loadIGVAsynchronous_Filtered();
 		}
 	}
-
-	//TODO disable HTTP access to BAM files
+	
 	private void loadIGVAsynchronous() throws Exception {
 
 		loadIGVButton.setText("Finding BAM File...");
