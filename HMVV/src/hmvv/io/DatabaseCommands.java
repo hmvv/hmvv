@@ -245,10 +245,10 @@ public class DatabaseCommands {
 				+ " left join db_g1000_phase3v1 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
 
-				+ " left join db_clinvar_72018 as t5"
+				+ " left join db_clinvar_42019 as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				
-				+ " left join db_gnomad as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
+				+ " left join db_gnomad_r211 as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
@@ -271,7 +271,7 @@ public class DatabaseCommands {
 	 */
 	public static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String query = "select cosmicID from db_cosmic_grch37v86 where chr = ? and pos = ? and ref = ? and alt = ?";
+		String query = "select cosmicID from db_cosmic_grch37v88 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
@@ -288,7 +288,7 @@ public class DatabaseCommands {
 	}
 
 	public static String getCosmicInfo(String cosmicID) throws Exception{
-		String query = "select info from db_cosmic_grch37v86 where cosmicID = ?";
+		String query = "select info from db_cosmic_grch37v88 where cosmicID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -333,13 +333,13 @@ public class DatabaseCommands {
 		String ENSP = "";
 		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
 		if(getHGVSpArray.length > 1) {
-			ENSP = GUICommonTools.abbreviationtoLetter(getHGVSpArray[2]);
+			ENSP = Configurations.abbreviationtoLetter(getHGVSpArray[2]);
 		}else {
 			//TODO What to do here?
 			return;
 		}
 
-		String query = "select tumor_type,tissue_type from db_pmkb where gene = ? and variant = ? limit 1";
+		String query = "select tumor_type,tissue_type from db_pmkb_42019 where gene = ? and variant = ? limit 1";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
 		preparedStatement.setString(2, ENSP);
@@ -361,7 +361,7 @@ public class DatabaseCommands {
 			return;
 		}
 
-		String query = "select variant_origin,variant_civic_url from db_civic where gene = ? and variant_LF = ? limit 1 ";
+		String query = "select variant_origin,variant_civic_url from db_civic_42019 where gene = ? and variant_LF = ? limit 1 ";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
 		preparedStatement.setString(2, ENSP);
@@ -475,7 +475,7 @@ public class DatabaseCommands {
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
 			if(gnomadAllFreq != null) {
-				mutation.setGnomad_allfreq(100*gnomadAllFreq);//Multiply by 100 because these are stored as decimals in the database
+				mutation.setGnomad_allfreq(gnomadAllFreq);
 			}
 
 			mutations.add(mutation);
@@ -922,7 +922,7 @@ public class DatabaseCommands {
 				+ " from samples"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
-				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
+				+ " join db_cosmic_grch37v88 on sampleVariants.chr = db_cosmic_grch37v88.chr and sampleVariants.pos = db_cosmic_grch37v88.pos and sampleVariants.ref = db_cosmic_grch37v88.ref and sampleVariants.alt = db_cosmic_grch37v88.alt "
 				+ " where samples.lastName like 'Horizon%' "
 				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
 
