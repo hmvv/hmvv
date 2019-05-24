@@ -69,33 +69,7 @@ public class GUICommonTools {
 	    bounds.height = window.getSize().height;
 	    return bounds;
 	}	
-	
-	public static String abbreviationtoLetter(String mutation){
-		return mutation
-			.replaceAll("Ala", "A")
-			.replaceAll("Cys", "C")
-			.replaceAll("Glu", "E")
-			.replaceAll("Phe", "F")
-			.replaceAll("Gly", "G")
-			.replaceAll("His", "H")
-			.replaceAll("Ile", "I")
-			.replaceAll("Lys", "K")
-			.replaceAll("Leu", "L")
-			.replaceAll("Met", "M")
-			.replaceAll("Asn", "N")
-			.replaceAll("Hyp", "O")
-			.replaceAll("Pro", "P")
-			.replaceAll("Gln", "Q")
-			.replaceAll("Arg", "R")
-			.replaceAll("Ser", "S")
-			.replaceAll("Thr", "T")
-			.replaceAll("Glp", "U")
-			.replaceAll("Val", "V")
-			.replaceAll("Trp", "W")
-			.replaceAll("Ter", "X")
-			.replaceAll("Tyr", "Y");
-	}
-	
+
 	public static int getNumber(JTextField field, Integer defaultInt){
 		String value = field.getText();
 		Integer valueInt = null;

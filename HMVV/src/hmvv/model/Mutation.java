@@ -1,6 +1,7 @@
 package hmvv.model;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.main.Configurations;
 
 import java.util.ArrayList;
 
@@ -513,7 +514,7 @@ public class Mutation {
            if(getHGVSpArray.length > 1) {
                ENSP = getHGVSpArray[2];
            }
-           this.oncokbID = this.getGene() + "-" + GUICommonTools.abbreviationtoLetter(ENSP);
+           this.oncokbID = this.getGene() + "-" + Configurations.abbreviationtoLetter(ENSP);
        }
     }
 
