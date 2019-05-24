@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
+import hmvv.gui.GUICommonTools;
 import hmvv.model.Pipeline;
 
 public class MonitorPipelinesTableModel extends AbstractTableModel{
@@ -54,10 +55,10 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				String.class,
 				(Pipeline pipeline) -> pipeline.status));
 
-		columns.add(new PipelineTableModelColumn("The runtime of pipeline", 
-				"runTime", 
+		columns.add(new PipelineTableModelColumn("The time the pipeline status was updated", 
+				"Status update time", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.runTime));
+				(Pipeline pipeline) -> GUICommonTools.extendedDateFormat1.format(pipeline.timeStatusUpdated)));
 		
 		columns.add(new PipelineTableModelColumn("The pipeline program", 
 				"program", 

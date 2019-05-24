@@ -1,5 +1,6 @@
 package hmvv.model;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -14,12 +15,12 @@ public class Pipeline {
 	public final String assayName;
 	public final String instrumentName;
 	public final String status;
-	public final String runTime;
+	public final Timestamp timeStatusUpdated;
 	
 	public final PipelineProgram pipelineProgram;
 	private int progress;
 	
-	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleName , String assayName, String instrumentName, String status, String runTime) {
+	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleName , String assayName, String instrumentName, String status, Timestamp timeStatusUpdated) {
         this.queueID = queueID;
         this.sampleID = sampleTableID;
         this.runID = runID;
@@ -27,7 +28,7 @@ public class Pipeline {
         this.assayName = assayName;
         this.instrumentName = instrumentName;
         this.status = status;
-        this.runTime = runTime;
+        this.timeStatusUpdated = timeStatusUpdated;
         pipelineProgram = computeProgram();
         try {
 			progress = computeProgress();
@@ -57,8 +58,8 @@ public class Pipeline {
 		return status;
 	}
 
-	public String getRunTime() {
-		return runTime;
+	public Timestamp getTimeStatusUpdated() {
+		return timeStatusUpdated;
 	}
 	
 	public PipelineProgram getPipelineProgress() {
@@ -134,11 +135,7 @@ public class Pipeline {
 
 			float timeElapsed = (float) ((Math.abs(currentTime.getTime() - pipelineStartTime.getTime())) / (1000.0f));
 
-			if (this.getInstrumentName().equals("nextseq")){
-				progress = ((timeElapsed * 100.0f) / (pipelineTotalTime * 60.0f));
-			} else{
-				progress = ((timeElapsed * 100.0f) / pipelineTotalTime);
-			}
+			progress = ((timeElapsed * 100.0f) / (pipelineTotalTime * 60.0f));
 
 			if (syncWithProgram() == 0) {
 				progress = 0.0f;

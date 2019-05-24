@@ -777,7 +777,7 @@ public class DatabaseCommands {
 				row.getString("assayName"),
 				row.getString("instrumentName"),
 				row.getString("plstatus"),
-				row.getString("timeUpdated")
+				row.getTimestamp("timeUpdated")
 				);
 		return pipeline;
 	}
