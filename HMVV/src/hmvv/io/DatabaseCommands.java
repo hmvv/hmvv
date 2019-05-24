@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import hmvv.gui.GUICommonTools;
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
@@ -245,10 +244,10 @@ public class DatabaseCommands {
 				+ " left join db_g1000_phase3v1 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
 
-				+ " left join db_clinvar_72018 as t5"
+				+ " left join db_clinvar_42019 as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				
-				+ " left join db_gnomad as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
+				+ " left join db_gnomad_r211 as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
@@ -271,7 +270,7 @@ public class DatabaseCommands {
 	 */
 	public static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String query = "select cosmicID from db_cosmic_grch37v86 where chr = ? and pos = ? and ref = ? and alt = ?";
+		String query = "select cosmicID from db_cosmic_grch37v88 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
@@ -288,7 +287,7 @@ public class DatabaseCommands {
 	}
 
 	public static String getCosmicInfo(String cosmicID) throws Exception{
-		String query = "select info from db_cosmic_grch37v86 where cosmicID = ?";
+		String query = "select info from db_cosmic_grch37v88 where cosmicID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -333,13 +332,13 @@ public class DatabaseCommands {
 		String ENSP = "";
 		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
 		if(getHGVSpArray.length > 1) {
-			ENSP = GUICommonTools.abbreviationtoLetter(getHGVSpArray[2]);
+			ENSP = Configurations.abbreviationtoLetter(getHGVSpArray[2]);
 		}else {
 			//TODO What to do here?
 			return;
 		}
 
-		String query = "select tumor_type,tissue_type from db_pmkb where gene = ? and variant = ? limit 1";
+		String query = "select tumor_type,tissue_type from db_pmkb_42019 where gene = ? and variant = ? limit 1";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
 		preparedStatement.setString(2, ENSP);
@@ -361,7 +360,7 @@ public class DatabaseCommands {
 			return;
 		}
 
-		String query = "select variant_origin,variant_civic_url from db_civic where gene = ? and variant_LF = ? limit 1 ";
+		String query = "select variant_origin,variant_civic_url from db_civic_42019 where gene = ? and variant_LF = ? limit 1 ";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
 		preparedStatement.setString(2, ENSP);
@@ -475,7 +474,7 @@ public class DatabaseCommands {
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
 			if(gnomadAllFreq != null) {
-				mutation.setGnomad_allfreq(100*gnomadAllFreq);//Multiply by 100 because these are stored as decimals in the database
+				mutation.setGnomad_allfreq(gnomadAllFreq);
 			}
 
 			mutations.add(mutation);
@@ -784,22 +783,52 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<Pipeline> getAllPipelines() throws Exception{
-		String query = "select t3.queueID, t1.sampleID, t1.runID, t1.sampleName, t4.assayName, t5.instrumentName, t2.plStatus, t2.timeUpdated " +
-				" from pipelineQueue as t3 " +
-				" join samples as t1 on t1.sampleID = t3.sampleID " +
-				" join assays as t4 on t4.assayID = t1.assayID " +
-				" join instruments as t5 on t5.instrumentID = t1.instrumentID " +
-				" left join ( " +
-				" select pipelineStatusID, queueID, plStatus, timeUpdated " +
-				" from pipelineStatus  " +
-				" where pipelineStatusID in " +
-				" (select  max(pipelineStatusID) " +
-				" from pipelineStatus " +
-				" group by queueID) ) as t2 " +
-				" on t3.queueID = t2.queueID " +
-				" where t2.timeUpdated  >= now() - interval 10 day" +
-				" order by t3.queueID desc" ;
-
+//		String query = "select t3.queueID, t1.sampleID, t1.runID, t1.sampleName, t4.assayName, t5.instrumentName, t2.plStatus, t2.timeUpdated " +
+//				" from pipelineQueue as t3 " +
+//				" join samples as t1 on t1.sampleID = t3.sampleID " +
+//				" join assays as t4 on t4.assayID = t1.assayID " +
+//				" join instruments as t5 on t5.instrumentID = t1.instrumentID " +
+//				" left join ( " +
+//				" select pipelineStatusID, queueID, plStatus, timeUpdated " +
+//				" from pipelineStatus  " +
+//				" where pipelineStatusID in " +
+//				" (select  max(pipelineStatusID) " +
+//				" from pipelineStatus " +
+//				" group by queueID) ) as t2 " +
+//				" on t3.queueID = t2.queueID " +
+//				" where t2.timeUpdated  >= now() - interval 10 day" +
+//				" order by t3.queueID desc" ;
+		String query = "select" + 
+				" queueTable.queueID, queueTable.sampleID, queueTable.runID, queueTable.sampleName, queueTable.assayName, queueTable.instrumentName," + 
+				" statusTable.plStatus, statusTable.timeUpdated" + 
+				" from" + 
+				" (" + 
+					" select pipelineQueue.queueID, samples.sampleID, samples.runID, samples.sampleName, assays.assayName, instruments.instrumentName" + 
+					" from pipelineQueue" + 
+					" join samples on samples.sampleID = pipelineQueue.sampleID" + 
+					" join assays on assays.assayID = samples.assayID" + 
+					" join instruments on instruments.instrumentID = samples.instrumentID" + 
+					" where timeSubmitted >= now() - interval 10 day" + 
+					" ) as queueTable" + 
+				
+				" left join " + 
+				
+				" (" + 
+				" select pipelineStatus.pipelineStatusID, pipelineStatus.queueID, pipelineStatus.plStatus, pipelineStatus.timeUpdated" + 
+				"   from" + 
+				"    (" + 
+				"     select max(pipelineStatusID) as pipelineStatusID" + 
+				"     from pipelineStatus" + 
+				"     where timeUpdated >= now() - interval 10 day" + 
+				"     group by queueID" + 
+				"    ) as maxPipelineStatusID" + 
+				"   join pipelineStatus on pipelineStatus.pipelineStatusID = maxPipelineStatusID.pipelineStatusID " + 
+				"   " + 
+				" ) as statusTable" + 
+				 
+				" on queueTable.queueID = statusTable.queueID" + 
+				" order by queueTable.queueID desc;";
+		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();
@@ -835,20 +864,33 @@ public class DatabaseCommands {
 
 
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
-
 		int averageRunTime = 0;
+		//TODO remove pipelineLogs from database?
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(
+				" select AVG(runtime) as averageMinutes from " +
+				"  ( " +
+				"  select samples.runID, instruments.instrumentName, assays.assayName, ps1.queueID, pipelineStatus.timeUpdated as startTime, ps1.timeUpdated as completedTime, TIMESTAMPDIFF(MINUTE, pipelineStatus.timeUpdated, ps1.timeUpdated) as runtime " +
+				 
+				"  from pipelineStatus " +
+				"  join pipelineStatus ps1 on pipelineStatus.queueID = ps1.queueID " +
+				"  join pipelineQueue on ps1.queueID = pipelineQueue.queueID " +
+				"  join samples on samples.sampleID = pipelineQueue.sampleID " +
+				"  join assays on assays.assayID = samples.assayID " +
+				"  join instruments on instruments.instrumentID = samples.instrumentID " +
 
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select AVG(totalRunTime) as averagetime from pipelineLogs " +
-				" where instrument=? and assay=? ;");
+				"  where pipelineStatus.plStatus = \"started\" " +
+				"  and ps1.plStatus = \"pipelineCompleted\" " +
+				"  and instruments.instrumentName = ? and assays.assayName = ?) temp "
+		);
+		
 		preparedStatement.setString(1, pipeline.getInstrumentName());
 		preparedStatement.setString(2, pipeline.getAssayName());
 
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
-			averageRunTime = rs.getInt("averagetime");
+			averageRunTime = rs.getInt("averageMinutes");
 		}
 		preparedStatement.close();
-		//System.out.println(pipeline.getInstrumentName() + ' ' + pipeline.getAssayName() + ' ' + pipeline.getsampleName() +  " averageRunTime " + averageRunTime);
 		return (float)averageRunTime;
 	}
 
@@ -922,7 +964,7 @@ public class DatabaseCommands {
 				+ " from samples"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
-				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
+				+ " join db_cosmic_grch37v88 on sampleVariants.chr = db_cosmic_grch37v88.chr and sampleVariants.pos = db_cosmic_grch37v88.pos and sampleVariants.ref = db_cosmic_grch37v88.ref and sampleVariants.alt = db_cosmic_grch37v88.alt "
 				+ " where samples.lastName like 'Horizon%' "
 				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
 

@@ -188,7 +188,7 @@ public class MonitorPipelines extends JDialog {
         });
 	}
 
-	public void buildModelFromDatabase() throws Exception {
+	private void buildModelFromDatabase() throws Exception {
 		try {
 			ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
 			for(Pipeline p : pipelines) {

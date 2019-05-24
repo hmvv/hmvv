@@ -73,7 +73,7 @@ public class Pipeline {
 		//default to RUNNING
 		PipelineProgram program = PipelineProgram.RUNNING;
 
-		if (status.equals("PipelineCompleted")){
+		if (status.toLowerCase().equals("pipelinecompleted")){
 			return PipelineProgram.COMPLETE;
 		}else if ( instrumentName.equals("proton")) {
 			if (status.equals("Started") || status.equals("queued") ) {
