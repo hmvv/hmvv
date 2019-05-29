@@ -11,10 +11,7 @@ import com.jcraft.jsch.*;
 import hmvv.gui.mutationlist.MutationFeaturePanel;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
-import hmvv.model.CommandResponse;
-import hmvv.model.Database;
-import hmvv.model.Mutation;
-import hmvv.model.Sample;
+import hmvv.model.*;
 
 public class SSHConnection {
 	
@@ -115,7 +112,7 @@ public class SSHConnection {
 		String sampleID = sample.sampleName;
 		String callerID = sample.callerID;
 		String instrument =  sample.instrument;
-		
+
 		if(instrument.equals("pgm")){
 			return SSHConnection.loadPGM_BAM(runID, sampleID, callerID, progressMonitor);
 		}else if(instrument.equals("proton")){
@@ -126,7 +123,7 @@ public class SSHConnection {
 			return SSHConnection.loadIllumina_BAM(instrument, runID, sampleID, progressMonitor);
 		}
 	}
-	
+
 	private static File loadPGM_BAM(String runID, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
 		String command = null;
 		sampleID = sampleID.replaceAll(".*_", "");
@@ -140,20 +137,20 @@ public class SSHConnection {
 		}
 		return findSample(command, "proton", runID, sampleID, progressMonitor);
 	}
-	
+
 	private static File loadProton_BAM(String runID, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
 		sampleID = sampleID.replaceAll(".*_", "");
 		callerID = callerID.replaceAll(".*\\.", "");
 		String command = String.format("ls /home/proton/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runID, callerID, sampleID);
 		return findSample(command, "proton", runID, sampleID, progressMonitor);
 	}
-	
+
 	private static File loadIlluminaNextseqHeme_BAM(String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
 		String instrument = "nextseq";
 		String command = String.format("ls /home/environments/%s/nextseqAnalysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
-	
+
 	private static File loadIllumina_BAM(String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
 		String command = String.format("ls /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s*.bam", instrument, runID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
@@ -334,16 +331,39 @@ public class SSHConnection {
 
         ArrayList<Mutation> selectedMutations = mutationList.getSelectedMutations();
 
-        for (int index = 0; index < selectedMutations.size(); index++) {
-            Mutation mutation = selectedMutations.get(index);
-            Integer lower = Integer.parseInt(mutation.getPos()) - bamCoverage;
-            Integer higher = Integer.parseInt(mutation.getPos()) + bamCoverage;
-            String line = mutation.getChr() + ':' + lower.toString() + '-' + higher.toString();
-            bw.write(line);
-            bw.newLine();
-        }
-        bw.close();
+        // verify chr/position pair is unique
+        ArrayList<Coordinate> selectedCoordinates = new ArrayList<>();
 
+        for (int index = 0; index < selectedMutations.size(); index++) {
+
+            Mutation mutation = selectedMutations.get(index);
+
+            if (selectedCoordinates.isEmpty()){
+				selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
+			} else {
+            	int duplicate = 0;
+            	for (Coordinate coordinate:selectedCoordinates){
+
+            		if ( (coordinate.getChr().equals(mutation.getChr())) && (coordinate.getPos().equals(mutation.getPos()))) {
+						duplicate = 1;
+						break;
+					}
+				}
+				if (duplicate == 0){
+					selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
+				}
+			}
+        }
+
+		for (int index = 0; index < selectedCoordinates.size(); index++) {
+			Coordinate coordinate = selectedCoordinates.get(index);
+			Integer lower = Integer.parseInt(coordinate.getPos()) - bamCoverage;
+			Integer higher = Integer.parseInt(coordinate.getPos()) + bamCoverage;
+			String line = coordinate.getChr() + ':' + lower.toString() + '-' + higher.toString();
+			bw.write(line);
+			bw.newLine();
+		}
+		bw.close();
 
 		loadIGVButton.setText("Sending mutations to server.");
 
@@ -381,7 +401,7 @@ public class SSHConnection {
 	}
 
 	private static void createTempBamFileONServer(String fileName) throws Exception {
-	    String command = "/var/pipelines_ngs_test/shell/createLocalBam.sh -f "+ fileName;
+	    String command = "/home/pipelines/"+Configurations.getEnvironment()+"/shell/createLocalBam.sh -f "+ fileName;
         CommandResponse rs = executeCommandAndGetOutput(command);
         if(rs.exitStatus != 0) {
             throw new Exception("Error creating local BAM file on server.");

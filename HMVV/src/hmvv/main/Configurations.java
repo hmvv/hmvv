@@ -100,7 +100,7 @@ public class Configurations {
 				}else if(variableName.startsWith("LIS_CONNECTION")){
 					LIS_CONNECTION = variableValue;
 				}else {
-					throw new Exception ("Invalid configuration on server. Variable name is not valide.");
+					throw new Exception ("Invalid configuration on server. Variable name is not valid.");
 				}
 			}catch(Exception e){
 				throw new Exception ("Invalid configuration on server. " + e.getClass().toString());
