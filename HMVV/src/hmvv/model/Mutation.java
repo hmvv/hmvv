@@ -481,9 +481,7 @@ public class Mutation {
     }
 
     public void setGnomadID() {
-       // if (this.getGnomad_allfreq() == null) {    	//TODO it seems like this check doesn't always work. I find variants online that don't have a gnomad_allfreq in our database
             this.gnomadID = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
-        //}
     }
 
     public String getOncokbID() {

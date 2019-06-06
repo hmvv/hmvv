@@ -201,7 +201,6 @@ public class Configurations {
 	public static int ALLELE_FREQ_FILTER = 10;
 	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
 	public static int getAlleleFrequencyFilter(Sample sample) {
-		//TODO Is there a better way to do this?
 		if(sample.getLastName().contains("Horizon")){
 			return HORIZON_ALLELE_FREQ_FILTER;
 		}else {

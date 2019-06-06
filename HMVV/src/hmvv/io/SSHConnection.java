@@ -431,7 +431,7 @@ public class SSHConnection {
 
     public static ArrayList<Database> getDatabaseInformation() throws Exception {
 
-		String command = "tail -n +2 /var/pipelines_"+Configurations.getEnvironment()+"/run_files/db_version.csv";
+		String command = "tail -n +2 /home/pipelines/"+Configurations.getEnvironment()+"/run_files/db_version.csv";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
 		if(rs.exitStatus != 0) {
@@ -452,7 +452,7 @@ public class SSHConnection {
 	}
     
     public static ArrayList<String> readConfigurationFile() throws Exception{
-    	String command = "cat /var/pipelines_" + Configurations.getEnvironment() + "/config/config.ini";
+    	String command = "cat /home/pipelines/" + Configurations.getEnvironment() + "/config/config.ini";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 		if(rs.exitStatus != 0) {
 			throw new Exception(String.format("Error finding or reading configuration file."));

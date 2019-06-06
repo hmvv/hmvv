@@ -783,21 +783,6 @@ public class DatabaseCommands {
 	}
 
 	public static ArrayList<Pipeline> getAllPipelines() throws Exception{
-//		String query = "select t3.queueID, t1.sampleID, t1.runID, t1.sampleName, t4.assayName, t5.instrumentName, t2.plStatus, t2.timeUpdated " +
-//				" from pipelineQueue as t3 " +
-//				" join samples as t1 on t1.sampleID = t3.sampleID " +
-//				" join assays as t4 on t4.assayID = t1.assayID " +
-//				" join instruments as t5 on t5.instrumentID = t1.instrumentID " +
-//				" left join ( " +
-//				" select pipelineStatusID, queueID, plStatus, timeUpdated " +
-//				" from pipelineStatus  " +
-//				" where pipelineStatusID in " +
-//				" (select  max(pipelineStatusID) " +
-//				" from pipelineStatus " +
-//				" group by queueID) ) as t2 " +
-//				" on t3.queueID = t2.queueID " +
-//				" where t2.timeUpdated  >= now() - interval 10 day" +
-//				" order by t3.queueID desc" ;
 		String query = "select" + 
 				" queueTable.queueID, queueTable.sampleID, queueTable.runID, queueTable.sampleName, queueTable.assayName, queueTable.instrumentName," + 
 				" statusTable.plStatus, statusTable.timeUpdated" + 
@@ -865,7 +850,6 @@ public class DatabaseCommands {
 
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 		int averageRunTime = 0;
-		//TODO remove pipelineLogs from database?
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(
 				" select AVG(runtime) as averageMinutes from " +
 				"  ( " +

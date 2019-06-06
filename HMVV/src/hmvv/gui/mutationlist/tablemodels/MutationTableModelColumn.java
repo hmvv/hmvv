@@ -130,7 +130,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			Integer.class,
 			(Mutation mutation) -> mutation.getAltReadDP());
 
-	public static final MutationTableModelColumn ConsequenceColumn = new MutationTableModelColumn("Consquence of mutation as predicted by ________",//TODO Fill in this blank
+	public static final MutationTableModelColumn ConsequenceColumn = new MutationTableModelColumn("Consquence of mutation as predicted by Variant Effect Predictor(VEP)",
 			"vep-Consequence",
 			String.class,
 			(Mutation mutation) -> mutation.getConsequence());
@@ -174,17 +174,17 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 
     //clinvar
 
-	public static final MutationTableModelColumn clinvarID = new MutationTableModelColumn("",//TODO Find this
+	public static final MutationTableModelColumn clinvarID = new MutationTableModelColumn("ClinVar Variation ID",
 			"clinVarID",
 			String.class,
 			(Mutation mutation) -> mutation.getClinvarID());
 	
-	public static final MutationTableModelColumn clinicalDisease = new MutationTableModelColumn("",//TODO Find this
+	public static final MutationTableModelColumn clinicalDisease = new MutationTableModelColumn("ClinVar's preferred disease name for the concept specified by disease identifiers in CLNDISDB",
 			"clinvar-Disease",
 			String.class,
 			(Mutation mutation) -> mutation.getClinicaldisease());
 	
-	public static final MutationTableModelColumn clinicalSignificance = new MutationTableModelColumn("",//TODO Find this
+	public static final MutationTableModelColumn clinicalSignificance = new MutationTableModelColumn("Clinical significance for this single variant",
 			"clinvar-Significance",
 			String.class,
 			(Mutation mutation) -> mutation.getClinicalsignificance());
@@ -194,7 +194,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(Mutation mutation) -> mutation.getClinicalconsequence());
 
-	public static final MutationTableModelColumn originColumn = new MutationTableModelColumn("",//TODO Find this
+	public static final MutationTableModelColumn originColumn = new MutationTableModelColumn("Allele origin",
 			"clinvar-Origin",
 			String.class,
 			(Mutation mutation) -> mutation.getClinicalorigin());
