@@ -270,7 +270,7 @@ public class DatabaseCommands {
 	 */
 	public static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String query = "select cosmicID from db_cosmic_grch37v88 where chr = ? and pos = ? and ref = ? and alt = ?";
+		String query = "select cosmicID from db_cosmic_grch37v86 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
@@ -287,7 +287,7 @@ public class DatabaseCommands {
 	}
 
 	public static String getCosmicInfo(String cosmicID) throws Exception{
-		String query = "select info from db_cosmic_grch37v88 where cosmicID = ?";
+		String query = "select info from db_cosmic_grch37v86 where cosmicID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -948,7 +948,7 @@ public class DatabaseCommands {
 				+ " from samples"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
-				+ " join db_cosmic_grch37v88 on sampleVariants.chr = db_cosmic_grch37v88.chr and sampleVariants.pos = db_cosmic_grch37v88.pos and sampleVariants.ref = db_cosmic_grch37v88.ref and sampleVariants.alt = db_cosmic_grch37v88.alt "
+				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
 				+ " where samples.lastName like 'Horizon%' "
 				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
 
