@@ -114,6 +114,15 @@ public abstract class CommonTable extends JTable{
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 		Component c = super.prepareRenderer(renderer, row, column);
+
+		if(row == this.getSelectedRow()) {
+			setSelectionBackground(Configurations.TABLE_SELECTION_COLOR);
+			if (isCellSelected(row, column)){
+				c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+			}
+			return c;
+		}
+
 		c.setForeground(customColumns[column].color);
 		return c;
 	}
@@ -177,7 +186,7 @@ public abstract class CommonTable extends JTable{
 	protected void searchGoogleForGene() throws Exception{
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
-		String gene = (getModel().getValueAt(modelRow, 1)).toString();
+		String gene = (getModel().getValueAt(modelRow, 3)).toString();
 		InternetCommands.searchGene(gene);
 	}
 

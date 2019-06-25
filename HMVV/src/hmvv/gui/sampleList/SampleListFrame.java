@@ -309,6 +309,10 @@ public class SampleListFrame extends JFrame {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				if(row == table.getSelectedRow()) {
+					setSelectionBackground(Configurations.TABLE_SELECTION_COLOR);
+					if (isCellSelected(row, column)){
+						c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+					}
 					return c;
 				}
 				c.setForeground(customColumns[column].color);
