@@ -73,8 +73,8 @@ public class DatabaseInformationTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int column) {
-        Database pipeline = databases.get(row);
-        return columns.get(column).getValue(pipeline);
+        Database db = databases.get(row);
+        return columns.get(column).getValue(db);
     }
 
     public String getColumnDescription(int column){
