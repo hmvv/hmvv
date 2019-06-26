@@ -77,7 +77,7 @@ public class Pipeline {
 		if (status.toLowerCase().equals("pipelinecompleted")){
 			return PipelineProgram.COMPLETE;
 		}else if ( instrumentName.equals("proton")) {
-			if (status.equals("Started") || status.equals("queued") ) {
+			if (status.equals("started") || status.equals("queued") ) {
 				program.setDisplayString("1/4");
 			}else if (status.equals("RunningVEP")) {
 				program.setDisplayString("2/4");
@@ -89,7 +89,7 @@ public class Pipeline {
 				program = PipelineProgram.ERROR;
 			}
 		}else if  ( assayName.equals("heme") || instrumentName.equals("nextseq")) {
-			if (status.equals("Started") || status.equals("queued")) {
+			if (status.equals("started") || status.equals("queued")) {
 				program.setDisplayString("0/6");
 			}else if (status.equals("bcl2fastq_running_now")) {
 				program.setDisplayString("1/6");
@@ -128,12 +128,12 @@ public class Pipeline {
 			ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
 			rows = DatabaseCommands.getPipelineDetail(queueID);
 			for (PipelineStatus ps : rows) {
-				if (ps.pipelineStatus.equals("Started")) {
+				if (ps.pipelineStatus.equals("started")){
 					pipelineStartTime = ps.getDateUpdated();
 				}
 			}
 
-			float timeElapsed = (float) ((Math.abs(currentTime.getTime() - pipelineStartTime.getTime())) / (1000.0f));
+			float timeElapsed = (float)((Math.abs(currentTime.getTime() - pipelineStartTime.getTime())) / (1000.0f));
 
 			progress = ((timeElapsed * 100.0f) / (pipelineTotalTime * 60.0f));
 
