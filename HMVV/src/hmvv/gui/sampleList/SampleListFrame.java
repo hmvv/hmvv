@@ -556,13 +556,24 @@ public class SampleListFrame extends JFrame {
 				try {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
-					ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
-					for(Mutation m : mutations){
-						m.setCosmicID("LOADING...");
+
+					if (currentSample.assay.equals("exome")){
+
+						TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, currentSample);
+						tmbFrame.setVisible(true);
+						System.out.println("test");
+
+					} else{
+
+						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
+						for(Mutation m : mutations){
+							m.setCosmicID("LOADING...");
+						}
+						MutationList mutationList = new MutationList(mutations);
+						MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
+						mutationListFrame.setVisible(true);
 					}
-					MutationList mutationList = new MutationList(mutations);
-					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
-					mutationListFrame.setVisible(true);
+
 				} catch (Exception e) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading mutation data.");
 				}
@@ -577,8 +588,18 @@ public class SampleListFrame extends JFrame {
 		try {
             table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Sample currentSample = getCurrentlySelectedSample();
-			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
-			amplicon.setVisible(true);
+
+			if(currentSample.assay.equals("exome")){
+
+                ExomeQCFrame exomeQC = new ExomeQCFrame(this, currentSample);
+                exomeQC.setVisible(true);
+
+            }else {
+
+                ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
+                amplicon.setVisible(true);
+
+            }
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
 		}

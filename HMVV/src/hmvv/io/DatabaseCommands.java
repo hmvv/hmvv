@@ -11,18 +11,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import hmvv.main.Configurations;
-import hmvv.model.Amplicon;
-import hmvv.model.AmpliconCount;
-import hmvv.model.Annotation;
-import hmvv.model.Coordinate;
-import hmvv.model.GeneQCDataElementTrend;
-import hmvv.model.GeneAnnotation;
-import hmvv.model.Mutation;
-import hmvv.model.Pipeline;
-import hmvv.model.PipelineStatus;
-import hmvv.model.QCDataElement;
-import hmvv.model.Sample;
-import hmvv.model.VariantPredictionClass;
+import hmvv.model.*;
 
 public class DatabaseCommands {
 
@@ -148,6 +137,11 @@ public class DatabaseCommands {
 		}
 		pstFindID.close();
 
+		if (sample.getClass().getSimpleName().equals("SampleExome")){
+
+			insertTumorNormalPair(sample);
+		}
+
 		queueSampleForRunningPipeline(sample);
 	}
 
@@ -160,6 +154,12 @@ public class DatabaseCommands {
 		
 		pstQueueSample.executeUpdate();
 		pstQueueSample.close();
+
+	}
+
+	private static void insertTumorNormalPair(Sample sampleExome){
+
+		SampleExome se = (SampleExome)sampleExome;
 
 	}
 

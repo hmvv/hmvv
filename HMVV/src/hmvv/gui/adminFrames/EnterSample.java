@@ -8,6 +8,7 @@ import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
+import hmvv.model.SampleExome;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,7 +22,7 @@ public class EnterSample extends JDialog {
 
     private SampleListFrame parent;
     private JTextField textRunID;
-    private JTextField exomeNormaltextRunID;
+    private JTextField textExomeNormalRunID;
     private JTextField textlastName;
     private JTextField textFirstName;
     private JTextField textOrderNumber;
@@ -45,11 +46,7 @@ public class EnterSample extends JDialog {
     private JButton enterSampleButton;
     private JButton cancelButton;
 
-
     private JPanel assayPanel;
-//    private JPanel assayPanel_proton;
-//    private JPanel assayPanel_heme;
-//    private JPanel assayPanel_exome;
 
     private SampleListTableModel sampleListTableModel;
 
@@ -68,8 +65,7 @@ public class EnterSample extends JDialog {
         createComponents();
         layoutComponents();
         activateComponents();
-        enableComboBoxes(false, false, false);
-
+        enableComboBoxes(false, false, false,false);
 
         pack();
         setModalityType(ModalityType.APPLICATION_MODAL);
@@ -90,7 +86,7 @@ public class EnterSample extends JDialog {
         }
 
         textRunID = new JTextField();
-        exomeNormaltextRunID = new JTextField();
+        textExomeNormalRunID = new JTextField();
 
         btnFindRun = new JButton("Find Run");
         btnFindExomeNormalRun = new JButton("Find Normal");
@@ -99,11 +95,7 @@ public class EnterSample extends JDialog {
         comboBoxSample = new JComboBox<String>();
 
         comboBoxExomeNormalSample= new JComboBox<String>();
-
         comboBoxAssay = new JComboBox<String>();
-        try {
-           // findAssays();
-        } catch (Exception e) {}
 
         textlastName = new JTextField();
         textFirstName = new JTextField();
@@ -203,8 +195,8 @@ public class EnterSample extends JDialog {
         pane.add(centerPanel, BorderLayout.CENTER);
         pane.add(rightPanel, BorderLayout.LINE_END);
         pane.add(bottomPanel, BorderLayout.PAGE_END);
-
     }
+
     private void activateComponents(){
         comboBoxInstrument.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
@@ -226,7 +218,24 @@ public class EnterSample extends JDialog {
                     @Override
                     public void run() {
                         try {
-                            findRun();
+                            findRun(textRunID.getText(),comboBoxSample,false);
+                        } catch (Exception e) {
+                            JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
+                        }
+                    }
+                });
+                findRunThread.start();
+            }
+        });
+
+        btnFindExomeNormalRun.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                findRunThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            findRun(textExomeNormalRunID.getText(),comboBoxExomeNormalSample, true);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -324,7 +333,7 @@ public class EnterSample extends JDialog {
                 }
                 if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
                     String barcodeText = textBarcode.getText();
-                    clearFields(true);
+                    clearFields(true,false);
                     textBarcode.setText(barcodeText);
                     runLISIntegration(barcodeText);
                 }
@@ -350,14 +359,12 @@ public class EnterSample extends JDialog {
         }
     }
 
-    private void findRun() throws Exception{
-        clearComboBoxes();
-        clearFields(false);
-        enableComboBoxes(false, false, false);
+    private void findRun(String runID, JComboBox<String> combobox,boolean isExomeNormal) throws Exception{
+        clearComboBoxes(isExomeNormal);
+        clearFields(false,isExomeNormal);
+        enableComboBoxes(false, false, false,false);
 
         String instrument = comboBoxInstrument.getSelectedItem().toString();
-        String runID = textRunID.getText();
-
         try{
             Integer.parseInt(runID);
         }catch(Exception e){
@@ -365,7 +372,7 @@ public class EnterSample extends JDialog {
         }
 
         if(instrument.equals("miseq") || instrument.equals("nextseq")){
-            findRunIllumina(instrument, runID);
+            findRunIllumina(instrument, runID, combobox);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
             findRunIon(instrument, runID);
         }else {
@@ -373,17 +380,17 @@ public class EnterSample extends JDialog {
         }
     }
 
-    private void findRunIllumina(String instrument, String runID) throws Exception {
+    private void findRunIllumina(String instrument, String runID,JComboBox<String> combobox) throws Exception {
         ArrayList<String> sampeIDList = SSHConnection.getSampleListIllumina(instrument, runID);
-        fillSample(sampeIDList);
-        enableComboBoxes(false, false, true);
+        fillSample(sampeIDList,combobox);
+        enableComboBoxes(false, false, true,true);
     }
 
     private void findRunIon(String instrument, String runID) throws Exception {
         ArrayList<String> coverageIDList = SSHConnection.getCandidateCoverageIDs(instrument, runID);
         ArrayList<String> variantCallerIDList = SSHConnection.getCandidateVariantCallerIDs(instrument, runID);
         fillComboBoxes(coverageIDList, variantCallerIDList);
-        enableComboBoxes(true, true, true);
+        enableComboBoxes(true, true, true,false);
 
         //Don't have to fillSampleIon because the comboBox listener will fire, and fillSampleIon will be called
     }
@@ -400,15 +407,16 @@ public class EnterSample extends JDialog {
         }
 
         ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runID, variantCallerID);
-        fillSample(sampleIDList);
+        fillSample(sampleIDList,comboBoxSample);
     }
 
-    private void fillSample(ArrayList<String> samples){
-        comboBoxSample.removeAllItems();
+    private void fillSample(ArrayList<String> samples,JComboBox<String> combobox){
+        combobox.removeAllItems();
         for(int i =0; i < samples.size(); i++){
-            comboBoxSample.addItem(samples.get(i));
+            combobox.addItem(samples.get(i));
         }
-        sampleIDSelectionChanged();
+        //TODO verify impact of removing this
+        //sampleIDSelectionChanged();
     }
 
     private void fillComboBoxes(ArrayList<String> coverageID, ArrayList<String> variantCallerID){
@@ -445,7 +453,7 @@ public class EnterSample extends JDialog {
             updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
         }else{
             String barcodeText = textBarcode.getText();
-            clearFields(true);
+            clearFields(true,false);
             runLISIntegration(barcodeText);
         }
     }
@@ -482,7 +490,7 @@ public class EnterSample extends JDialog {
             GridLayout runIDGridLayout = new GridLayout(1,0);
             runIDGridLayout.setHgap(10);
             runIDPanel.setLayout(runIDGridLayout);
-            runIDPanel.add(exomeNormaltextRunID);
+            runIDPanel.add(textExomeNormalRunID);
             runIDPanel.add(btnFindExomeNormalRun);
 
             assayPanel.add(new RowPanel("Normal-RunID", runIDPanel));
@@ -557,26 +565,39 @@ public class EnterSample extends JDialog {
         enterSampleButton.setEnabled(editable);
     }
 
-    private void clearComboBoxes(){
+    private void clearComboBoxes(Boolean isExomeNormal){
         comboBoxCoverageIDList.removeAllItems();
         comboBoxVariantCallerIDList.removeAllItems();
-        comboBoxSample.removeAllItems();
+        if(!isExomeNormal){
+            comboBoxSample.removeAllItems();
+        }
+        comboBoxExomeNormalSample.removeAllItems();
+    }
+
+    private void clearAllRunIDs(){
+        textRunID.setText("");
+        textExomeNormalRunID.setText("");
     }
 
     private void clearAndDisableAll(){
-        clearComboBoxes();
-        clearFields(false);
-        enableComboBoxes(false, false, false);
+        clearComboBoxes(false);
+        clearAllRunIDs();
+        clearFields(false,false);
+        enableComboBoxes(false, false, false,false);
     }
 
-    private void enableComboBoxes(boolean comboBoxCoverageIDList, boolean comboBoxVariantCallerIDList, boolean comboBoxSample) {
+    private void enableComboBoxes(boolean comboBoxCoverageIDList, boolean comboBoxVariantCallerIDList, boolean comboBoxSample,boolean comboBoxExomeNormalSample) {
         this.comboBoxCoverageIDList.setEnabled(comboBoxCoverageIDList);
         this.comboBoxVariantCallerIDList.setEnabled(comboBoxVariantCallerIDList);
         this.comboBoxSample.setEnabled(comboBoxSample);
+        this.comboBoxExomeNormalSample.setEnabled(comboBoxExomeNormalSample);
     }
 
-    private void clearFields(boolean editable) {
-        updateFields("", "", "", "", "", "", "", "", "", editable);
+    private void clearFields(boolean editable,boolean isExomeNormal) {
+
+        if (!isExomeNormal) {
+            updateFields("", "", "", "", "", "", "", "", "", editable);
+        }
     }
 
     private void enterData() throws Exception{
@@ -626,8 +647,17 @@ public class EnterSample extends JDialog {
         String note = textNote.getText();
         String enteredBy = SSHConnection.getUserName();
 
-        return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
-                pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
+        if (assay.equals("exome")){
+
+            return new SampleExome(sampleID, assay, instrument, lastName, firstName, orderNumber,
+                    pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
+                    runDate, patientHistory, diagnosis, note, enteredBy,
+                    textExomeNormalRunID.getText(),comboBoxExomeNormalSample.getSelectedItem().toString());
+        }
+        else{
+            return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+                    pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
+        }
     }
 
     private class RowPanel extends JPanel{
