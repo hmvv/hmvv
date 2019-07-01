@@ -21,7 +21,7 @@ public class Sample {
 	private String patientHistory;
 	private String diagnosis ;
 	private String note;
-	
+
 	public Sample(int sampleID, String assay, String instrument, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
 			String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
@@ -127,5 +127,13 @@ public class Sample {
 	
 	public void setTumorPercent(String tumorPercent) {
 		this.tumorPercent = tumorPercent;
+	}
+
+	public String getAssayQC(){
+		if (assay.equals("exome")){
+			return "QC";
+		}else {
+			return "amplicon";
+		}
 	}
 }

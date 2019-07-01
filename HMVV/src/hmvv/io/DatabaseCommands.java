@@ -137,7 +137,7 @@ public class DatabaseCommands {
 		}
 		pstFindID.close();
 
-		if (sample.getClass().getSimpleName().equals("SampleExome")){
+		if ( sample instanceof SampleExome){
 
 			insertTumorNormalPair(sample);
 		}
@@ -157,9 +157,21 @@ public class DatabaseCommands {
 
 	}
 
-	private static void insertTumorNormalPair(Sample sampleExome){
+	private static void insertTumorNormalPair(Sample sampleExome)throws Exception{
 
-		SampleExome se = (SampleExome)sampleExome;
+		SampleExome sample_exome = (SampleExome)sampleExome;
+
+		String enterSampleNormalPair = "insert into sampleNormalPair "
+				+ "(sampleID,normalPairRunID,sampleName,enterDate) "
+				+ "values ( ?,?,?,now())";
+		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
+		pstEnterSampleNormalPair.setInt(1, sample_exome.sampleID);
+		pstEnterSampleNormalPair.setString(2, sample_exome.getNormalRunID());
+		pstEnterSampleNormalPair.setString(3, sample_exome.getNormalSampleName());
+
+		pstEnterSampleNormalPair.executeUpdate();
+		pstEnterSampleNormalPair.close();
+
 
 	}
 
@@ -998,4 +1010,29 @@ public class DatabaseCommands {
 
 		return geneVariantTrends;
 	}
+
+    /* ************************************************************************
+     * Query Exome Plot
+     *************************************************************************/
+
+    public static ExomeTMB getSampleTMB(Sample sample)throws Exception{
+
+        PreparedStatement preparedStatement = databaseConnection.prepareStatement("select TMBPair,TMBTotalVariants,TMBScore,TMBGroup from sampleTumorMutationBurden where sampleID = ? ");
+        preparedStatement.setInt(1, sample.sampleID);
+        ResultSet rs = preparedStatement.executeQuery();
+        ExomeTMB exomeTMB = new ExomeTMB();
+        while(rs.next()){
+            exomeTMB.setTMBPair(rs.getString("TMBPair"));
+            Integer totalvariants = rs.getInt("TMBTotalVariants");
+            exomeTMB.setTMBTotalVariants(totalvariants.toString());
+            Float tmbscore = rs.getFloat("TMBScore");
+            exomeTMB.setTMBScore(tmbscore.toString());
+            exomeTMB.setTMBGroup(rs.getString("TMBGroup"));
+        }
+        preparedStatement.close();
+
+    return exomeTMB;
+    }
+
+
 }

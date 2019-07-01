@@ -117,10 +117,6 @@ public class EnterSample extends JDialog {
         cancelButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 
         assayPanel = new JPanel();
-//        assayPanel_proton = new JPanel();
-//        assayPanel_heme = new JPanel();
-//        assayPanel_exome = new JPanel();
-
     }
 
     private void layoutComponents(){
@@ -146,10 +142,8 @@ public class EnterSample extends JDialog {
         leftPanel.add(new RowPanel("RunID", runIDPanel));
         leftPanel.add(new RowPanel("SampleName", comboBoxSample));
 
-        // assay panel dynamic
         leftPanel.add(new RowPanel("Assay", comboBoxAssay));
         assayPanel.setPreferredSize(new Dimension(475, 150));
-//        assayPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         leftPanel.add(assayPanel);
 
         JPanel centerPanel = new JPanel();
@@ -321,6 +315,21 @@ public class EnterSample extends JDialog {
             public void keyTyped(KeyEvent arg0) {}
         });
 
+        textExomeNormalRunID.addKeyListener(new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+                    btnFindExomeNormalRun.doClick();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent arg0) {}
+
+            @Override
+            public void keyTyped(KeyEvent arg0) {}
+        });
+
         sampleIDSelectionChanged();
 
         textBarcode.addKeyListener(new KeyListener() {
@@ -460,6 +469,7 @@ public class EnterSample extends JDialog {
 
     private void assaySelectionChanged(String assay) {
         if (assay.equals("gene50") || assay.equals("neuro") ) {
+
             assayPanel.removeAll();
             assayPanel.repaint();
             assayPanel.revalidate();
@@ -476,10 +486,6 @@ public class EnterSample extends JDialog {
             assayPanel.repaint();
             assayPanel.revalidate();
 
-//            assayPanel.add(new RowPanel("C----ageID", comboBoxCoverageIDList));
-//            assayPanel.repaint();
-//            assayPanel.revalidate();
-
         } else if (assay.equals("exome")) {
 
             assayPanel.removeAll();
@@ -494,7 +500,6 @@ public class EnterSample extends JDialog {
             runIDPanel.add(btnFindExomeNormalRun);
 
             assayPanel.add(new RowPanel("Normal-RunID", runIDPanel));
-
             assayPanel.add(new RowPanel("Normal-Sample", comboBoxExomeNormalSample));
             assayPanel.repaint();
             assayPanel.revalidate();
@@ -648,6 +653,12 @@ public class EnterSample extends JDialog {
         String enteredBy = SSHConnection.getUserName();
 
         if (assay.equals("exome")){
+
+            if(comboBoxExomeNormalSample.getSelectedItem().toString().equals(comboBoxSample.getSelectedItem().toString()) &&
+                textRunID.getText().equals(textExomeNormalRunID.getText())) {
+
+                throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
+            }
 
             return new SampleExome(sampleID, assay, instrument, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,

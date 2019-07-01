@@ -1,6 +1,8 @@
 package hmvv.gui.sampleList;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.io.DatabaseCommands;
+import hmvv.model.ExomeTMB;
 import hmvv.model.Sample;
 
 import javax.swing.*;
@@ -10,6 +12,7 @@ public class TumorMutationBurdenFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
+    private JButton txtSample;
     private JButton txtTotalVariants;
     private JButton txtTMBScore;
     private JButton txtTMBGroup;
@@ -21,7 +24,7 @@ public class TumorMutationBurdenFrame extends JDialog {
         this.sample = sample;
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.2), (int)(bounds.height*.21));
+        setSize((int)(bounds.width*.2), (int)(bounds.height*.28));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -37,6 +40,11 @@ public class TumorMutationBurdenFrame extends JDialog {
     }
 
     private void createComponents(){
+
+        txtSample = new JButton();
+        txtSample.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        txtSample.setBackground(new Color(59, 89, 182));
+        txtSample.setContentAreaFilled(false);
 
         txtTotalVariants = new JButton();
         txtTotalVariants.setFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -58,37 +66,46 @@ public class TumorMutationBurdenFrame extends JDialog {
 
         Container pane = getContentPane();
 
-        JPanel mainPanel = new JPanel(new GridLayout(3,1));
-        mainPanel.setPreferredSize(new Dimension(200, 175));
-        mainPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        JPanel mainPanel = new JPanel(new GridLayout(4,1));
+        mainPanel.setPreferredSize(new Dimension(300, 225));
 
-        JPanel topPanel = new JPanel();
-        topPanel.setPreferredSize(new Dimension(200, 50));
-        topPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        topPanel.add(new RowPanel("Total Variants:",txtTotalVariants));
+        JPanel samplePanel = new JPanel(new GridLayout(1,0));
+        samplePanel.setPreferredSize(new Dimension(300, 75));
+        samplePanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        samplePanel.add(txtSample);
 
-        JPanel middlePanel = new JPanel();
-        middlePanel .setPreferredSize(new Dimension(200, 50));
-        middlePanel .setBorder(BorderFactory.createLineBorder(Color.black));
-        middlePanel .add(new RowPanel("TMB Score:",txtTMBScore));
+        JPanel variantPanel = new JPanel();
+        variantPanel.setPreferredSize(new Dimension(300, 50));
+        variantPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        variantPanel.add(new RowPanel("Total Variants:",txtTotalVariants));
 
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setPreferredSize(new Dimension(200, 50));
-        bottomPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        bottomPanel.add(new RowPanel("TMB Group:",txtTMBGroup));
+        JPanel scorePanel = new JPanel();
+        scorePanel.setPreferredSize(new Dimension(300, 50));
+        scorePanel.setBorder(BorderFactory.createLineBorder(Color.black));
+        scorePanel.add(new RowPanel("TMB Score:",txtTMBScore));
 
-        mainPanel.add(topPanel);
-        mainPanel.add(middlePanel);
-        mainPanel.add(bottomPanel);
+        JPanel groupPanel = new JPanel();
+        groupPanel .setPreferredSize(new Dimension(300, 50));
+        groupPanel .setBorder(BorderFactory.createLineBorder(Color.black));
+        groupPanel .add(new RowPanel("TMB Group:",txtTMBGroup));
+
+
+        mainPanel.add(samplePanel);
+        mainPanel.add(variantPanel);
+        mainPanel.add(scorePanel);
+        mainPanel.add(groupPanel);
 
         pane.add(mainPanel,BorderLayout.PAGE_START);
 
     }
 
-    private void setValues(){
-        txtTotalVariants.setText("250");
-        txtTMBScore.setText("3.2");
-        txtTMBGroup.setText("HIGH");
+    private void setValues() throws Exception {
+
+        ExomeTMB exomeTMB = DatabaseCommands.getSampleTMB(sample);
+        txtSample.setText(exomeTMB.getTMBPair());
+        txtTotalVariants.setText(exomeTMB.getTMBTotalVariants());
+        txtTMBScore.setText(exomeTMB.getTMBScore());
+        txtTMBGroup.setText(exomeTMB.getTMBGroup());
     }
 
     private class RowPanel extends JPanel{
