@@ -467,4 +467,24 @@ public class SSHConnection {
 		}
 		return configurations;
     }
+
+	public static ArrayList<String> readExomeSeqStatsFile(Sample sample) throws Exception{
+		String command = "cat /home/environments/" + Configurations.getEnvironment() + "/exomeAnalysis/*_"+sample.runID+"_*/Paired/"+
+				sample.sampleName+"_*_"+sample.getNormalSampleName()+"_*/"+
+				sample.sampleName+"_*_"+sample.getNormalSampleName()+"_*.SeqStats.csv";
+		CommandResponse rs = executeCommandAndGetOutput(command);
+
+		if(rs.exitStatus != 0) {
+			throw new Exception(String.format("Error finding or reading Exome Sequence Stat files."));
+		}
+
+		ArrayList<String> stats = new ArrayList<String>();
+		for(String line : rs.responseLines) {
+			if(line.equals("")){
+				continue;
+			}
+			stats.add(line);
+		}
+		return stats;
+	}
 }

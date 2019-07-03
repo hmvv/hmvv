@@ -137,7 +137,7 @@ public class DatabaseCommands {
 		}
 		pstFindID.close();
 
-		if ( sample instanceof SampleExome){
+		if ( assay.equals("tmb")){
 
 			insertTumorNormalPair(sample);
 		}
@@ -159,15 +159,13 @@ public class DatabaseCommands {
 
 	private static void insertTumorNormalPair(Sample sampleExome)throws Exception{
 
-		SampleExome sample_exome = (SampleExome)sampleExome;
-
 		String enterSampleNormalPair = "insert into sampleNormalPair "
 				+ "(sampleID,normalPairRunID,sampleName,enterDate) "
 				+ "values ( ?,?,?,now())";
 		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
-		pstEnterSampleNormalPair.setInt(1, sample_exome.sampleID);
-		pstEnterSampleNormalPair.setString(2, sample_exome.getNormalRunID());
-		pstEnterSampleNormalPair.setString(3, sample_exome.getNormalSampleName());
+		pstEnterSampleNormalPair.setInt(1, sampleExome.sampleID);
+		pstEnterSampleNormalPair.setString(2, sampleExome.getNormalRunID());
+		pstEnterSampleNormalPair.setString(3, sampleExome.getNormalSampleName());
 
 		pstEnterSampleNormalPair.executeUpdate();
 		pstEnterSampleNormalPair.close();
@@ -562,6 +560,11 @@ public class DatabaseCommands {
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
 			Sample s = getSample(rs);
+
+			if (s.assay.equals("exome")){
+
+				updateExomeInfo(s);
+			}
 			samples.add(s);
 		}
 		preparedStatement.close();
@@ -592,6 +595,18 @@ public class DatabaseCommands {
 		return sample;
 	}
 
+	private static void updateExomeInfo(Sample sample) throws SQLException{
+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalPairRunID,normalSampleName from sampleNormalPair where sampleID = ?");
+		preparedStatement.setInt(1, sample.sampleID);
+		ResultSet rs = preparedStatement.executeQuery();
+		if(rs.next()){
+			sample.setNormalRunID(rs.getString("normalPairRunID"));
+			sample.setNormalSampleName(rs.getString("normalSampleName"));
+		}
+		preparedStatement.close();
+
+	}
 	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set note = ? where sampleID = ?");
 		updateStatement.setString(1, newNote);
@@ -857,8 +872,6 @@ public class DatabaseCommands {
 
 		return rows;
 	}
-
-
 
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 		int averageRunTime = 0;

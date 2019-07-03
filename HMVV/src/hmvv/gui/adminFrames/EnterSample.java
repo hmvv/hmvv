@@ -8,7 +8,6 @@ import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
-import hmvv.model.SampleExome;
 
 import javax.swing.*;
 import java.awt.*;
@@ -660,7 +659,7 @@ public class EnterSample extends JDialog {
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
 
-            return new SampleExome(sampleID, assay, instrument, lastName, firstName, orderNumber,
+            return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy,
                     textExomeNormalRunID.getText(),comboBoxExomeNormalSample.getSelectedItem().toString());

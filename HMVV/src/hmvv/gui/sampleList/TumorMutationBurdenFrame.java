@@ -24,9 +24,10 @@ public class TumorMutationBurdenFrame extends JDialog {
         this.sample = sample;
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.2), (int)(bounds.height*.28));
+        setSize((int)(bounds.width*.5), (int)(bounds.height*.5));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        setResizable(false);
 
         createComponents();
         layoutComponents();
@@ -123,7 +124,6 @@ public class TumorMutationBurdenFrame extends JDialog {
             left.setFont(GUICommonTools.TAHOMA_BOLD_14);
             left.setPreferredSize(new Dimension(150, 25));
             right.setPreferredSize(new Dimension(150, 25));
-
             setLayout(new BorderLayout());
             add(left, BorderLayout.WEST);
             add(right, BorderLayout.CENTER);

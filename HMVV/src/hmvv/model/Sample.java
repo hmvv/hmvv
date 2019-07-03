@@ -11,6 +11,9 @@ public class Sample {
 	public final String callerID;
 	public final String runDate;
 	public final String enteredBy;
+
+	private String normalRunID;
+	private String normalSampleName;
 	
 	private String lastName;
 	private String firstName;
@@ -43,6 +46,34 @@ public class Sample {
 		this.diagnosis = notNull(bmDiagnosis);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
+	}
+
+	public Sample(int sampleID, String assay, String instrument, String lastName, String firstName, String orderNumber,
+					   String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
+					   String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy,
+					   String normalRunID, String normalSampleName){
+
+		this.sampleID = sampleID;
+		this.assay = notNull(assay);
+		this.instrument = notNull(instrument);
+		this.lastName = notNull(lastName);
+		this.firstName = notNull(firstName);
+		this.orderNumber = notNull(orderNumber);
+		this.pathNumber = notNull(pathNumber);
+		this.tumorSource = notNull(tumorSource);
+		this.tumorPercent = notNull(tumorPercent);
+		this.runID = notNull(runID);
+		this.sampleName = notNull(sampleName);
+		this.coverageID = notNull(coverageID);
+		this.callerID = notNull(callerID);
+		this.runDate = notNull(runDate);
+		this.patientHistory = notNull(patientHistory);
+		this.diagnosis = notNull(bmDiagnosis);
+		this.note = notNull(note);
+		this.enteredBy = notNull(enteredBy);
+		this.normalRunID = normalRunID;
+		this.normalSampleName = normalSampleName;
+
 	}
 	
 	public int getSampleID(){
@@ -135,5 +166,21 @@ public class Sample {
 		}else {
 			return "amplicon";
 		}
+	}
+
+	public String getNormalRunID() {
+		return normalRunID;
+	}
+
+	public void setNormalRunID(String normalRunID) {
+		this.normalRunID = normalRunID;
+	}
+
+	public String getNormalSampleName() {
+		return normalSampleName;
+	}
+
+	public void setNormalSampleName(String normalSampleName) {
+		this.normalSampleName = normalSampleName;
 	}
 }
