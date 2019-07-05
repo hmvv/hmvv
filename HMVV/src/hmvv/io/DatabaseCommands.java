@@ -160,7 +160,7 @@ public class DatabaseCommands {
 	private static void insertTumorNormalPair(Sample sampleExome)throws Exception{
 
 		String enterSampleNormalPair = "insert into sampleNormalPair "
-				+ "(sampleID,normalPairRunID,sampleName,enterDate) "
+				+ "(sampleID,normalPairRunID,normalSampleName,enterDate) "
 				+ "values ( ?,?,?,now())";
 		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
 		pstEnterSampleNormalPair.setInt(1, sampleExome.sampleID);

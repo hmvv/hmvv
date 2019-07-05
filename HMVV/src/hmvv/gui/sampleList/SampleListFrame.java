@@ -201,8 +201,8 @@ public class SampleListFrame extends JFrame {
 		adminMenu.add(qualityControlMenuItem);
 		try{
 			for(String assay : DatabaseCommands.getAllAssays()){
-				//TODO support exome QC
-				if(assay.equals("exome")) {
+				//TODO support TMB QC
+				if(assay.equals("tmb")) {
 					continue;
 				}
 				
@@ -557,7 +557,7 @@ public class SampleListFrame extends JFrame {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
 
-					if (currentSample.assay.equals("exome")){
+					if (currentSample.assay.equals("tmb")){
 
 						TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, currentSample);
 						tmbFrame.setVisible(true);
@@ -589,10 +589,10 @@ public class SampleListFrame extends JFrame {
             table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Sample currentSample = getCurrentlySelectedSample();
 
-			if(currentSample.assay.equals("exome")){
+			if(currentSample.assay.equals("tmb")){
 
-                ExomeQCFrame exomeQC = new ExomeQCFrame(this, currentSample);
-                exomeQC.setVisible(true);
+                TMBQCFrame tmbQC = new TMBQCFrame(this, currentSample);
+				tmbQC.setVisible(true);
 
             }else {
 

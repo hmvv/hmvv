@@ -161,7 +161,7 @@ public class Sample {
 	}
 
 	public String getAssayQC(){
-		if (assay.equals("exome")){
+		if (assay.equals("tmb")){
 			return "QC";
 		}else {
 			return "amplicon";

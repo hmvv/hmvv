@@ -21,7 +21,7 @@ public class EnterSample extends JDialog {
 
     private SampleListFrame parent;
     private JTextField textRunID;
-    private JTextField textExomeNormalRunID;
+    private JTextField textTMBNormalRunID;
     private JTextField textlastName;
     private JTextField textFirstName;
     private JTextField textOrderNumber;
@@ -38,10 +38,10 @@ public class EnterSample extends JDialog {
     private JComboBox<String> comboBoxCoverageIDList;
     private JComboBox<String> comboBoxVariantCallerIDList;
     private JComboBox<String> comboBoxSample;
-    private JComboBox<String> comboBoxExomeNormalSample;
+    private JComboBox<String> comboBoxTMBNormalSample;
 
     private JButton btnFindRun;
-    private JButton btnFindExomeNormalRun;
+    private JButton btnFindTMBNormalRun;
     private JButton enterSampleButton;
     private JButton cancelButton;
 
@@ -85,15 +85,15 @@ public class EnterSample extends JDialog {
         }
 
         textRunID = new JTextField();
-        textExomeNormalRunID = new JTextField();
+        textTMBNormalRunID = new JTextField();
 
         btnFindRun = new JButton("Find Run");
-        btnFindExomeNormalRun = new JButton("Find Normal");
+        btnFindTMBNormalRun = new JButton("Find Normal");
         comboBoxCoverageIDList = new JComboBox<String>();
         comboBoxVariantCallerIDList = new JComboBox<String>();
         comboBoxSample = new JComboBox<String>();
 
-        comboBoxExomeNormalSample= new JComboBox<String>();
+        comboBoxTMBNormalSample= new JComboBox<String>();
         comboBoxAssay = new JComboBox<String>();
 
         textlastName = new JTextField();
@@ -221,14 +221,14 @@ public class EnterSample extends JDialog {
             }
         });
 
-        btnFindExomeNormalRun.addActionListener(new ActionListener(){
+        btnFindTMBNormalRun.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
                 findRunThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            findRun(textExomeNormalRunID.getText(),comboBoxExomeNormalSample, true);
+                            findRun(textTMBNormalRunID.getText(),comboBoxTMBNormalSample, true);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -314,11 +314,11 @@ public class EnterSample extends JDialog {
             public void keyTyped(KeyEvent arg0) {}
         });
 
-        textExomeNormalRunID.addKeyListener(new KeyListener() {
+        textTMBNormalRunID.addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent arg0) {
                 if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
-                    btnFindExomeNormalRun.doClick();
+                    btnFindTMBNormalRun.doClick();
                 }
             }
 
@@ -367,9 +367,9 @@ public class EnterSample extends JDialog {
         }
     }
 
-    private void findRun(String runID, JComboBox<String> combobox,boolean isExomeNormal) throws Exception{
-        clearComboBoxes(isExomeNormal);
-        clearFields(false,isExomeNormal);
+    private void findRun(String runID, JComboBox<String> combobox,boolean isTMBNormal) throws Exception{
+        clearComboBoxes(isTMBNormal);
+        clearFields(false,isTMBNormal);
         enableComboBoxes(false, false, false,false);
 
         String instrument = comboBoxInstrument.getSelectedItem().toString();
@@ -380,7 +380,7 @@ public class EnterSample extends JDialog {
         }
 
         if(instrument.equals("miseq") || instrument.equals("nextseq")){
-            findRunIllumina(instrument, runID, combobox);
+            findRunIllumina(instrument, runID, combobox,isTMBNormal);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
             findRunIon(instrument, runID);
         }else {
@@ -388,9 +388,9 @@ public class EnterSample extends JDialog {
         }
     }
 
-    private void findRunIllumina(String instrument, String runID,JComboBox<String> combobox) throws Exception {
+    private void findRunIllumina(String instrument, String runID,JComboBox<String> combobox,boolean isTMBNormal) throws Exception {
         ArrayList<String> sampeIDList = SSHConnection.getSampleListIllumina(instrument, runID);
-        fillSample(sampeIDList,combobox);
+        fillSample(sampeIDList,combobox,isTMBNormal);
         enableComboBoxes(false, false, true,true);
     }
 
@@ -415,13 +415,19 @@ public class EnterSample extends JDialog {
         }
 
         ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runID, variantCallerID);
-        fillSample(sampleIDList,comboBoxSample);
+        fillSample(sampleIDList,comboBoxSample,false);
     }
 
-    private void fillSample(ArrayList<String> samples,JComboBox<String> combobox){
+    private void fillSample(ArrayList<String> samples,JComboBox<String> combobox,boolean isTMBNormal){
         combobox.removeAllItems();
         for(int i =0; i < samples.size(); i++){
-            combobox.addItem(samples.get(i));
+
+            String currentSample =samples.get(i);
+            if (!isTMBNormal){
+                combobox.addItem(currentSample);
+            } else if(isTMBNormal && currentSample.endsWith("-N") ){
+                combobox.addItem(currentSample);
+            }
         }
         //TODO verify impact of removing this
         //sampleIDSelectionChanged();
@@ -485,7 +491,7 @@ public class EnterSample extends JDialog {
             assayPanel.repaint();
             assayPanel.revalidate();
 
-        } else if (assay.equals("exome")) {
+        } else if (assay.equals("tmb")) {
 
             assayPanel.removeAll();
             assayPanel.repaint();
@@ -495,11 +501,11 @@ public class EnterSample extends JDialog {
             GridLayout runIDGridLayout = new GridLayout(1,0);
             runIDGridLayout.setHgap(10);
             runIDPanel.setLayout(runIDGridLayout);
-            runIDPanel.add(textExomeNormalRunID);
-            runIDPanel.add(btnFindExomeNormalRun);
+            runIDPanel.add(textTMBNormalRunID);
+            runIDPanel.add(btnFindTMBNormalRun);
 
             assayPanel.add(new RowPanel("Normal-RunID", runIDPanel));
-            assayPanel.add(new RowPanel("Normal-Sample", comboBoxExomeNormalSample));
+            assayPanel.add(new RowPanel("Normal-Sample", comboBoxTMBNormalSample));
             assayPanel.repaint();
             assayPanel.revalidate();
         }
@@ -569,18 +575,18 @@ public class EnterSample extends JDialog {
         enterSampleButton.setEnabled(editable);
     }
 
-    private void clearComboBoxes(Boolean isExomeNormal){
+    private void clearComboBoxes(Boolean isTMBNormal){
         comboBoxCoverageIDList.removeAllItems();
         comboBoxVariantCallerIDList.removeAllItems();
-        if(!isExomeNormal){
+        if(!isTMBNormal){
             comboBoxSample.removeAllItems();
         }
-        comboBoxExomeNormalSample.removeAllItems();
+        comboBoxTMBNormalSample.removeAllItems();
     }
 
     private void clearAllRunIDs(){
         textRunID.setText("");
-        textExomeNormalRunID.setText("");
+        textTMBNormalRunID.setText("");
     }
 
     private void clearAndDisableAll(){
@@ -590,16 +596,16 @@ public class EnterSample extends JDialog {
         enableComboBoxes(false, false, false,false);
     }
 
-    private void enableComboBoxes(boolean comboBoxCoverageIDList, boolean comboBoxVariantCallerIDList, boolean comboBoxSample,boolean comboBoxExomeNormalSample) {
+    private void enableComboBoxes(boolean comboBoxCoverageIDList, boolean comboBoxVariantCallerIDList, boolean comboBoxSample,boolean comboBoxTMBNormalSample) {
         this.comboBoxCoverageIDList.setEnabled(comboBoxCoverageIDList);
         this.comboBoxVariantCallerIDList.setEnabled(comboBoxVariantCallerIDList);
         this.comboBoxSample.setEnabled(comboBoxSample);
-        this.comboBoxExomeNormalSample.setEnabled(comboBoxExomeNormalSample);
+        this.comboBoxTMBNormalSample.setEnabled(comboBoxTMBNormalSample);
     }
 
-    private void clearFields(boolean editable,boolean isExomeNormal) {
+    private void clearFields(boolean editable,boolean isTMBNormal) {
 
-        if (!isExomeNormal) {
+        if (!isTMBNormal) {
             updateFields("", "", "", "", "", "", "", "", "", editable);
         }
     }
@@ -651,10 +657,10 @@ public class EnterSample extends JDialog {
         String note = textNote.getText();
         String enteredBy = SSHConnection.getUserName();
 
-        if (assay.equals("exome")){
+        if (assay.equals("tmb")){
 
-            if(comboBoxExomeNormalSample.getSelectedItem().toString().equals(comboBoxSample.getSelectedItem().toString()) &&
-                textRunID.getText().equals(textExomeNormalRunID.getText())) {
+            if(comboBoxTMBNormalSample.getSelectedItem().toString().equals(comboBoxSample.getSelectedItem().toString()) &&
+                textRunID.getText().equals(textTMBNormalRunID.getText())) {
 
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
@@ -662,7 +668,7 @@ public class EnterSample extends JDialog {
             return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy,
-                    textExomeNormalRunID.getText(),comboBoxExomeNormalSample.getSelectedItem().toString());
+                    textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{
             return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,

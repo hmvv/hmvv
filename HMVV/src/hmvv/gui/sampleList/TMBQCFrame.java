@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class ExomeQCFrame extends JDialog {
+public class TMBQCFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,7 +19,7 @@ public class ExomeQCFrame extends JDialog {
 
     private Sample sample;
 
-    public ExomeQCFrame (SampleListFrame parent,Sample sample) throws Exception{
+    public TMBQCFrame(SampleListFrame parent, Sample sample) throws Exception{
         super(parent, "Sample Amplicons");
         this.sample = sample;
 
@@ -33,7 +33,7 @@ public class ExomeQCFrame extends JDialog {
         layoutComponents();
         setLocationRelativeTo(parent);
 
-        String title = "Exome Quality Control - " + sample.getLastName() + "," + sample.getFirstName() +
+        String title = "TMB Quality Control - " + sample.getLastName() + "," + sample.getFirstName() +
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
 

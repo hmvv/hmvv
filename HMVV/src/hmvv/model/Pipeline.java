@@ -88,7 +88,7 @@ public class Pipeline {
 			}else if (status.startsWith("ERROR")) {
 				program = PipelineProgram.ERROR;
 			}
-		}else if  ( assayName.equals("heme") || instrumentName.equals("nextseq")) {
+		}else if  ( assayName.equals("heme") || assayName.equals("tmb")) {
 			if (status.equals("started") || status.equals("queued")) {
 				program.setDisplayString("0/6");
 			}else if (status.equals("bcl2fastq_running_now")) {
