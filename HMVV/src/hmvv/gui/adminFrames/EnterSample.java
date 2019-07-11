@@ -251,6 +251,7 @@ public class EnterSample extends JDialog {
                             try {
                                 enterData();
                                 enterSampleButton.setText("Completed");
+                                comboBoxInstrument.setSelectedItem("miseq");
                             } catch (Exception e) {
                                 HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error entering sample data");
                                 enterSampleButton.setText("Enter Sample");
@@ -430,7 +431,7 @@ public class EnterSample extends JDialog {
             }
         }
         //TODO verify impact of removing this
-        //sampleIDSelectionChanged();
+        sampleIDSelectionChanged();
     }
 
     private void fillComboBoxes(ArrayList<String> coverageID, ArrayList<String> variantCallerID){
@@ -487,6 +488,8 @@ public class EnterSample extends JDialog {
 
         } else if (assay.equals("heme")) {
 
+            textTMBNormalRunID.setText("");
+            comboBoxTMBNormalSample.removeAllItems();
             assayPanel.removeAll();
             assayPanel.repaint();
             assayPanel.revalidate();

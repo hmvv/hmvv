@@ -37,7 +37,6 @@ public class TMBQCFrame extends JDialog {
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
 
-        setValues();
     }
 
     private void createComponents(){
@@ -60,13 +59,21 @@ public class TMBQCFrame extends JDialog {
 
     }
 
-    private void setValues() throws Exception {
+    public boolean setValues() throws Exception {
 
-        ArrayList<String> exomeQC = SSHConnection.readExomeSeqStatsFile(sample);
+        try {
+            ArrayList<String> exomeQC = SSHConnection.readExomeSeqStatsFile(sample);
 
-        for (int i = 0; i < exomeQC.size(); i++) {
-            String [] rowdata = exomeQC.get(i).split(",");
-            tableModel.addRow(new Object[]{rowdata[0],rowdata[1],rowdata[2]});
+            for (int i = 0; i < exomeQC.size(); i++) {
+                String[] rowdata = exomeQC.get(i).split(",");
+                tableModel.addRow(new Object[]{rowdata[0], rowdata[1], rowdata[2]});
+            }
+
+            return true;
+
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "TMB Assay - Pipeline not completed.");
+            return false;
         }
     }
 }

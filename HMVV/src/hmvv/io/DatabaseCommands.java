@@ -157,15 +157,15 @@ public class DatabaseCommands {
 
 	}
 
-	private static void insertTumorNormalPair(Sample sampleExome)throws Exception{
+	private static void insertTumorNormalPair(Sample sampleTMB)throws Exception{
 
 		String enterSampleNormalPair = "insert into sampleNormalPair "
 				+ "(sampleID,normalPairRunID,normalSampleName,enterDate) "
 				+ "values ( ?,?,?,now())";
 		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
-		pstEnterSampleNormalPair.setInt(1, sampleExome.sampleID);
-		pstEnterSampleNormalPair.setString(2, sampleExome.getNormalRunID());
-		pstEnterSampleNormalPair.setString(3, sampleExome.getNormalSampleName());
+		pstEnterSampleNormalPair.setInt(1, sampleTMB.sampleID);
+		pstEnterSampleNormalPair.setString(2, sampleTMB.getNormalRunID());
+		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalSampleName());
 
 		pstEnterSampleNormalPair.executeUpdate();
 		pstEnterSampleNormalPair.close();
@@ -561,9 +561,9 @@ public class DatabaseCommands {
 		while(rs.next()){
 			Sample s = getSample(rs);
 
-			if (s.assay.equals("exome")){
+			if (s.assay.equals("tmb")){
 
-				updateExomeInfo(s);
+				updateTMBInfo(s);
 			}
 			samples.add(s);
 		}
@@ -595,7 +595,7 @@ public class DatabaseCommands {
 		return sample;
 	}
 
-	private static void updateExomeInfo(Sample sample) throws SQLException{
+	private static void updateTMBInfo(Sample sample) throws SQLException{
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalPairRunID,normalSampleName from sampleNormalPair where sampleID = ?");
 		preparedStatement.setInt(1, sample.sampleID);
@@ -1025,7 +1025,7 @@ public class DatabaseCommands {
 	}
 
     /* ************************************************************************
-     * Query Exome Plot
+     * Query TMB DATA
      *************************************************************************/
 
     public static ExomeTMB getSampleTMB(Sample sample)throws Exception{

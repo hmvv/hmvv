@@ -469,9 +469,10 @@ public class SSHConnection {
     }
 
 	public static ArrayList<String> readExomeSeqStatsFile(Sample sample) throws Exception{
-		String command = "cat /home/environments/" + Configurations.getEnvironment() + "/exomeAnalysis/*_"+sample.runID+"_*/Paired/"+
-				sample.sampleName+"_*_"+sample.getNormalSampleName()+"_*/"+
-				sample.sampleName+"_*_"+sample.getNormalSampleName()+"_*.SeqStats.csv";
+
+		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/nextseqAnalysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
+				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
+				sample.sampleName+"_"+sample.getNormalSampleName()+"_SeqStats.csv";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
 		if(rs.exitStatus != 0) {

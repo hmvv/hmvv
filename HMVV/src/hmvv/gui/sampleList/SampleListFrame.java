@@ -543,7 +543,6 @@ public class SampleListFrame extends JFrame {
 		monitorPipelineThread.start();
 	}
 
-
 	private void handledatabaseInformationClick() throws Exception {
         DatabaseInformation dbinfo = new DatabaseInformation(this);
         dbinfo.setVisible(true);
@@ -592,7 +591,12 @@ public class SampleListFrame extends JFrame {
 			if(currentSample.assay.equals("tmb")){
 
                 TMBQCFrame tmbQC = new TMBQCFrame(this, currentSample);
-				tmbQC.setVisible(true);
+
+                if(tmbQC.setValues()) {
+					tmbQC.setVisible(true);
+				} else{
+                	tmbQC.dispose();
+				}
 
             }else {
 
