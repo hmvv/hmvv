@@ -308,25 +308,21 @@ public class SampleListFrame extends JFrame {
 			@Override
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
-				if(row == table.getSelectedRow()) {
-					setSelectionBackground(Configurations.TABLE_SELECTION_COLOR);
-					if (isCellSelected(row, column)){
-						c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+				if (isCellSelected(row, column)){
+					c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+					c.setBackground(Configurations.TABLE_SELECTION_COLOR);
+				}else {
+					c.setForeground(customColumns[column].color);
+					c.setBackground(PipelineProgram.COMPLETE.displayColor);//default background to COMPLETE
+					
+					Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
+					for(Pipeline p : pipelines) {
+						if(currentSample.sampleID == p.sampleID) {
+							c.setBackground(p.pipelineProgram.displayColor);
+							break;
+						}
 					}
-					return c;
 				}
-				c.setForeground(customColumns[column].color);
-				Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
-				for(Pipeline p : pipelines) {
-					if(currentSample.sampleID == p.sampleID) {
-						c.setBackground(p.pipelineProgram.displayColor);
-						return c;
-					}
-				}
-				
-				//If the sampleID was not found in the list of recent pipelines. Revert to default color.
-				//TODO store pipeline program in database to allow display of failed runs from the distant past
-				c.setBackground(PipelineProgram.COMPLETE.displayColor);
 				return c;
 			}
 		};
