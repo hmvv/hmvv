@@ -1,15 +1,15 @@
 package hmvv.model;
 
-public class ExomeTMB {
+public class ExomeTumorMutationBurden {
 
     private  String TMBPair;
     private  String TMBTotalVariants;
     private  String TMBScore;
     private  String TMBGroup;
 
-    public ExomeTMB(){}
+    public ExomeTumorMutationBurden(){}
 
-    public ExomeTMB(String TMBPair, String TMBTotalVariants, String TMBScore, String TMBGroup) {
+    public ExomeTumorMutationBurden(String TMBPair, String TMBTotalVariants, String TMBScore, String TMBGroup) {
         this.TMBPair = TMBPair;
         this.TMBTotalVariants = TMBTotalVariants;
         this.TMBScore = TMBScore;

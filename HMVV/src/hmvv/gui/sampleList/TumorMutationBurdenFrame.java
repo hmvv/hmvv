@@ -2,7 +2,7 @@ package hmvv.gui.sampleList;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
-import hmvv.model.ExomeTMB;
+import hmvv.model.ExomeTumorMutationBurden;
 import hmvv.model.Sample;
 
 import javax.swing.*;
@@ -102,11 +102,11 @@ public class TumorMutationBurdenFrame extends JDialog {
 
     private void setValues() throws Exception {
 
-        ExomeTMB exomeTMB = DatabaseCommands.getSampleTMB(sample);
-        txtSample.setText(exomeTMB.getTMBPair());
-        txtTotalVariants.setText(exomeTMB.getTMBTotalVariants());
-        txtTMBScore.setText(exomeTMB.getTMBScore());
-        txtTMBGroup.setText(exomeTMB.getTMBGroup());
+        ExomeTumorMutationBurden exomeTumorMutationBurden = DatabaseCommands.getSampleTumorMutationBurden(sample);
+        txtSample.setText(exomeTumorMutationBurden.getTMBPair());
+        txtTotalVariants.setText(exomeTumorMutationBurden.getTMBTotalVariants());
+        txtTMBScore.setText(exomeTumorMutationBurden.getTMBScore());
+        txtTMBGroup.setText(exomeTumorMutationBurden.getTMBGroup());
     }
 
     private class RowPanel extends JPanel{

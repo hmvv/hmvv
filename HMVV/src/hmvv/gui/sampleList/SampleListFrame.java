@@ -560,7 +560,6 @@ public class SampleListFrame extends JFrame {
 
 						TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, currentSample);
 						tmbFrame.setVisible(true);
-						System.out.println("test");
 
 					} else{
 
@@ -590,7 +589,7 @@ public class SampleListFrame extends JFrame {
 
 			if(currentSample.assay.equals("tmb")){
 
-                TMBQCFrame tmbQC = new TMBQCFrame(this, currentSample);
+                TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(this, currentSample);
 
                 if(tmbQC.setValues()) {
 					tmbQC.setVisible(true);

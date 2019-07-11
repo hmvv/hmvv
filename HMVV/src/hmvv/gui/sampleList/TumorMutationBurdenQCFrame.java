@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class TMBQCFrame extends JDialog {
+public class TumorMutationBurdenQCFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -19,8 +19,8 @@ public class TMBQCFrame extends JDialog {
 
     private Sample sample;
 
-    public TMBQCFrame(SampleListFrame parent, Sample sample) throws Exception{
-        super(parent, "Sample Amplicons");
+    public TumorMutationBurdenQCFrame(SampleListFrame parent, Sample sample) throws Exception{
+        super(parent, "Sample AssayQC");
         this.sample = sample;
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
@@ -62,7 +62,7 @@ public class TMBQCFrame extends JDialog {
     public boolean setValues() throws Exception {
 
         try {
-            ArrayList<String> exomeQC = SSHConnection.readExomeSeqStatsFile(sample);
+            ArrayList<String> exomeQC = SSHConnection.readTMBSeqStatsFile(sample);
 
             for (int i = 0; i < exomeQC.size(); i++) {
                 String[] rowdata = exomeQC.get(i).split(",");
