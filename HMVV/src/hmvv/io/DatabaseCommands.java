@@ -1025,26 +1025,26 @@ public class DatabaseCommands {
 	}
 
     /* ************************************************************************
-     * Query TMB DATA
+     * Query Tumor Mutation Burden Data
      *************************************************************************/
 
-    public static ExomeTMB getSampleTMB(Sample sample)throws Exception{
+    public static ExomeTumorMutationBurden getSampleTumorMutationBurden(Sample sample)throws Exception{
 
         PreparedStatement preparedStatement = databaseConnection.prepareStatement("select TMBPair,TMBTotalVariants,TMBScore,TMBGroup from sampleTumorMutationBurden where sampleID = ? ");
         preparedStatement.setInt(1, sample.sampleID);
         ResultSet rs = preparedStatement.executeQuery();
-        ExomeTMB exomeTMB = new ExomeTMB();
+        ExomeTumorMutationBurden exomeTumorMutationBurden = new ExomeTumorMutationBurden();
         while(rs.next()){
-            exomeTMB.setTMBPair(rs.getString("TMBPair"));
+            exomeTumorMutationBurden.setTMBPair(rs.getString("TMBPair"));
             Integer totalvariants = rs.getInt("TMBTotalVariants");
-            exomeTMB.setTMBTotalVariants(totalvariants.toString());
+            exomeTumorMutationBurden.setTMBTotalVariants(totalvariants.toString());
             Float tmbscore = rs.getFloat("TMBScore");
-            exomeTMB.setTMBScore(tmbscore.toString());
-            exomeTMB.setTMBGroup(rs.getString("TMBGroup"));
+            exomeTumorMutationBurden.setTMBScore(tmbscore.toString());
+            exomeTumorMutationBurden.setTMBGroup(rs.getString("TMBGroup"));
         }
         preparedStatement.close();
 
-    return exomeTMB;
+    return exomeTumorMutationBurden;
     }
 
 
