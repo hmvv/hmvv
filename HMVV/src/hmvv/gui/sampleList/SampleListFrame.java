@@ -47,15 +47,13 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.adminFrames.CreateAssay;
-import hmvv.gui.adminFrames.EnterSample;
-import hmvv.gui.adminFrames.MonitorPipelines;
-import hmvv.gui.adminFrames.QualityControlFrame;
+import hmvv.gui.adminFrames.*;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVLoginFrame;
 import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.Mutation;
@@ -75,7 +73,9 @@ public class SampleListFrame extends JFrame {
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
+    private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
+
 	
 	//Table
 	private JTable table;
@@ -85,7 +85,6 @@ public class SampleListFrame extends JFrame {
 	//Buttons
 	private JButton sampleSearchButton;
 	private JButton resetButton;
-	private JButton mutationSearchButton;
 	
 	//Labels
 	private JLabel lblChooseAnAssay;
@@ -186,6 +185,7 @@ public class SampleListFrame extends JFrame {
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
+        databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
@@ -201,48 +201,50 @@ public class SampleListFrame extends JFrame {
 		adminMenu.add(qualityControlMenuItem);
 		try{
 			for(String assay : DatabaseCommands.getAllAssays()){
-				//TODO support exome QC
-				if(assay.equals("exome")) {
+				//TODO support TMB QC
+				if(assay.equals("tmb")) {
 					continue;
 				}
 				
-				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
-				qualityControlMenuItem.add(assayMenuItem);
-				assayMenuItem.addActionListener(new ActionListener(){
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						try {
-							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
-							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
-						} catch (Exception e1) {
-							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
-						}
-					}
-				});
-				if(assay.equals("neuro")) {
-					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
-				}
-				assayMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
-				qualityControlMenuItem.add(assayMenuItem);
-				assayMenuItem.addActionListener(new ActionListener(){
+//				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
+//				qualityControlMenuItem.add(assayMenuItem);
+//				assayMenuItem.addActionListener(new ActionListener(){
+//					@Override
+//					public void actionPerformed(ActionEvent e) {
+//						try {
+//							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
+//							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
+//						} catch (Exception e1) {
+//							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
+//						}
+//					}
+//				});
+//				if(assay.equals("neuro")) {
+//					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
+//				}
+				JMenuItem variantAlleleFrequencyMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
+				qualityControlMenuItem.add(variantAlleleFrequencyMenuItem);
+				variantAlleleFrequencyMenuItem.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try {
 							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
-							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+							QualityControlFrame qcFrame = new QualityControlFrame(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+							qcFrame.setVisible(true);
 						} catch (Exception e1) {
-							JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 						}
 					}
 				});
 				
-				qualityControlMenuItem.addSeparator();
+//				qualityControlMenuItem.addSeparator();
 			}
 		}catch(Exception e){
 			//unable to get assays
 		}
 		
 		adminMenu.addSeparator();
+		adminMenu.add(databaseInformationMenuItem);
 		adminMenu.add(refreshLabel);
 		
 		setJMenuBar(menuBar);
@@ -255,8 +257,10 @@ public class SampleListFrame extends JFrame {
 					if(e.getSource() == enterSampleMenuItem){
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
-					}else if(e.getSource() == monitorPipelinesItem){
-						handleMonitorPipelineClick();
+					}else if(e.getSource() == monitorPipelinesItem) {
+                        handleMonitorPipelineClick();
+                    }else if(e.getSource() == databaseInformationMenuItem){
+                            handledatabaseInformationClick();
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -266,7 +270,7 @@ public class SampleListFrame extends JFrame {
 						}
 					}
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, e1.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 				}
 			}
 		};
@@ -275,6 +279,7 @@ public class SampleListFrame extends JFrame {
 		newAssayMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);
+        databaseInformationMenuItem.addActionListener(listener);
 	}
 	
 	public void addSample(Sample sample){
@@ -304,6 +309,10 @@ public class SampleListFrame extends JFrame {
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
 				if(row == table.getSelectedRow()) {
+					setSelectionBackground(Configurations.TABLE_SELECTION_COLOR);
+					if (isCellSelected(row, column)){
+						c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+					}
 					return c;
 				}
 				c.setForeground(customColumns[column].color);
@@ -347,7 +356,7 @@ public class SampleListFrame extends JFrame {
 				assayComboBox.addItem(item);	
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
 		}
 		
 		sampleSearchButton = new JButton("Sample Search");
@@ -357,10 +366,6 @@ public class SampleListFrame extends JFrame {
 		resetButton = new JButton("Reset Filters");
 		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
-
-		mutationSearchButton = new JButton("Mutation Search");
-		mutationSearchButton.setToolTipText("Open mutation search window");
-		mutationSearchButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 		
 		lblChooseAnAssay = new JLabel("Choose an assay");
 		lblChooseAnAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -390,8 +395,6 @@ public class SampleListFrame extends JFrame {
 						.addComponent(sampleSearchButton)
 						.addGap(18)
 						.addComponent(resetButton)
-						.addGap(18)
-						.addComponent(mutationSearchButton)
 						.addGap(145))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
@@ -412,7 +415,6 @@ public class SampleListFrame extends JFrame {
 								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(25)
 										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(mutationSearchButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(sampleSearchButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(resetButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
 												.addComponent(lblRunid, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
@@ -490,13 +492,6 @@ public class SampleListFrame extends JFrame {
 			}
 		});
 		
-		mutationSearchButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				mutationSearchAction();
-			}
-		});
-		
 		textRunID.getDocument().addDocumentListener(new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
 				refilterTable();
@@ -527,8 +522,7 @@ public class SampleListFrame extends JFrame {
 				handleEditSampleClick();
 			}
 		}catch (Exception e){
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, e.getMessage());
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
 		}
 	}
 
@@ -541,13 +535,19 @@ public class SampleListFrame extends JFrame {
 					MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
 					monitorpipelines.setVisible(true);
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading Monitor Pipeline window: " + e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading Monitor Pipeline window.");
 				}
 				setCursor(Cursor.getDefaultCursor());
 			}
 		});
 		monitorPipelineThread.start();
 	}
+
+	private void handledatabaseInformationClick() throws Exception {
+        DatabaseInformation dbinfo = new DatabaseInformation(this);
+        dbinfo.setVisible(true);
+    }
+
 	private void handleMutationClick() throws Exception{
 		Thread mutationListThread = new Thread(new Runnable() {
 			@Override
@@ -555,15 +555,26 @@ public class SampleListFrame extends JFrame {
 				try {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
-					ArrayList<Mutation> mutations = DatabaseCommands.getUnfilteredMutationDataByID(currentSample);
-					for(Mutation m : mutations){
-						m.setCosmicID("LOADING...");
+
+					if (currentSample.assay.equals("tmb")){
+
+						TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, currentSample);
+						tmbFrame.setVisible(true);
+						System.out.println("test");
+
+					} else{
+
+						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
+						for(Mutation m : mutations){
+							m.setCosmicID("LOADING...");
+						}
+						MutationList mutationList = new MutationList(mutations);
+						MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
+						mutationListFrame.setVisible(true);
 					}
-					MutationList mutationList = new MutationList(mutations);
-					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
-					mutationListFrame.setVisible(true);
+
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, "Error loading mutation data: " + e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading mutation data.");
 				}
 				table.setCursor(Cursor.getDefaultCursor());
 			}
@@ -576,10 +587,25 @@ public class SampleListFrame extends JFrame {
 		try {
             table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Sample currentSample = getCurrentlySelectedSample();
-			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
-			amplicon.setVisible(true);
+
+			if(currentSample.assay.equals("tmb")){
+
+                TMBQCFrame tmbQC = new TMBQCFrame(this, currentSample);
+
+                if(tmbQC.setValues()) {
+					tmbQC.setVisible(true);
+				} else{
+                	tmbQC.dispose();
+				}
+
+            }else {
+
+                ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
+                amplicon.setVisible(true);
+
+            }
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(SampleListFrame.this, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
 		}
         table.setCursor(Cursor.getDefaultCursor());
 	}
@@ -606,7 +632,7 @@ public class SampleListFrame extends JFrame {
 					DatabaseCommands.updateSample(updatedSample);
 					tableModel.updateSample(modelRow, updatedSample);
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(SampleListFrame.this, e1);
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
 				}
 				editSample.dispose();
 			}
@@ -614,12 +640,21 @@ public class SampleListFrame extends JFrame {
 		editSample.addDeleteListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					DatabaseCommands.deleteSample(sample.sampleID);
-					tableModel.deleteSample(modelRow);
+					String result = JOptionPane.showInputDialog(SampleListFrame.this, "Type DELETE to delete this sample.", "Delete sample?", JOptionPane.QUESTION_MESSAGE);
+					if(result == null) {
+						return;
+					}
+					if(result.equals("DELETE")) {
+						DatabaseCommands.deleteSample(sample.sampleID);
+						tableModel.deleteSample(modelRow);
+						JOptionPane.showMessageDialog(SampleListFrame.this, "Sample deleted.");
+						editSample.dispose();
+					}else {
+						JOptionPane.showMessageDialog(SampleListFrame.this, result + " is not DELETE. Deletion cancelled.");
+					}
 				} catch (SQLException e1) {
-					JOptionPane.showMessageDialog(editSample, e1);
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
 				}
-				editSample.dispose();
 			}
 		});
 	}
@@ -685,24 +720,5 @@ public class SampleListFrame extends JFrame {
 	private void resetFilters(){
 		assayComboBox.setSelectedIndex(0);
 		textRunID.setText("");
-	}
-
-	private void mutationSearchAction(){
-		MutationSearchDialog searchMutation = new MutationSearchDialog(this);
-		searchMutation.setVisible(true);
-		searchMutation.addConfirmListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try{
-					ArrayList<Mutation> mutations = searchMutation.getMutationSearchResults();
-					MutationList mutationSearchList = new MutationList(mutations);
-					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, null, mutationSearchList);
-					mutationListFrame.setVisible(true);
-					searchMutation.dispose();
-				}catch(Exception ex){
-					ex.printStackTrace();
-					JOptionPane.showMessageDialog(SampleListFrame.this, ex.getMessage());
-				}
-			}
-		});
 	}
 }

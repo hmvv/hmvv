@@ -2,9 +2,9 @@ package hmvv.model;
 
 public class VariantPredictionClass {
 	
-	private static final int HIGH = 3;
-	private static final int MODERATE = 2;
-	private static final int LOW = 1;
+	private static final int HIGH = 4;
+	private static final int MODERATE = 3;
+	private static final int LOW = 2;
 	private static final int MODIFIER = 1;
 	private static final int UNCATEGORIZED = 0;
 	

@@ -1,5 +1,8 @@
 package hmvv.model;
 
+import hmvv.gui.GUICommonTools;
+import hmvv.main.Configurations;
+
 import java.util.ArrayList;
 
 public class Mutation {
@@ -14,9 +17,9 @@ public class Mutation {
     private String exons;
 
     // custom
+    private boolean selected;
     private Integer occurrence;
     private ArrayList<Annotation> annotationHistory;
-    private Annotation latestAnnotation;
 
    //vep
     private String type;
@@ -47,7 +50,8 @@ public class Mutation {
     private Integer totalCount;
     private Double altGlobalFreq;
     private Double americanFreq;
-    private Double asianFreq;
+    private Double eastAsianFreq;
+    private Double southAsianFreq;
     private Double afrFreq;
     private Double eurFreq;
 
@@ -62,7 +66,7 @@ public class Mutation {
 
     //gnomad
     private String gnomadID;
-    private String gnomad_allfreq;
+    private Double gnomad_allfreq;
 
     //oncokb
     private String oncokbID;
@@ -75,6 +79,11 @@ public class Mutation {
     private String civicID;
     private String civic_variant_origin;
     private String civic_variant_url;
+
+    //pmkb
+    private String pmkbID;
+    private String pmkb_tumor_type;
+    private String pmkb_tissue_type;
 
     public Mutation() {
 
@@ -95,6 +104,14 @@ public class Mutation {
 
     public void setReported(boolean reported) {
         this.reported = reported;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     public String getGene() {
@@ -344,12 +361,16 @@ public class Mutation {
         this.americanFreq = americanFreq;
     }
 
-    public Double getAsianFreq() {
-        return asianFreq;
+    public Double getEastAsianFreq() {
+        return eastAsianFreq;
     }
+    public Double getSouthAsianFreq() { return southAsianFreq; }
 
-    public void setAsianFreq(Double asianFreq) {
-        this.asianFreq = asianFreq;
+    public void setEastAsianFreq(Double eastAsianFreq) {
+        this.eastAsianFreq = eastAsianFreq;
+    }
+    public void setSouthAsianFreq(Double southAsianFreq) {
+        this.southAsianFreq = southAsianFreq;
     }
 
     public Double getAfricanFreq() {
@@ -426,7 +447,6 @@ public class Mutation {
 
     public void addAnnotation(Annotation annotation) {
         annotationHistory.add(annotation);
-        this.latestAnnotation = annotation;
     }
 
     public int getAnnotationHistorySize() {
@@ -439,24 +459,20 @@ public class Mutation {
 
     public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
         this.annotationHistory = annotationHistory;
-        if (annotationHistory.size() > 0) {
-            this.latestAnnotation = annotationHistory.get(annotationHistory.size() - 1);
-        }
     }
-
-    public void setLatestAnnotation(Annotation latestAnnotation) {
-        this.latestAnnotation = latestAnnotation;
-    }
-
+    
     public Annotation getLatestAnnotation() {
-        return latestAnnotation;
+    	if (annotationHistory.size() == 0) {
+            return null;
+        }
+    	return  annotationHistory.get(annotationHistory.size() - 1);
     }
 
-    public String getGnomad_allfreq() {
+    public Double getGnomad_allfreq() {
         return gnomad_allfreq;
     }
 
-    public void setGnomad_allfreq(String gnomad_allfreq) {
+    public void setGnomad_allfreq(Double gnomad_allfreq) {
         this.gnomad_allfreq = gnomad_allfreq;
     }
 
@@ -465,10 +481,7 @@ public class Mutation {
     }
 
     public void setGnomadID() {
-
-        if (this.getGnomad_allfreq() != "") {
             this.gnomadID = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
-        }
     }
 
     public String getOncokbID() {
@@ -493,6 +506,13 @@ public class Mutation {
     public void setOncokbID() {
        if (this.getOnco_Protein_Change() != null) {
             this.oncokbID = this.getGene() + "-" + this.getOnco_Protein_Change();
+       } else{
+           String[] getHGVSpArray = this.getHGVSp().split("\\.");
+           String ENSP="None";
+           if(getHGVSpArray.length > 1) {
+               ENSP = getHGVSpArray[2];
+           }
+           this.oncokbID = this.getGene() + "-" + Configurations.abbreviationtoLetter(ENSP);
        }
     }
 
@@ -537,5 +557,29 @@ public class Mutation {
 
     public void setCivic_variant_url(String civic_variant_url) {
         this.civic_variant_url = civic_variant_url;
+    }
+
+    public String getPmkbID() {
+        return pmkbID;
+    }
+
+    public String getPmkb_tumor_type() {
+        return pmkb_tumor_type;
+    }
+
+    public String getPmkb_tissue_type() {
+        return pmkb_tissue_type;
+    }
+
+    public void setPmkbID() {
+        this.pmkbID = this.getOncokbID();
+    }
+
+    public void setPmkb_tumor_type(String pmkb_tumor_type) {
+        this.pmkb_tumor_type = pmkb_tumor_type;
+    }
+
+    public void setPmkb_tissue_type(String pmkb_tissue_type) {
+        this.pmkb_tissue_type = pmkb_tissue_type;
     }
 }

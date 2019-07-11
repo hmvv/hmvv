@@ -2,14 +2,14 @@ package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
-import hmvv.gui.mutationlist.tablemodels.CivicTableModel;
+import hmvv.gui.mutationlist.tablemodels.PmkbTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.model.Mutation;
 
-public class CivicTable extends CommonTable {
+public class PmkbTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public CivicTable(MutationListFrame parent, CivicTableModel model) {
+    public PmkbTable(MutationListFrame parent, PmkbTableModel model) {
         super(parent, model);
     }
 
@@ -21,15 +21,16 @@ public class CivicTable extends CommonTable {
     @Override
     protected void handleMouseClick(int column) throws Exception {
         if (column == 7) {
-            searchCivic();
+            searchPmkb();
         }
     }
 
-    private void searchCivic() throws Exception {
+    private void searchPmkb() throws Exception {
         Mutation mutation = getSelectedMutation();
-        String civic_url = mutation.getCivic_variant_url();
-        if (!civic_url.equals("") && !civic_url.equals("null")) {
-            InternetCommands.searchCivic(civic_url);
+        String onco_id = mutation.getPmkbID();
+        if (!onco_id.equals("") && !onco_id.equals("null")) {
+            InternetCommands.searchPmkb(onco_id);
         }
     }
 }
+

@@ -1,6 +1,7 @@
 package hmvv.gui.sampleList;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -11,31 +12,35 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.MutationListFrame;
+import hmvv.main.HMVVDefectReportFrame;
 
-public class ReportFrame extends JFrame {
+public abstract class ReportFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
+	private JPanel buttonPanel;
+	protected MutationListFrame parent;
 	
 	/**
 	 * Create the frame.
 	 */
-	public ReportFrame(MutationListFrame parent, String report) {
-		super("Variant Report");
-		
+	public ReportFrame(MutationListFrame parent, String title) {
+		super(parent, title);
+		this.parent = parent;
+	}
+	
+	protected void constructFrame(double widthPercentOfParent) {
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.50), (int)(bounds.height*.70));
+		setSize((int)(bounds.width*widthPercentOfParent), (int)(bounds.height*.90));
 		
 		setLocationRelativeTo(parent);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -46,24 +51,19 @@ public class ReportFrame extends JFrame {
 		contentPane.setLayout(new BorderLayout());
 		setContentPane(contentPane);
 		
-		JTextArea textArea = new JTextArea(report);
-		textArea.addMouseListener(new ContextMenuMouseListener());
-		textArea.setLineWrap(true);
-		textArea.setWrapStyleWord(true);
-		
 		JButton saveAsButton = new JButton("Save As File");
 		saveAsButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				try {
-		            exportReport(textArea.getText());
+		            exportReport(buildTextExtract());
 		        } catch (IOException ex) {
-		        	JOptionPane.showMessageDialog(parent, ex.getMessage());
+		        	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
 		        }
 			}
 		});
 		
-		JPanel buttonPanel = new JPanel();
+		buttonPanel = new JPanel();
 		buttonPanel.setLayout(new GridLayout(1,0));
 		buttonPanel.add(new JPanel());
 		buttonPanel.add(new JPanel());
@@ -72,11 +72,16 @@ public class ReportFrame extends JFrame {
 		buttonPanel.add(new JPanel());
 		buttonPanel.add(saveAsButton);
 		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportView(textArea);
 		contentPane.add(buttonPanel, BorderLayout.NORTH);
-		contentPane.add(scrollPane, BorderLayout.CENTER);
+		contentPane.add(getReport(), BorderLayout.CENTER);
 	}
+	
+	protected void addButton(JButton button) {
+		buttonPanel.add(button);
+	}
+	
+	public abstract Component getReport();
+	public abstract String buildTextExtract();
 	
 	private void exportReport(String text) throws IOException{
 		JFileChooser saveAsFileChooser = new JFileChooser();

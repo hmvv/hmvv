@@ -22,6 +22,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
+import hmvv.io.LIS.LISConnection;
 
 public class HMVVLoginFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -51,7 +52,7 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try {
-			Configurations.loadConfigurations(null, configurationStream);
+			Configurations.loadLocalConfigurations(null, configurationStream);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage() + "\nShutting down.");
 			return;
@@ -104,7 +105,7 @@ public class HMVVLoginFrame extends JFrame {
 		lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
 		lblhmvv.setBounds(75, 100, 1000, 30);
 
-		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 3.0 </a></html>");
+		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 3.2 </a></html>");
 		lblhmvv_version.setFont(GUICommonTools.TAHOMA_BOLD_11);
 		lblhmvv_version.setBounds(215, 125, 100, 30);
 
@@ -162,7 +163,11 @@ public class HMVVLoginFrame extends JFrame {
 		lblhmvv_version.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				InternetCommands.hmvvHome();
+				try {
+					InternetCommands.hmvvHome();
+				} catch (Exception e1) {
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVLoginFrame.this, e1);
+				}
 			}
 		});
 		lblhmvv_version.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -184,11 +189,27 @@ public class HMVVLoginFrame extends JFrame {
 		}
 		
 		try {
+			loginButton.setText("Getting configuration...");
+			Configurations.loadServerConfigurations();
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Server configuration load failed. Please contact the system administrator.");
+			return;
+		}
+		
+		try {
 			loginButton.setText("Connecting to database...");
 			DatabaseCommands.connect();
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, "Database connection failed (" + e.getMessage() + ")." + " Please contact the system administrator.");
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Database connection failed. Please contact the system administrator.");
 			return;
+		}
+		
+		try {
+			loginButton.setText("Connecting to LIS...");
+			LISConnection.connect();
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "LIS connection failed. Please contact the system administrator.");
+			//Don't return, as LIS connection is not critical
 		}
 		
 		try{
@@ -197,7 +218,7 @@ public class HMVVLoginFrame extends JFrame {
 			sampleList.setVisible(true);
 			dispose();
 		}catch(Exception e){
-			JOptionPane.showMessageDialog(this, "Could not construct sample list (" + e.getMessage() + ")." + " Please contact the system administrator.");
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Could not construct sample list. Please contact the system administrator.");
 		}
 	}
 }

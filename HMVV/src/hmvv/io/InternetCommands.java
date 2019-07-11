@@ -1,18 +1,13 @@
 package hmvv.io;
 
 import java.awt.Desktop;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
-
-import javax.swing.JOptionPane;
 
 import hmvv.main.Configurations;
 
 public class InternetCommands {
-	private static void browseToURL(String url) throws IOException, URISyntaxException {
+	private static void browseToURL(String url) throws Exception{
 		if(Desktop.isDesktopSupported()){
 			Desktop desktop = Desktop.getDesktop();
 			desktop.browse(new URI(url));
@@ -22,33 +17,28 @@ public class InternetCommands {
 		}
 	}
 
-	public static void searchGnomad(String term){
-		try {
-			browseToURL("http://gnomad.broadinstitute.org/variant/" + term );
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
+	public static void searchGnomad(String term) throws Exception{
+		browseToURL("http://gnomad.broadinstitute.org/variant/" + term );
 	}
 
 
-	public static void searchOncokb(String term){
+	public static void searchOncokb(String term) throws Exception{
 		String[] terms = term.split("-");
-		try {
-			browseToURL("http://oncokb.org/#/gene/"+terms[0]+"/alteration/"+ terms[1] );
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
+		browseToURL("http://oncokb.org/#/gene/"+terms[0]+"/alteration/"+ terms[1] );
 	}
 
-	public static void searchGoogle(String term){
-		try {
-			browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
+	public static void searchPmkb(String term) throws Exception{
+		String[] terms = term.split("-");
+		browseToURL("https://pmkb.weill.cornell.edu/search?utf8=&search="+terms[0]+"+"+ terms[1] );
 	}
 
-	public static void searchSNP(String ID){
+	public static void searchGoogle(String term) throws Exception{
+		browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
+	}
+	public static void searchGene(String term) throws Exception{
+		browseToURL("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + term );
+	}
+	public static void searchSNP(String ID) throws Exception{
 		if(ID.contains(",")){
 			String searchTerm = "";
 			Integer n = 0;
@@ -60,51 +50,30 @@ public class InternetCommands {
 				}
 				n += 1;
 			}
-			try {
-				browseToURL("http://www.ncbi.nlm.nih.gov/snp?term=" + searchTerm);
-			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, e.getMessage());
-			}
+			browseToURL("http://www.ncbi.nlm.nih.gov/snp?term=" + searchTerm);
 		}
 		else{
-			try {
-				browseToURL("http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=" + ID);
-			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, e.getMessage());
-			}
+			browseToURL("http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=" + ID);
 		}
 	}
 
-	public static void searchCosmic(ArrayList<String> cosmicIDs){
+	public static void searchCosmic(ArrayList<String> cosmicIDs) throws Exception{
 		for(String cosmicID : cosmicIDs){
 			String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
-			try {
-				browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
-			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, e.getMessage());
-			}
+			browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
 		}
 	}
 
-	public static void searchClinvar(String term){
-		try {
-			browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term );
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
+	public static void searchClinvar(String term) throws Exception{
+		browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term );
 
 	}
 
-	public static void searchCivic(String url){
-
-		try {
-			browseToURL(url);
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
+	public static void searchCivic(String url) throws Exception{
+		browseToURL(url);
 	}
 
-	public static void searchPubmed(String ID){
+	public static void searchPubmed(String ID) throws Exception{
 		String[] IDs = ID.split("&");
 		Integer n = 0;
 		String search = "http://www.ncbi.nlm.nih.gov/pubmed/?term=";
@@ -116,19 +85,16 @@ public class InternetCommands {
 			}
 			n += 1;
 		}
-		try {
-			browseToURL(search);
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
+		browseToURL(search);
 	}
 
-	public static void hmvvHome(){
-		String search = "http://10.110.21.70/hmvv3";
-		try {
-			browseToURL(search);
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, e.getMessage());
-		}
+	public static void hmvvHome() throws Exception{
+		String search = "http://" + Configurations.SSH_SERVER_ADDRESS + "/hmvv3";
+		browseToURL(search);
+	}
+	
+	public static void hmvvBugsReport() throws Exception{
+		String search = "http://" + Configurations.SSH_SERVER_ADDRESS + "/hmvv3/bugs.html";
+		browseToURL(search);
 	}
 }

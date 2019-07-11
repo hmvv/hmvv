@@ -23,6 +23,11 @@ public class VEPTableModel extends CommonTableModel  {
         columns.add(MutationTableModelColumn.refColumn);
         columns.add(MutationTableModelColumn.altColumn);
 
+        columns.add(MutationTableModelColumn.HGVScColumn);
+        columns.add(MutationTableModelColumn.HGVSpColumn);
+        columns.add(MutationTableModelColumn.dbSNPIDColumn);
+        columns.add(MutationTableModelColumn.pubmedColumn);
+
         columns.add(MutationTableModelColumn.variantClassificationColumn);
         columns.add(MutationTableModelColumn.typeColumn);
         columns.add(MutationTableModelColumn.altFreqColumn);
@@ -32,12 +37,6 @@ public class VEPTableModel extends CommonTableModel  {
         columns.add(MutationTableModelColumn.ConsequenceColumn);
         columns.add(MutationTableModelColumn.SiftColumn);
         columns.add(MutationTableModelColumn.PolyPhenColumn);
-
-        columns.add(MutationTableModelColumn.HGVScColumn);
-        columns.add(MutationTableModelColumn.HGVSpColumn);
-        columns.add(MutationTableModelColumn.dbSNPIDColumn);
-        columns.add(MutationTableModelColumn.pubmedColumn);
-
 
         return columns;
     }

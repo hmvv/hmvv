@@ -14,6 +14,7 @@ import javax.swing.table.*;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineProgram;
 import hmvv.model.PipelineStatus;
@@ -167,7 +168,7 @@ public class MonitorPipelines extends JDialog {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					handlePipelineSelectionClick();
 				}catch (Exception e){
-					JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(MonitorPipelines.this, e);
 				}
 				table.setCursor(Cursor.getDefaultCursor());
 			}
@@ -180,33 +181,38 @@ public class MonitorPipelines extends JDialog {
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     buildModelFromDatabase();
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(MonitorPipelines.this, e.getMessage());
+                	HMVVDefectReportFrame.showHMVVDefectReportFrame(MonitorPipelines.this, e);
                 }
                 setCursor(Cursor.getDefaultCursor());
             }
         });
 	}
 
-	public void buildModelFromDatabase() throws Exception {
+	private void buildModelFromDatabase() throws Exception {
 		try {
 			ArrayList<Pipeline> pipelines = DatabaseCommands.getAllPipelines();
 			for(Pipeline p : pipelines) {
 				tableModel.addOrUpdatePipeline(p);
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(MonitorPipelines.this, "Failure to update pipeline status details. Please contact the administrator.");
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(MonitorPipelines.this, e, "Failure to update pipeline status details. Please contact the administrator.");
 		}
 	}
 
 	private Pipeline getCurrentlySelectedPipeline(){
 		int viewRow = table.getSelectedRow();
+		if(viewRow == -1) {
+			return null;
+		}
 		int modelRow = table.convertRowIndexToModel(viewRow);
 		return tableModel.getPipeline(modelRow);
 	}
 
 	private void handlePipelineSelectionClick() throws Exception{
 		Pipeline currentPipeline = getCurrentlySelectedPipeline();
-
+		if(currentPipeline == null) {
+			return;
+		}
 		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(currentPipeline.queueID);
 
 		DefaultTableModel tableModel = new DefaultTableModel(){

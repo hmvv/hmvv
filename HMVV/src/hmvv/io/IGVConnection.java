@@ -77,7 +77,6 @@ public class IGVConnection {
 		if(igvBusy.get()) {
 			return "Command ignored. Previous IGV command still in process.";
 		}
-		
 		try{
 			int soTimeout = 10*1000;//10 seconds
 			igvBusy.set(true);

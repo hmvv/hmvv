@@ -12,22 +12,26 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.text.SimpleDateFormat;
 
+import javax.swing.JTextField;
+
 public class GUICommonTools {
-//	public static final Color ERROR_COLOR = new Color(255,51,51);
-//	public static final Color COMPLETE_COLOR = new Color(102,255,102);
+
 	public static final Color ERROR_COLOR = new Color(255,204,204);
 	public static final Color COMPLETE_COLOR = new Color(204,255,204);
 	public static final Color WHITE_COLOR = Color.WHITE;
+	public static final Color LIGHT_GRAY = new Color(240,240,240);
 	public static final Color RUNNING_COLOR = new Color(255,255,204);
+	public static final Color BLACK_COLOR = new Color(0,0,0);
 	
 	public static final Color PROGRESS_BACKGROUND_COLOR = Color.YELLOW;
 	public static final Color PROGRESS_FOREGROUND_COLOR = Color.GREEN.darker();
 	
-	public static Font TAHOMA_PLAIN_13 = new Font("Tahoma", Font.BOLD, 13);
+	public static Font TAHOMA_PLAIN_13 = new Font("Tahoma", Font.PLAIN, 13);
 	public static Font TAHOMA_BOLD_11 = new Font("Tahoma", Font.BOLD, 11);
 	public static Font TAHOMA_BOLD_12 = new Font("Tahoma", Font.BOLD, 12);
 	public static Font TAHOMA_BOLD_13 = new Font("Tahoma", Font.BOLD, 13);
 	public static Font TAHOMA_BOLD_14 = new Font("Tahoma", Font.BOLD, 14);
+	public static Font TAHOMA_BOLD_17 = new Font("Tahoma", Font.BOLD, 17);
 	public static Font TAHOMA_BOLD_20 = new Font("Tahoma", Font.BOLD, 20);
 	
 	public static final SimpleDateFormat extendedDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -65,30 +69,19 @@ public class GUICommonTools {
 	    bounds.height = window.getSize().height;
 	    return bounds;
 	}	
-	
-	public static String abbreviationtoLetter(String mutation){
-		return mutation
-			.replaceAll("Ala", "A")
-			.replaceAll("Cys", "C")
-			.replaceAll("Glu", "E")
-			.replaceAll("Phe", "F")
-			.replaceAll("Gly", "G")
-			.replaceAll("His", "H")
-			.replaceAll("Ile", "I")
-			.replaceAll("Lys", "K")
-			.replaceAll("Leu", "L")
-			.replaceAll("Met", "M")
-			.replaceAll("Asn", "N")
-			.replaceAll("Hyp", "O")
-			.replaceAll("Pro", "P")
-			.replaceAll("Gln", "Q")
-			.replaceAll("Arg", "R")
-			.replaceAll("Ser", "S")
-			.replaceAll("Thr", "T")
-			.replaceAll("Glp", "U")
-			.replaceAll("Val", "V")
-			.replaceAll("Trp", "W")
-			.replaceAll("Ter", "X")
-			.replaceAll("Tyr", "Y");
+
+	public static int getNumber(JTextField field, Integer defaultInt){
+		String value = field.getText();
+		Integer valueInt = null;
+		if(value.equals("")){
+			valueInt = defaultInt;
+		}else{
+			try{
+				valueInt = Integer.parseInt(value);
+			}catch(Exception e){
+				return defaultInt;
+			}
+		}
+		return valueInt;
 	}
 }

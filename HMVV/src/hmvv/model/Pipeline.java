@@ -1,5 +1,6 @@
 package hmvv.model;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -14,12 +15,12 @@ public class Pipeline {
 	public final String assayName;
 	public final String instrumentName;
 	public final String status;
-	public final String runTime;
+	public final Timestamp timeStatusUpdated;
 	
 	public final PipelineProgram pipelineProgram;
 	private int progress;
 	
-	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleName , String assayName, String instrumentName, String status, String runTime) {
+	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleName , String assayName, String instrumentName, String status, Timestamp timeStatusUpdated) {
         this.queueID = queueID;
         this.sampleID = sampleTableID;
         this.runID = runID;
@@ -27,7 +28,7 @@ public class Pipeline {
         this.assayName = assayName;
         this.instrumentName = instrumentName;
         this.status = status;
-        this.runTime = runTime;
+        this.timeStatusUpdated = timeStatusUpdated;
         pipelineProgram = computeProgram();
         try {
 			progress = computeProgress();
@@ -57,8 +58,8 @@ public class Pipeline {
 		return status;
 	}
 
-	public String getRunTime() {
-		return runTime;
+	public Timestamp getTimeStatusUpdated() {
+		return timeStatusUpdated;
 	}
 	
 	public PipelineProgram getPipelineProgress() {
@@ -73,23 +74,21 @@ public class Pipeline {
 		//default to RUNNING
 		PipelineProgram program = PipelineProgram.RUNNING;
 
-		if (status.equals("pipelineCompleted")){
+		if (status.toLowerCase().equals("pipelinecompleted")){
 			return PipelineProgram.COMPLETE;
-		}else if ( instrumentName.equals("proton") || instrumentName.equals("pgm") || instrumentName.equals("miseq")) {
+		}else if ( instrumentName.equals("proton")) {
 			if (status.equals("started") || status.equals("queued") ) {
-				program.setDisplayString("0/4");
-			}else if (status.equals("bedtools")) {
 				program.setDisplayString("1/4");
-			}else if (status.equals("VEP") || status.equals("parseVEP")) {
+			}else if (status.equals("RunningVEP")) {
 				program.setDisplayString("2/4");
-			}else if (status.equals("UpdateDatabase")) {
+			}else if (status.equals("CompletedVEP")) {
 				program.setDisplayString("3/4");
 			}else if (status.equals("UpdatingDatabase")) {
 				program.setDisplayString("4/4");
 			}else if (status.startsWith("ERROR")) {
 				program = PipelineProgram.ERROR;
 			}
-		}else if  ( assayName.equals("heme") || instrumentName.equals("nextseq")) {
+		}else if  ( assayName.equals("heme") || assayName.equals("tmb")) {
 			if (status.equals("started") || status.equals("queued")) {
 				program.setDisplayString("0/6");
 			}else if (status.equals("bcl2fastq_running_now")) {
@@ -100,16 +99,14 @@ public class Pipeline {
 				program.setDisplayString("1/6");
 			}else if (status.equals("bcl2fastq_wait") ) {
 				program.setDisplayString("1/6");
-			}else if (status.equals("varscanPE")) {
+			}else if (status.equals("Alignment")) {
 				program.setDisplayString("2/6");
-			}else if (status.equals("bedtools")) {
+			}else if (status.equals("VariantCaller")) {
 				program.setDisplayString("3/6");
-			}else if (status.equals("VEP")) {
+			}else if (status.equals("RunningVEP")) {
 				program.setDisplayString("4/6");
-			}else if (status.equals("samtools")) {
+			}else if (status.equals("CompletedVEP")){
 				program.setDisplayString("5/6");
-			}else if (status.equals("UpdateDatabase")) {
-				program.setDisplayString("6/6");
 			}else if (status.equals("UpdatingDatabase")) {
 				program.setDisplayString("6/6");
 			}else if (status.startsWith("ERROR")) {
@@ -131,18 +128,14 @@ public class Pipeline {
 			ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
 			rows = DatabaseCommands.getPipelineDetail(queueID);
 			for (PipelineStatus ps : rows) {
-				if (ps.pipelineStatus.equals("started")) {
+				if (ps.pipelineStatus.equals("started")){
 					pipelineStartTime = ps.getDateUpdated();
 				}
 			}
 
-			float timeElapsed = (float) ((Math.abs(currentTime.getTime() - pipelineStartTime.getTime())) / (1000.0f));
+			float timeElapsed = (float)((Math.abs(currentTime.getTime() - pipelineStartTime.getTime())) / (1000.0f));
 
-			if (this.getInstrumentName().equals("nextseq")){
-				progress = ((timeElapsed * 100.0f) / (pipelineTotalTime * 60.0f));
-			} else{
-				progress = ((timeElapsed * 100.0f) / pipelineTotalTime);
-			}
+			progress = ((timeElapsed * 100.0f) / (pipelineTotalTime * 60.0f));
 
 			if (syncWithProgram() == 0) {
 				progress = 0.0f;
@@ -166,7 +159,7 @@ public class Pipeline {
 		
 		if (status.startsWith("ERROR")) {
 			isSync=0;// for error 
-		}else if (status.equals("pipelineCompleted")) {
+		}else if (status.equals("PipelineCompleted")) {
 			isSync=2;// for checking completion 
 		}
 		return isSync;

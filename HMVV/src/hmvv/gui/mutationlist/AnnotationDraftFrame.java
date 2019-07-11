@@ -2,7 +2,8 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
-import hmvv.model.Annotation;
+import hmvv.main.HMVVDefectReportFrame;
+import hmvv.model.Mutation;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,34 +17,33 @@ public class AnnotationDraftFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
     private JTextArea annotationTextArea;
-    private int maxCharacters = 5000;
-
     private JButton clearButton;
     private JButton saveButton;
-
-    Annotation latestAnnotation;
-
-    public AnnotationDraftFrame( AnnotationFrame parent, Annotation latestAnnotation) throws HeadlessException {
-        this.latestAnnotation = latestAnnotation;
-
+    
+    private Mutation mutation;
+    private AnnotationFrame parent;
+    
+    public AnnotationDraftFrame( AnnotationFrame parent, Mutation mutation) throws HeadlessException {
+        this.parent = parent;
+        this.mutation = mutation;
+        
         createComponents();
         layoutComponents();
         activateComponents();
-
 
         pack();
         setResizable(false);
         setLocationRelativeTo(parent);
     }
+    
     private void createComponents(){
-
         annotationTextArea = new JTextArea();
         annotationTextArea.setWrapStyleWord(true);
         annotationTextArea.setLineWrap(true);
         try {
-            annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(latestAnnotation.coordinate));
+        	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate()));
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(AnnotationDraftFrame.this, e.getMessage());
+        	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
         }
 
         clearButton = new JButton("Clear");
@@ -91,7 +91,7 @@ public class AnnotationDraftFrame extends JFrame {
                 try {
                     annotationTextArea.setText("");
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(AnnotationDraftFrame.this, e.getMessage());
+                	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
                 }
             }
         });
@@ -99,13 +99,11 @@ public class AnnotationDraftFrame extends JFrame {
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-
                 try {
-                    DatabaseCommands.addVariantAnnotationDraft(latestAnnotation.coordinate,annotationTextArea.getText());
+                    DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText());
                     AnnotationDraftFrame.this.dispose();
-
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(AnnotationDraftFrame.this, e.getMessage());
+                	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
                 }
 
             }

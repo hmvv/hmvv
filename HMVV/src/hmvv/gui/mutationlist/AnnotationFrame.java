@@ -24,6 +24,7 @@ import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Annotation;
 import hmvv.model.CommonAnnotation;
 import hmvv.model.GeneAnnotation;
@@ -111,6 +112,7 @@ public class AnnotationFrame extends JFrame {
 		mutationTypeComboBox.addItem("Germline");
 		mutationTypeComboBox.addItem("Unknown");
 		mutationTypeComboBox.addItem("Artifact");
+		mutationTypeComboBox.addItem("Not Confirmed Somatic");
 		
 		previousGeneAnnotationButton = new JButton("Previous");
 		if (geneAnnotationHistory.size() <= 1) { 	
@@ -232,7 +234,7 @@ public class AnnotationFrame extends JFrame {
 		itemPanel.add(new JLabel());
 		itemPanel.add(new JLabel());
 		
-		Dimension textAreaDimension = new Dimension(400,400);
+		Dimension textAreaDimension = new Dimension(450,400);
 		
 		JPanel textAreaPanel = new JPanel();
 		//Annotation
@@ -293,7 +295,7 @@ public class AnnotationFrame extends JFrame {
 					AnnotationFrame.this.setVisible(false);
 					saveRecord();
 				}catch(Exception e){
-					JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
 				}
 			}
 		});
@@ -311,7 +313,7 @@ public class AnnotationFrame extends JFrame {
 				try{
 					showAnnotationDraftFrame();
 				}catch(Exception e){
-					JOptionPane.showMessageDialog(AnnotationFrame.this, e.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
 				}
 			}
 		});
@@ -319,7 +321,6 @@ public class AnnotationFrame extends JFrame {
 		ActionListener historyActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					
 					if(e.getSource() == previousGeneAnnotationButton) {
 						showGeneAnnotationPrevious();
 					}else if(e.getSource() == nextGeneAnnotationButton) {
@@ -329,9 +330,8 @@ public class AnnotationFrame extends JFrame {
 					}else if(e.getSource() == nextAnnotationButton) {
 						showAnnotationNext();
 					}
-					
 				} catch (Exception exception) {
-					JOptionPane.showMessageDialog(AnnotationFrame.this, exception.getMessage());
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, exception);
 				}
 			}
 		};
@@ -352,7 +352,7 @@ public class AnnotationFrame extends JFrame {
 		
 		if(!SSHConnection.isSuperUser()){
 			//readOnly should prevent this, but just in case
-			JOptionPane.showMessageDialog(null, "Only authorized user can edit annotation");
+			JOptionPane.showMessageDialog(this, "Only authorized user can edit annotation");
 			return;
 		}
 		
@@ -364,7 +364,7 @@ public class AnnotationFrame extends JFrame {
 		if(currentAnnotationIndex == mutation.getAnnotationHistorySize() - 1 || mutation.getAnnotationHistorySize() == 0) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
 			//annotation update
 			Annotation newAnnotation = new Annotation(
-					mutation.getCoordinate(),
+					mutation,
 					pathogenicityComboBox.getSelectedItem().toString(),
 					annotationTextArea.getText(),
 					mutationTypeComboBox.getSelectedItem().toString(),
@@ -501,7 +501,7 @@ public class AnnotationFrame extends JFrame {
 	}
 
 	private void showAnnotationDraftFrame(){
-		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this,mutation.getLatestAnnotation());
+		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);
 		annotationdraftframe.setVisible(true);
 	}
 }

@@ -2,28 +2,18 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-import hmvv.io.DatabaseCommands;
+import hmvv.gui.mutationlist.MutationListFilters;
 import hmvv.model.Mutation;
-import hmvv.model.VariantPredictionClass;
 
 public class MutationList {
 	private ArrayList<Mutation> mutations;
 	private ArrayList<Mutation> filteredMutations;
 	private ArrayList<MutationListListener> listeners;
-	private ArrayList<Mutation> mutationsInNormalPair;
 	
 	public MutationList(ArrayList<Mutation> mutations){
 		this.mutations = mutations;
 		this.filteredMutations = new ArrayList<Mutation>();
 		this.listeners = new ArrayList<MutationListListener>();
-	}
-	
-	public void addListener(CommonTableModel listener){
-		listeners.add(listener);
-	}
-	
-	public final Mutation getMutation(int index){
-		return mutations.get(index);
 	}
 	
 	public final void addFilteredMutation(Mutation mutation) {
@@ -35,7 +25,7 @@ public class MutationList {
 		mutation.setReported(reported);
 		notifyReportedStatusChanged(index);
 	}
-	
+
 	public void sortModel(int[] newOrder){
 		ArrayList<Mutation> newSortedOrder = new ArrayList<Mutation>(mutations);
 		
@@ -53,142 +43,41 @@ public class MutationList {
 		notifyStructureChanged();
 	}
 	
-	private boolean includeMutationCosmicFilter(boolean includeCosmicOnly, Mutation mutation){
-		if(!includeCosmicOnly){
-			return true;
-		}
-		if(mutation.getCosmicID() == null){
-			return false;
-		}
-		return !(mutation.getCosmicID().size() == 0);
-	}
-	
-	private boolean includeReportedFilter(boolean includeReportedOnly, Mutation mutation){
-		if(!includeReportedOnly){
-			return true;
-		}
-		return mutation.isReported();
-	}
-	
-	private boolean includeVariantFilter(int frequencyFrom, int frequencyTo, Mutation mutation){
-		double variantFrequency = mutation.getAltFreq();
-		if(frequencyFrom > variantFrequency){
-			return false;
-		}
-		
-		if(frequencyTo < variantFrequency){
-			return false;
-		}
-		return true;
-	}
-	
-	private boolean includeOccurrenceFilter(int minOccurence, Mutation mutation){
-		if(mutation.getOccurrence() != null){
-			int occurrence = mutation.getOccurrence();
-			if(minOccurence > occurrence){
-				return false;
-			}
-		}
-		return true;//default to true
-	}
-	
-	private boolean includeReadDepthFilter(int minReadDepth, Mutation mutation){
-		if(mutation.getReadDP() != null){
-			int readDepth = mutation.getReadDP();
-			if(minReadDepth > readDepth){
-				return false;
-			}
-		}
-		return true;//default to true;
-	}
-	
-	private boolean includePopulationFrequencyFilter(int maxPopulationFrequency, Mutation mutation){
-		if(mutation.getAltGlobalFreq() != null){
-			double populationFrequency = mutation.getAltGlobalFreq();
-			if(maxPopulationFrequency < populationFrequency){
-				return false;
-			}
-		}
-		return true;//default to true;
-	}
-	
-	private boolean includeVariantPredictionFilter(VariantPredictionClass minPredictionClass, Mutation mutation){
-		if(mutation.getVariantPredictionClass() != null){
-			if(mutation.getVariantPredictionClass().importance < minPredictionClass.importance){
-				return false;
-			}
-		}
-		return true;//default to true;
-	}
-	
-	
-	private boolean includeMutation(boolean includeCosmicOnly, boolean includeReportedOnly, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency, VariantPredictionClass minPredictionClass, Mutation mutation){
-		if(!includeMutationCosmicFilter(includeCosmicOnly, mutation)){
-			return false;
-		}
-		if(!includeReportedFilter(includeReportedOnly, mutation)){
-			return false;
-		}
-		if(!includeVariantFilter(frequencyFrom, frequencyTo, mutation)){
-			return false;
-		}
-		if(!includeOccurrenceFilter(minOccurence, mutation)){
-			return false;
-		}
-		if(!includeReadDepthFilter(minReadDepth, mutation)){
-			return false;
-		}
-		if(!includePopulationFrequencyFilter(maxPopulationFrequency, mutation)){
-			return false;
-		}
-		if(!includeVariantPredictionFilter(minPredictionClass, mutation)){
-			return false;
-		}
-		return true;
-	}
-	
-	public void filterMutations(boolean includeCosmicOnly, boolean includeReportedOnly, boolean filterNormalPair, int normalPairSampleID, int frequencyFrom, int frequencyTo, int minOccurence, int minReadDepth, int maxPopulationFrequency, VariantPredictionClass minPredictionClass) throws Exception{
-		ArrayList<Mutation> allMutations = new ArrayList<Mutation>(mutations.size() + filteredMutations.size());
-		allMutations.addAll(mutations);
-		allMutations.addAll(filteredMutations);
-
-		if(mutationsInNormalPair == null && filterNormalPair){
-			mutationsInNormalPair = DatabaseCommands.getPairedNormalMutations(normalPairSampleID);
-			if(mutationsInNormalPair == null){
-				mutationsInNormalPair = new ArrayList<Mutation>();//empty array list because no normal was identified
-			}
-		}
-
-		ArrayList<Mutation> newFilteredMutations = new ArrayList<Mutation>();
-		
-		for(int i = 0; i < allMutations.size(); i++){
-			Mutation mutation = allMutations.get(i);
-
-			if(!includeMutation(includeCosmicOnly, includeReportedOnly, frequencyFrom, frequencyTo, minOccurence, minReadDepth, maxPopulationFrequency, minPredictionClass, mutation)){				
-				newFilteredMutations.add(mutation);
-				continue;
-			}
-			
-			if(filterNormalPair){
-				for(Mutation m : mutationsInNormalPair){
-					if(m.getCoordinate().equals(mutation.getCoordinate())){
-						newFilteredMutations.add(mutation);
-						break;
-					}
-				}
-			}
-		}
-		allMutations.removeAll(newFilteredMutations);
-		
-		mutations.clear();
-		mutations.addAll(allMutations);
-		filteredMutations.clear();
-		filteredMutations.addAll(newFilteredMutations);
+	public void filterMutations(MutationListFilters mutationListFilters){
+		mutationListFilters.filterMutations(mutations, filteredMutations);
 		notifyDataChanged();
+	}
+	
+	public final Mutation getMutation(int index){
+		return mutations.get(index);
 	}
 	
 	public int getMutationCount() {
 		return mutations.size();
+	}
+
+	public int getSelectedMutationCount() {
+		int count = 0;
+		for (int i = 0; i < mutations.size(); i++) {
+			Mutation mutation = mutations.get(i);
+			if (mutation.isSelected()) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	public ArrayList<Mutation> getSelectedMutations() {
+
+		ArrayList<Mutation> selectedMutations = new ArrayList<Mutation>();
+
+		for (int i = 0; i < mutations.size(); i++){
+			Mutation m = mutations.get(i);
+			if (m.isSelected()) {
+				selectedMutations.add(m);
+			}
+		}
+		return selectedMutations;
 	}
 	
 	public int getFilteredMutationCount() {
@@ -199,12 +88,16 @@ public class MutationList {
 		return filteredMutations.get(index);
 	}
 	
+	public void addListener(CommonTableModel listener){
+		listeners.add(listener);
+	}
+	
 	private void notifyReportedStatusChanged(int index){
 		for(MutationListListener listener : listeners){
 			listener.mutationReportedStatusChanged(index);
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private void notifyRowUpdated(int index){
 		for(MutationListListener listener : listeners){

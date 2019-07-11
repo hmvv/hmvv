@@ -5,27 +5,81 @@ import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
+import hmvv.io.SSHConnection;
 import hmvv.model.Sample;
 
 public class Configurations {
 
-	public static void loadConfigurations(Component parent, InputStream configurationInputStream) throws Exception{
+	public static void loadLocalConfigurations(Component parent, InputStream configurationInputStream) throws Exception{
 		BufferedReader br = new BufferedReader(new InputStreamReader(configurationInputStream));
 		String line = null;
 		while((line = br.readLine()) != null){
 			if(line.equals("")){
 				continue;
 			}
-			String[] split = line.split("=");
-			if(split.length != 2){
-				JOptionPane.showMessageDialog(parent, "Invalid configuration: " + line);
+			String[] variableConfig = parseConfigurationLine(line);
+			String variableName = variableConfig[0];
+			String variableValue = variableConfig[1];
+			
+			try{
+				if(variableName.startsWith("SSH_SERVER_ADDRESS")){
+					SSH_SERVER_ADDRESS = variableValue;
+				}else if(variableName.startsWith("SSH_PORT")){
+					SSH_PORT = Integer.parseInt(variableValue);
+				}else if(variableName.startsWith("SSH_FORWARDING_HOST")){
+					SSH_FORWARDING_HOST = variableValue;
+				}else if(variableName.startsWith("DATABASE_PORT")){
+					DATABASE_PORT = Integer.parseInt(variableValue);
+				}else if(variableName.startsWith("DATABASE_NAME")){
+					DATABASE_NAME = variableValue;
+				}else {
+					JOptionPane.showMessageDialog(parent, "Unknown configuration: " + line);
+				}
+			}catch(Exception e){
+				JOptionPane.showMessageDialog(parent, e.getClass().toString() + ". Could not assign configuration " + line);
+			}
+		}
+		br.close();
+		String message = "";
+		if(SSH_SERVER_ADDRESS == null){
+			message+="SSH_SERVER_ADDRESS ";
+		}
+		if(SSH_PORT == null){
+			message+="SSH_PORT ";
+		}
+		if(SSH_FORWARDING_HOST == null){
+			message+="SSH_FORWARDING_HOST ";
+		}
+		if(DATABASE_PORT == null){
+			message+="DATABASE_PORT ";
+		}
+		if(DATABASE_NAME == null){
+			message+="DATABASE_NAME ";
+		}
+		if(message.length() > 0){
+			throw new Exception("The following were not present in the configuration file: " + message);
+		}
+	}
+	
+	/**
+	 * Dependent on SSHConnection already established
+	 * @throws Exception
+	 */
+	public static void loadServerConfigurations() throws Exception{
+		ArrayList<String> configurations = SSHConnection.readConfigurationFile();
+		
+		for(String line : configurations) {
+			if(line.equals("")){
 				continue;
 			}
-			String variableName = split[0].trim();
-			String variableValue = split[1].trim();
+			String[] variableConfig = parseConfigurationLine(line);
+			String variableName = variableConfig[0];
+			String variableValue = variableConfig[1];
+			
 			try{
 				if(variableName.startsWith("READ_ONLY_CREDENTIALS")){
 					String[] lineSplit = variableValue.split(",");
@@ -37,54 +91,54 @@ public class Configurations {
 					READ_WRITE_CREDENTIALS = new String[2];
 					READ_WRITE_CREDENTIALS[0] = lineSplit[0];
 					READ_WRITE_CREDENTIALS[1] = lineSplit[1];
-				}else if(variableName.startsWith("DATABASE_NAME")){
-					DATABASE_NAME = variableValue;
-				}else if(variableName.startsWith("DATABASE_PORT")){
-					DATABASE_PORT = Integer.parseInt(variableValue);
 				}else if(variableName.startsWith("SUPER_USER_GROUP")){
 					SUPER_USER_GROUP = variableValue;
-				}else if(variableName.startsWith("SSH_SERVER_ADDRESS")){
-					SSH_SERVER_ADDRESS = variableValue;
-				}else if(variableName.startsWith("SSH_PORT")){
-					SSH_PORT = Integer.parseInt(variableValue);
-				}else if(variableName.startsWith("SSH_FORWARDING_HOST")){
-					SSH_FORWARDING_HOST = variableValue;
+				}else if(variableName.startsWith("LIS_DRIVER")){
+					LIS_DRIVER = variableValue;
+				}else if(variableName.startsWith("LIS_CONNECTION_DRIVER")){
+					LIS_CONNECTION_DRIVER = variableValue;
+				}else if(variableName.startsWith("LIS_CONNECTION")){
+					LIS_CONNECTION = variableValue;
 				}else {
-					JOptionPane.showMessageDialog(parent, "Unknown configuration: " + line);
+					throw new Exception ("Invalid configuration on server. Variable name is not valid.");
 				}
 			}catch(Exception e){
-				JOptionPane.showMessageDialog(parent, e.getClass().toString() + ". Could not assign configuration " + line);
+				throw new Exception ("Invalid configuration on server. " + e.getClass().toString());
 			}
 		}
-		br.close();
-		String message = "";
+		
+		String message = "";		
 		if(	READ_ONLY_CREDENTIALS == null){
 			message+="READ_ONLY_CREDENTIALS ";
 		}
 		if(READ_WRITE_CREDENTIALS == null){
 			message+="READ_WRITE_CREDENTIALS ";
 		}
-		if(DATABASE_NAME == null){
-			message+="DATABASE_NAME ";
-		}
-		if(DATABASE_PORT == null){
-			message+="DATABASE_PORT ";
-		}
 		if(SUPER_USER_GROUP == null){
 			message+="SUPER_USER_GROUP ";
 		}
-		if(SSH_SERVER_ADDRESS == null){
-			message+="SSH_SERVER_ADDRESS ";
+		if(LIS_DRIVER == null){
+			message+="LIS_DRIVER ";
 		}
-		if(SSH_PORT == null){
-			message+="SSH_PORT ";
+		if(LIS_CONNECTION_DRIVER == null){
+			message+="LIS_CONNECTION_DRIVER ";
 		}
-		if(SSH_FORWARDING_HOST == null){
-			message+="SSH_FORWARDING_HOST ";
+		if(LIS_CONNECTION == null){
+			message+="LIS_CONNECTION ";
 		}
 		if(message.length() > 0){
 			throw new Exception("The following were not present in the configuration file: " + message);
 		}
+	}
+	
+	private static String[] parseConfigurationLine(String line) throws Exception {
+		String[] split = line.split("=");
+		if(split.length != 2){
+			throw new Exception ("Invalid configuration. Line is not correctly formatted.");
+		}
+		String variableName = split[0].trim();
+		String variableValue = split[1].trim();
+		return new String[] {variableName, variableValue};
 	}
 	
 	public static String abbreviationtoLetter(String mutation){
@@ -125,6 +179,10 @@ public class Configurations {
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
 	
+	public static String LIS_DRIVER;
+	public static String LIS_CONNECTION_DRIVER;
+	public static String LIS_CONNECTION;
+			
 	/*
 	 * User configurations
 	 */
@@ -137,21 +195,18 @@ public class Configurations {
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
 	public static int READ_DEPTH_FILTER = 100;
-	public static int MIN_OCCURENCE_FILTER = 0;
+	public static int MAX_OCCURENCE_FILTER = 1000000;
 	
 	
 	public static int ALLELE_FREQ_FILTER = 10;
 	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
 	public static int getAlleleFrequencyFilter(Sample sample) {
-		//TODO Is there a better way to do this?
 		if(sample.getLastName().contains("Horizon")){
 			return HORIZON_ALLELE_FREQ_FILTER;
 		}else {
 			return ALLELE_FREQ_FILTER;
 		}
 	}
-	
-	public static String DEFAULT_ASSAY = "heme";
 	
 	/*
 	 * SSH server configurations
@@ -165,6 +220,8 @@ public class Configurations {
 	}
 	
 	public static Color TEST_ENV_COLOR = Color.CYAN;
+	public static Color TABLE_SELECTION_COLOR = new Color(51,204,255);
+	public static Color TABLE_SELECTION_FONT_COLOR = Color.black;
 	public static boolean isTestEnvironment() {
 		return !getEnvironment().equals("ngs_live");
 	}
