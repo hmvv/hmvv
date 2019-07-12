@@ -201,8 +201,8 @@ public class SampleListFrame extends JFrame {
 		adminMenu.add(qualityControlMenuItem);
 		try{
 			for(String assay : DatabaseCommands.getAllAssays()){
-				//TODO support exome QC
-				if(assay.equals("exome")) {
+				//TODO support TMB QC
+				if(assay.equals("tmb")) {
 					continue;
 				}
 				
@@ -539,7 +539,6 @@ public class SampleListFrame extends JFrame {
 		monitorPipelineThread.start();
 	}
 
-
 	private void handledatabaseInformationClick() throws Exception {
         DatabaseInformation dbinfo = new DatabaseInformation(this);
         dbinfo.setVisible(true);
@@ -552,13 +551,23 @@ public class SampleListFrame extends JFrame {
 				try {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
-					ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
-					for(Mutation m : mutations){
-						m.setCosmicID("LOADING...");
+
+					if (currentSample.assay.equals("tmb")){
+
+						TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, currentSample);
+						tmbFrame.setVisible(true);
+
+					} else{
+
+						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
+						for(Mutation m : mutations){
+							m.setCosmicID("LOADING...");
+						}
+						MutationList mutationList = new MutationList(mutations);
+						MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
+						mutationListFrame.setVisible(true);
 					}
-					MutationList mutationList = new MutationList(mutations);
-					MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
-					mutationListFrame.setVisible(true);
+
 				} catch (Exception e) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading mutation data.");
 				}
@@ -573,8 +582,23 @@ public class SampleListFrame extends JFrame {
 		try {
             table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Sample currentSample = getCurrentlySelectedSample();
-			ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this,currentSample);
-			amplicon.setVisible(true);
+
+			if(currentSample.assay.equals("tmb")){
+
+                TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(this, currentSample);
+
+                if(tmbQC.setValues()) {
+					tmbQC.setVisible(true);
+				} else{
+                	tmbQC.dispose();
+				}
+
+            }else {
+
+                ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
+                amplicon.setVisible(true);
+
+            }
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
 		}

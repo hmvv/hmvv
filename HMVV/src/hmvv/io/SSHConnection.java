@@ -467,4 +467,25 @@ public class SSHConnection {
 		}
 		return configurations;
     }
+
+	public static ArrayList<String> readTMBSeqStatsFile(Sample sample) throws Exception{
+
+		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/nextseqAnalysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
+				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
+				sample.sampleName+"_"+sample.getNormalSampleName()+"_SeqStats.csv";
+		CommandResponse rs = executeCommandAndGetOutput(command);
+
+		if(rs.exitStatus != 0) {
+			throw new Exception(String.format("Error finding or reading Exome Sequence Stat files."));
+		}
+
+		ArrayList<String> stats = new ArrayList<String>();
+		for(String line : rs.responseLines) {
+			if(line.equals("")){
+				continue;
+			}
+			stats.add(line);
+		}
+		return stats;
+	}
 }

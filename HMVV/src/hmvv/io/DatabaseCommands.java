@@ -11,18 +11,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import hmvv.main.Configurations;
-import hmvv.model.Amplicon;
-import hmvv.model.AmpliconCount;
-import hmvv.model.Annotation;
-import hmvv.model.Coordinate;
-import hmvv.model.GeneQCDataElementTrend;
-import hmvv.model.GeneAnnotation;
-import hmvv.model.Mutation;
-import hmvv.model.Pipeline;
-import hmvv.model.PipelineStatus;
-import hmvv.model.QCDataElement;
-import hmvv.model.Sample;
-import hmvv.model.VariantPredictionClass;
+import hmvv.model.*;
 
 public class DatabaseCommands {
 
@@ -148,6 +137,11 @@ public class DatabaseCommands {
 		}
 		pstFindID.close();
 
+		if ( assay.equals("tmb")){
+
+			insertTumorNormalPair(sample);
+		}
+
 		queueSampleForRunningPipeline(sample);
 	}
 
@@ -160,6 +154,22 @@ public class DatabaseCommands {
 		
 		pstQueueSample.executeUpdate();
 		pstQueueSample.close();
+
+	}
+
+	private static void insertTumorNormalPair(Sample sampleTMB)throws Exception{
+
+		String enterSampleNormalPair = "insert into sampleNormalPair "
+				+ "(sampleID,normalPairRunID,normalSampleName,enterDate) "
+				+ "values ( ?,?,?,now())";
+		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
+		pstEnterSampleNormalPair.setInt(1, sampleTMB.sampleID);
+		pstEnterSampleNormalPair.setString(2, sampleTMB.getNormalRunID());
+		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalSampleName());
+
+		pstEnterSampleNormalPair.executeUpdate();
+		pstEnterSampleNormalPair.close();
+
 
 	}
 
@@ -550,6 +560,11 @@ public class DatabaseCommands {
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
 			Sample s = getSample(rs);
+
+			if (s.assay.equals("tmb")){
+
+				updateTMBInfo(s);
+			}
 			samples.add(s);
 		}
 		preparedStatement.close();
@@ -580,6 +595,18 @@ public class DatabaseCommands {
 		return sample;
 	}
 
+	private static void updateTMBInfo(Sample sample) throws SQLException{
+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalPairRunID,normalSampleName from sampleNormalPair where sampleID = ?");
+		preparedStatement.setInt(1, sample.sampleID);
+		ResultSet rs = preparedStatement.executeQuery();
+		if(rs.next()){
+			sample.setNormalRunID(rs.getString("normalPairRunID"));
+			sample.setNormalSampleName(rs.getString("normalSampleName"));
+		}
+		preparedStatement.close();
+
+	}
 	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set note = ? where sampleID = ?");
 		updateStatement.setString(1, newNote);
@@ -846,8 +873,6 @@ public class DatabaseCommands {
 		return rows;
 	}
 
-
-
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 		int averageRunTime = 0;
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(
@@ -998,4 +1023,30 @@ public class DatabaseCommands {
 
 		return geneVariantTrends;
 	}
+
+    /* ************************************************************************
+     * Query Tumor Mutation Burden Data
+     *************************************************************************/
+
+    public static ExomeTumorMutationBurden getSampleTumorMutationBurden(Sample sample)throws Exception{
+
+        PreparedStatement preparedStatement = databaseConnection.prepareStatement("select TMBPair,TMBTotalVariants,TMBScore,TMBGroup from sampleTumorMutationBurden where sampleID = ? ");
+        preparedStatement.setInt(1, sample.sampleID);
+        ResultSet rs = preparedStatement.executeQuery();
+        ExomeTumorMutationBurden exomeTumorMutationBurden = new ExomeTumorMutationBurden();
+        exomeTumorMutationBurden.setSampleID(sample.sampleID);
+        while(rs.next()){
+            exomeTumorMutationBurden.setTMBPair(rs.getString("TMBPair"));
+            Integer totalvariants = rs.getInt("TMBTotalVariants");
+            exomeTumorMutationBurden.setTMBTotalVariants(totalvariants.toString());
+            Float tmbscore = rs.getFloat("TMBScore");
+            exomeTumorMutationBurden.setTMBScore(tmbscore.toString());
+            exomeTumorMutationBurden.setTMBGroup(rs.getString("TMBGroup"));
+        }
+        preparedStatement.close();
+
+    return exomeTumorMutationBurden;
+    }
+
+
 }
