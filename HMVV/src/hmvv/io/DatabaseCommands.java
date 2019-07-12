@@ -1034,6 +1034,7 @@ public class DatabaseCommands {
         preparedStatement.setInt(1, sample.sampleID);
         ResultSet rs = preparedStatement.executeQuery();
         ExomeTumorMutationBurden exomeTumorMutationBurden = new ExomeTumorMutationBurden();
+        exomeTumorMutationBurden.setSampleID(sample.sampleID);
         while(rs.next()){
             exomeTumorMutationBurden.setTMBPair(rs.getString("TMBPair"));
             Integer totalvariants = rs.getInt("TMBTotalVariants");
