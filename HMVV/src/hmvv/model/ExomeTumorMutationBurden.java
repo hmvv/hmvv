@@ -2,6 +2,7 @@ package hmvv.model;
 
 public class ExomeTumorMutationBurden {
 
+    private  int sampleID;
     private  String TMBPair;
     private  String TMBTotalVariants;
     private  String TMBScore;
@@ -14,6 +15,14 @@ public class ExomeTumorMutationBurden {
         this.TMBTotalVariants = TMBTotalVariants;
         this.TMBScore = TMBScore;
         this.TMBGroup = TMBGroup;
+    }
+
+    public int getSampleID() {
+        return sampleID;
+    }
+
+    public void setSampleID(int sampleID) {
+        this.sampleID = sampleID;
     }
 
     public String getTMBPair() {
