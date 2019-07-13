@@ -16,6 +16,14 @@ public class ExomeTumorMutationBurden {
         this.TMBGroup = TMBGroup;
     }
 
+    public int getSampleID() {
+        return sampleID;
+    }
+
+    public void setSampleID(int sampleID) {
+        this.sampleID = sampleID;
+    }
+
     public String getTMBPair() {
         return TMBPair;
     }
