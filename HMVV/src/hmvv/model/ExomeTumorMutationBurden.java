@@ -20,10 +20,6 @@ public class ExomeTumorMutationBurden {
         return sampleID;
     }
 
-    public void setSampleID(int sampleID) {
-        this.sampleID = sampleID;
-    }
-
     public String getTMBPair() {
         return TMBPair;
     }
@@ -38,21 +34,5 @@ public class ExomeTumorMutationBurden {
 
     public String getTMBGroup() {
         return TMBGroup;
-    }
-
-    public void setTMBPair(String TMBPair) {
-        this.TMBPair = TMBPair;
-    }
-
-    public void setTMBTotalVariants(int TMBTotalVariants) {
-        this.TMBTotalVariants = TMBTotalVariants;
-    }
-
-    public void setTMBScore(float TMBScore) {
-        this.TMBScore = TMBScore;
-    }
-
-    public void setTMBGroup(String TMBGroup) {
-        this.TMBGroup = TMBGroup;
     }
 }
