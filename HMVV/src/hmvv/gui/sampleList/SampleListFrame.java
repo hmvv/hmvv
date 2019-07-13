@@ -60,32 +60,33 @@ import hmvv.model.Mutation;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineProgram;
 import hmvv.model.Sample;
+import hmvv.model.TMBSample;
 
 public class SampleListFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private JTextField textRunID;
 	private TableRowSorter<SampleListTableModel> sorter;
-	
+
 	//Menu
 	private JMenuBar menuBar;
 	private JMenu adminMenu;
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem newAssayMenuItem;
-    private JMenuItem databaseInformationMenuItem;
+	private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
 
-	
+
 	//Table
 	private JTable table;
 	private SampleListTableModel tableModel;
 	private JScrollPane tableScrollPane;
-	
+
 	//Buttons
 	private JButton sampleSearchButton;
 	private JButton resetButton;
-	
+
 	//Labels
 	private JLabel lblChooseAnAssay;
 	private JLabel lblRunid;
@@ -93,46 +94,46 @@ public class SampleListFrame extends JFrame {
 	private JComboBox<String> assayComboBox;
 
 	private HMVVTableColumn[] customColumns;
-	
+
 	//Asynchronous sample status updates
 	private Thread pipelineRefreshThread;
 	private final int secondsToSleep = 60;
 	private volatile long timeLastRefreshed = 0;
 	private volatile ArrayList<Pipeline> pipelines;
 	private volatile JMenuItem refreshLabel;
-	private int mutationLinkColumn =0;
-	private int ampliconColumn = 18;
+	private int loadSampleResultsColumn = 0;
+	private int qcColumn = 18;
 	private int sampleEditColumn = 19;
-	
+
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) {
 		super( Configurations.DATABASE_NAME + " : Sample List");
 		tableModel = new SampleListTableModel(samples);
-		
+
 		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
 		setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addWindowListener(new WindowAdapter(){
-		    public void windowClosing(WindowEvent e){
-		    	SSHConnection.shutdown();
-		    }
+			public void windowClosing(WindowEvent e){
+				SSHConnection.shutdown();
+			}
 		});		
-		
-		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), mutationLinkColumn, ampliconColumn, sampleEditColumn);
+
+		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), loadSampleResultsColumn, qcColumn, sampleEditColumn);
 		pipelines = new ArrayList<Pipeline>();//initialize as blank so that if setupPipelineRefreshThread() fails, the object is still instantiated
-		
+
 		createMenu();
 		createComponents();
 		layoutComponents();
 		activateComponents();
 		setLocationRelativeTo(parent);
-		
+
 		setupPipelineRefreshThread();
 	}
-	
+
 	private void setupPipelineRefreshThread() {		
 		pipelineRefreshThread = new Thread(new Runnable() {
 			@Override
@@ -148,9 +149,9 @@ public class SampleListFrame extends JFrame {
 							return;
 						}
 					}
-					
+
 					setRefreshLabelText();
-					
+
 					try {
 						Thread.sleep(1 * 1000);
 					} catch (InterruptedException e) {}
@@ -160,7 +161,7 @@ public class SampleListFrame extends JFrame {
 		pipelineRefreshThread.setName("Sample List Pipeline Status Refresh");
 		pipelineRefreshThread.start();
 	}
-	
+
 	private boolean updatePipelinesASynch() {
 		try {
 			pipelines = DatabaseCommands.getAllPipelines();
@@ -171,7 +172,7 @@ public class SampleListFrame extends JFrame {
 			return false;
 		}
 	}
-	
+
 	private void setRefreshLabelText() {
 		long currentTimeInMillis = System.currentTimeMillis();
 		long timeToRefresh = timeLastRefreshed + (1000 * secondsToSleep);
@@ -179,24 +180,24 @@ public class SampleListFrame extends JFrame {
 		long secondsRemaining = diff / 1000;
 		refreshLabel.setText("Status refresh in " + secondsRemaining + "s");
 	}
-	
+
 	private void createMenu(){
 		menuBar = new JMenuBar();
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
-        databaseInformationMenuItem = new JMenuItem("Database Information");
+		databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
 		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
 		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
 		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
-		
+
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
 		adminMenu.add(newAssayMenuItem);
-		
+
 		adminMenu.addSeparator();
 		adminMenu.add(qualityControlMenuItem);
 		try{
@@ -205,23 +206,23 @@ public class SampleListFrame extends JFrame {
 				if(assay.equals("tmb")) {
 					continue;
 				}
-				
-//				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
-//				qualityControlMenuItem.add(assayMenuItem);
-//				assayMenuItem.addActionListener(new ActionListener(){
-//					@Override
-//					public void actionPerformed(ActionEvent e) {
-//						try {
-//							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
-//							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
-//						} catch (Exception e1) {
-//							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
-//						}
-//					}
-//				});
-//				if(assay.equals("neuro")) {
-//					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
-//				}
+
+				//				JMenuItem assayMenuItem = new JMenuItem(assay + "_AmpliconCoverageDepth");
+				//				qualityControlMenuItem.add(assayMenuItem);
+				//				assayMenuItem.addActionListener(new ActionListener(){
+				//					@Override
+				//					public void actionPerformed(ActionEvent e) {
+				//						try {
+				//							TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getAmpliconQCData(assay);
+				//							QualityControlFrame.showQCChart(SampleListFrame.this, ampliconTrends, assay, "Coverage depth over time", "Sample ID", "Coverage Depth");
+				//						} catch (Exception e1) {
+				//							HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
+				//						}
+				//					}
+				//				});
+				//				if(assay.equals("neuro")) {
+				//					assayMenuItem.setEnabled(false);//TODO the amplicon names do not have the gene in them. Need to find the mapping if we need this feature.
+				//				}
 				JMenuItem variantAlleleFrequencyMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
 				qualityControlMenuItem.add(variantAlleleFrequencyMenuItem);
 				variantAlleleFrequencyMenuItem.addActionListener(new ActionListener(){
@@ -236,19 +237,19 @@ public class SampleListFrame extends JFrame {
 						}
 					}
 				});
-				
-//				qualityControlMenuItem.addSeparator();
+
+				//				qualityControlMenuItem.addSeparator();
 			}
 		}catch(Exception e){
 			//unable to get assays
 		}
-		
+
 		adminMenu.addSeparator();
 		adminMenu.add(databaseInformationMenuItem);
 		adminMenu.add(refreshLabel);
-		
+
 		setJMenuBar(menuBar);
-		
+
 		ActionListener listener = new ActionListener(){
 
 			@Override
@@ -258,9 +259,9 @@ public class SampleListFrame extends JFrame {
 						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
 						sampleEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem) {
-                        handleMonitorPipelineClick();
-                    }else if(e.getSource() == databaseInformationMenuItem){
-                            handledatabaseInformationClick();
+						handleMonitorPipelineClick();
+					}else if(e.getSource() == databaseInformationMenuItem){
+						handledatabaseInformationClick();
 					}else if(e.getSource() == newAssayMenuItem){
 						if(SSHConnection.isSuperUser()){
 							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
@@ -274,19 +275,19 @@ public class SampleListFrame extends JFrame {
 				}
 			}
 		};
-		
+
 		enterSampleMenuItem.addActionListener(listener);
 		newAssayMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);
-        databaseInformationMenuItem.addActionListener(listener);
+		databaseInformationMenuItem.addActionListener(listener);
 	}
-	
+
 	public void addSample(Sample sample){
 		tableModel.addSample(sample);
 		updatePipelinesASynch();
 	}
-	
+
 	private void createComponents(){
 		table = new JTable(tableModel){
 			private static final long serialVersionUID = 1L;
@@ -304,7 +305,7 @@ public class SampleListFrame extends JFrame {
 					}
 				};
 			}
-			
+
 			@Override
 			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 				Component c = super.prepareRenderer(renderer, row, column);
@@ -314,7 +315,7 @@ public class SampleListFrame extends JFrame {
 				}else {
 					c.setForeground(customColumns[column].color);
 					c.setBackground(PipelineProgram.COMPLETE.displayColor);//default background to COMPLETE
-					
+
 					Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 					for(Pipeline p : pipelines) {
 						if(currentSample.sampleID == p.sampleID) {
@@ -326,14 +327,14 @@ public class SampleListFrame extends JFrame {
 				return c;
 			}
 		};
-		
+
 		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
 		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
 		((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
 		table.setAutoCreateRowSorter(true);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
+
 		sorter = new TableRowSorter<SampleListTableModel>(tableModel);
 		table.setRowSorter(sorter);
 		//by default, sort from newest to oldest
@@ -341,10 +342,10 @@ public class SampleListFrame extends JFrame {
 		sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
 		sorter.setSortKeys(sortKeys);
 		sorter.sort();
-				
+
 		tableScrollPane = new JScrollPane();
 		tableScrollPane.setViewportView(table);
-		
+
 		assayComboBox = new JComboBox<String>();
 		try {
 			assayComboBox.addItem("All");
@@ -354,7 +355,7 @@ public class SampleListFrame extends JFrame {
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
 		}
-		
+
 		sampleSearchButton = new JButton("Sample Search");
 		sampleSearchButton.setToolTipText("Open sample search window");
 		sampleSearchButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
@@ -362,13 +363,13 @@ public class SampleListFrame extends JFrame {
 		resetButton = new JButton("Reset Filters");
 		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
-		
+
 		lblChooseAnAssay = new JLabel("Choose an assay");
 		lblChooseAnAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		
+
 		lblRunid = new JLabel("runID");
 		lblRunid.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		
+
 		textRunID = new JTextField();
 		textRunID.setColumns(10);
 	}
@@ -420,37 +421,37 @@ public class SampleListFrame extends JFrame {
 						.addGap(25))
 				);
 		getContentPane().setLayout(groupLayout);
-		
+
 		if(Configurations.isTestEnvironment()) {
 			getContentPane().setBackground(Configurations.TEST_ENV_COLOR);
 		}
-		
+
 		resizeColumnWidths();
 	}
-	
-	public void resizeColumnWidths() {
-	    TableColumnModel columnModel = table.getColumnModel();    
-	    
-	    for (int column = 0; column < table.getColumnCount(); column++) {
-	        TableColumn tableColumn = columnModel.getColumn(column);
 
-	        TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
-	        Component headerComp = headerRenderer.getTableCellRendererComponent(table, tableColumn.getHeaderValue(), false, false, 0, 0);
-	        
-	    	int minWidth = headerComp.getPreferredSize().width;
-	    	int maxWidth = 150;
-	    	
-	        int width = minWidth;
-	        for (int row = 0; row < table.getRowCount(); row++) {
-	            TableCellRenderer renderer = table.getCellRenderer(row, column);
-	            Component comp = table.prepareRenderer(renderer, row, column);
-	            width = Math.max(comp.getPreferredSize().width + 25 , width);
-	        }
-	        width = Math.min(maxWidth, width);
-	        columnModel.getColumn(column).setPreferredWidth(width);
-	    }
+	public void resizeColumnWidths() {
+		TableColumnModel columnModel = table.getColumnModel();    
+
+		for (int column = 0; column < table.getColumnCount(); column++) {
+			TableColumn tableColumn = columnModel.getColumn(column);
+
+			TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
+			Component headerComp = headerRenderer.getTableCellRendererComponent(table, tableColumn.getHeaderValue(), false, false, 0, 0);
+
+			int minWidth = headerComp.getPreferredSize().width;
+			int maxWidth = 150;
+
+			int width = minWidth;
+			for (int row = 0; row < table.getRowCount(); row++) {
+				TableCellRenderer renderer = table.getCellRenderer(row, column);
+				Component comp = table.prepareRenderer(renderer, row, column);
+				width = Math.max(comp.getPreferredSize().width + 25 , width);
+			}
+			width = Math.min(maxWidth, width);
+			columnModel.getColumn(column).setPreferredWidth(width);
+		}
 	}
-	
+
 	private void activateComponents(){
 		table.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
@@ -459,20 +460,20 @@ public class SampleListFrame extends JFrame {
 				table.setCursor(customColumns[column].cursor);
 			}
 		});
-		
+
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent c) {
 				handleTableMouseClick(c);
 			}
 		});
-		
+
 		assayComboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				refilterTable();
 			}
 		});
-		
+
 		sampleSearchButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -487,7 +488,7 @@ public class SampleListFrame extends JFrame {
 				refilterTable();
 			}
 		});
-		
+
 		textRunID.getDocument().addDocumentListener(new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
 				refilterTable();
@@ -510,10 +511,10 @@ public class SampleListFrame extends JFrame {
 	private void handleTableMouseClick(MouseEvent c){
 		try{
 			Point pClick = c.getPoint();
-			if(table.columnAtPoint (pClick) == mutationLinkColumn){
+			if(table.columnAtPoint (pClick) == loadSampleResultsColumn){
 				handleMutationClick();
-			}else if(table.columnAtPoint (pClick) == ampliconColumn){
-				handleShowAmpliconClick();
+			}else if(table.columnAtPoint (pClick) == qcColumn){
+				handleQCClick();
 			}else if(table.columnAtPoint (pClick) == sampleEditColumn){
 				handleEditSampleClick();
 			}
@@ -540,9 +541,9 @@ public class SampleListFrame extends JFrame {
 	}
 
 	private void handledatabaseInformationClick() throws Exception {
-        DatabaseInformation dbinfo = new DatabaseInformation(this);
-        dbinfo.setVisible(true);
-    }
+		DatabaseInformation dbinfo = new DatabaseInformation(this);
+		dbinfo.setVisible(true);
+	}
 
 	private void handleMutationClick() throws Exception{
 		Thread mutationListThread = new Thread(new Runnable() {
@@ -552,13 +553,10 @@ public class SampleListFrame extends JFrame {
 					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					Sample currentSample = getCurrentlySelectedSample();
 
-					if (currentSample.assay.equals("tmb")){
-
-						TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, currentSample);
+					if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
+						TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, (TMBSample)currentSample);
 						tmbFrame.setVisible(true);
-
 					} else{
-
 						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
 						for(Mutation m : mutations){
 							m.setCosmicID("LOADING...");
@@ -577,32 +575,30 @@ public class SampleListFrame extends JFrame {
 		mutationListThread.start();
 	}
 
-	private void handleShowAmpliconClick(){
-		//Show amplicon
+	private void handleQCClick(){
 		try {
-            table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			Sample currentSample = getCurrentlySelectedSample();
 
-			if(currentSample.assay.equals("tmb")){
-
-                TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(this, currentSample);
-
-                if(tmbQC.setValues()) {
-					tmbQC.setVisible(true);
-				} else{
-                	tmbQC.dispose();
-				}
-
-            }else {
-
-                ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
-                amplicon.setVisible(true);
-
-            }
+			if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
+				loadTMBQC((TMBSample)currentSample);
+			}else {
+				ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
+				amplicon.setVisible(true);
+			}
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
 		}
-        table.setCursor(Cursor.getDefaultCursor());
+		table.setCursor(Cursor.getDefaultCursor());
+	}
+
+	private void loadTMBQC(TMBSample tmbSample) {
+		try {
+			TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(this, tmbSample);
+			tmbQC.setVisible(true);
+		}catch(Exception e) {
+			JOptionPane.showMessageDialog(null, "TMB Assay - Pipeline not completed.");
+		}
 	}
 
 	private void handleEditSampleClick() throws Exception{
@@ -610,13 +606,13 @@ public class SampleListFrame extends JFrame {
 		int viewRow = table.getSelectedRow();
 		final int modelRow = table.convertRowIndexToModel(viewRow);
 		Sample sample = getCurrentlySelectedSample();
-		
+
 		String currentUser = SSHConnection.getUserName();
 		if(!currentUser.equals(sample.enteredBy) && !SSHConnection.isSuperUser()){
 			JOptionPane.showMessageDialog(this, "Error: You can only edit samples entered by you!");
 			return;
 		}
-		
+
 		EditSampleFrame editSample = new EditSampleFrame(this, sample);
 		editSample.setVisible(true);
 		editSample.addConfirmListener(new ActionListener() {
@@ -653,10 +649,10 @@ public class SampleListFrame extends JFrame {
 			}
 		});
 	}
-	
+
 	public void refilterTable(){
 		RowFilter<SampleListTableModel, Integer> rowFilter = new RowFilter<SampleListTableModel, Integer>(){
-			
+
 			private boolean doesAssayMatch(Entry<? extends SampleListTableModel, ? extends Integer> entry){
 				if(assayComboBox.getSelectedIndex() == 0){//index 0 is "All"
 					return true;
@@ -669,7 +665,7 @@ public class SampleListFrame extends JFrame {
 					return false;
 				}
 			}
-			
+
 			private boolean doesRunIDMatch(Entry<? extends SampleListTableModel, ? extends Integer> entry){
 				int row = entry.getIdentifier();
 				Sample sample = tableModel.getSample(row);
@@ -680,7 +676,7 @@ public class SampleListFrame extends JFrame {
 					return sample.runID.toLowerCase().contains(runID.toLowerCase());
 				}
 			}
-			
+
 			@Override
 			public boolean include(Entry<? extends SampleListTableModel, ? extends Integer> entry) {
 				return doesAssayMatch(entry) && doesRunIDMatch(entry);

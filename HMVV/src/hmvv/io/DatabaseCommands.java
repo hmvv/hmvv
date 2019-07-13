@@ -136,10 +136,9 @@ public class DatabaseCommands {
 			throw new Exception("Error2: Problem locating the entered sample; data not entered");
 		}
 		pstFindID.close();
-
-		if ( assay.equals("tmb")){
-
-			insertTumorNormalPair(sample);
+		
+		if(sample instanceof TMBSample) {//not ideal to condition using instanceof
+			insertTumorNormalPair((TMBSample)sample);
 		}
 
 		queueSampleForRunningPipeline(sample);
@@ -148,29 +147,25 @@ public class DatabaseCommands {
 	private static void queueSampleForRunningPipeline(Sample sample) throws Exception{
 		String queueSample = 
 				"INSERT INTO pipelineQueue "
-				+ "(sampleID,timeSubmitted) VALUES (?, now() )";
+				+ "(sampleID, timeSubmitted) VALUES (?, now() )";
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.setInt(1, sample.getSampleID());
 		
 		pstQueueSample.executeUpdate();
 		pstQueueSample.close();
-
 	}
 
-	private static void insertTumorNormalPair(Sample sampleTMB)throws Exception{
-
+	private static void insertTumorNormalPair(TMBSample sampleTMB)throws Exception{
 		String enterSampleNormalPair = "insert into sampleNormalPair "
-				+ "(sampleID,normalPairRunID,normalSampleName,enterDate) "
-				+ "values ( ?,?,?,now())";
+				+ "(sampleID, normalPairRunID, normalSampleName, enterDate) "
+				+ "values ( ?, ?, ?, now())";
 		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
 		pstEnterSampleNormalPair.setInt(1, sampleTMB.sampleID);
 		pstEnterSampleNormalPair.setString(2, sampleTMB.getNormalRunID());
 		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalSampleName());
-
+		
 		pstEnterSampleNormalPair.executeUpdate();
 		pstEnterSampleNormalPair.close();
-
-
 	}
 
 	/* ************************************************************************
@@ -551,20 +546,19 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
 		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
-				"s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
-				"s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy from samples as s " +
-				"join instruments  as i on i.instrumentID = s.instrumentID " +
-				"join assays as a on a.assayID = s.assayID ";
+				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
+				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
+				" normalPairRunID, normalSampleName " +
+				
+				" from samples as s " +
+				" left join sampleNormalPair on s.sampleID = sampleNormalPair.sampleID " +
+				" join instruments  as i on i.instrumentID = s.instrumentID " +
+				" join assays as a on a.assayID = s.assayID ";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
 			Sample s = getSample(rs);
-
-			if (s.assay.equals("tmb")){
-
-				updateTMBInfo(s);
-			}
 			samples.add(s);
 		}
 		preparedStatement.close();
@@ -572,41 +566,56 @@ public class DatabaseCommands {
 	}
 
 	private static Sample getSample(ResultSet row) throws SQLException{
-		Sample sample = new Sample(
-				Integer.parseInt(row.getString("sampleID")),
-				row.getString("assay"),
-				row.getString("instrument"),
-				row.getString("lastName"),
-				row.getString("firstName"),
-				row.getString("orderNumber"),
-				row.getString("pathNumber"),
-				row.getString("tumorSource"),
-				row.getString("tumorPercent"),
-				row.getString("runID"),
-				row.getString("sampleName"),
-				row.getString("coverageID"),
-				row.getString("callerID"),
-				row.getString("runDate"),
-				row.getString("patientHistory"),
-				row.getString("bmDiagnosis"),
-				row.getString("note"),
-				row.getString("enteredBy")
-				);
-		return sample;
+		String assay = row.getString("assay");
+		if (assay.equals("tmb")){
+			TMBSample sample = new TMBSample(
+					Integer.parseInt(row.getString("sampleID")),
+					row.getString("assay"),
+					row.getString("instrument"),
+					row.getString("lastName"),
+					row.getString("firstName"),
+					row.getString("orderNumber"),
+					row.getString("pathNumber"),
+					row.getString("tumorSource"),
+					row.getString("tumorPercent"),
+					row.getString("runID"),
+					row.getString("sampleName"),
+					row.getString("coverageID"),
+					row.getString("callerID"),
+					row.getString("runDate"),
+					row.getString("patientHistory"),
+					row.getString("bmDiagnosis"),
+					row.getString("note"),
+					row.getString("enteredBy"),
+					row.getString("normalPairRunID"),
+					row.getString("normalSampleName")
+					);
+			return sample;
+		}else {
+			Sample sample = new Sample(
+					Integer.parseInt(row.getString("sampleID")),
+					row.getString("assay"),
+					row.getString("instrument"),
+					row.getString("lastName"),
+					row.getString("firstName"),
+					row.getString("orderNumber"),
+					row.getString("pathNumber"),
+					row.getString("tumorSource"),
+					row.getString("tumorPercent"),
+					row.getString("runID"),
+					row.getString("sampleName"),
+					row.getString("coverageID"),
+					row.getString("callerID"),
+					row.getString("runDate"),
+					row.getString("patientHistory"),
+					row.getString("bmDiagnosis"),
+					row.getString("note"),
+					row.getString("enteredBy")
+					);
+			return sample;
+		}		
 	}
-
-	private static void updateTMBInfo(Sample sample) throws SQLException{
-
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select normalPairRunID,normalSampleName from sampleNormalPair where sampleID = ?");
-		preparedStatement.setInt(1, sample.sampleID);
-		ResultSet rs = preparedStatement.executeQuery();
-		if(rs.next()){
-			sample.setNormalRunID(rs.getString("normalPairRunID"));
-			sample.setNormalSampleName(rs.getString("normalSampleName"));
-		}
-		preparedStatement.close();
-
-	}
+	
 	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
 		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set note = ? where sampleID = ?");
 		updateStatement.setString(1, newNote);
@@ -1027,26 +1036,23 @@ public class DatabaseCommands {
     /* ************************************************************************
      * Query Tumor Mutation Burden Data
      *************************************************************************/
-
-    public static ExomeTumorMutationBurden getSampleTumorMutationBurden(Sample sample)throws Exception{
-
-        PreparedStatement preparedStatement = databaseConnection.prepareStatement("select TMBPair,TMBTotalVariants,TMBScore,TMBGroup from sampleTumorMutationBurden where sampleID = ? ");
+    public static ExomeTumorMutationBurden getSampleTumorMutationBurden(TMBSample sample)throws Exception{
+        PreparedStatement preparedStatement = databaseConnection.prepareStatement("select TMBPair, TMBTotalVariants, TMBScore, TMBGroup from sampleTumorMutationBurden where sampleID = ? ");
         preparedStatement.setInt(1, sample.sampleID);
         ResultSet rs = preparedStatement.executeQuery();
-        ExomeTumorMutationBurden exomeTumorMutationBurden = new ExomeTumorMutationBurden();
-        exomeTumorMutationBurden.setSampleID(sample.sampleID);
-        while(rs.next()){
-            exomeTumorMutationBurden.setTMBPair(rs.getString("TMBPair"));
-            Integer totalvariants = rs.getInt("TMBTotalVariants");
-            exomeTumorMutationBurden.setTMBTotalVariants(totalvariants.toString());
-            Float tmbscore = rs.getFloat("TMBScore");
-            exomeTumorMutationBurden.setTMBScore(tmbscore.toString());
-            exomeTumorMutationBurden.setTMBGroup(rs.getString("TMBGroup"));
+        
+        ExomeTumorMutationBurden exomeTumorMutationBurden = null;
+        if(rs.next()){
+        	exomeTumorMutationBurden = new ExomeTumorMutationBurden(
+        		sample.sampleID,
+        		rs.getString("TMBPair"),
+        		rs.getInt("TMBTotalVariants"),
+        		rs.getFloat("TMBScore"),
+        		rs.getString("TMBGroup")
+        	);
         }
         preparedStatement.close();
 
-    return exomeTumorMutationBurden;
+        return exomeTumorMutationBurden;
     }
-
-
 }

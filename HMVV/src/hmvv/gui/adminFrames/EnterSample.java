@@ -8,6 +8,7 @@ import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
+import hmvv.model.TMBSample;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,6 +73,7 @@ public class EnterSample extends JDialog {
         setResizable(false);
         setLocationRelativeTo(parent);
     }
+    
     private void createComponents(){
         comboBoxInstrument = new JComboBox<String>();
         try{
@@ -119,13 +121,9 @@ public class EnterSample extends JDialog {
     }
 
     private void layoutComponents(){
-
-        Container pane = getContentPane();
-
         JPanel topPanel = new JPanel();
         topPanel.setPreferredSize(new Dimension(200, 10));
         topPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-
 
         JPanel leftPanel = new JPanel();
         leftPanel.setPreferredSize(new Dimension(500, 275));
@@ -140,7 +138,6 @@ public class EnterSample extends JDialog {
         leftPanel.add(new RowPanel("Instrument", comboBoxInstrument));
         leftPanel.add(new RowPanel("RunID", runIDPanel));
         leftPanel.add(new RowPanel("SampleName", comboBoxSample));
-
         leftPanel.add(new RowPanel("Assay", comboBoxAssay));
         assayPanel.setPreferredSize(new Dimension(475, 150));
         leftPanel.add(assayPanel);
@@ -183,11 +180,11 @@ public class EnterSample extends JDialog {
         southPanel.add(cancelButton);
         bottomPanel.add(southPanel);
 
-        //pane.add(topPanel, BorderLayout.PAGE_START);
-        pane.add(leftPanel, BorderLayout.LINE_START);
-        pane.add(centerPanel, BorderLayout.CENTER);
-        pane.add(rightPanel, BorderLayout.LINE_END);
-        pane.add(bottomPanel, BorderLayout.PAGE_END);
+        //add(topPanel, BorderLayout.PAGE_START);
+        add(leftPanel, BorderLayout.LINE_START);
+        add(centerPanel, BorderLayout.CENTER);
+        add(rightPanel, BorderLayout.LINE_END);
+        add(bottomPanel, BorderLayout.PAGE_END);
     }
 
     private void activateComponents(){
@@ -211,7 +208,7 @@ public class EnterSample extends JDialog {
                     @Override
                     public void run() {
                         try {
-                            findRun(textRunID.getText(),comboBoxSample,false);
+                            findRun(textRunID.getText(), comboBoxSample, false);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -228,7 +225,7 @@ public class EnterSample extends JDialog {
                     @Override
                     public void run() {
                         try {
-                            findRun(textTMBNormalRunID.getText(),comboBoxTMBNormalSample, true);
+                            findRun(textTMBNormalRunID.getText(), comboBoxTMBNormalSample, true);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -342,7 +339,7 @@ public class EnterSample extends JDialog {
                 }
                 if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
                     String barcodeText = textBarcode.getText();
-                    clearFields(true,false);
+                    clearFields(true, false);
                     textBarcode.setText(barcodeText);
                     runLISIntegration(barcodeText);
                 }
@@ -368,7 +365,7 @@ public class EnterSample extends JDialog {
         }
     }
 
-    private void findRun(String runID, JComboBox<String> combobox,boolean isTMBNormal) throws Exception{
+    private void findRun(String runID, JComboBox<String> combobox, boolean isTMBNormal) throws Exception{
         clearComboBoxes(isTMBNormal);
         clearFields(false,isTMBNormal);
         enableComboBoxes(false, false, false,false);
@@ -381,7 +378,7 @@ public class EnterSample extends JDialog {
         }
 
         if(instrument.equals("miseq") || instrument.equals("nextseq")){
-            findRunIllumina(instrument, runID, combobox,isTMBNormal);
+            findRunIllumina(instrument, runID, combobox, isTMBNormal);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
             findRunIon(instrument, runID);
         }else {
@@ -668,7 +665,7 @@ public class EnterSample extends JDialog {
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
 
-            return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+            return new TMBSample(sampleID, assay, instrument, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy,
                     textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
@@ -701,5 +698,4 @@ public class EnterSample extends JDialog {
             add(right, BorderLayout.CENTER);
         }
     }
-
 }

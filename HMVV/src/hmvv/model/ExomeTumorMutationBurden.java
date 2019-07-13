@@ -2,14 +2,14 @@ package hmvv.model;
 
 public class ExomeTumorMutationBurden {
 
-    private  String TMBPair;
-    private  String TMBTotalVariants;
-    private  String TMBScore;
-    private  String TMBGroup;
+	private int sampleID;
+    private String TMBPair;
+    private int TMBTotalVariants;
+    private float TMBScore;
+    private String TMBGroup;
 
-    public ExomeTumorMutationBurden(){}
-
-    public ExomeTumorMutationBurden(String TMBPair, String TMBTotalVariants, String TMBScore, String TMBGroup) {
+    public ExomeTumorMutationBurden(int sampleID, String TMBPair, int TMBTotalVariants, float TMBScore, String TMBGroup) {
+    	this.sampleID = sampleID;
         this.TMBPair = TMBPair;
         this.TMBTotalVariants = TMBTotalVariants;
         this.TMBScore = TMBScore;
@@ -20,11 +20,11 @@ public class ExomeTumorMutationBurden {
         return TMBPair;
     }
 
-    public String getTMBTotalVariants() {
+    public int getTMBTotalVariants() {
         return TMBTotalVariants;
     }
 
-    public String getTMBScore() {
+    public float getTMBScore() {
         return TMBScore;
     }
 
@@ -36,11 +36,11 @@ public class ExomeTumorMutationBurden {
         this.TMBPair = TMBPair;
     }
 
-    public void setTMBTotalVariants(String TMBTotalVariants) {
+    public void setTMBTotalVariants(int TMBTotalVariants) {
         this.TMBTotalVariants = TMBTotalVariants;
     }
 
-    public void setTMBScore(String TMBScore) {
+    public void setTMBScore(float TMBScore) {
         this.TMBScore = TMBScore;
     }
 
