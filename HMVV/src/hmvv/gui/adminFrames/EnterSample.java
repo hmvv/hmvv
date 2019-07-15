@@ -8,6 +8,7 @@ import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Sample;
+import hmvv.model.TMBSample;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,14 +43,15 @@ public class EnterSample extends JDialog {
 
     private JButton btnFindRun;
     private JButton btnFindTMBNormalRun;
-    private JButton enterSampleButton;
-    private JButton cancelButton;
+    private JButton btnEnterSample;
+    private JButton btnClear;
 
     private JPanel assayPanel;
 
     private SampleListTableModel sampleListTableModel;
 
     private static String defaultCoverageAndCallerID = "-";
+    private static String defaultInstrument = "miseq";
 
     private Thread findRunThread;
     private Thread enterSampleThread;
@@ -72,6 +74,7 @@ public class EnterSample extends JDialog {
         setResizable(false);
         setLocationRelativeTo(parent);
     }
+    
     private void createComponents(){
         comboBoxInstrument = new JComboBox<String>();
         try{
@@ -110,22 +113,18 @@ public class EnterSample extends JDialog {
         textNote.setColumns(5);
         textBarcode = new JTextField();
 
-        enterSampleButton = new JButton("Enter Sample");
-        enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
-        cancelButton = new JButton("Cancel");
-        cancelButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+        btnEnterSample = new JButton("Enter Sample");
+        btnEnterSample.setFont(GUICommonTools.TAHOMA_BOLD_13);
+        btnClear = new JButton("Clear");
+        btnClear.setFont(GUICommonTools.TAHOMA_BOLD_13);
 
         assayPanel = new JPanel();
     }
 
     private void layoutComponents(){
-
-        Container pane = getContentPane();
-
         JPanel topPanel = new JPanel();
         topPanel.setPreferredSize(new Dimension(200, 10));
         topPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-
 
         JPanel leftPanel = new JPanel();
         leftPanel.setPreferredSize(new Dimension(500, 275));
@@ -140,7 +139,6 @@ public class EnterSample extends JDialog {
         leftPanel.add(new RowPanel("Instrument", comboBoxInstrument));
         leftPanel.add(new RowPanel("RunID", runIDPanel));
         leftPanel.add(new RowPanel("SampleName", comboBoxSample));
-
         leftPanel.add(new RowPanel("Assay", comboBoxAssay));
         assayPanel.setPreferredSize(new Dimension(475, 150));
         leftPanel.add(assayPanel);
@@ -179,15 +177,15 @@ public class EnterSample extends JDialog {
         GridLayout southGridLayout = new GridLayout(1,0);
         southGridLayout.setHgap(30);
         southPanel.setLayout(southGridLayout);
-        southPanel.add(enterSampleButton);
-        southPanel.add(cancelButton);
+        southPanel.add(btnEnterSample);
+        southPanel.add(btnClear);
         bottomPanel.add(southPanel);
 
-        //pane.add(topPanel, BorderLayout.PAGE_START);
-        pane.add(leftPanel, BorderLayout.LINE_START);
-        pane.add(centerPanel, BorderLayout.CENTER);
-        pane.add(rightPanel, BorderLayout.LINE_END);
-        pane.add(bottomPanel, BorderLayout.PAGE_END);
+        //add(topPanel, BorderLayout.PAGE_START);
+        add(leftPanel, BorderLayout.LINE_START);
+        add(centerPanel, BorderLayout.CENTER);
+        add(rightPanel, BorderLayout.LINE_END);
+        add(bottomPanel, BorderLayout.PAGE_END);
     }
 
     private void activateComponents(){
@@ -211,7 +209,7 @@ public class EnterSample extends JDialog {
                     @Override
                     public void run() {
                         try {
-                            findRun(textRunID.getText(),comboBoxSample,false);
+                            findRun(textRunID.getText(), comboBoxSample, false);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -228,7 +226,7 @@ public class EnterSample extends JDialog {
                     @Override
                     public void run() {
                         try {
-                            findRun(textTMBNormalRunID.getText(),comboBoxTMBNormalSample, true);
+                            findRun(textTMBNormalRunID.getText(), comboBoxTMBNormalSample, true);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -241,34 +239,36 @@ public class EnterSample extends JDialog {
         ActionListener actionListener = new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(e.getSource() == enterSampleButton) {
+                if(e.getSource() == btnEnterSample) {
                     enterSampleThread = new Thread(new Runnable() {
                         @Override
                         public void run() {
                             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                            enterSampleButton.setText("Processing...");
-                            enterSampleButton.setEnabled(false);
+                            btnEnterSample.setText("Processing...");
+                            btnEnterSample.setEnabled(false);
                             try {
                                 enterData();
-                                enterSampleButton.setText("Completed");
-                                comboBoxInstrument.setSelectedItem("miseq");
+                                btnEnterSample.setText("Completed");
+                                comboBoxInstrument.setSelectedItem(defaultInstrument);
                             } catch (Exception e) {
                                 HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error entering sample data");
-                                enterSampleButton.setText("Enter Sample");
-                                enterSampleButton.setEnabled(true);
+                                btnEnterSample.setText("Enter Sample");
+                                btnEnterSample.setEnabled(true);
                             }
                             setCursor(Cursor.getDefaultCursor());
                         }
                     });
                     enterSampleThread.start();
-                }else if(e.getSource() == cancelButton) {
-                    dispose();
+                }else if (e.getSource() == btnClear){
+                    clearAndDisableAll();
+                    comboBoxInstrument.setSelectedItem(defaultInstrument);
                 }
             }
         };
 
-        enterSampleButton.addActionListener(actionListener);
-        cancelButton.addActionListener(actionListener);
+        btnEnterSample.addActionListener(actionListener);
+
+        btnClear.addActionListener(actionListener);
 
         comboBoxVariantCallerIDList.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent e) {
@@ -342,7 +342,7 @@ public class EnterSample extends JDialog {
                 }
                 if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
                     String barcodeText = textBarcode.getText();
-                    clearFields(true,false);
+                    clearFields(true, false);
                     textBarcode.setText(barcodeText);
                     runLISIntegration(barcodeText);
                 }
@@ -368,7 +368,7 @@ public class EnterSample extends JDialog {
         }
     }
 
-    private void findRun(String runID, JComboBox<String> combobox,boolean isTMBNormal) throws Exception{
+    private void findRun(String runID, JComboBox<String> combobox, boolean isTMBNormal) throws Exception{
         clearComboBoxes(isTMBNormal);
         clearFields(false,isTMBNormal);
         enableComboBoxes(false, false, false,false);
@@ -381,7 +381,7 @@ public class EnterSample extends JDialog {
         }
 
         if(instrument.equals("miseq") || instrument.equals("nextseq")){
-            findRunIllumina(instrument, runID, combobox,isTMBNormal);
+            findRunIllumina(instrument, runID, combobox, isTMBNormal);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
             findRunIon(instrument, runID);
         }else {
@@ -430,8 +430,6 @@ public class EnterSample extends JDialog {
                 combobox.addItem(currentSample);
             }
         }
-        //TODO verify impact of removing this
-        sampleIDSelectionChanged();
     }
 
     private void fillComboBoxes(ArrayList<String> coverageID, ArrayList<String> variantCallerID){
@@ -446,7 +444,7 @@ public class EnterSample extends JDialog {
     }
 
     private void sampleIDSelectionChanged(){
-        enterSampleButton.setText("Enter Sample");
+        btnEnterSample.setText("Enter Sample");
         String runID = textRunID.getText();
         String instrument = (String)comboBoxInstrument.getSelectedItem();
         String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
@@ -500,6 +498,8 @@ public class EnterSample extends JDialog {
             assayPanel.repaint();
             assayPanel.revalidate();
 
+            clearFields(false,true);
+
             JPanel runIDPanel = new JPanel();
             GridLayout runIDGridLayout = new GridLayout(1,0);
             runIDGridLayout.setHgap(10);
@@ -513,6 +513,7 @@ public class EnterSample extends JDialog {
             assayPanel.revalidate();
         }
     }
+
     private void runLISIntegration(String barcodeText) {
         String assay = (String)comboBoxAssay.getSelectedItem();
         String sampleName = (String)comboBoxSample.getSelectedItem();
@@ -575,7 +576,7 @@ public class EnterSample extends JDialog {
         textPatientHistory.setEditable(editable);
         textDiagnosis.setEditable(editable);
         textNote.setEditable(editable);
-        enterSampleButton.setEnabled(editable);
+        btnEnterSample.setEnabled(editable);
     }
 
     private void clearComboBoxes(Boolean isTMBNormal){
@@ -615,13 +616,12 @@ public class EnterSample extends JDialog {
 
     private void enterData() throws Exception{
         setEnabled(false);
-
         try {
             Sample sample = constructSampleFromTextFields();
             DatabaseCommands.insertDataIntoDatabase(sample);
             parent.addSample(sample);
 
-            //call update fields in order to run the code that updates the editable status of the fields, and also the enterSampleButton
+            //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
             updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
         }finally {
             setEnabled(true);
@@ -668,7 +668,7 @@ public class EnterSample extends JDialog {
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
 
-            return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+            return new TMBSample(sampleID, assay, instrument, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy,
                     textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
@@ -701,5 +701,4 @@ public class EnterSample extends JDialog {
             add(right, BorderLayout.CENTER);
         }
     }
-
 }

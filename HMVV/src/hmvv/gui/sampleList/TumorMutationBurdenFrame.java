@@ -2,8 +2,8 @@ package hmvv.gui.sampleList;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
-import hmvv.model.ExomeTMB;
-import hmvv.model.Sample;
+import hmvv.model.ExomeTumorMutationBurden;
+import hmvv.model.TMBSample;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,10 +17,14 @@ public class TumorMutationBurdenFrame extends JDialog {
     private JButton txtTMBScore;
     private JButton txtTMBGroup;
 
-    private Sample sample;
+    private TMBSample sample;
 
-    public TumorMutationBurdenFrame (SampleListFrame parent,Sample sample) throws Exception{
-        super(parent, "Sample Amplicons");
+    public TumorMutationBurdenFrame (SampleListFrame parent, TMBSample sample) throws Exception{
+        super(parent, "Title Set Later");
+        String title = "Tumor Mutation Burden Result - " + sample.getLastName() + "," + sample.getFirstName() +
+                " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
+        setTitle(title);
+        
         this.sample = sample;
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
@@ -31,17 +35,12 @@ public class TumorMutationBurdenFrame extends JDialog {
 
         createComponents();
         layoutComponents();
+        setComponentValues();
+        
         setLocationRelativeTo(parent);
-
-        String title = "Tumor Mutation Burden Result - " + sample.getLastName() + "," + sample.getFirstName() +
-                " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
-        setTitle(title);
-
-        setValues();
     }
 
     private void createComponents(){
-
         txtSample = new JButton();
         txtSample.setFont(GUICommonTools.TAHOMA_BOLD_14);
         txtSample.setBackground(new Color(59, 89, 182));
@@ -64,9 +63,6 @@ public class TumorMutationBurdenFrame extends JDialog {
     }
 
     private void layoutComponents(){
-
-        Container pane = getContentPane();
-
         JPanel mainPanel = new JPanel(new GridLayout(4,1));
         mainPanel.setPreferredSize(new Dimension(300, 225));
 
@@ -96,17 +92,15 @@ public class TumorMutationBurdenFrame extends JDialog {
         mainPanel.add(scorePanel);
         mainPanel.add(groupPanel);
 
-        pane.add(mainPanel,BorderLayout.PAGE_START);
-
+        add(mainPanel, BorderLayout.PAGE_START);
     }
 
-    private void setValues() throws Exception {
-
-        ExomeTMB exomeTMB = DatabaseCommands.getSampleTMB(sample);
-        txtSample.setText(exomeTMB.getTMBPair());
-        txtTotalVariants.setText(exomeTMB.getTMBTotalVariants());
-        txtTMBScore.setText(exomeTMB.getTMBScore());
-        txtTMBGroup.setText(exomeTMB.getTMBGroup());
+    private void setComponentValues() throws Exception {
+        ExomeTumorMutationBurden exomeTumorMutationBurden = DatabaseCommands.getSampleTumorMutationBurden(sample);
+        txtSample.setText(exomeTumorMutationBurden.getTMBPair());
+        txtTotalVariants.setText(exomeTumorMutationBurden.getTMBTotalVariants()+"");
+        txtTMBScore.setText(exomeTumorMutationBurden.getTMBScore()+"");
+        txtTMBGroup.setText(exomeTumorMutationBurden.getTMBGroup());
     }
 
     private class RowPanel extends JPanel{
@@ -129,6 +123,5 @@ public class TumorMutationBurdenFrame extends JDialog {
             add(right, BorderLayout.CENTER);
         }
     }
-
 }
 

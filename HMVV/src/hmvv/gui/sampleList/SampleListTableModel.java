@@ -113,7 +113,7 @@ public class SampleListTableModel extends AbstractTableModel{
 		columns.add(new SampleTableModelColumn("Quality control metrics of this assay.",
 				"AssayQC",
 				String.class,
-				(Sample sample) -> sample.getAssayQC()));
+				(Sample sample) -> sample.getAssayQCLabel()));
 		
 		columns.add(new SampleTableModelColumn("Click to edit metadata associated with this sample", 
 				"Edit Sample", 

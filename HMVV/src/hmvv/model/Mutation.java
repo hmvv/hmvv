@@ -364,11 +364,15 @@ public class Mutation {
     public Double getEastAsianFreq() {
         return eastAsianFreq;
     }
-    public Double getSouthAsianFreq() { return southAsianFreq; }
+    
+    public Double getSouthAsianFreq() {
+    	return southAsianFreq;
+    }
 
     public void setEastAsianFreq(Double eastAsianFreq) {
         this.eastAsianFreq = eastAsianFreq;
     }
+    
     public void setSouthAsianFreq(Double southAsianFreq) {
         this.southAsianFreq = southAsianFreq;
     }
@@ -465,7 +469,7 @@ public class Mutation {
     	if (annotationHistory.size() == 0) {
             return null;
         }
-    	return  annotationHistory.get(annotationHistory.size() - 1);
+    	return annotationHistory.get(annotationHistory.size() - 1);
     }
 
     public Double getGnomad_allfreq() {
@@ -481,7 +485,7 @@ public class Mutation {
     }
 
     public void setGnomadID() {
-            this.gnomadID = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
+    	this.gnomadID = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
     }
 
     public String getOncokbID() {
@@ -517,7 +521,6 @@ public class Mutation {
     }
 
     public void setOncogenicity(String oncogenicity) {
-
         this.oncogenicity = oncogenicity;
     }
 

@@ -2,14 +2,14 @@ package hmvv.gui.sampleList;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.SSHConnection;
-import hmvv.model.Sample;
+import hmvv.model.TMBSample;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class TMBQCFrame extends JDialog {
+public class TumorMutationBurdenQCFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -17,10 +17,14 @@ public class TMBQCFrame extends JDialog {
     private DefaultTableModel tableModel;
     private JScrollPane tableScrollPane;
 
-    private Sample sample;
+    private TMBSample sample;
 
-    public TMBQCFrame(SampleListFrame parent, Sample sample) throws Exception{
-        super(parent, "Sample Amplicons");
+    public TumorMutationBurdenQCFrame(SampleListFrame parent, TMBSample sample) throws Exception{
+        super(parent, "Title Set Later");
+        String title = "TMB Quality Control - " + sample.getLastName() + "," + sample.getFirstName() +
+                " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
+        setTitle(title);
+        
         this.sample = sample;
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
@@ -31,16 +35,11 @@ public class TMBQCFrame extends JDialog {
 
         createComponents();
         layoutComponents();
-        setLocationRelativeTo(parent);
-
-        String title = "TMB Quality Control - " + sample.getLastName() + "," + sample.getFirstName() +
-                " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
-        setTitle(title);
-
+        setComponentValues();
+        setLocationRelativeTo(parent);        
     }
 
     private void createComponents(){
-
         tableModel = new DefaultTableModel(new String[]{"Metrics", "Tumor", "Normal"}, 0);
         table = new JTable(tableModel);
 
@@ -51,29 +50,16 @@ public class TMBQCFrame extends JDialog {
     }
 
     private void layoutComponents(){
-
-        Container pane = getContentPane();
         JPanel mainPanel = new JPanel();
         mainPanel.add(tableScrollPane);
-        pane.add(mainPanel,BorderLayout.PAGE_START);
-
+        add(mainPanel, BorderLayout.PAGE_START);
     }
 
-    public boolean setValues() throws Exception {
-
-        try {
-            ArrayList<String> exomeQC = SSHConnection.readExomeSeqStatsFile(sample);
-
-            for (int i = 0; i < exomeQC.size(); i++) {
-                String[] rowdata = exomeQC.get(i).split(",");
-                tableModel.addRow(new Object[]{rowdata[0], rowdata[1], rowdata[2]});
-            }
-
-            return true;
-
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(null, "TMB Assay - Pipeline not completed.");
-            return false;
+    private void setComponentValues() throws Exception {
+    	ArrayList<String> exomeQC = SSHConnection.readTMBSeqStatsFile(sample);
+        for (int i = 0; i < exomeQC.size(); i++) {
+            String[] rowdata = exomeQC.get(i).split(",");
+            tableModel.addRow(new Object[]{rowdata[0], rowdata[1], rowdata[2]});
         }
     }
 }
