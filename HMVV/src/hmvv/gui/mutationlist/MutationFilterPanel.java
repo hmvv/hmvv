@@ -3,7 +3,8 @@ package hmvv.gui.mutationlist;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.io.File;
+import java.text.SimpleDateFormat;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,10 +13,9 @@ import javax.swing.event.DocumentListener;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.io.AsynchronousMutationDataIO;
-import hmvv.io.DatabaseCommands;
+import hmvv.io.IGVConnection;
+import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
-import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
@@ -41,10 +41,10 @@ public class MutationFilterPanel extends JPanel {
 	private MutationListFilters mutationListFilters;
 
     private JButton resetButton;
-    private JButton loadFilteredMutationsButton;
-	
+    private LoadIGVButton loadIGVButton;
+    
 	MutationFilterPanel(MutationListFrame parent,Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
-		this.parent=parent;
+		this.parent = parent;
 	    this.sample = sample;
 		this.mutationList = mutationList;
 		this.mutationListFilters = mutationListFilters;
@@ -74,32 +74,36 @@ public class MutationFilterPanel extends JPanel {
 		selectAllCheckbox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
 				handleSelectAllClick(selectAllCheckbox.isSelected());
 			}
 		});
-
-
+		
+		loadIGVButton = new LoadIGVButton();
+		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
+		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		loadIGVButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	new Thread(new Runnable() {
+					public void run() {
+						try {
+							loadIGVButton.setEnabled(false);
+							handleIGVButtonClickAsynchronous();
+						} catch (Exception ex) {
+							JOptionPane.showMessageDialog(parent, ex.getMessage());
+						}
+						loadIGVButton.setEnabled(true);
+						loadIGVButton.resetText();
+					}
+				}).start();
+            }
+        });
+		
 		resetButton = new JButton("Reset all Filters");
         resetButton.setToolTipText("Reset filters to defaults");
         resetButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
-
         resetButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 resetFilters();
-            }
-        });
-
-        loadFilteredMutationsButton = new JButton("Load Mutations");
-        loadFilteredMutationsButton.setToolTipText("Load Mutations that did not meet the quality filter metrics");
-        loadFilteredMutationsButton.setFont(GUICommonTools.TAHOMA_BOLD_11);
-       // loadFilteredMutationsButton.setEnabled(false);//this will be enabled after the unfiltered variant data is loaded
-
-        loadFilteredMutationsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadFilteredMutationsButton.setEnabled(false);
-                loadFilteredMutationsAsynchronous();
             }
         });
 
@@ -165,13 +169,19 @@ public class MutationFilterPanel extends JPanel {
 		JPanel checkboxPanel = new JPanel(new GridLayout(0,1));
 		JPanel resetButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		resetButtonPanel.add(resetButton);
+		
         checkboxPanel.add(resetButtonPanel);
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
 		checkboxPanel.add(selectAllCheckbox);
+		
+		JPanel igvButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		igvButtonPanel.add(loadIGVButton);
+		checkboxPanel.add(igvButtonPanel);
+		
 		leftFilterPanel.add(checkboxPanel);
 
-        JPanel middleFilterPanel = new JPanel(new GridLayout(0,1));
+		JPanel middleFilterPanel = new JPanel(new GridLayout(0,1));
 
 		//variant frequency
         JPanel g1000Panel = new JPanel(new GridLayout(0,1));
@@ -234,7 +244,6 @@ public class MutationFilterPanel extends JPanel {
         predictionFilterPanel.add(predictionFilterLabel);
         JPanel predictionFilterComponentsPanel =  new JPanel(new FlowLayout(FlowLayout.CENTER));
         predictionFilterComponentsPanel.add(predictionFilterComboBox);
-        predictionFilterComponentsPanel.add(loadFilteredMutationsButton);
         predictionFilterPanel.add(predictionFilterComponentsPanel);
         vepPanel.add(predictionFilterPanel);
 
@@ -267,111 +276,141 @@ public class MutationFilterPanel extends JPanel {
 	}
 
 	void disableInputForAsynchronousLoad() {
-		String tooltip = "Disabled while data is loading";
 		cosmicOnlyCheckbox.setEnabled(false);
-		cosmicOnlyCheckbox.setToolTipText(tooltip);
 		reportedOnlyCheckbox.setEnabled(false);
-		reportedOnlyCheckbox.setToolTipText(tooltip);
+		loadIGVButton.setEnabled(false);
 		selectAllCheckbox.setEnabled(false);
-		selectAllCheckbox.setToolTipText(tooltip);
 		textFreqFrom.setEditable(false);
-		textFreqFrom.setToolTipText(tooltip);
 		textVarFreqTo.setEditable(false);
-		textVarFreqTo.setToolTipText(tooltip);
 		minReadDepthTextField.setEditable(false);
-		minReadDepthTextField.setToolTipText(tooltip);
 		occurenceFromTextField.setEditable(false);
-		occurenceFromTextField.setToolTipText(tooltip);
 		maxPopulationFrequencyG1000TextField.setEditable(false);
-		maxPopulationFrequencyG1000TextField.setToolTipText(tooltip);
 		maxPopulationFrequencyGnomadTextField.setEditable(false);
-		maxPopulationFrequencyGnomadTextField.setToolTipText(tooltip);
 		predictionFilterComboBox.setEnabled(false);
-		predictionFilterComboBox.setToolTipText(tooltip);
         resetButton.setEnabled(false);
-        resetButton.setToolTipText(tooltip);
-        loadFilteredMutationsButton.setEnabled(false);
-        loadFilteredMutationsButton.setToolTipText(tooltip);
 	}
 
 	void enableInputAfterAsynchronousLoad() {
 		cosmicOnlyCheckbox.setEnabled(true);
-		cosmicOnlyCheckbox.setToolTipText("");
 		reportedOnlyCheckbox.setEnabled(true);
-		reportedOnlyCheckbox.setToolTipText("");
+		loadIGVButton.setEnabled(true);
 		selectAllCheckbox.setEnabled(true);
-		selectAllCheckbox.setToolTipText("");
 		textFreqFrom.setEditable(true);
-		textFreqFrom.setToolTipText("");
 		textVarFreqTo.setEditable(true);
-		textVarFreqTo.setToolTipText("");
 		minReadDepthTextField.setEditable(true);
-		minReadDepthTextField.setToolTipText("");
 		occurenceFromTextField.setEditable(true);
-		occurenceFromTextField.setToolTipText("");
 		maxPopulationFrequencyG1000TextField.setEditable(true);
-		maxPopulationFrequencyG1000TextField.setToolTipText("");
 		maxPopulationFrequencyGnomadTextField.setEditable(true);
-		maxPopulationFrequencyGnomadTextField.setToolTipText("");
 		predictionFilterComboBox.setEnabled(true);
-		predictionFilterComboBox.setToolTipText("");
         resetButton.setEnabled(true);
-        resetButton.setToolTipText("");
-        loadFilteredMutationsButton.setEnabled(true);
-        loadFilteredMutationsButton.setToolTipText("");
 	}
 	
 	void applyRowFilters(){
 		mutationList.filterMutations(mutationListFilters);
-	}
-
-    private void loadFilteredMutationsAsynchronous() {
-        createLoadFilteredMutationDataThread();
-    }
-
-    private void createLoadFilteredMutationDataThread(){
-        Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
-            @Override
-            public void run() {
-                disableInputForAsynchronousLoad();
-                getFilteredMutationData();
-                enableInputAfterAsynchronousLoad();
-                loadFilteredMutationsButton.setEnabled(false);
-            }
-        });
-        loadFilteredMutationDataThread.start();
-    }
-    private void getFilteredMutationData() {
-        try{
-            loadFilteredMutationsButton.setText("Loading...");
-            ArrayList<Mutation> mutations = DatabaseCommands.getExtraMutationsBySample(sample);
-            for(int i = 0; i < mutations.size(); i++) {
-                if(parent.isCallbackClosed()){
-                    return;
-                }
-                loadFilteredMutationsButton.setText("Loading " + (i+1) + " of " + mutations.size());
-                try{
-                    Mutation mutation = mutations.get(i);
-                    AsynchronousMutationDataIO.getMutationData(mutation);
-                    //no need to call parent.mutationListIndexUpdated() here these mutations are not current displayed
-                    mutationList.addFilteredMutation(mutation);
-
-                }catch(Exception e){
-                	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Could not load additional mutation data.");
-                }
-            }
-            applyRowFilters();
-        }catch(Exception ex){
-        	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
-        }
-        loadFilteredMutationsButton.setText("Filtered mutations loaded");
-    }
+	}    
 
     private void handleSelectAllClick(boolean choice) {
 		for (int i = 0; i < mutationList.getMutationCount(); i++) {
 			Mutation mutation = mutationList.getMutation(i);
 			if (choice){mutation.setSelected(true);}
 			else {mutation.setSelected(false);}
+		}
+	}
+    
+    private void loadIGVAsynchronous() throws Exception {
+
+		loadIGVButton.setText("Finding BAM File...");
+		File bamFile = SSHConnection.loadBAMForIGV(sample, loadIGVButton);
+
+		loadIGVButton.setText("Loading File Into IGV...");
+		String response = IGVConnection.loadFileIntoIGV(this, bamFile);
+
+		if (response.equals("OK")) {
+			JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
+		} else if (!response.equals("")) {
+			JOptionPane.showMessageDialog(this, response);
+		}
+	}
+    
+    private void handleIGVButtonClickAsynchronous() throws Exception {
+		if (mutationList.getSelectedMutationCount() == 0 ){
+			String msg = "You have not selected any mutations. Would you like to load the entire BAM file?";
+			int request = JOptionPane.showConfirmDialog(parent, msg, "Load the entire BAM file Confirmation", JOptionPane.YES_NO_OPTION);
+			if (request == JOptionPane.YES_OPTION) {
+				loadIGVAsynchronous();
+			}
+			return;
+		}
+		
+		String msg = "You have selected " + mutationList.getSelectedMutationCount() + " mutation(s) to load into IGV. Would you like to load the BAM file for these coordinates?";
+		int request = JOptionPane.showConfirmDialog(parent, msg, "Load IGV Confirmation", JOptionPane.YES_NO_OPTION);
+		
+		if (request == JOptionPane.YES_OPTION) {
+			loadIGVAsynchronous_Filtered();
+		}
+	}
+    
+    private void loadIGVAsynchronous_Filtered() throws Exception {
+		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		ServerTask serverTask = new ServerTask(0);
+		loadIGVButtonTimerLabel(serverTask);
+		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverTask);
+		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+		loadIGVButton.setText("Finding BAM File...");
+		File bamLocalFile = SSHConnection.copyTempBamFileONLocal(sample, loadIGVButton, bamServerFileName);
+
+		loadIGVButton.setText("Loading File Into IGV...");
+		String response = IGVConnection.loadFileIntoIGV(this, bamLocalFile);
+
+		if (response.equals("OK")) {
+			JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
+		} else if (!response.equals("")) {
+			JOptionPane.showMessageDialog(this, response);
+		}
+	}
+    
+    private void loadIGVButtonTimerLabel(ServerTask task) {
+		int seconds = 3 * mutationList.getSelectedMutationCount();
+		final long duration = seconds * 1000;   // calculate to milliseconds
+		final Timer timer = new Timer(1, new ActionListener() {
+			long startTime = -1;
+			private SimpleDateFormat minuteSecondDateFormat = new SimpleDateFormat("mm:ss");
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				if (startTime < 0) {
+					startTime = System.currentTimeMillis();
+				}
+				long now = System.currentTimeMillis();
+				long clockTime = now - startTime;
+				if (task.getStatus() == 1) {
+					((Timer) event.getSource()).stop();
+					return;
+				}
+				long interval = duration - clockTime;
+				if(interval < 0) {
+					interval = 1000;
+				}
+				loadIGVButton.setText(String.format("Processing...%s", minuteSecondDateFormat.format(interval)));
+			}
+		});
+		timer.start();
+	}
+    
+    public class ServerTask {
+
+		int status;
+
+		public ServerTask(int s) {
+			this.status = s;
+		}
+
+		public int getStatus() {
+			return status;
+		}
+
+		public void setStatus(int s) {
+			this.status = s;
 		}
 	}
 }

@@ -1,6 +1,5 @@
 package hmvv.model;
 
-import hmvv.gui.GUICommonTools;
 import hmvv.main.Configurations;
 
 import java.util.ArrayList;

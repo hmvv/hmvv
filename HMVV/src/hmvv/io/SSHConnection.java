@@ -8,7 +8,7 @@ import javax.swing.*;
 
 import com.jcraft.jsch.*;
 
-import hmvv.gui.mutationlist.MutationFeaturePanel;
+import hmvv.gui.mutationlist.MutationFilterPanel.ServerTask;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.model.*;
@@ -320,7 +320,7 @@ public class SSHConnection {
 		}
 	}
 
-	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, MutationFeaturePanel.ServerTask serverTask) throws Exception {
+	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerTask serverTask) throws Exception {
 
 	    //create a local temp file
 		int bamCoverage = 25;

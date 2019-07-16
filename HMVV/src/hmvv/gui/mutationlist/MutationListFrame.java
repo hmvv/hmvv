@@ -30,7 +30,9 @@ import hmvv.model.Sample;
 
 public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private static final long serialVersionUID = 1L;
-		
+	
+	private MutationListMenuBar mutationListMenuBar;
+	
 	private BasicTable basicTabTable;
 	private BasicTableModel basicTabTableModel;
 
@@ -78,7 +80,6 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	private Sample sample;
 	private MutationFilterPanel mutationFilterPanel;
-	private MutationFeaturePanel mutationFeaturePanel;
 	
 	private volatile boolean isWindowClosed;
 		
@@ -122,7 +123,8 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		mutationFilterPanel = new MutationFilterPanel(this,sample, mutationList, mutationListFilters);
 		mutationFilterPanel.resetFilters();
 		
-		mutationFeaturePanel = new MutationFeaturePanel(this, sample, mutationList);
+		mutationListMenuBar = new MutationListMenuBar(this, sample, mutationList, mutationFilterPanel);
+		setJMenuBar(mutationListMenuBar);
 		
 		constructTabs();
 	}
@@ -195,7 +197,6 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
 		northPanel.add(mutationFilterPanel, BorderLayout.WEST);
-		northPanel.add(mutationFeaturePanel, BorderLayout.CENTER);
 		
 		JPanel contentPane = new JPanel();
 		contentPane.setLayout(new BorderLayout());
@@ -268,14 +269,14 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	public void disableInputForAsynchronousLoad() {
 		if(sample != null) {
-			mutationFeaturePanel.disableInputForAsynchronousLoad();
+			mutationListMenuBar.disableInputForAsynchronousLoad();
 			mutationFilterPanel.disableInputForAsynchronousLoad();
 		}
 	}
 	
 	public void enableInputAfterAsynchronousLoad() {
 		if(sample != null) {
-			mutationFeaturePanel.enableInputAfterAsynchronousLoad();
+			mutationListMenuBar.enableInputAfterAsynchronousLoad();
 			mutationFilterPanel.enableInputAfterAsynchronousLoad();
 		}
 	}
