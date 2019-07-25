@@ -163,7 +163,6 @@ public class DatabaseCommands {
 		pstEnterSampleNormalPair.setInt(1, sampleTMB.sampleID);
 		pstEnterSampleNormalPair.setString(2, sampleTMB.getNormalRunID());
 		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalSampleName());
-		
 		pstEnterSampleNormalPair.executeUpdate();
 		pstEnterSampleNormalPair.close();
 	}

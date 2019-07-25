@@ -117,8 +117,8 @@ public class SSHConnection {
 			return SSHConnection.loadPGM_BAM(runID, sampleID, callerID, progressMonitor);
 		}else if(instrument.equals("proton")){
 			return SSHConnection.loadProton_BAM(runID, sampleID, callerID, progressMonitor);
-		}else if(instrument.equals("nextseq") && sample.assay.equals("heme")){
-			return SSHConnection.loadIlluminaNextseqHeme_BAM(runID, sampleID, progressMonitor);
+		}else if( ( instrument.equals("nextseq") || (instrument.equals("nextseq550"))) && sample.assay.equals("heme")){
+			return SSHConnection.loadIlluminaNextseqHeme_BAM(instrument, runID, sampleID, progressMonitor);
 		}else{
 			return SSHConnection.loadIllumina_BAM(instrument, runID, sampleID, progressMonitor);
 		}
@@ -145,9 +145,8 @@ public class SSHConnection {
 		return findSample(command, "proton", runID, sampleID, progressMonitor);
 	}
 
-	private static File loadIlluminaNextseqHeme_BAM(String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String instrument = "nextseq";
-		String command = String.format("ls /home/environments/%s/nextseqAnalysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
+	private static File loadIlluminaNextseqHeme_BAM(String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
+		String command = String.format("ls /home/environments/%s/"+instrument+"Analysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
 
@@ -469,7 +468,7 @@ public class SSHConnection {
     }
 
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
-		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/nextseqAnalysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
+		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"_SeqStats.csv";
 		CommandResponse rs = executeCommandAndGetOutput(command);
