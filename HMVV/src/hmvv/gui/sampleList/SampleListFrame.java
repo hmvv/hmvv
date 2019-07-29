@@ -555,13 +555,8 @@ public class SampleListFrame extends JFrame {
 
 					if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
 
-						//TODO temp fix- find better way to message pipeline not completed when qc/mutationlist clicked
-						try {
-							TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, (TMBSample)currentSample);
-							tmbFrame.setVisible(true);
-						}catch(Exception e) {
-							JOptionPane.showMessageDialog(null, "TMB Assay - Pipeline is not completed.");
-						}
+					    TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, (TMBSample)currentSample);
+					    tmbFrame.setVisible(true);
 
 					} else{
 						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
@@ -588,24 +583,22 @@ public class SampleListFrame extends JFrame {
 			Sample currentSample = getCurrentlySelectedSample();
 
 			if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
-				loadTMBQC((TMBSample)currentSample);
+
+			    TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(this, (TMBSample)currentSample);
+                tmbQC.setVisible(true);
+
 			}else {
-				ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
+
+			    ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
 				amplicon.setVisible(true);
+
 			}
 		} catch (Exception e) {
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
+
+		    HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
+
 		}
 		table.setCursor(Cursor.getDefaultCursor());
-	}
-
-	private void loadTMBQC(TMBSample tmbSample) {
-		try {
-			TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(this, tmbSample);
-			tmbQC.setVisible(true);
-		}catch(Exception e) {
-			JOptionPane.showMessageDialog(null, "TMB Assay - Pipeline is not completed.");
-		}
 	}
 
 	private void handleEditSampleClick() throws Exception{

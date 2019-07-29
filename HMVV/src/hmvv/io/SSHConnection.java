@@ -8,6 +8,7 @@ import javax.swing.*;
 
 import com.jcraft.jsch.*;
 
+import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.MutationFilterPanel.ServerTask;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
@@ -470,19 +471,22 @@ public class SSHConnection {
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
 		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
-				sample.sampleName+"_"+sample.getNormalSampleName()+"_SeqStats.csv";
+				sample.sampleName+"_"+sample.getNormalSampleName()+"_seqStats.csv";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
-		if(rs.exitStatus != 0) {
-			throw new Exception(String.format("Error finding or reading Exome Sequence Stat files."));
-		}
-
 		ArrayList<String> stats = new ArrayList<String>();
-		for(String line : rs.responseLines) {
-			if(line.equals("")){
-				continue;
+
+		if(rs.exitStatus != 0) {
+
+			stats.add(GUICommonTools.PIPELINE_INCOMPLETE_STATUS);
+
+		} else {
+			for (String line : rs.responseLines) {
+				if (line.equals("")) {
+					continue;
+				}
+				stats.add(line);
 			}
-			stats.add(line);
 		}
 		return stats;
 	}

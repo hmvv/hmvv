@@ -46,17 +46,17 @@ public class TumorMutationBurdenFrame extends JDialog {
         txtSample.setBackground(new Color(59, 89, 182));
         txtSample.setContentAreaFilled(false);
 
-        txtTotalVariants = new JButton();
+        txtTotalVariants = new JButton("");
         txtTotalVariants.setFont(GUICommonTools.TAHOMA_BOLD_14);
         txtTotalVariants.setBackground(new Color(59, 89, 182));
         txtTotalVariants.setFocusPainted(false);
 
-        txtTMBScore = new JButton();
+        txtTMBScore = new JButton("");
         txtTMBScore.setFont(GUICommonTools.TAHOMA_BOLD_14);
         txtTMBScore.setBackground(new Color(59, 89, 182));
         txtTMBScore.setFocusPainted(false);
 
-        txtTMBGroup = new JButton();
+        txtTMBGroup = new JButton("");
         txtTMBGroup.setFont(GUICommonTools.TAHOMA_BOLD_14);
         txtTMBGroup.setBackground(new Color(59, 89, 182));
         txtTMBGroup.setFocusPainted(false);
@@ -97,10 +97,17 @@ public class TumorMutationBurdenFrame extends JDialog {
 
     private void setComponentValues() throws Exception {
         ExomeTumorMutationBurden exomeTumorMutationBurden = DatabaseCommands.getSampleTumorMutationBurden(sample);
-        txtSample.setText(exomeTumorMutationBurden.getTMBPair());
-        txtTotalVariants.setText(exomeTumorMutationBurden.getTMBTotalVariants()+"");
-        txtTMBScore.setText(exomeTumorMutationBurden.getTMBScore()+"");
-        txtTMBGroup.setText(exomeTumorMutationBurden.getTMBGroup());
+
+        if ( null == exomeTumorMutationBurden){
+
+            txtSample.setText(GUICommonTools.PIPELINE_INCOMPLETE_STATUS);
+
+        } else {
+            txtSample.setText(exomeTumorMutationBurden.getTMBPair());
+            txtTotalVariants.setText(exomeTumorMutationBurden.getTMBTotalVariants() + "");
+            txtTMBScore.setText(exomeTumorMutationBurden.getTMBScore() + "");
+            txtTMBGroup.setText(exomeTumorMutationBurden.getTMBGroup());
+        }
     }
 
     private class RowPanel extends JPanel{
