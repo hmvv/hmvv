@@ -37,6 +37,8 @@ public class GUICommonTools {
 	public static final SimpleDateFormat extendedDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	public static final SimpleDateFormat extendedDateFormat2 = new SimpleDateFormat("M/d/y HH:mm:ss");
 	public static final SimpleDateFormat shortDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+	public static final String PIPELINE_INCOMPLETE_STATUS="Running";
 	
 	public static Rectangle getScreenBounds(Component parent){
 	    GraphicsConfiguration gc = parent.getGraphicsConfiguration();

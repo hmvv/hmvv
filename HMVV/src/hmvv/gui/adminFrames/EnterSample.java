@@ -380,7 +380,7 @@ public class EnterSample extends JDialog {
             throw new Exception("Run ID must be an integer.");
         }
 
-        if(instrument.equals("miseq") || instrument.equals("nextseq")){
+        if(instrument.equals("miseq") || instrument.equals("nextseq") || instrument.equals("nextseq550") ){
             findRunIllumina(instrument, runID, combobox, isTMBNormal);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
             findRunIon(instrument, runID);
@@ -467,7 +467,10 @@ public class EnterSample extends JDialog {
         }else{
             String barcodeText = textBarcode.getText();
             clearFields(true,false);
-            runLISIntegration(barcodeText);
+
+            if (!barcodeText.equals("")){
+                runLISIntegration(barcodeText);
+            }
         }
     }
 

@@ -8,7 +8,8 @@ import javax.swing.*;
 
 import com.jcraft.jsch.*;
 
-import hmvv.gui.mutationlist.MutationFeaturePanel;
+import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.MutationFilterPanel.ServerTask;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.model.*;
@@ -117,8 +118,8 @@ public class SSHConnection {
 			return SSHConnection.loadPGM_BAM(runID, sampleID, callerID, progressMonitor);
 		}else if(instrument.equals("proton")){
 			return SSHConnection.loadProton_BAM(runID, sampleID, callerID, progressMonitor);
-		}else if(instrument.equals("nextseq") && sample.assay.equals("heme")){
-			return SSHConnection.loadIlluminaNextseqHeme_BAM(runID, sampleID, progressMonitor);
+		}else if( ( instrument.equals("nextseq") || (instrument.equals("nextseq550"))) && sample.assay.equals("heme")){
+			return SSHConnection.loadIlluminaNextseqHeme_BAM(instrument, runID, sampleID, progressMonitor);
 		}else{
 			return SSHConnection.loadIllumina_BAM(instrument, runID, sampleID, progressMonitor);
 		}
@@ -145,9 +146,8 @@ public class SSHConnection {
 		return findSample(command, "proton", runID, sampleID, progressMonitor);
 	}
 
-	private static File loadIlluminaNextseqHeme_BAM(String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String instrument = "nextseq";
-		String command = String.format("ls /home/environments/%s/nextseqAnalysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
+	private static File loadIlluminaNextseqHeme_BAM(String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
+		String command = String.format("ls /home/environments/%s/"+instrument+"Analysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
 
@@ -320,7 +320,7 @@ public class SSHConnection {
 		}
 	}
 
-	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, MutationFeaturePanel.ServerTask serverTask) throws Exception {
+	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerTask serverTask) throws Exception {
 
 	    //create a local temp file
 		int bamCoverage = 25;
@@ -469,21 +469,24 @@ public class SSHConnection {
     }
 
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
-		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/nextseqAnalysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
+		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
-				sample.sampleName+"_"+sample.getNormalSampleName()+"_SeqStats.csv";
+				sample.sampleName+"_"+sample.getNormalSampleName()+"_seqStats.csv";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
-		if(rs.exitStatus != 0) {
-			throw new Exception(String.format("Error finding or reading Exome Sequence Stat files."));
-		}
-
 		ArrayList<String> stats = new ArrayList<String>();
-		for(String line : rs.responseLines) {
-			if(line.equals("")){
-				continue;
+
+		if(rs.exitStatus != 0) {
+
+			stats.add(GUICommonTools.PIPELINE_INCOMPLETE_STATUS);
+
+		} else {
+			for (String line : rs.responseLines) {
+				if (line.equals("")) {
+					continue;
+				}
+				stats.add(line);
 			}
-			stats.add(line);
 		}
 		return stats;
 	}

@@ -214,7 +214,7 @@ public class Configurations {
 	public static String SSH_SERVER_ADDRESS;
 	public static Integer SSH_PORT;
 	public static String SSH_FORWARDING_HOST;
-	
+
 	public static String getEnvironment() {
 		return DATABASE_NAME;
 	}

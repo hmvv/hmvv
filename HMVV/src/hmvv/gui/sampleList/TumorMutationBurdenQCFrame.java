@@ -56,11 +56,20 @@ public class TumorMutationBurdenQCFrame extends JDialog {
     }
 
     private void setComponentValues() throws Exception {
+
     	ArrayList<String> exomeQC = SSHConnection.readTMBSeqStatsFile(sample);
-        for (int i = 0; i < exomeQC.size(); i++) {
-            String[] rowdata = exomeQC.get(i).split(",");
-            tableModel.addRow(new Object[]{rowdata[0], rowdata[1], rowdata[2]});
-        }
+
+    	if (exomeQC.size()<1){
+
+    	    for (int i = 0; i < exomeQC.size(); i++) {
+                String[] rowdata = exomeQC.get(i).split(",");
+                tableModel.addRow(new Object[]{rowdata[0], rowdata[1], rowdata[2]});
+            }
+    	}else{
+
+    	    tableModel.addRow(new Object[]{GUICommonTools.PIPELINE_INCOMPLETE_STATUS});
+    }
+
     }
 }
 
