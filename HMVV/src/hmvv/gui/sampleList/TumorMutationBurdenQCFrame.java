@@ -59,7 +59,7 @@ public class TumorMutationBurdenQCFrame extends JDialog {
 
     	ArrayList<String> exomeQC = SSHConnection.readTMBSeqStatsFile(sample);
 
-    	if (exomeQC.size()<1){
+    	if (exomeQC.size()>1){
 
     	    for (int i = 0; i < exomeQC.size(); i++) {
                 String[] rowdata = exomeQC.get(i).split(",");

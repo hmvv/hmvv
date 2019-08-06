@@ -471,7 +471,7 @@ public class SSHConnection {
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
 		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
-				sample.sampleName+"_"+sample.getNormalSampleName()+"_seqStats.csv";
+				sample.sampleName+"_"+sample.getNormalSampleName()+".seq_stats";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
 		ArrayList<String> stats = new ArrayList<String>();
