@@ -672,7 +672,7 @@ public class EnterSample extends JDialog {
 
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
-
+             // TODO  replace comboBoxInstrument with normal sample instrument in future
             return new TMBSample(sampleID, assay, instrument, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
