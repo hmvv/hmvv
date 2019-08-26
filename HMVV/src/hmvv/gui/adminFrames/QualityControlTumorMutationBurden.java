@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class TumorMutationBurdenDashboard extends JDialog {
+public class QualityControlTumorMutationBurden extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,7 +28,7 @@ public class TumorMutationBurdenDashboard extends JDialog {
     private int image_height;
 
 
-    public TumorMutationBurdenDashboard(SampleListFrame parent,ArrayList<Sample> samples) throws Exception {
+    public QualityControlTumorMutationBurden(SampleListFrame parent, ArrayList<Sample> samples) throws Exception {
         super (parent,"TumorMutationBurden Dashboard");
         this.parent = parent;
         this.samples = samples;

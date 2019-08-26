@@ -435,7 +435,7 @@ public class SSHConnection {
 		String serverFilePath = "";
 
 		if (fileType.equals("tmb_control")){
-			serverFileName = "TMB_Foundation_ScatterPlot.png";
+			serverFileName = "TMB_ControlCOLO829_Scores.png";
 			serverFilePath = "/home/environments/" + Configurations.getEnvironment() + "/assayCommonFiles/tmbAssay/";
 		}
 
@@ -494,7 +494,7 @@ public class SSHConnection {
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
 		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
-				sample.sampleName+"_"+sample.getNormalSampleName()+".seq_stats";
+				sample.sampleName+"_"+sample.getNormalSampleName()+".final_result.txt";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
 		ArrayList<String> stats = new ArrayList<String>();

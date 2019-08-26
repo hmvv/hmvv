@@ -206,13 +206,13 @@ public class SampleListFrame extends JFrame {
 		try{
 			for(String assay : DatabaseCommands.getAllAssays()){
 				if(assay.equals("tmb")) {
-					JMenuItem tmbDashboard = new JMenuItem(assay + "_Dashboard");
+					JMenuItem tmbDashboard = new JMenuItem(assay + "_Assay");
 					qualityControlMenuItem.add(tmbDashboard);
 					tmbDashboard.addActionListener(new ActionListener(){
 						@Override
 						public void actionPerformed(ActionEvent e) {
 							try {
-									TumorMutationBurdenDashboard tmbDashboard = new TumorMutationBurdenDashboard(SampleListFrame.this,samples);
+									QualityControlTumorMutationBurden tmbDashboard = new QualityControlTumorMutationBurden(SampleListFrame.this,samples);
 									tmbDashboard.setVisible(true);
 							} catch (Exception e1) {
 								HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);

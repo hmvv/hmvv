@@ -5,6 +5,7 @@ import hmvv.io.SSHConnection;
 import hmvv.model.TMBSample;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
@@ -16,19 +17,20 @@ public class TumorMutationBurdenQCFrame extends JDialog {
     private JTable table;
     private DefaultTableModel tableModel;
     private JScrollPane tableScrollPane;
-
+    private SampleListFrame parent;
     private TMBSample sample;
+    private Rectangle bounds;
 
     public TumorMutationBurdenQCFrame(SampleListFrame parent, TMBSample sample) throws Exception{
         super(parent, "Title Set Later");
         String title = "TMB Quality Control - " + sample.getLastName() + "," + sample.getFirstName() +
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
-        
+        this.parent = parent;
         this.sample = sample;
 
-        Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.5), (int)(bounds.height*.5));
+        this.bounds = GUICommonTools.getBounds(parent);
+        setSize((int)(bounds.width*.6), (int)(bounds.height*.6));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         setResizable(false);
@@ -40,12 +42,16 @@ public class TumorMutationBurdenQCFrame extends JDialog {
     }
 
     private void createComponents(){
-        tableModel = new DefaultTableModel(new String[]{"Metrics", "Tumor", "Normal"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"Metrics", "Stats"}, 0);
         table = new JTable(tableModel);
+
+        ((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
+        ((DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.CENTER);
 
         tableScrollPane = new JScrollPane();
         tableScrollPane.setViewportView(table);
         table.getTableHeader().setFont(GUICommonTools.TAHOMA_BOLD_14);
+        tableScrollPane.setPreferredSize(new Dimension((int)(bounds.width*.5), (int)(bounds.height*.5)));
         table.setFont(GUICommonTools.TAHOMA_BOLD_12);
     }
 
@@ -63,7 +69,7 @@ public class TumorMutationBurdenQCFrame extends JDialog {
 
     	    for (int i = 0; i < exomeQC.size(); i++) {
                 String[] rowdata = exomeQC.get(i).split(",");
-                tableModel.addRow(new Object[]{rowdata[0], rowdata[1], rowdata[2]});
+                tableModel.addRow(new Object[]{rowdata[0], rowdata[1]});
             }
     	}else{
 
