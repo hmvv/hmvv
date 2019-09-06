@@ -66,34 +66,44 @@ public class MutationReportGenerator{
 	}
 	
 	public static String generateShortReport(MutationList mutationList) throws Exception{
+
 		StringBuilder report = new StringBuilder(500);
-		for(int i = 0; i < mutationList.getMutationCount(); i++){
+
+		for(int i = 0; i < mutationList.getMutationCount(); i++) {
 			Mutation mutation = mutationList.getMutation(i);
-			if(!mutation.isReported()){
+			if (!mutation.isReported()) {
 				continue;
 			}
-			
+
 			String cDNA = mutation.getHGVSc();
 			String codon = mutation.getHGVSp();
 			String gene = mutation.getGene();
 			String mutationText = gene + ":" + cDNA + ";" + codon;
-			report.append("Mutation: " + mutationText + "\n");
-			
+			report.append(mutationText + "\n");
+		}
+
+		report.append("\n");
+
+		for(int i = 0; i < mutationList.getMutationCount(); i++) {
+			Mutation mutation = mutationList.getMutation(i);
+			if (!mutation.isReported()) {
+				continue;
+			}
 			Annotation annotation = mutation.getLatestAnnotation();
 			if(annotation != null) {
 				String curation = annotation.curation;
 				if(curation.length() > 0) {
-					report.append("Curation Note: " + curation + "\n");
+					report.append(curation + "\n");
 				}
 			}
 			
-			ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-			if(geneAnnotationHistory.size() > 0) {
-				GeneAnnotation geneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
-				if(geneAnnotation.curation.length() > 0) {
-					report.append("Gene Note: " + geneAnnotation.curation + "\n");
-				}
-			}
+//			ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
+//			if(geneAnnotationHistory.size() > 0) {
+//				GeneAnnotation geneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
+//				if(geneAnnotation.curation.length() > 0) {
+//					report.append("Gene Note: " + geneAnnotation.curation + "\n");
+//				}
+//			}
 			
 			report.append("\n");
 		}
