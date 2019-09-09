@@ -85,7 +85,7 @@ public class HMVVDefectReportFrame extends JDialog{
 	private void activateComponents(){
 		defectLinkLabel.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void mousePressed(MouseEvent e) {
 				try {
 					InternetCommands.hmvvBugsReport();
 				} catch (Exception e1) {

@@ -162,7 +162,7 @@ public class HMVVLoginFrame extends JFrame {
 
 		lblhmvv_version.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void mousePressed(MouseEvent e) {
 				try {
 					InternetCommands.hmvvHome();
 				} catch (Exception e1) {

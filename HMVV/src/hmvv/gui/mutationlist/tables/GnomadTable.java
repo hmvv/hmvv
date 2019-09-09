@@ -19,7 +19,7 @@ public class GnomadTable extends CommonTable{
 	}
 
 	@Override
-	protected void handleMouseClick(int column) throws Exception{
+	protected void handleMousePressed(int column) throws Exception{
 		if(column == 7){
 			searchGnomad();
 		}

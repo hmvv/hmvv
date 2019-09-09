@@ -93,14 +93,14 @@ public abstract class CommonTable extends JTable{
 		});
 		addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent c) {
+			public void mousePressed(MouseEvent c) {
 				try{
 					int column = columnAtPoint(c.getPoint());
 					int row = rowAtPoint(c.getPoint());
 					if(getValueAt(row, column) == null){
 						return;
 					}
-					handleMouseClick(column);
+					handleMousePressed(column);
 				}catch(Exception e){
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 				}
@@ -109,7 +109,7 @@ public abstract class CommonTable extends JTable{
 		model.addTableModelListener(new ReportedCheckboxChangeListener());
 	}
 	
-	protected abstract void handleMouseClick(int column) throws Exception;
+	protected abstract void handleMousePressed(int column) throws Exception;
 	
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column){

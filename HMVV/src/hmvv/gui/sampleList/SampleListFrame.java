@@ -456,11 +456,11 @@ public class SampleListFrame extends JFrame {
 				table.setCursor(customColumns[column].cursor);
 			}
 		});
-
+		
 		table.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent c) {
-				handleTableMouseClick(c);
+			public void mousePressed(MouseEvent c) {
+				handleTableMousePressed(c);
 			}
 		});
 
@@ -503,8 +503,8 @@ public class SampleListFrame extends JFrame {
 		int modelRow = table.convertRowIndexToModel(viewRow);
 		return tableModel.getSample(modelRow);
 	}
-
-	private void handleTableMouseClick(MouseEvent c){
+	
+	private void handleTableMousePressed(MouseEvent c) {
 		try{
 			Point pClick = c.getPoint();
 			if(table.columnAtPoint (pClick) == loadSampleResultsColumn){
