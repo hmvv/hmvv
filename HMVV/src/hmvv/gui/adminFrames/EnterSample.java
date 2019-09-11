@@ -209,7 +209,7 @@ public class EnterSample extends JDialog {
                     @Override
                     public void run() {
                         try {
-                            findRun(textRunID.getText(), comboBoxSample, false);
+                            findRun(textRunID.getText(), comboBoxSample,false);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -368,10 +368,11 @@ public class EnterSample extends JDialog {
         }
     }
 
-    private void findRun(String runID, JComboBox<String> combobox, boolean isTMBNormal) throws Exception{
+    private void findRun(String runID, JComboBox<String> comboboxSample, boolean isTMBNormal) throws Exception{
         clearComboBoxes(isTMBNormal);
         clearFields(false,isTMBNormal);
         enableComboBoxes(false, false, false,false);
+
 
         String instrument = comboBoxInstrument.getSelectedItem().toString();
         try{
@@ -381,7 +382,7 @@ public class EnterSample extends JDialog {
         }
 
         if(instrument.equals("miseq") || instrument.equals("nextseq") || instrument.equals("nextseq550") ){
-            findRunIllumina(instrument, runID, combobox, isTMBNormal);
+            findRunIllumina(instrument, runID, comboboxSample, isTMBNormal);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
             findRunIon(instrument, runID);
         }else {
@@ -507,6 +508,7 @@ public class EnterSample extends JDialog {
             GridLayout runIDGridLayout = new GridLayout(1,0);
             runIDGridLayout.setHgap(10);
             runIDPanel.setLayout(runIDGridLayout);
+
             runIDPanel.add(textTMBNormalRunID);
             runIDPanel.add(btnFindTMBNormalRun);
 
@@ -632,7 +634,7 @@ public class EnterSample extends JDialog {
     }
 
     private Sample constructSampleFromTextFields() throws Exception{
-        if(textlastName.getText().equals("") || textFirstName.getText().equals("")  ){
+        if ( textlastName.getText().equals("") || textFirstName.getText().equals("") ){
             throw new Exception("First Name and Last Name are required");
         }
 
@@ -670,10 +672,10 @@ public class EnterSample extends JDialog {
 
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
-
+             // TODO  replace comboBoxInstrument with normal sample instrument in future
             return new TMBSample(sampleID, assay, instrument, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
-                    runDate, patientHistory, diagnosis, note, enteredBy,
+                    runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
                     textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{

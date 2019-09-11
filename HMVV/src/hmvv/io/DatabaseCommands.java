@@ -156,13 +156,18 @@ public class DatabaseCommands {
 	}
 
 	private static void insertTumorNormalPair(TMBSample sampleTMB)throws Exception{
-		String enterSampleNormalPair = "insert into sampleNormalPair "
-				+ "(sampleID, normalPairRunID, normalSampleName, enterDate) "
-				+ "values ( ?, ?, ?, now())";
+
+		String enterSampleNormalPair = " insert into sampleNormalPair "
+		        + " (sampleID, normalPairInstrumentID, normalPairRunID, normalSampleName, enterDate)  "
+		        + " values ( ? , "
+		        + " ( select instrumentID from instruments where instrumentName=?), "
+		        + " ?, ?, now() )";
+
 		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
 		pstEnterSampleNormalPair.setInt(1, sampleTMB.sampleID);
-		pstEnterSampleNormalPair.setString(2, sampleTMB.getNormalRunID());
-		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalSampleName());
+		pstEnterSampleNormalPair.setString(2, sampleTMB.getNormalInstrumentName());
+		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalRunID());
+		pstEnterSampleNormalPair.setString(4, sampleTMB.getNormalSampleName());
 		pstEnterSampleNormalPair.executeUpdate();
 		pstEnterSampleNormalPair.close();
 	}
@@ -380,14 +385,15 @@ public class DatabaseCommands {
 	 * Acquires the number of occurrences of this mutation from the database.
 	 */
 	public static int getOccurrenceCount(Mutation mutation) throws Exception{
-		Coordinate coordinate = mutation.getCoordinate();
+
+        Coordinate coordinate = mutation.getCoordinate();
 		String assay = mutation.getAssay();
 		String query = "select count(*) as occurrence "
-				
+
 				+ " from sampleVariants"
 				+ " join samples on samples.sampleID = sampleVariants.sampleID "
 				+ " join assays on assays.assayID = samples.assayID "
-				
+
 				+ " where sampleVariants.impact != 'No Call' and sampleVariants.chr = ? and sampleVariants.pos = ? and sampleVariants.ref = ? and sampleVariants.alt = ? and assays.assayName = ?"
 				+ " and sampleVariants.altFreq >= " + Configurations.ALLELE_FREQ_FILTER
 				+ " and samples.lastName not like 'Horizon%' ";//Filter control samples from occurrence count
@@ -397,7 +403,7 @@ public class DatabaseCommands {
 		preparedStatement.setString(3, coordinate.getRef());
 		preparedStatement.setString(4, coordinate.getAlt());
 		preparedStatement.setString(5, assay);
-		
+
 		ResultSet rs = preparedStatement.executeQuery();
 		if(rs.next()){
 			String result = rs.getString(1);
@@ -544,13 +550,19 @@ public class DatabaseCommands {
 	 * Sample Queries
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
+
+	    // TODO: watch out for delay due to subquery as sample number increases.
+        // Tested on test env with 2806 samples copied from ngs_live, minor difference
+
 		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
-				" normalPairRunID, normalSampleName " +
-				
+				" t2.instrumentName as normalInstrument , t2.normalPairRunID, t2.normalSampleName " +
 				" from samples as s " +
-				" left join sampleNormalPair on s.sampleID = sampleNormalPair.sampleID " +
+				" left join " +
+				" ( select  sampleID,instrumentName, normalPairRunID,normalSampleName from sampleNormalPair " +
+				" join instruments on instruments.instrumentID=normalPairInstrumentID ) as t2 " +
+				" on s.sampleID = t2.sampleID " +
 				" join instruments  as i on i.instrumentID = s.instrumentID " +
 				" join assays as a on a.assayID = s.assayID ";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -586,6 +598,7 @@ public class DatabaseCommands {
 					row.getString("bmDiagnosis"),
 					row.getString("note"),
 					row.getString("enteredBy"),
+					row.getString("normalInstrument"),
 					row.getString("normalPairRunID"),
 					row.getString("normalSampleName")
 					);

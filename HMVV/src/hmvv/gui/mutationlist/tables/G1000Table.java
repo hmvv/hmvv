@@ -17,7 +17,7 @@ public class G1000Table extends CommonTable{
 	}
 	
 	@Override
-	protected void handleMouseClick(int column) throws Exception{
+	protected void handleMousePressed(int column) throws Exception{
 
 	}
 }

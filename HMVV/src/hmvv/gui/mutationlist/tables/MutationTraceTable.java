@@ -22,7 +22,7 @@ public class MutationTraceTable extends CommonTable{
 	}
 
 	@Override
-	protected void handleMouseClick(int column) throws Exception {
+	protected void handleMousePressed(int column) throws Exception {
 		if(column == 1){
 			searchGoogleForGene();
 		}else if(column == 3){

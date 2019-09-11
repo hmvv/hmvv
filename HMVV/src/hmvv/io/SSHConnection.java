@@ -19,7 +19,7 @@ public class SSHConnection {
 	private static Session sshSession;
 	private static String[] groups;
 	private static int forwardingPort;
-	private static String temporaryBAMDirectory = "temp_BAM_files";
+	private static String temporaryHMVVDirectory = "temp_HMVV_files";
 	
 	private SSHConnection(){
 		//never constructed
@@ -80,7 +80,7 @@ public class SSHConnection {
 	}
 	
 	private static File copyFile(String instrument, String runID, String runFile, SftpProgressMonitor progressMonitor) throws Exception{
-		String runIDFolder = temporaryBAMDirectory + File.separator + instrument + File.separator + runID;
+		String runIDFolder = temporaryHMVVDirectory + File.separator + instrument + File.separator + runID;
 		new File(runIDFolder).mkdirs();
 		
 		String fileName = new File(runFile).getName().trim();
@@ -290,7 +290,7 @@ public class SSHConnection {
 	
 	public static void shutdown() {
 		sshSession.disconnect();
-		File tempBAMDir = new File(temporaryBAMDirectory);
+		File tempBAMDir = new File(temporaryHMVVDirectory);
 		if(!tempBAMDir.exists()) {
 			return;
 		}
@@ -410,7 +410,7 @@ public class SSHConnection {
 
     public static File copyTempBamFileONLocal(Sample sample, SftpProgressMonitor progressMonitor, String tempBamFileName ) throws Exception{
 
-        String runIDFolder = temporaryBAMDirectory + File.separator + sample.instrument + File.separator + sample.runID + "_filtered";
+        String runIDFolder = temporaryHMVVDirectory + File.separator + sample.instrument + File.separator + sample.runID + "_filtered";
         new File(runIDFolder).mkdirs();
 
         String serverFileName = tempBamFileName+".bam";
@@ -428,6 +428,29 @@ public class SSHConnection {
 
         return localBamFile;
     }
+
+	public static File copyFileONLocal(String fileType) throws Exception{
+
+		String serverFileName = "";
+		String serverFilePath = "";
+
+		if (fileType.equals("tmb_control")){
+			serverFileName = "TMB_ControlCOLO829_Scores.png";
+			serverFilePath = "/home/environments/" + Configurations.getEnvironment() + "/assayCommonFiles/tmbAssay/";
+		}
+
+		String fileFolder = temporaryHMVVDirectory + File.separator + fileType.split("_")[0]+"Assay"+File.separator;
+		new File(fileFolder).mkdirs();
+		File localFile = new File(fileFolder + serverFileName);
+
+		ChannelSftp channel = (ChannelSftp)sshSession.openChannel("sftp");
+		channel.connect();
+		channel.cd(serverFilePath);
+		channel.get(serverFileName, localFile.getAbsolutePath());
+		channel.exit();
+
+		return localFile;
+	}
 
     public static ArrayList<Database> getDatabaseInformation() throws Exception {
 
@@ -471,7 +494,7 @@ public class SSHConnection {
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
 		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
-				sample.sampleName+"_"+sample.getNormalSampleName()+"_seqStats.csv";
+				sample.sampleName+"_"+sample.getNormalSampleName()+".final_result.txt";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
 		ArrayList<String> stats = new ArrayList<String>();
