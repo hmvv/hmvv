@@ -1,7 +1,6 @@
 package hmvv.gui.mutationlist.tables;
 
-import java.awt.Component;
-import java.awt.Cursor;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -115,14 +114,26 @@ public abstract class CommonTable extends JTable{
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 		Component c = super.prepareRenderer(renderer, row, column);
 
+		if( (column ==0) && (model.getMutation(row).isReported()) ) {
+			c.setBackground(Configurations.TABLE_REPORTED_COLOR);
+		}
+		else {
+			c.setBackground(Color.white);
+		}
+
 		if(row == this.getSelectedRow()) {
 			setSelectionBackground(Configurations.TABLE_SELECTION_COLOR);
 			if (isCellSelected(row, column)){
+				if( (column ==0) && (model.getMutation(row).isReported()) ) {
+					c.setBackground(Configurations.TABLE_REPORTED_COLOR);
+				}
+				else {
+					c.setBackground(Configurations.TABLE_SELECTION_COLOR);
+				}
 				c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
 			}
 			return c;
 		}
-
 		c.setForeground(customColumns[column].color);
 		return c;
 	}
