@@ -11,11 +11,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.*;
 
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
@@ -114,7 +110,11 @@ public abstract class CommonTable extends JTable{
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 		Component c = super.prepareRenderer(renderer, row, column);
 
-		if( (column ==0) && (model.getMutation(row).isReported()) ) {
+		int modelRow = getRowSorter().convertRowIndexToModel(row);
+		int columnStatusPosition = 0;
+		Boolean statusColumnValue =  (Boolean)model.getValueAt(modelRow, columnStatusPosition);
+
+		if( (column ==0) && (statusColumnValue) ) {
 			c.setBackground(Configurations.TABLE_REPORTED_COLOR);
 		}
 		else {
@@ -124,7 +124,7 @@ public abstract class CommonTable extends JTable{
 		if(row == this.getSelectedRow()) {
 			setSelectionBackground(Configurations.TABLE_SELECTION_COLOR);
 			if (isCellSelected(row, column)){
-				if( (column ==0) && (model.getMutation(row).isReported()) ) {
+				if( (column ==0) && (statusColumnValue) ) {
 					c.setBackground(Configurations.TABLE_REPORTED_COLOR);
 				}
 				else {
