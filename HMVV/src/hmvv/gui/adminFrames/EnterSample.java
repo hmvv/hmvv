@@ -98,7 +98,14 @@ public class EnterSample extends JDialog {
 
         comboBoxTMBNormalSample= new JComboBox<String>();
         comboBoxAssay = new JComboBox<String>();
-
+        try {
+			findAssays();
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error getting Assays from database");
+            dispose();
+            return;
+		}
+        
         textlastName = new JTextField();
         textFirstName = new JTextField();
         textOrderNumber = new JTextField();
@@ -468,10 +475,7 @@ public class EnterSample extends JDialog {
         }else{
             String barcodeText = textBarcode.getText();
             clearFields(true,false);
-
-            if (!barcodeText.equals("")){
-                runLISIntegration(barcodeText);
-            }
+            runLISIntegration(barcodeText);
         }
     }
 
@@ -538,14 +542,14 @@ public class EnterSample extends JDialog {
             }else if(pathOrderNumbers.size() == 1) {
                 textPathologyNumber.setText(pathOrderNumbers.get(0));
             }else {
-                String[] choices = pathOrderNumbers.toArray(new String[pathOrderNumbers.size() + 20]);//add 20 to force JOptionPane into JList
-                String choice = (String) JOptionPane.showInputDialog(this, "Choose the Path Number:",
-                        "Choose the Path Number", JOptionPane.QUESTION_MESSAGE, null,
-                        choices, // Array of choices
-                        choices[0]); // Initial choice
-                if(choice != null) {
-                    textPathologyNumber.setText(choice);
-                }
+//                String[] choices = pathOrderNumbers.toArray(new String[pathOrderNumbers.size() + 20]);//add 20 to force JOptionPane into JList
+//                String choice = (String) JOptionPane.showInputDialog(this, "Choose the Path Number:",
+//                        "Choose the Path Number", JOptionPane.QUESTION_MESSAGE, null,
+//                        choices, // Array of choices
+//                        choices[0]); // Initial choice
+//                if(choice != null) {
+//                    textPathologyNumber.setText(choice);
+//                }
             }
 
             //fill patient name
