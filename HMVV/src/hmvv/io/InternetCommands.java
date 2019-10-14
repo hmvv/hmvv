@@ -2,8 +2,6 @@ package hmvv.io;
 
 import java.awt.Desktop;
 import java.net.URI;
-import java.util.ArrayList;
-
 import hmvv.main.Configurations;
 
 public class InternetCommands {
@@ -57,11 +55,9 @@ public class InternetCommands {
 		}
 	}
 
-	public static void searchCosmic(ArrayList<String> cosmicIDs) throws Exception{
-		for(String cosmicID : cosmicIDs){
-			String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
-			browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
-		}
+	public static void searchCosmic(String cosmicID) throws Exception{
+		String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
+		browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
 	}
 
 	public static void searchClinvar(String term) throws Exception{
