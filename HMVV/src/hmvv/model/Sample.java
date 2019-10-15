@@ -11,6 +11,7 @@ public class Sample {
 	public final String callerID;
 	public final String runDate;
 	public final String enteredBy;
+	private String mrn;
 	private String lastName;
 	private String firstName;
 	private String orderNumber;
@@ -21,12 +22,13 @@ public class Sample {
 	private String diagnosis ;
 	private String note;
 
-	public Sample(int sampleID, String assay, String instrument, String lastName, String firstName, String orderNumber,
+	public Sample(int sampleID, String assay, String instrument, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
 			String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
 		this.sampleID = sampleID;
 		this.assay = notNull(assay);
 		this.instrument = notNull(instrument);
+		this.mrn = notNull(mrn);
 		this.lastName = notNull(lastName);
 		this.firstName = notNull(firstName);
 		this.orderNumber = notNull(orderNumber);
@@ -56,6 +58,14 @@ public class Sample {
 		return (testString == null)?"":testString;
 	}
 
+	public String getMRN() {
+		return mrn;
+	}
+
+	public void setMRN(String mrn) {
+		this.mrn = mrn;
+	}
+	
 	public String getLastName() {
 		return lastName;
 	}

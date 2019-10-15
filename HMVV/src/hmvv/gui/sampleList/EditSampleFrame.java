@@ -24,7 +24,8 @@ import hmvv.model.Sample;
 
 public class EditSampleFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
-
+	
+	private JTextField textMRN;
 	private JTextField textLast;
 	private JTextField textFirst;
 	private JTextField textOrder;
@@ -48,6 +49,9 @@ public class EditSampleFrame extends JDialog {
 		this.sample = sample;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		
+		textMRN = new JTextField(sample.getMRN());
+		textMRN.setColumns(10);
 		
 		textLast = new JTextField(sample.getLastName());
 		textLast.setColumns(10);
@@ -149,6 +153,10 @@ public class EditSampleFrame extends JDialog {
 		labelPanel.add(createPair("Run Date", createJLabel(sample.runDate)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
+		labelPanel.add(createPair("MRN", textMRN));
+		textMRN.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
 		labelPanel.add(createPair("Last Name", textLast));
 		textLast.setPreferredSize(textFieldDimension);
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
@@ -207,6 +215,7 @@ public class EditSampleFrame extends JDialog {
 	}
 
 	public Sample getUpdatedSample(){
+		sample.setMRN(textMRN.getText());
 		sample.setLastName(textLast.getText());
 		sample.setFirstName(textFirst.getText());
 		sample.setOrderNumber(textOrder.getText());

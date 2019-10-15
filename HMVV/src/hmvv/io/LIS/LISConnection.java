@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import hmvv.main.Configurations;
+import hmvv.model.Patient;
 import hmvv.model.PatientHistory;
 
 public class LISConnection{
@@ -20,8 +21,8 @@ public class LISConnection{
 		return connection.getBarcodeHelpText();
 	}
 	
-	public static String[] getPatientName(String orderNumber) throws SQLException {
-		return connection.getPatientName(orderNumber);
+	public static Patient getPatient(String orderNumber) throws SQLException {
+		return connection.getPatient(orderNumber);
 	}
 
 	public static ArrayList<PatientHistory> getPatientHistory(String orderNumber) throws SQLException{
