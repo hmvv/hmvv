@@ -154,7 +154,7 @@ public class EnterSample extends JDialog {
         leftPanel.add(assayPanel);
 
         JPanel centerPanel = new JPanel();
-        centerPanel.setPreferredSize(new Dimension(500, 250));
+        centerPanel.setPreferredSize(new Dimension(500, 325));
         centerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         RowPanel barcodeRowPanel = new RowPanel("Barcode", textBarcode);
         barcodeRowPanel.left.setToolTipText(LISConnection.getBarcodeHelpText());
@@ -559,9 +559,11 @@ public class EnterSample extends JDialog {
             //fill patient name
             if(labOrderNumber != null) {
                 Patient patient = LISConnection.getPatient(labOrderNumber);
-                textMRN.setText(patient.mrn);
-                textFirstName.setText(patient.firstName);
-                textlastName.setText(patient.lastName);
+                if(patient != null) {
+	                textMRN.setText(patient.mrn);
+	                textFirstName.setText(patient.firstName);
+	                textlastName.setText(patient.lastName);
+                }
             }
         }catch(Exception e) {
             HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "LIS Integration Error");
