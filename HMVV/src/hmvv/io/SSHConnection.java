@@ -43,7 +43,7 @@ public class SSHConnection {
 	
 	public static boolean isSuperUser(){
 		for(String group : groups){
-			if(group.equals(Configurations.SUPER_USER_GROUP)){
+			if(group.equals("")){
 				return true;
 			}
 		}
