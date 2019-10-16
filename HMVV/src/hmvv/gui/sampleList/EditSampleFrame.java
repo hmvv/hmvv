@@ -20,6 +20,8 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.model.Sample;
 
 public class EditSampleFrame extends JDialog {
@@ -51,17 +53,21 @@ public class EditSampleFrame extends JDialog {
 		
 		textLast = new JTextField(sample.getLastName());
 		textLast.setColumns(10);
+        textLast.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
 		
 		textFirst = new JTextField(sample.getFirstName());
 		textFirst.setColumns(10);
+        textFirst.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
 
 		textOrder = new JTextField(sample.getOrderNumber());
 		textOrder.setColumns(10);
+        textOrder.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
 
 		textPathology = new JTextField(sample.getPathNumber());
 		textPathology.setColumns(10);
-		
-		textSource = new JTextField(sample.getTumorSource());
+        textPathology.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+
+        textSource = new JTextField(sample.getTumorSource());
 		textPercent = new JTextField(sample.getTumorPercent());
 		
 		textPatientHistory = new JTextArea();
@@ -69,13 +75,14 @@ public class EditSampleFrame extends JDialog {
 		textPatientHistory.setLineWrap(true);
 		textPatientHistory.setWrapStyleWord(true);
 		textPatientHistory.setColumns(10);
+
 		
 		textDiagnosis = new JTextArea();
 		textDiagnosis.setText(sample.getDiagnosis());
 		textDiagnosis.setLineWrap(true);
 		textDiagnosis.setWrapStyleWord(true);
 		textDiagnosis.setColumns(10);
-		
+
 		textNote = new JTextArea();
 		textNote.setText(sample.getNote());
 		textNote.setLineWrap(true);

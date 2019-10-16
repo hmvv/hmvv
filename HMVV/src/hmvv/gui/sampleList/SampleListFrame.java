@@ -188,11 +188,12 @@ public class SampleListFrame extends JFrame {
 		menuBar = new JMenuBar();
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
+		enterSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
-		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
-		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
+		newAssayMenuItem = new JMenuItem("Create New Assay");
+		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 
@@ -259,13 +260,9 @@ public class SampleListFrame extends JFrame {
 					}else if(e.getSource() == databaseInformationMenuItem){
 						handledatabaseInformationClick();
 					}else if(e.getSource() == newAssayMenuItem){
-						if(SSHConnection.isSuperUser()){
-							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
-							createAssay.setVisible(true);
-						}else{
-							JOptionPane.showMessageDialog(SampleListFrame.this, "Only authorized users can create an assay");
+						CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
+						createAssay.setVisible(true);
 						}
-					}
 				} catch (Exception e1) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 				}
@@ -602,12 +599,6 @@ public class SampleListFrame extends JFrame {
 		int viewRow = table.getSelectedRow();
 		final int modelRow = table.convertRowIndexToModel(viewRow);
 		Sample sample = getCurrentlySelectedSample();
-
-		String currentUser = SSHConnection.getUserName();
-		if(!currentUser.equals(sample.enteredBy) && !SSHConnection.isSuperUser()){
-			JOptionPane.showMessageDialog(this, "Error: You can only edit samples entered by you!");
-			return;
-		}
 
 		EditSampleFrame editSample = new EditSampleFrame(this, sample);
 		editSample.setVisible(true);

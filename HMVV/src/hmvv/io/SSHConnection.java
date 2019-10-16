@@ -12,12 +12,14 @@ import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.MutationFilterPanel.ServerTask;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
+import hmvv.main.Configurations.USER_TYPE;
+import hmvv.main.Configurations.USER_FUNCTION;
 import hmvv.model.*;
 
 public class SSHConnection {
 	
 	private static Session sshSession;
-	private static String[] groups;
+	private static USER_TYPE userType;
 	private static int forwardingPort;
 	private static String temporaryHMVVDirectory = "temp_HMVV_files";
 	
@@ -41,18 +43,25 @@ public class SSHConnection {
 		return sshSession.getUserName();
 	}
 	
-	public static boolean isSuperUser(){
-		for(String group : groups){
-			if(group.equals("")){
-				return true;
-			}
-		}
-		return false;
+	public static boolean isSuperUser( USER_FUNCTION function){
+
+        if( ( function == USER_FUNCTION.ENTER_SAMPLE || function == USER_FUNCTION.EDIT_SAMPLE_LABR ) &&
+            ( userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST ) ) {
+            return true;
+        }else if(  function == USER_FUNCTION.ANNOTATE_MAIN  &&
+                ( userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST ) ) {
+            return true;
+        }else if(  function == USER_FUNCTION.ANNOTATE_DRAFT  &&
+                ( userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR) ) {
+            return true;
+        }else{
+	        return false;
+        }
 	}
 	
 	public static void connect(String user, String password) throws Exception{
 		sshSession = connectToSSH(user, password);
-		groups = readGroups();
+        readUserType();
 	}
 	
 	private static Session connectToSSH(String userName, String password) throws Exception{
@@ -65,18 +74,30 @@ public class SSHConnection {
 		return sshSession;
 	}
 	
-	private static String[] readGroups() throws Exception{
+	private static void readUserType() throws Exception{
 		ChannelExec channel = (ChannelExec) sshSession.openChannel("exec");
 		BufferedReader in=new BufferedReader(new InputStreamReader(channel.getInputStream()));
-		channel.setCommand("groups");
+		channel.setCommand("checkAccountType");
 		channel.connect();
-		String groups = in.readLine();
-		String[] retval = groups.split("\\s+");
-		if(retval == null){
-			return new String[]{};
-		}else{
-			return retval;
-		}
+		String usertype = in.readLine();
+
+		if( usertype != null && !usertype.equals("")){
+
+		    if(usertype.equals("technologist")){
+		        userType = USER_TYPE.TECHNOLOGIST;
+            }else if(usertype.equals("rotator")){
+                userType = USER_TYPE.ROTATOR;
+            }else if(usertype.equals("fellow")){
+                userType = USER_TYPE.FELLOW;
+            }else if(usertype.equals("pathologist")){
+                userType = USER_TYPE.PATHOLOGIST;
+            }else{
+                throw new Exception(String.format("User not recognized. Please contact your system administrator."));
+            }
+
+        }else{
+            throw new Exception(String.format("User not found. Please contact your system administrator."));
+        }
 	}
 	
 	private static File copyFile(String instrument, String runID, String runFile, SftpProgressMonitor progressMonitor) throws Exception{

@@ -172,6 +172,21 @@ public class Configurations {
 	/*
 	 * User configurations
 	 */
+
+	public enum USER_TYPE{
+	    TECHNOLOGIST,
+        ROTATOR,
+        FELLOW,
+        PATHOLOGIST;
+    }
+
+    public enum USER_FUNCTION{
+        ENTER_SAMPLE,
+        EDIT_SAMPLE_LABR,
+        ANNOTATE_MAIN,
+        ANNOTATE_DRAFT;
+    }
+
 	/**
 	 * The Linux group which defines super users.
 	 */

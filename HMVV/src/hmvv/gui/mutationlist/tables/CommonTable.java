@@ -249,9 +249,9 @@ public abstract class CommonTable extends JTable{
 		String gene = mutation.getGene();
 		
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-		
-		boolean readOnly = !SSHConnection.isSuperUser();
-		AnnotationFrame editAnnotation = new AnnotationFrame(readOnly, mutation, geneAnnotationHistory, this, parent);
+
+
+		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, this, parent);
 		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
 	}
