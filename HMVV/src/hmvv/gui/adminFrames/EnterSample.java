@@ -7,6 +7,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.model.Patient;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
 
@@ -23,6 +24,7 @@ public class EnterSample extends JDialog {
     private SampleListFrame parent;
     private JTextField textRunID;
     private JTextField textTMBNormalRunID;
+    private JTextField textMRN;
     private JTextField textlastName;
     private JTextField textFirstName;
     private JTextField textOrderNumber;
@@ -106,6 +108,7 @@ public class EnterSample extends JDialog {
             return;
 		}
         
+        textMRN = new JTextField();
         textlastName = new JTextField();
         textFirstName = new JTextField();
         textOrderNumber = new JTextField();
@@ -151,13 +154,14 @@ public class EnterSample extends JDialog {
         leftPanel.add(assayPanel);
 
         JPanel centerPanel = new JPanel();
-        centerPanel.setPreferredSize(new Dimension(500, 250));
+        centerPanel.setPreferredSize(new Dimension(500, 325));
         centerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         RowPanel barcodeRowPanel = new RowPanel("Barcode", textBarcode);
         barcodeRowPanel.left.setToolTipText(LISConnection.getBarcodeHelpText());
         centerPanel.add(barcodeRowPanel);
         centerPanel.add(new RowPanel("Pathology Number", textPathologyNumber));
         centerPanel.add(new RowPanel("Order Number", textOrderNumber));
+        centerPanel.add(new RowPanel("MRN", textMRN));
         centerPanel.add(new RowPanel("Last Name", textlastName));
         centerPanel.add(new RowPanel("First Name", textFirstName));
         centerPanel.add(new RowPanel("Tumor Source", textTumorSource));
@@ -460,7 +464,7 @@ public class EnterSample extends JDialog {
         String sampleName = (String)comboBoxSample.getSelectedItem();
 
         if(runID.equals("") || sampleName == null){
-            updateFields("", "", "", "", "", "", "", "", "", false);
+            updateFields("", "", "", "", "", "", "", "", "", "", false);
             return;
         }
 
@@ -471,7 +475,7 @@ public class EnterSample extends JDialog {
 
         Sample sample = sampleListTableModel.getSample(instrument, runID, coverageID, variantCallerID, sampleName);
         if(sample != null){
-            updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
+            updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
         }else{
             String barcodeText = textBarcode.getText();
             clearFields(true,false);
@@ -554,17 +558,21 @@ public class EnterSample extends JDialog {
 
             //fill patient name
             if(labOrderNumber != null) {
-                String[] patientName = LISConnection.getPatientName(labOrderNumber);
-                textFirstName.setText(patientName[0]);
-                textlastName.setText(patientName[1]);
+                Patient patient = LISConnection.getPatient(labOrderNumber);
+                if(patient != null) {
+	                textMRN.setText(patient.mrn);
+	                textFirstName.setText(patient.firstName);
+	                textlastName.setText(patient.lastName);
+                }
             }
         }catch(Exception e) {
             HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "LIS Integration Error");
         }
     }
 
-    private void updateFields(String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String patientHistory, String diagnosis, String note, boolean editable){
+    private void updateFields(String mrn, String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String patientHistory, String diagnosis, String note, boolean editable){
         textBarcode.setText("");
+        textMRN.setText(mrn);
         textlastName.setText(lastName);
         textFirstName.setText(firstName);
         textOrderNumber.setText(orderNumber);
@@ -576,6 +584,7 @@ public class EnterSample extends JDialog {
         textNote.setText(note);
 
         textBarcode.setEditable(editable);
+        textMRN.setEditable(editable);
         textlastName.setEditable(editable);
         textFirstName.setEditable(editable);
         textOrderNumber.setEditable(editable);
@@ -619,7 +628,7 @@ public class EnterSample extends JDialog {
     private void clearFields(boolean editable,boolean isTMBNormal) {
 
         if (!isTMBNormal) {
-            updateFields("", "", "", "", "", "", "", "", "", editable);
+            updateFields("", "", "", "", "", "", "", "", "", "", editable);
         }
     }
 
@@ -631,7 +640,7 @@ public class EnterSample extends JDialog {
             parent.addSample(sample);
 
             //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
-            updateFields(sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
+            updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
         }finally {
             setEnabled(true);
         }
@@ -645,6 +654,7 @@ public class EnterSample extends JDialog {
         int sampleID = -1;//This will be computed by the database when the sample is inserted
         String assay = comboBoxAssay.getSelectedItem().toString();
         String instrument = comboBoxInstrument.getSelectedItem().toString();
+        String mrn = textMRN.getText();
         String lastName = textlastName.getText();
         String firstName = textFirstName.getText();
         String orderNumber = textOrderNumber.getText();
@@ -677,13 +687,13 @@ public class EnterSample extends JDialog {
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
              // TODO  replace comboBoxInstrument with normal sample instrument in future
-            return new TMBSample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+            return new TMBSample(sampleID, assay, instrument, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
                     textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{
-            return new Sample(sampleID, assay, instrument, lastName, firstName, orderNumber,
+            return new Sample(sampleID, assay, instrument, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
         }
     }

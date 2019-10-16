@@ -104,8 +104,8 @@ public class SampleListFrame extends JFrame {
 	private volatile ArrayList<Pipeline> pipelines;
 	private volatile JMenuItem refreshLabel;
 	private int loadSampleResultsColumn = 0;
-	private int qcColumn = 18;
-	private int sampleEditColumn = 19;
+	private int qcColumn = 19;
+	private int sampleEditColumn = 20;
 
 	/**
 	 * Initialize the contents of the frame.

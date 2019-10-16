@@ -549,7 +549,7 @@ public class DatabaseCommands {
 	    // TODO: watch out for delay due to subquery as sample number increases.
         // Tested on test env with 2806 samples copied from ngs_live, minor difference
 
-		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
+		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, \"\" as mrn, s.lastName, s.firstName, s.orderNumber, " +//TODO store mrn in table
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
 				" t2.instrumentName as normalInstrument , t2.normalPairRunID, t2.normalSampleName " +
@@ -578,6 +578,7 @@ public class DatabaseCommands {
 					Integer.parseInt(row.getString("sampleID")),
 					row.getString("assay"),
 					row.getString("instrument"),
+					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),
 					row.getString("orderNumber"),
@@ -603,6 +604,7 @@ public class DatabaseCommands {
 					Integer.parseInt(row.getString("sampleID")),
 					row.getString("assay"),
 					row.getString("instrument"),
+					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),
 					row.getString("orderNumber"),
