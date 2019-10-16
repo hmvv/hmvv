@@ -54,7 +54,9 @@ public class EditSampleFrame extends JDialog {
 		
 		textMRN = new JTextField(sample.getMRN());
 		textMRN.setColumns(10);
-		
+        textMRN.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+
+
 		textLast = new JTextField(sample.getLastName());
 		textLast.setColumns(10);
         textLast.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
@@ -107,7 +109,8 @@ public class EditSampleFrame extends JDialog {
 
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		
+        btnDelete.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+
 		layoutComponents();
 		pack();
 		setLocationRelativeTo(parent);
