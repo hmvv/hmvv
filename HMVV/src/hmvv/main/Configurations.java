@@ -172,21 +172,42 @@ public class Configurations {
 	/*
 	 * User configurations
 	 */
-
 	public enum USER_TYPE{
-	    TECHNOLOGIST,
+		TECHNOLOGIST,
         ROTATOR,
         FELLOW,
-        PATHOLOGIST;
+        PATHOLOGIST
     }
-
+	
     public enum USER_FUNCTION{
-        ENTER_SAMPLE,
-        EDIT_SAMPLE_LABR,
-        ANNOTATE_MAIN,
-        ANNOTATE_DRAFT;
+        ENTER_SAMPLE{
+        	public boolean isSuperUser(USER_TYPE userType) {
+	    		return userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST;
+	    	}
+        },
+        
+        EDIT_SAMPLE_LABR{
+        	public boolean isSuperUser(USER_TYPE userType) {
+	    		return userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST;
+	    	}
+        },
+        
+        ANNOTATE_MAIN{
+        	public boolean isSuperUser(USER_TYPE userType) {
+        		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST;
+	    	}
+        },
+        
+        ANNOTATE_DRAFT{
+        	public boolean isSuperUser(USER_TYPE userType) {
+	    		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR;
+	    	}
+        };
+    	
+    	public abstract boolean isSuperUser(USER_TYPE userType);
     }
 
+    
 	/**
 	 * The Linux group which defines super users.
 	 */

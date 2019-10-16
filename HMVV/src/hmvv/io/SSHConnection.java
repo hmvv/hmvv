@@ -43,20 +43,8 @@ public class SSHConnection {
 		return sshSession.getUserName();
 	}
 	
-	public static boolean isSuperUser( USER_FUNCTION function){
-
-        if( ( function == USER_FUNCTION.ENTER_SAMPLE || function == USER_FUNCTION.EDIT_SAMPLE_LABR ) &&
-            ( userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST ) ) {
-            return true;
-        }else if(  function == USER_FUNCTION.ANNOTATE_MAIN  &&
-                ( userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST ) ) {
-            return true;
-        }else if(  function == USER_FUNCTION.ANNOTATE_DRAFT  &&
-                ( userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR) ) {
-            return true;
-        }else{
-	        return false;
-        }
+	public static boolean isSuperUser(USER_FUNCTION function){
+		return function.isSuperUser(userType);
 	}
 	
 	public static void connect(String user, String password) throws Exception{
@@ -82,19 +70,8 @@ public class SSHConnection {
 		String usertype = in.readLine();
 
 		if( usertype != null && !usertype.equals("")){
-
-		    if(usertype.equals("technologist")){
-		        userType = USER_TYPE.TECHNOLOGIST;
-            }else if(usertype.equals("rotator")){
-                userType = USER_TYPE.ROTATOR;
-            }else if(usertype.equals("fellow")){
-                userType = USER_TYPE.FELLOW;
-            }else if(usertype.equals("pathologist")){
-                userType = USER_TYPE.PATHOLOGIST;
-            }else{
-                throw new Exception(String.format("User not recognized. Please contact your system administrator."));
-            }
-
+			usertype = usertype.toUpperCase();
+			userType = USER_TYPE.valueOf(usertype);
         }else{
             throw new Exception(String.format("User not found. Please contact your system administrator."));
         }
