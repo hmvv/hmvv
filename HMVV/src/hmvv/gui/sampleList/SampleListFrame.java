@@ -307,12 +307,12 @@ public class SampleListFrame extends JFrame {
 					c.setBackground(Configurations.TABLE_SELECTION_COLOR);
 				}else {
 					c.setForeground(customColumns[column].color);
-					c.setBackground(PipelineProgram.COMPLETE.displayColor);//default background to COMPLETE
+					c.setBackground(PipelineProgram.DEFAULT_COLOR);//default background to COMPLETE
 
 					Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 					for(Pipeline p : pipelines) {
 						if(currentSample.sampleID == p.sampleID) {
-							c.setBackground(p.pipelineProgram.displayColor);
+							c.setBackground(p.pipelineProgram.getColor());
 							break;
 						}
 					}
