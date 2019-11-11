@@ -202,7 +202,13 @@ public class Configurations {
         	public boolean isSuperUser(USER_TYPE userType) {
 	    		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR;
 	    	}
-        };
+        },
+
+		RESTRICT_SAMPLE_ACCESS{
+			public boolean isSuperUser(USER_TYPE userType) {
+				return userType == USER_TYPE.ROTATOR;
+			}
+		};
     	
     	public abstract boolean isSuperUser(USER_TYPE userType);
     }

@@ -77,13 +77,13 @@ public class Pipeline {
 			return PipelineProgram.completeProgram();
 		}else if ( instrumentName.equals("proton")) {
 			if (status.equals("started") || status.equals("queued") ) {
-				program.setDisplayString("1/4");
+				program.setDisplayString("0/3");
 			}else if (status.equals("RunningVEP")) {
-				program.setDisplayString("2/4");
+				program.setDisplayString("1/3");
 			}else if (status.equals("CompletedVEP")) {
-				program.setDisplayString("3/4");
+				program.setDisplayString("2/3");
 			}else if (status.equals("UpdatingDatabase")) {
-				program.setDisplayString("4/4");
+				program.setDisplayString("3/3");
 			}else if (status.startsWith("ERROR")) {
 				return PipelineProgram.errorProgram();
 			}
@@ -98,7 +98,7 @@ public class Pipeline {
 				program.setDisplayString("1/6");
 			}else if (status.equals("bcl2fastq_wait") ) {
 				program.setDisplayString("1/6");
-			}else if (status.equals("Alignment")) {
+			}else if (status.equals("Alignment") || status.equals("Trimming")) {
 				program.setDisplayString("2/6");
 			}else if (status.equals("VariantCaller")) {
 				program.setDisplayString("3/6");
