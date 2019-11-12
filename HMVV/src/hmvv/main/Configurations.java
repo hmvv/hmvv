@@ -218,6 +218,8 @@ public class Configurations {
 	 * The Linux group which defines super users.
 	 */
 	public static String GENOME_VERSION = "37";
+
+	public static int RESTRICT_SAMPLE_DAYS = 60;
 	
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;

@@ -564,10 +564,15 @@ public class DatabaseCommands {
 				" join assays as a on a.assayID = s.assayID " ;
 
 		if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)){
-			query = query + "  where s.runDate > DATE_SUB(NOW(), INTERVAL 60 day) ";
+			query = query + "  where s.runDate >= DATE_SUB(NOW(), INTERVAL ? day) ";
 		}
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+
+        if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)){
+            preparedStatement.setInt(1, Configurations.RESTRICT_SAMPLE_DAYS);
+        }
+
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
@@ -591,11 +596,13 @@ public class DatabaseCommands {
 				" on s.sampleID = t2.sampleID " +
 				" join instruments  as i on i.instrumentID = s.instrumentID " +
 				" join assays as a on a.assayID = s.assayID " +
-				" where s.mrn = ? and s.sampleID != ? ";
+				" where s.mrn = ? and s.sampleID != ? and " +
+                " s.runDate < DATE_SUB(NOW(), INTERVAL ? day)";
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, sampleMRN);
 		preparedStatement.setInt(2, sampleID);
+        preparedStatement.setInt(3, Configurations.RESTRICT_SAMPLE_DAYS);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
