@@ -55,12 +55,7 @@ import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVLoginFrame;
-import hmvv.model.GeneQCDataElementTrend;
-import hmvv.model.Mutation;
-import hmvv.model.Pipeline;
-import hmvv.model.PipelineProgram;
-import hmvv.model.Sample;
-import hmvv.model.TMBSample;
+import hmvv.model.*;
 
 public class SampleListFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -110,9 +105,14 @@ public class SampleListFrame extends JFrame {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) {
+	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) throws Exception {
 		super( Configurations.DATABASE_NAME + " : Sample List");
+
 		this.samples = samples;
+        if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)) {
+            addExceptionSamples();
+        }
+
 		tableModel = new SampleListTableModel(samples);
 
 		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
@@ -133,8 +133,8 @@ public class SampleListFrame extends JFrame {
 		layoutComponents();
 		activateComponents();
 		setLocationRelativeTo(parent);
-
 		setupPipelineRefreshThread();
+
 	}
 
 	private void setupPipelineRefreshThread() {		
@@ -698,5 +698,18 @@ public class SampleListFrame extends JFrame {
 	private void resetFilters(){
 		assayComboBox.setSelectedIndex(0);
 		textRunID.setText("");
+	}
+
+	private void addExceptionSamples() throws Exception{
+
+			ArrayList<Sample> exception_samples = new ArrayList<>();
+
+			for (Sample s : this.samples){
+				ArrayList<Sample> new_samples = DatabaseCommands.getExceptionSamples(s.sampleID,s.getMRN());
+				if (new_samples.size()>0) {
+                    exception_samples.addAll(new_samples);
+                }
+			}
+			this.samples.addAll(exception_samples);
 	}
 }

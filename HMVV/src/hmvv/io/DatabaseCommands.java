@@ -548,8 +548,8 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
 
-	    // TODO: watch out for delay due to subquery as sample number increases.
-        // Tested on test env with 2806 samples copied from ngs_live, minor difference
+		// TODO: watch out for delay due to subquery as sample number increases.
+		// Tested on test env with 2806 samples copied from ngs_live, minor difference
 
 		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.mrn as mrn, s.lastName, s.firstName, s.orderNumber, " +//TODO store mrn in table
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
@@ -564,10 +564,38 @@ public class DatabaseCommands {
 				" join assays as a on a.assayID = s.assayID " ;
 
 		if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)){
-            query = query + "  where s.runDate > DATE_SUB(NOW(), INTERVAL 60 day) ";
-        }
+			query = query + "  where s.runDate > DATE_SUB(NOW(), INTERVAL 60 day) ";
+		}
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		ResultSet rs = preparedStatement.executeQuery();
+		ArrayList<Sample> samples = new ArrayList<Sample>();
+		while(rs.next()){
+			Sample s = getSample(rs);
+			samples.add(s);
+		}
+		preparedStatement.close();
+		return samples;
+	}
+
+	public static ArrayList<Sample> getExceptionSamples(int sampleID , String sampleMRN ) throws Exception{
+
+		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.mrn as mrn, s.lastName, s.firstName, s.orderNumber, " +//TODO store mrn in table
+				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
+				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
+				" t2.instrumentName as normalInstrument , t2.normalPairRunID, t2.normalSampleName " +
+				" from samples as s " +
+				" left join " +
+				" ( select  sampleID,instrumentName, normalPairRunID,normalSampleName from sampleNormalPair " +
+				" join instruments on instruments.instrumentID=normalPairInstrumentID ) as t2 " +
+				" on s.sampleID = t2.sampleID " +
+				" join instruments  as i on i.instrumentID = s.instrumentID " +
+				" join assays as a on a.assayID = s.assayID " +
+				" where s.mrn = ? and s.sampleID != ? ";
+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, sampleMRN);
+		preparedStatement.setInt(2, sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
