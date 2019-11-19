@@ -35,6 +35,11 @@ public class SampleListTableModel extends AbstractTableModel{
 				String.class,
 				(Sample sample) -> sample.instrument));
 		
+		columns.add(new SampleTableModelColumn("The patient's MRN", 
+				"MRN", 
+				String.class,
+				(Sample sample) -> sample.getMRN()));
+		
 		columns.add(new SampleTableModelColumn("The patient's last name", 
 				"Last Name", 
 				String.class,

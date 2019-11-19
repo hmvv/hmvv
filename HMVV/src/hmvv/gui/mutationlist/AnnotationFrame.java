@@ -24,6 +24,7 @@ import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Annotation;
 import hmvv.model.CommonAnnotation;
@@ -68,10 +69,10 @@ public class AnnotationFrame extends JFrame {
 	 * Create the dialog.
 	 * @throws Exception 
 	 */
-	public AnnotationFrame(Boolean readOnly, Mutation mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, CommonTable parent, MutationListFrame mutationListFrame) throws Exception {
+	public AnnotationFrame( Mutation mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, CommonTable parent, MutationListFrame mutationListFrame) throws Exception {
 		super("Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString());
 		this.mutation = mutation;
-		this.readOnly = readOnly;
+		this.readOnly = !SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN);
 		this.parent = parent;
 		
 		this.geneAnnotationHistory = geneAnnotationHistory;
@@ -142,7 +143,7 @@ public class AnnotationFrame extends JFrame {
 		historyLabelAnnotation = new JLabel("New Annotation");
 
 		draftButton = new JButton("Variant Annotation Draft");
-		draftButton.setEnabled(true);
+		draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
 
 		okButton = new JButton("OK");
 		getRootPane().setDefaultButton(okButton);
@@ -350,7 +351,7 @@ public class AnnotationFrame extends JFrame {
 			return;
 		}
 		
-		if(!SSHConnection.isSuperUser()){
+		if(!SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN)){
 			//readOnly should prevent this, but just in case
 			JOptionPane.showMessageDialog(this, "Only authorized user can edit annotation");
 			return;

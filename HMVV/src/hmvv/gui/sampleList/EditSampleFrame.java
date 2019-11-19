@@ -20,11 +20,14 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.model.Sample;
 
 public class EditSampleFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
-
+	
+	private JTextField textMRN;
 	private JTextField textLast;
 	private JTextField textFirst;
 	private JTextField textOrder;
@@ -49,19 +52,28 @@ public class EditSampleFrame extends JDialog {
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
+		textMRN = new JTextField(sample.getMRN());
+		textMRN.setColumns(10);
+        textMRN.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+
+
 		textLast = new JTextField(sample.getLastName());
 		textLast.setColumns(10);
+        textLast.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
 		
 		textFirst = new JTextField(sample.getFirstName());
 		textFirst.setColumns(10);
+        textFirst.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
 
 		textOrder = new JTextField(sample.getOrderNumber());
 		textOrder.setColumns(10);
+        textOrder.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
 
 		textPathology = new JTextField(sample.getPathNumber());
 		textPathology.setColumns(10);
-		
-		textSource = new JTextField(sample.getTumorSource());
+        textPathology.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+
+        textSource = new JTextField(sample.getTumorSource());
 		textPercent = new JTextField(sample.getTumorPercent());
 		
 		textPatientHistory = new JTextArea();
@@ -69,13 +81,14 @@ public class EditSampleFrame extends JDialog {
 		textPatientHistory.setLineWrap(true);
 		textPatientHistory.setWrapStyleWord(true);
 		textPatientHistory.setColumns(10);
+
 		
 		textDiagnosis = new JTextArea();
 		textDiagnosis.setText(sample.getDiagnosis());
 		textDiagnosis.setLineWrap(true);
 		textDiagnosis.setWrapStyleWord(true);
 		textDiagnosis.setColumns(10);
-		
+
 		textNote = new JTextArea();
 		textNote.setText(sample.getNote());
 		textNote.setLineWrap(true);
@@ -96,7 +109,8 @@ public class EditSampleFrame extends JDialog {
 
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		
+        btnDelete.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+
 		layoutComponents();
 		pack();
 		setLocationRelativeTo(parent);
@@ -147,6 +161,10 @@ public class EditSampleFrame extends JDialog {
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Run Date", createJLabel(sample.runDate)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("MRN", textMRN));
+		textMRN.setPreferredSize(textFieldDimension);
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Last Name", textLast));
@@ -207,6 +225,7 @@ public class EditSampleFrame extends JDialog {
 	}
 
 	public Sample getUpdatedSample(){
+		sample.setMRN(textMRN.getText());
 		sample.setLastName(textLast.getText());
 		sample.setFirstName(textFirst.getText());
 		sample.setOrderNumber(textOrder.getText());

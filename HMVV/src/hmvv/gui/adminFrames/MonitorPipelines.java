@@ -70,10 +70,10 @@ public class MonitorPipelines extends JDialog {
 					if (isCellSelected(row,column)){
 						c.setBackground(new Color(51,153,255));
 					}else {
-						if (pipelineProgress == PipelineProgram.COMPLETE) {
+						if (pipelineProgress.isCompleteProgram()) {
 							c.setBackground(GUICommonTools.COMPLETE_COLOR);
 						} else {
-							c.setBackground(pipelineProgress.displayColor);
+							c.setBackground(pipelineProgress.getColor());
 						}
 					}
 					return c;

@@ -81,18 +81,11 @@ public class Configurations {
 			String variableValue = variableConfig[1];
 			
 			try{
-				if(variableName.startsWith("READ_ONLY_CREDENTIALS")){
-					String[] lineSplit = variableValue.split(",");
-					READ_ONLY_CREDENTIALS = new String[2];
-					READ_ONLY_CREDENTIALS[0] = lineSplit[0];
-					READ_ONLY_CREDENTIALS[1] = lineSplit[1];
-				}else if(variableName.startsWith("READ_WRITE_CREDENTIALS")){
+			    if(variableName.startsWith("READ_WRITE_CREDENTIALS")){
 					String[] lineSplit = variableValue.split(",");
 					READ_WRITE_CREDENTIALS = new String[2];
 					READ_WRITE_CREDENTIALS[0] = lineSplit[0];
 					READ_WRITE_CREDENTIALS[1] = lineSplit[1];
-				}else if(variableName.startsWith("SUPER_USER_GROUP")){
-					SUPER_USER_GROUP = variableValue;
 				}else if(variableName.startsWith("LIS_DRIVER")){
 					LIS_DRIVER = variableValue;
 				}else if(variableName.startsWith("LIS_CONNECTION_DRIVER")){
@@ -107,17 +100,11 @@ public class Configurations {
 			}
 		}
 		
-		String message = "";		
-		if(	READ_ONLY_CREDENTIALS == null){
-			message+="READ_ONLY_CREDENTIALS ";
-		}
+		String message = "";
 		if(READ_WRITE_CREDENTIALS == null){
 			message+="READ_WRITE_CREDENTIALS ";
-		}
-		if(SUPER_USER_GROUP == null){
-			message+="SUPER_USER_GROUP ";
-		}
-		if(LIS_DRIVER == null){
+        }
+        if(LIS_DRIVER == null){
 			message+="LIS_DRIVER ";
 		}
 		if(LIS_CONNECTION_DRIVER == null){
@@ -174,7 +161,6 @@ public class Configurations {
 	/*
 	 * Database configurations
 	 */
-	public static String[] READ_ONLY_CREDENTIALS;
 	public static String[] READ_WRITE_CREDENTIALS;
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
@@ -186,11 +172,54 @@ public class Configurations {
 	/*
 	 * User configurations
 	 */
+	public enum USER_TYPE{
+		TECHNOLOGIST,
+        ROTATOR,
+        FELLOW,
+        PATHOLOGIST
+    }
+	
+    public enum USER_FUNCTION{
+        ENTER_SAMPLE{
+        	public boolean isSuperUser(USER_TYPE userType) {
+	    		return userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST;
+	    	}
+        },
+        
+        EDIT_SAMPLE_LABR{
+        	public boolean isSuperUser(USER_TYPE userType) {
+	    		return userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST;
+	    	}
+        },
+        
+        ANNOTATE_MAIN{
+        	public boolean isSuperUser(USER_TYPE userType) {
+        		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST;
+	    	}
+        },
+        
+        ANNOTATE_DRAFT{
+        	public boolean isSuperUser(USER_TYPE userType) {
+	    		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR;
+	    	}
+        },
+
+		RESTRICT_SAMPLE_ACCESS{
+			public boolean isSuperUser(USER_TYPE userType) {
+				return userType == USER_TYPE.ROTATOR;
+			}
+		};
+    	
+    	public abstract boolean isSuperUser(USER_TYPE userType);
+    }
+
+    
 	/**
 	 * The Linux group which defines super users.
 	 */
-	public static String SUPER_USER_GROUP;
 	public static String GENOME_VERSION = "37";
+
+	public static int RESTRICT_SAMPLE_DAYS = 60;
 	
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;

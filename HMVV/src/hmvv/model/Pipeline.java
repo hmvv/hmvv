@@ -3,7 +3,6 @@ package hmvv.model;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-
 import hmvv.io.DatabaseCommands;
 
 public class Pipeline {
@@ -72,21 +71,21 @@ public class Pipeline {
 	
 	private PipelineProgram computeProgram(){
 		//default to RUNNING
-		PipelineProgram program = PipelineProgram.RUNNING;
-
+		PipelineProgram program = PipelineProgram.runningProgram();
+		
 		if (status.toLowerCase().equals("pipelinecompleted")){
-			return PipelineProgram.COMPLETE;
+			return PipelineProgram.completeProgram();
 		}else if ( instrumentName.equals("proton")) {
 			if (status.equals("started") || status.equals("queued") ) {
-				program.setDisplayString("1/4");
+				program.setDisplayString("0/3");
 			}else if (status.equals("RunningVEP")) {
-				program.setDisplayString("2/4");
+				program.setDisplayString("1/3");
 			}else if (status.equals("CompletedVEP")) {
-				program.setDisplayString("3/4");
+				program.setDisplayString("2/3");
 			}else if (status.equals("UpdatingDatabase")) {
-				program.setDisplayString("4/4");
+				program.setDisplayString("3/3");
 			}else if (status.startsWith("ERROR")) {
-				program = PipelineProgram.ERROR;
+				return PipelineProgram.errorProgram();
 			}
 		}else if  ( assayName.equals("heme") || assayName.equals("tmb")) {
 			if (status.equals("started") || status.equals("queued")) {
@@ -99,7 +98,7 @@ public class Pipeline {
 				program.setDisplayString("1/6");
 			}else if (status.equals("bcl2fastq_wait") ) {
 				program.setDisplayString("1/6");
-			}else if (status.equals("Alignment")) {
+			}else if (status.equals("Alignment") || status.equals("Trimming")) {
 				program.setDisplayString("2/6");
 			}else if (status.equals("VariantCaller")) {
 				program.setDisplayString("3/6");
@@ -110,7 +109,7 @@ public class Pipeline {
 			}else if (status.equals("UpdatingDatabase")) {
 				program.setDisplayString("6/6");
 			}else if (status.startsWith("ERROR")) {
-				program = PipelineProgram.ERROR;
+				return PipelineProgram.errorProgram();
 			}
 		}
 		return program;
@@ -118,7 +117,7 @@ public class Pipeline {
 
 	private int computeProgress() throws Exception {
 
-		if (pipelineProgram == PipelineProgram.RUNNING) {
+		if (pipelineProgram.isRunningProgram()) {
 			float progress = 0.0f;
 			float pipelineTotalTime = DatabaseCommands.getPipelineTimeEstimate(this);
 			Date currentTime = new Date();
@@ -147,7 +146,7 @@ public class Pipeline {
 				}
 			}
 			return (int)(progress);
-		}else if (pipelineProgram == PipelineProgram.COMPLETE){
+		}else if (pipelineProgram.isCompleteProgram()){
 			return 100;
 		}else {
 			return -1;

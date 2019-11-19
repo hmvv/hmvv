@@ -55,12 +55,7 @@ import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVLoginFrame;
-import hmvv.model.GeneQCDataElementTrend;
-import hmvv.model.Mutation;
-import hmvv.model.Pipeline;
-import hmvv.model.PipelineProgram;
-import hmvv.model.Sample;
-import hmvv.model.TMBSample;
+import hmvv.model.*;
 
 public class SampleListFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -104,15 +99,20 @@ public class SampleListFrame extends JFrame {
 	private volatile ArrayList<Pipeline> pipelines;
 	private volatile JMenuItem refreshLabel;
 	private int loadSampleResultsColumn = 0;
-	private int qcColumn = 18;
-	private int sampleEditColumn = 19;
+	private int qcColumn = 19;
+	private int sampleEditColumn = 20;
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) {
+	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) throws Exception {
 		super( Configurations.DATABASE_NAME + " : Sample List");
+
 		this.samples = samples;
+        if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)) {
+            addExceptionSamples();
+        }
+
 		tableModel = new SampleListTableModel(samples);
 
 		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
@@ -133,8 +133,8 @@ public class SampleListFrame extends JFrame {
 		layoutComponents();
 		activateComponents();
 		setLocationRelativeTo(parent);
-
 		setupPipelineRefreshThread();
+
 	}
 
 	private void setupPipelineRefreshThread() {		
@@ -188,11 +188,12 @@ public class SampleListFrame extends JFrame {
 		menuBar = new JMenuBar();
 		adminMenu = new JMenu("Admin");
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
+		enterSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
-		newAssayMenuItem = new JMenuItem("New Assay (super user only)");
-		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser());
+		newAssayMenuItem = new JMenuItem("Create New Assay");
+		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 
@@ -259,13 +260,9 @@ public class SampleListFrame extends JFrame {
 					}else if(e.getSource() == databaseInformationMenuItem){
 						handledatabaseInformationClick();
 					}else if(e.getSource() == newAssayMenuItem){
-						if(SSHConnection.isSuperUser()){
-							CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
-							createAssay.setVisible(true);
-						}else{
-							JOptionPane.showMessageDialog(SampleListFrame.this, "Only authorized users can create an assay");
+						CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
+						createAssay.setVisible(true);
 						}
-					}
 				} catch (Exception e1) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
 				}
@@ -310,12 +307,12 @@ public class SampleListFrame extends JFrame {
 					c.setBackground(Configurations.TABLE_SELECTION_COLOR);
 				}else {
 					c.setForeground(customColumns[column].color);
-					c.setBackground(PipelineProgram.COMPLETE.displayColor);//default background to COMPLETE
+					c.setBackground(PipelineProgram.DEFAULT_COLOR);//default background to COMPLETE
 
 					Sample currentSample = tableModel.getSample(table.convertRowIndexToModel(row));
 					for(Pipeline p : pipelines) {
 						if(currentSample.sampleID == p.sampleID) {
-							c.setBackground(p.pipelineProgram.displayColor);
+							c.setBackground(p.pipelineProgram.getColor());
 							break;
 						}
 					}
@@ -603,12 +600,6 @@ public class SampleListFrame extends JFrame {
 		final int modelRow = table.convertRowIndexToModel(viewRow);
 		Sample sample = getCurrentlySelectedSample();
 
-		String currentUser = SSHConnection.getUserName();
-		if(!currentUser.equals(sample.enteredBy) && !SSHConnection.isSuperUser()){
-			JOptionPane.showMessageDialog(this, "Error: You can only edit samples entered by you!");
-			return;
-		}
-
 		EditSampleFrame editSample = new EditSampleFrame(this, sample);
 		editSample.setVisible(true);
 		editSample.addConfirmListener(new ActionListener() {
@@ -707,5 +698,18 @@ public class SampleListFrame extends JFrame {
 	private void resetFilters(){
 		assayComboBox.setSelectedIndex(0);
 		textRunID.setText("");
+	}
+
+	private void addExceptionSamples() throws Exception{
+
+			ArrayList<Sample> exception_samples = new ArrayList<>();
+
+			for (Sample s : this.samples){
+				ArrayList<Sample> new_samples = DatabaseCommands.getExceptionSamples(s.sampleID,s.getMRN());
+				if (new_samples.size()>0) {
+                    exception_samples.addAll(new_samples);
+                }
+			}
+			this.samples.addAll(exception_samples);
 	}
 }

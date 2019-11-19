@@ -20,13 +20,8 @@ public class DatabaseCommands {
 	public static void connect() throws Exception{
 		String driver = "com.mysql.jdbc.Driver";
 		String url = "jdbc:mysql://" + SSHConnection.getForwardingHost() +":" + SSHConnection.getForwardingPort() + "/";
-		String[] credentials = null;
+		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
 
-		if(!SSHConnection.isSuperUser()){
-			credentials = Configurations.READ_ONLY_CREDENTIALS;
-		}else{
-			credentials = Configurations.READ_WRITE_CREDENTIALS;
-		}
 
 		try{
 			Class.forName(driver);
@@ -44,6 +39,7 @@ public class DatabaseCommands {
 		String instrument = sample.instrument;
 		String lastName = sample.getLastName();
 		String firstName = sample.getFirstName();
+		String mrn = sample.getMRN();
 		String orderNumber = sample.getOrderNumber();
 		String pathologyNumber = sample.getPathNumber();
 		String tumorSource = sample.getTumorSource();
@@ -82,11 +78,11 @@ public class DatabaseCommands {
 		}
 
 		String enterSample = "insert into samples "
-				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis) "
+				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, mrn,orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis) "
 				+ "values ("
 				+ "	(select assayID from assays where assayName = ?),"
 				+ "	(select instrumentID from instruments where instrumentName = ? ),"
-				+ "	?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+				+ "	?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
 		pstEnterSample.setString(1, assay);
 		pstEnterSample.setString(2, instrument);
@@ -96,15 +92,16 @@ public class DatabaseCommands {
 		pstEnterSample.setString(6, variantCallerID);
 		pstEnterSample.setString(7, lastName);
 		pstEnterSample.setString(8, firstName);
-		pstEnterSample.setString(9, orderNumber);
-		pstEnterSample.setString(10, pathologyNumber);
-		pstEnterSample.setString(11, tumorSource);
-		pstEnterSample.setString(12, tumorPercent);
-		pstEnterSample.setString(13, runDate);
-		pstEnterSample.setString(14, note);
-		pstEnterSample.setString(15, enteredBy);
-		pstEnterSample.setString(16, patientHistory);
-		pstEnterSample.setString(17, diagnosis);
+		pstEnterSample.setString(9, mrn);
+		pstEnterSample.setString(10, orderNumber);
+		pstEnterSample.setString(11, pathologyNumber);
+		pstEnterSample.setString(12, tumorSource);
+		pstEnterSample.setString(13, tumorPercent);
+		pstEnterSample.setString(14, runDate);
+		pstEnterSample.setString(15, note);
+		pstEnterSample.setString(16, enteredBy);
+		pstEnterSample.setString(17, patientHistory);
+		pstEnterSample.setString(18, diagnosis);
 		
 		pstEnterSample.executeUpdate();
 		pstEnterSample.close();
@@ -551,10 +548,10 @@ public class DatabaseCommands {
 	 *************************************************************************/
 	public static ArrayList<Sample> getAllSamples() throws Exception{
 
-	    // TODO: watch out for delay due to subquery as sample number increases.
-        // Tested on test env with 2806 samples copied from ngs_live, minor difference
+		// TODO: watch out for delay due to subquery as sample number increases.
+		// Tested on test env with 2806 samples copied from ngs_live, minor difference
 
-		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.lastName, s.firstName, s.orderNumber, " +
+		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.mrn as mrn, s.lastName, s.firstName, s.orderNumber, " +//TODO store mrn in table
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
 				" t2.instrumentName as normalInstrument , t2.normalPairRunID, t2.normalSampleName " +
@@ -564,8 +561,48 @@ public class DatabaseCommands {
 				" join instruments on instruments.instrumentID=normalPairInstrumentID ) as t2 " +
 				" on s.sampleID = t2.sampleID " +
 				" join instruments  as i on i.instrumentID = s.instrumentID " +
-				" join assays as a on a.assayID = s.assayID ";
+				" join assays as a on a.assayID = s.assayID " ;
+
+		if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)){
+			query = query + "  where s.runDate >= DATE_SUB(NOW(), INTERVAL ? day) ";
+		}
+
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+
+        if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)){
+            preparedStatement.setInt(1, Configurations.RESTRICT_SAMPLE_DAYS);
+        }
+
+		ResultSet rs = preparedStatement.executeQuery();
+		ArrayList<Sample> samples = new ArrayList<Sample>();
+		while(rs.next()){
+			Sample s = getSample(rs);
+			samples.add(s);
+		}
+		preparedStatement.close();
+		return samples;
+	}
+
+	public static ArrayList<Sample> getExceptionSamples(int sampleID , String sampleMRN ) throws Exception{
+
+		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.mrn as mrn, s.lastName, s.firstName, s.orderNumber, " +//TODO store mrn in table
+				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
+				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
+				" t2.instrumentName as normalInstrument , t2.normalPairRunID, t2.normalSampleName " +
+				" from samples as s " +
+				" left join " +
+				" ( select  sampleID,instrumentName, normalPairRunID,normalSampleName from sampleNormalPair " +
+				" join instruments on instruments.instrumentID=normalPairInstrumentID ) as t2 " +
+				" on s.sampleID = t2.sampleID " +
+				" join instruments  as i on i.instrumentID = s.instrumentID " +
+				" join assays as a on a.assayID = s.assayID " +
+				" where s.mrn = ? and s.sampleID != ? and " +
+                " s.runDate < DATE_SUB(NOW(), INTERVAL ? day)";
+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, sampleMRN);
+		preparedStatement.setInt(2, sampleID);
+        preparedStatement.setInt(3, Configurations.RESTRICT_SAMPLE_DAYS);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Sample> samples = new ArrayList<Sample>();
 		while(rs.next()){
@@ -583,6 +620,7 @@ public class DatabaseCommands {
 					Integer.parseInt(row.getString("sampleID")),
 					row.getString("assay"),
 					row.getString("instrument"),
+					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),
 					row.getString("orderNumber"),
@@ -608,6 +646,7 @@ public class DatabaseCommands {
 					Integer.parseInt(row.getString("sampleID")),
 					row.getString("assay"),
 					row.getString("instrument"),
+					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),
 					row.getString("orderNumber"),
@@ -637,18 +676,19 @@ public class DatabaseCommands {
 	}
 
 	public static void updateSample(Sample sample) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set lastName = ?, firstName = ?, orderNumber = ?, pathNumber = ?, "
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("update samples set lastName = ?, firstName = ?, mrn = ?, orderNumber = ?, pathNumber = ?, "
 				+ "tumorSource = ?, tumorPercent = ?, patientHistory = ?, bmDiagnosis = ?, note = ? where sampleID = ?");
 		updateStatement.setString(1, sample.getLastName());
 		updateStatement.setString(2, sample.getFirstName());
-		updateStatement.setString(3, sample.getOrderNumber());
-		updateStatement.setString(4, sample.getPathNumber());
-		updateStatement.setString(5, sample.getTumorSource());
-		updateStatement.setString(6, sample.getTumorPercent());
-		updateStatement.setString(7, sample.getPatientHistory());
-		updateStatement.setString(8, sample.getDiagnosis());
-		updateStatement.setString(9, sample.getNote());
-		updateStatement.setString(10, sample.sampleID+"");
+        updateStatement.setString(3, sample.getMRN());
+		updateStatement.setString(4, sample.getOrderNumber());
+		updateStatement.setString(5, sample.getPathNumber());
+		updateStatement.setString(6, sample.getTumorSource());
+		updateStatement.setString(7, sample.getTumorPercent());
+		updateStatement.setString(8, sample.getPatientHistory());
+		updateStatement.setString(9, sample.getDiagnosis());
+		updateStatement.setString(10, sample.getNote());
+		updateStatement.setString(11, sample.sampleID+"");
 		updateStatement.executeUpdate();
 		updateStatement.close();
 	}
