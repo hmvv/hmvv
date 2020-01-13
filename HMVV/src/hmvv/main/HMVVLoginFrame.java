@@ -105,7 +105,7 @@ public class HMVVLoginFrame extends JFrame {
 		lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
 		lblhmvv.setBounds(75, 100, 1000, 30);
 
-		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 3.3 </a></html>");
+		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 3.4.1 </a></html>");
 		lblhmvv_version.setFont(GUICommonTools.TAHOMA_BOLD_11);
 		lblhmvv_version.setBounds(215, 125, 100, 30);
 

@@ -218,17 +218,14 @@ public class Configurations {
 	 * The Linux group which defines super users.
 	 */
 	public static String GENOME_VERSION = "37";
-
 	public static int RESTRICT_SAMPLE_DAYS = 60;
-	
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
 	public static int READ_DEPTH_FILTER = 100;
 	public static int MAX_OCCURENCE_FILTER = 1000000;
-	
-	
-	public static int ALLELE_FREQ_FILTER = 10;
+	public static int ALLELE_FREQ_FILTER = 5;
 	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
+
 	public static int getAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){
 			return HORIZON_ALLELE_FREQ_FILTER;
