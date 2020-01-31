@@ -195,10 +195,8 @@ public abstract class CommonTable extends JTable{
 	}
 	
 	protected void searchGoogleForGene() throws Exception{
-		int viewRow = getSelectedRow();
-		int modelRow = convertRowIndexToModel(viewRow);
-		String gene = (getModel().getValueAt(modelRow, 3)).toString();
-		InternetCommands.searchGene(gene);
+		Mutation mutation = getSelectedMutation();
+		InternetCommands.searchGene(mutation.getGene());
 	}
 
 	protected void searchGoogleForDNAChange() throws Exception{

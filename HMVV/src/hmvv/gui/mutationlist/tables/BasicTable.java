@@ -16,7 +16,7 @@ public class BasicTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 6, 7, 11, 13);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 2, 3, 4, 7, 8, 12, 14);
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class BasicTable extends CommonTable{
 
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
-		if(column == 1){
+		if(column == 2){
 			new Thread(new Runnable() {
 				public void run() {
 					try {
@@ -42,17 +42,17 @@ public class BasicTable extends CommonTable{
 					}
 				}
 			}).start();			
-		}else if (column == 2) {
-			handleLoadIGVCheckBoxClick();
 		}else if (column == 3) {
+			handleLoadIGVCheckBoxClick();
+		}else if (column == 4) {
 			searchGoogleForGene();
-		}else if(column == 6){
+		}else if(column == 7){
             searchGoogleForDNAChange();
-        }else if(column == 7){
+        }else if(column == 8){
              searchGoogleForProteinChange();
-        }else if (column == 11) {
+        }else if (column == 12) {
 			searchCosmic();
-		}else if(column == 13){
+		}else if(column == 14){
 			handleAnnotationClick();
 		}
 	}

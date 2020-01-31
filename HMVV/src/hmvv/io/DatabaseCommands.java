@@ -223,11 +223,15 @@ public class DatabaseCommands {
 	 * Mutation Queries
 	 *************************************************************************/
 	public static ArrayList<Mutation> getBaseMutationsBySample(Sample sample) throws Exception{
-		return getMutationDataByID(sample, false);
+		ArrayList<Mutation> mutations = getMutationDataByID(sample, false);
+		addReportedMutationsByMRN(sample, mutations);		
+		return mutations;
 	}
 
 	public static ArrayList<Mutation> getExtraMutationsBySample(Sample sample) throws Exception{
-		return getMutationDataByID(sample, true);
+		ArrayList<Mutation> mutations = getMutationDataByID(sample, true);
+		addReportedMutationsByMRN(sample, mutations);		
+		return mutations;
 	}
 
 	private static ArrayList<Mutation> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
@@ -262,13 +266,34 @@ public class DatabaseCommands {
 			where = " !" + where;
 		}
 		query = query + " and " + where ;
-
+		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Mutation> mutations = makeModel(rs);
 		preparedStatement.close();
 		return mutations;
+	}
+	
+	/**
+	 * Get all reported mutations from the MRN on the provided sample
+	 * @param sample
+	 * @return
+	 * @throws Exception
+	 */
+	private static void addReportedMutationsByMRN(Sample sample, ArrayList<Mutation> mutations) throws Exception {
+		ArrayList<Mutation> reportedMutations = new ArrayList<Mutation>();
+		for(Sample otherSample : sample.getLinkedPatientSamples()) {
+			reportedMutations.addAll(getMutationDataByID(otherSample, false));			
+		}
+		
+		for(Mutation mutation : mutations) {
+			for(Mutation other : reportedMutations) {
+				if(mutation.equals(other)) {
+					mutation.addOtherMutation(other);
+				}
+			}
+		}
 	}
 
 	/**
