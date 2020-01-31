@@ -580,6 +580,24 @@ public class DatabaseCommands {
 			samples.add(s);
 		}
 		preparedStatement.close();
+		
+		for(int i = 0; i < samples.size(); i++) {
+			Sample currentSample = samples.get(i);
+			if(currentSample.getMRN().equals("")) {
+				continue;
+			}
+			
+			for(int j = 0; j < samples.size(); j++) {
+				if(i == j) {
+					continue;
+				}
+				
+				Sample compSample = samples.get(j);
+				if(currentSample.getMRN().equals(compSample.getMRN())) {
+					currentSample.addLinkedPatientSample(compSample);
+				}
+			}
+		}
 		return samples;
 	}
 
