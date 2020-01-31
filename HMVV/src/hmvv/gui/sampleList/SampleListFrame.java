@@ -60,7 +60,6 @@ import hmvv.model.*;
 public class SampleListFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
-	private JTextField textRunID;
 	private TableRowSorter<SampleListTableModel> sorter;
 
 	//Menu
@@ -84,11 +83,19 @@ public class SampleListFrame extends JFrame {
 	private JButton sampleSearchButton;
 	private JButton resetButton;
 
-	//Labels
-	private JLabel lblChooseAnAssay;
-	private JLabel lblRunid;
-
+	//Filters
+	private JLabel assayLabel;
 	private JComboBox<String> assayComboBox;
+	
+	private JLabel instrumentLabel;
+	private JComboBox<String> instrumentComboBox;
+	
+	private JLabel mrnLabel;
+	private JTextField mrnTextField;
+	
+	private JLabel runIDLabel;
+	private JTextField runIDTextField;	
+	
 
 	private HMVVTableColumn[] customColumns;
 
@@ -99,8 +106,11 @@ public class SampleListFrame extends JFrame {
 	private volatile ArrayList<Pipeline> pipelines;
 	private volatile JMenuItem refreshLabel;
 	private int loadSampleResultsColumn = 0;
+	private int mrnColumn = 3;
+	private int runIDColumn = 10;
 	private int qcColumn = 19;
 	private int sampleEditColumn = 20;
+	
 
 	/**
 	 * Initialize the contents of the frame.
@@ -125,7 +135,7 @@ public class SampleListFrame extends JFrame {
 			}
 		});		
 
-		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), loadSampleResultsColumn, qcColumn, sampleEditColumn);
+		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), loadSampleResultsColumn, qcColumn, mrnColumn, runIDColumn, sampleEditColumn);
 		pipelines = new ArrayList<Pipeline>();//initialize as blank so that if setupPipelineRefreshThread() fails, the object is still instantiated
 
 		createMenu();
@@ -320,6 +330,7 @@ public class SampleListFrame extends JFrame {
 				return c;
 			}
 		};
+		table.getTableHeader().setReorderingAllowed(false);
 
 		((DefaultTableCellRenderer)table.getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
 		((DefaultTableCellRenderer)table.getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
@@ -348,6 +359,16 @@ public class SampleListFrame extends JFrame {
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
 		}
+		
+		instrumentComboBox = new JComboBox<String>();
+		try {
+			instrumentComboBox.addItem("All");
+			for(String item : DatabaseCommands.getAllInstruments()){
+				instrumentComboBox.addItem(item);	
+			}
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
+		}
 
 		sampleSearchButton = new JButton("Sample Search");
 		sampleSearchButton.setToolTipText("Open sample search window");
@@ -357,14 +378,23 @@ public class SampleListFrame extends JFrame {
 		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
-		lblChooseAnAssay = new JLabel("Choose an assay");
-		lblChooseAnAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		assayLabel = new JLabel("Assay");
+		assayLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		
+		instrumentLabel = new JLabel("Instrument");
+		instrumentLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		
+		mrnLabel = new JLabel("MRN");
+		mrnLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		
+		mrnTextField = new JTextField();
+		mrnTextField.setColumns(10);
+		
+		runIDLabel = new JLabel("Run ID");
+		runIDLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblRunid = new JLabel("runID");
-		lblRunid.setFont(GUICommonTools.TAHOMA_BOLD_14);
-
-		textRunID = new JTextField();
-		textRunID.setColumns(10);
+		runIDTextField = new JTextField();
+		runIDTextField.setColumns(10);
 	}
 
 	private void layoutComponents(){
@@ -373,19 +403,25 @@ public class SampleListFrame extends JFrame {
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(59)
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblChooseAnAssay, GroupLayout.PREFERRED_SIZE, 129, GroupLayout.PREFERRED_SIZE))
-						.addGap(7)
-						.addComponent(assayComboBox, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
-						.addGap(18)
-						.addComponent(lblRunid, GroupLayout.PREFERRED_SIZE, 53, GroupLayout.PREFERRED_SIZE)
+						.addComponent(assayLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(textRunID, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(assayComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addGap(18)
+						.addComponent(instrumentLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(instrumentComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addGap(18)
+						.addComponent(mrnLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(mrnTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addGap(18)
+						.addComponent(runIDLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(runIDTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addGap(18)
 						.addComponent(sampleSearchButton)
 						.addGap(18)
-						.addComponent(resetButton)
-						.addGap(145))
+						.addComponent(resetButton))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE)
@@ -397,18 +433,17 @@ public class SampleListFrame extends JFrame {
 						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup()
 										.addGap(25)
-										.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-												.addGroup(groupLayout.createSequentialGroup()
-														.addComponent(lblChooseAnAssay, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE))
-												.addGroup(groupLayout.createSequentialGroup()
-														.addComponent(assayComboBox, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE))))
-								.addGroup(groupLayout.createSequentialGroup()
-										.addGap(25)
 										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(sampleSearchButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-												.addComponent(resetButton, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-												.addComponent(lblRunid, GroupLayout.PREFERRED_SIZE, 22, GroupLayout.PREFERRED_SIZE)
-												.addComponent(textRunID, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
+												.addComponent(assayLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(assayComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(instrumentLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(instrumentComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(sampleSearchButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(resetButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(mrnLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(mrnTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(runIDLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(runIDTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
 						.addGap(25)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
 						.addGap(25))
@@ -466,6 +501,12 @@ public class SampleListFrame extends JFrame {
 				refilterTable();
 			}
 		});
+		
+		instrumentComboBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				refilterTable();
+			}
+		});
 
 		sampleSearchButton.addActionListener(new ActionListener(){
 			@Override
@@ -482,7 +523,7 @@ public class SampleListFrame extends JFrame {
 			}
 		});
 
-		textRunID.getDocument().addDocumentListener(new DocumentListener(){
+		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
 				refilterTable();
 			}
@@ -492,7 +533,10 @@ public class SampleListFrame extends JFrame {
 			public void insertUpdate(DocumentEvent e) {
 				refilterTable();
 			}
-		});
+		};
+		
+		mrnTextField.getDocument().addDocumentListener(documentListener);
+		runIDTextField.getDocument().addDocumentListener(documentListener);
 	}
 
 	private Sample getCurrentlySelectedSample(){
@@ -510,6 +554,10 @@ public class SampleListFrame extends JFrame {
 				handleQCClick();
 			}else if(table.columnAtPoint (pClick) == sampleEditColumn){
 				handleEditSampleClick();
+			}else if(table.columnAtPoint (pClick) == mrnColumn){
+				handleMRNClick();
+			}else if(table.columnAtPoint (pClick) == runIDColumn){
+				handleRunIDClick();
 			}
 		}catch (Exception e){
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
@@ -594,6 +642,18 @@ public class SampleListFrame extends JFrame {
 		table.setCursor(Cursor.getDefaultCursor());
 	}
 
+	private void handleMRNClick() {
+		Sample sample = getCurrentlySelectedSample();
+		mrnTextField.setText(sample.getMRN());
+	}
+	
+	private void handleRunIDClick() {
+		Sample sample = getCurrentlySelectedSample();
+		runIDTextField.setText(sample.runID);
+		assayComboBox.setSelectedItem(sample.assay);
+		instrumentComboBox.setSelectedItem(sample.instrument);
+	}
+	
 	private void handleEditSampleClick() throws Exception{
 		//Edit sample
 		int viewRow = table.getSelectedRow();
@@ -652,11 +712,35 @@ public class SampleListFrame extends JFrame {
 					return false;
 				}
 			}
+			
+			private boolean doesInstrumentMatch(Entry<? extends SampleListTableModel, ? extends Integer> entry){
+				if(instrumentComboBox.getSelectedIndex() == 0){//index 0 is "All"
+					return true;
+				}
+				int row = entry.getIdentifier();
+				Sample sample = tableModel.getSample(row);
+				if(instrumentComboBox.getSelectedItem().toString().equals(sample.instrument)){
+					return true;
+				}else{
+					return false;
+				}
+			}
+			
+			private boolean doesMRNMatch(Entry<? extends SampleListTableModel, ? extends Integer> entry){
+				int row = entry.getIdentifier();
+				Sample sample = tableModel.getSample(row);
+				String mrn = mrnTextField.getText();
+				if(mrn.equals("")){
+					return true;
+				}else{
+					return sample.getMRN().contains(mrn);
+				}
+			}
 
 			private boolean doesRunIDMatch(Entry<? extends SampleListTableModel, ? extends Integer> entry){
 				int row = entry.getIdentifier();
 				Sample sample = tableModel.getSample(row);
-				String runID = textRunID.getText();
+				String runID = runIDTextField.getText();
 				if(runID.equals("")){
 					return true;
 				}else{
@@ -666,7 +750,7 @@ public class SampleListFrame extends JFrame {
 
 			@Override
 			public boolean include(Entry<? extends SampleListTableModel, ? extends Integer> entry) {
-				return doesAssayMatch(entry) && doesRunIDMatch(entry);
+				return doesAssayMatch(entry) && doesInstrumentMatch(entry) && doesMRNMatch(entry) && doesRunIDMatch(entry);
 			}
 		};
 		sorter.setRowFilter(rowFilter);
@@ -697,7 +781,9 @@ public class SampleListFrame extends JFrame {
 
 	private void resetFilters(){
 		assayComboBox.setSelectedIndex(0);
-		textRunID.setText("");
+		instrumentComboBox.setSelectedIndex(0);
+		mrnTextField.setText("");
+		runIDTextField.setText("");
 	}
 
 	private void addExceptionSamples() throws Exception{
