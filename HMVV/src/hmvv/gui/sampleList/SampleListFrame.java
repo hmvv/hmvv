@@ -601,9 +601,6 @@ public class SampleListFrame extends JFrame {
 
 					} else{
 						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
-						for(Mutation m : mutations){
-							m.setCosmicID("LOADING...");
-						}
 						MutationList mutationList = new MutationList(mutations);
 						MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
 						mutationListFrame.setVisible(true);

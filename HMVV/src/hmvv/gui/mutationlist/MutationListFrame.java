@@ -31,6 +31,8 @@ import hmvv.model.Sample;
 public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private static final long serialVersionUID = 1L;
 	
+	public final SampleListFrame parent;
+	
 	private MutationListMenuBar mutationListMenuBar;
 	
 	private BasicTable basicTabTable;
@@ -85,6 +87,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		
 	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
 		super(parent);
+		this.parent = parent;
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
 		setTitle(title);
@@ -112,6 +115,9 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 			}
 		});
 		
+		for(int i = 0; i < mutationList.getMutationCount(); i++){
+			mutationList.getMutation(i).setCosmicID("LOADING...");
+		}
 		AsynchronousMutationDataIO.loadMissingDataAsynchronous(mutationList, this);
 	}
 

@@ -31,6 +31,7 @@ public class MutationListMenuBar extends JMenuBar {
 	private JMenuItem shortReportMenuItem;
 	private JMenuItem longReportMenuItem;
 	private JMenuItem exportMutationsMenuItem;
+	private JMenu patientSampleHistoryMenu;
 	private JMenu patientHistoryMenu;
 	private JMenuItem loadPatientHistory;
 	private JMenu filteredMutationsMenu;
@@ -64,6 +65,9 @@ public class MutationListMenuBar extends JMenuBar {
 		exportMutationsMenuItem = new JMenuItem("Export mutations");
 		exportMutationsMenuItem.setToolTipText("Export the mutations to a text file");
 		
+		patientSampleHistoryMenu = new JMenu("Patient Sample History");
+		patientSampleHistoryMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
+		
 		patientHistoryMenu = new JMenu("Patient History");
 		patientHistoryMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
 		loadPatientHistory = new JMenuItem("Load Patient History...");
@@ -88,6 +92,18 @@ public class MutationListMenuBar extends JMenuBar {
 		separator.setEnabled(false);
 		add(separator);
 		
+		if(sample.getLinkedPatientSamples().size() > 0) {
+			add(patientSampleHistoryMenu);
+			for(Sample otherSample : sample.getLinkedPatientSamples()) {
+				JMenuItem otherSampleMenuItem = new JMenuItem(otherSample.sampleID + "");
+				patientSampleHistoryMenu.add(otherSampleMenuItem);
+			}
+			
+			JMenu separator1 = new JMenu("|");
+			separator1.setEnabled(false);
+			add(separator1);
+		}
+
 		add(patientHistoryMenu);
 		patientHistoryMenu.add(loadPatientHistory);
 		
