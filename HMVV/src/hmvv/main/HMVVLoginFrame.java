@@ -18,7 +18,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
@@ -214,8 +213,8 @@ public class HMVVLoginFrame extends JFrame {
 		
 		try{
 			loginButton.setText("Loading Sample list...");
-			SampleListFrame sampleList = new SampleListFrame(HMVVLoginFrame.this, DatabaseCommands.getAllSamples());
-			sampleList.setVisible(true);
+			HMVVFrame hmvvFrame = new HMVVFrame(HMVVLoginFrame.this, DatabaseCommands.getAllSamples());
+			hmvvFrame.setVisible(true);
 			dispose();
 		}catch(Exception e){
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Could not construct sample list. Please contact the system administrator.");

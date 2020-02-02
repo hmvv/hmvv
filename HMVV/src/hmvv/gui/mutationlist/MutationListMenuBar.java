@@ -19,6 +19,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.MutationReportGenerator;
 import hmvv.io.LIS.LISConnection;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Mutation;
 import hmvv.model.PatientHistory;
 import hmvv.model.Sample;
@@ -37,13 +38,17 @@ public class MutationListMenuBar extends JMenuBar {
 	private JMenu filteredMutationsMenu;
 	private JMenuItem loadFilteredMutationsMenuItem;
 	
-	private MutationListFrame parent;
+	private HMVVFrame parent;
+	private MutationListFrame mutationListPanel;
+	
 	private Sample sample;
 	private MutationList mutationList;
 	private MutationFilterPanel mutationFilterPanel;
 
-	MutationListMenuBar(MutationListFrame parent, Sample sample, MutationList mutationList, MutationFilterPanel mutationFilterPanel) {
+	MutationListMenuBar(HMVVFrame parent, MutationListFrame mutationListPanel, Sample sample, MutationList mutationList, MutationFilterPanel mutationFilterPanel) {
 		this.parent = parent;
+		this.mutationListPanel = mutationListPanel;
+		
 		this.sample = sample;
 		this.mutationList = mutationList;
 		this.mutationFilterPanel = mutationFilterPanel;
@@ -162,7 +167,7 @@ public class MutationListMenuBar extends JMenuBar {
 
 		int returnValue = saveAs.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
-			parent.exportReport(saveAs.getSelectedFile());
+			mutationListPanel.exportReport(saveAs.getSelectedFile());
 		}
 	}
 
@@ -173,8 +178,8 @@ public class MutationListMenuBar extends JMenuBar {
 				labOrderNumber = LISConnection.getLabOrderNumber(sample.assay, sample.getPathNumber(), sample.sampleName);
 			}
 			ArrayList<PatientHistory> history = LISConnection.getPatientHistory(labOrderNumber);
-			ReportFramePatientHistory reportFrame = new ReportFramePatientHistory(parent, labOrderNumber, history);
-			reportFrame.setVisible(true);
+			ReportFramePatientHistory reportFrame = new ReportFramePatientHistory(parent, sample, labOrderNumber, history);
+			parent.createTab("Patient History", reportFrame);
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
@@ -211,9 +216,9 @@ public class MutationListMenuBar extends JMenuBar {
         Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
             @Override
             public void run() {
-                parent.disableInputForAsynchronousLoad();
+            	mutationListPanel.disableInputForAsynchronousLoad();
                 getFilteredMutationData();
-                parent.enableInputAfterAsynchronousLoad();
+                mutationListPanel.enableInputAfterAsynchronousLoad();
                 filteredMutationsMenu.setEnabled(false);
             }
         });
@@ -225,7 +230,7 @@ public class MutationListMenuBar extends JMenuBar {
         	filteredMutationsMenu.setText("Loading...");
             ArrayList<Mutation> mutations = DatabaseCommands.getExtraMutationsBySample(sample);
             for(int i = 0; i < mutations.size(); i++) {
-                if(parent.isCallbackClosed()){
+                if(mutationListPanel.isCallbackClosed()){
                     return;
                 }
                 filteredMutationsMenu.setText("Loading " + (i+1) + " of " + mutations.size());

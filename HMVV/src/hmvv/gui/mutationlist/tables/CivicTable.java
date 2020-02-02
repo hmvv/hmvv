@@ -1,15 +1,15 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CivicTableModel;
 import hmvv.io.InternetCommands;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Mutation;
 
 public class CivicTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public CivicTable(MutationListFrame parent, CivicTableModel model) {
+    public CivicTable(HMVVFrame parent, CivicTableModel model) {
         super(parent, model);
     }
 

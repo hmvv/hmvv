@@ -1,15 +1,9 @@
 package hmvv.gui.mutationlist;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -18,20 +12,19 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.*;
 import hmvv.gui.mutationlist.tables.*;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.AsynchronousCallback;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Sample;
 
-public class MutationListFrame extends JDialog implements AsynchronousCallback{
+public class MutationListFrame extends JPanel implements AsynchronousCallback{
 	private static final long serialVersionUID = 1L;
 	
-	public final SampleListFrame parent;
+	public final HMVVFrame parent;
 	
 	private MutationListMenuBar mutationListMenuBar;
 	
@@ -75,7 +68,6 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private MutationList mutationList;
 	private MutationListFilters mutationListFilters;
 	
-	private JPanel contentPane;
 	private JTabbedPane tabbedPane;
 	private CommonTable selectedTable;
 	private JScrollPane selectedScrollPane;
@@ -83,15 +75,11 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private Sample sample;
 	private MutationFilterPanel mutationFilterPanel;
 	
-	private volatile boolean isWindowClosed;
+	private volatile boolean isWindowClosed = false;
 		
-	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
-		super(parent);
+	public MutationListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
+		super();
 		this.parent = parent;
-		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
-				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
-		setTitle(title);
-		
 		this.mutationList = mutationList;
 		this.sample = sample;
 		this.mutationListFilters = new MutationListFilters();
@@ -100,76 +88,57 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		layoutComponents();
 		createSortChangeListener();
 		
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
-		setMinimumSize(new Dimension(700, getHeight()/3));
-		
-		setLocationRelativeTo(parent);
-		
-		isWindowClosed = false;
-		addWindowListener(new WindowAdapter(){
-			@Override
-			public void windowClosed(WindowEvent arg0) {
-				isWindowClosed = true;
-			}
-		});
-		
 		for(int i = 0; i < mutationList.getMutationCount(); i++){
 			mutationList.getMutation(i).setCosmicID("LOADING...");
 		}
 		AsynchronousMutationDataIO.loadMissingDataAsynchronous(mutationList, this);
 	}
 
-	private void constructComponents() {
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		
+	private void constructComponents() {		
 		mutationFilterPanel = new MutationFilterPanel(this,sample, mutationList, mutationListFilters);
 		mutationFilterPanel.resetFilters();
 		
-		mutationListMenuBar = new MutationListMenuBar(this, sample, mutationList, mutationFilterPanel);
-		setJMenuBar(mutationListMenuBar);
+		mutationListMenuBar = new MutationListMenuBar(parent, this, sample, mutationList, mutationFilterPanel);
+		parent.setJMenuBar(mutationListMenuBar);
 		
 		constructTabs();
 	}
 	
 	private void constructTabs(){
 		basicTabTableModel = new BasicTableModel(mutationList);
-		basicTabTable = new BasicTable(this, basicTabTableModel);
+		basicTabTable = new BasicTable(parent, basicTabTableModel);
 		basicTabTable.setAutoCreateRowSorter(true);
 
 		vepTabTableModel = new VEPTableModel(mutationList);
-		vepTabTable = new VEPTable(this, vepTabTableModel);
+		vepTabTable = new VEPTable(parent, vepTabTableModel);
 		vepTabTable.setAutoCreateRowSorter(true);
 		
 		cosmicTabTableModel = new CosmicTableModel(mutationList);
-		cosmicTabTable = new CosmicTable(this, cosmicTabTableModel);
+		cosmicTabTable = new CosmicTable(parent, cosmicTabTableModel);
 		cosmicTabTable.setAutoCreateRowSorter(true);
 
 		g1000TabTableModel = new G1000TableModel(mutationList);
-		g1000TabTable = new G1000Table(this, g1000TabTableModel);
+		g1000TabTable = new G1000Table(parent, g1000TabTableModel);
 		g1000TabTable.setAutoCreateRowSorter(true);
 
 		clinVarTabTableModel = new ClinVarTableModel(mutationList);
-		clinVarTabTable = new ClinVarTable(this, clinVarTabTableModel);
+		clinVarTabTable = new ClinVarTable(parent, clinVarTabTableModel);
 		clinVarTabTable.setAutoCreateRowSorter(true);
 
 		gnomadTabTableModel = new GnomadTableModel(mutationList);
-		gnomadTabTable = new GnomadTable(this, gnomadTabTableModel);
+		gnomadTabTable = new GnomadTable(parent, gnomadTabTableModel);
 		gnomadTabTable.setAutoCreateRowSorter(true);
 
 		oncokbTabTableModel = new OncokbTableModel(mutationList);
-		oncokbTabTable = new OncokbTable(this, oncokbTabTableModel);
+		oncokbTabTable = new OncokbTable(parent, oncokbTabTableModel);
 		oncokbTabTable.setAutoCreateRowSorter(true);
 
 		civicTabTableModel = new CivicTableModel(mutationList);
-		civicTabTable = new CivicTable(this, civicTabTableModel);
+		civicTabTable = new CivicTable(parent, civicTabTableModel);
 		civicTabTable.setAutoCreateRowSorter(true);
 
 		pmkbTabTableModel = new PmkbTableModel(mutationList);
-		pmkbTabTable = new PmkbTable(this, pmkbTabTableModel);
+		pmkbTabTable = new PmkbTable(parent, pmkbTabTableModel);
 		pmkbTabTable.setAutoCreateRowSorter(true);
 	}
 	
@@ -203,14 +172,12 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
 		northPanel.add(mutationFilterPanel, BorderLayout.WEST);
+
+		setLayout(new BorderLayout());
+		add(northPanel, BorderLayout.NORTH);
+		add(tabbedPane, BorderLayout.CENTER);
 		
-		JPanel contentPane = new JPanel();
-		contentPane.setLayout(new BorderLayout());
-		contentPane.add(northPanel, BorderLayout.NORTH);
-		contentPane.add(tabbedPane, BorderLayout.CENTER);
-		
-		contentPane.setBorder(new EmptyBorder(15, 15, 15, 15));
-		setContentPane(contentPane);
+		setBorder(new EmptyBorder(15, 15, 15, 15));
 	}
 	
 	private void createSortChangeListener(){
@@ -292,10 +259,14 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	}
 	
 	public void showErrorMessage(Exception e, String message) {
-		HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, message);
+		HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, message);
+	}
+	
+	public void setClosed() {
+		isWindowClosed = true;
 	}
 	
 	public boolean isCallbackClosed() {
-		return this.isWindowClosed;
+		return isWindowClosed;
 	}
 }

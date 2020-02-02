@@ -3,7 +3,6 @@ package hmvv.gui.sampleList;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -11,22 +10,16 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -47,32 +40,18 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.adminFrames.*;
-import hmvv.gui.mutationlist.MutationListFrame;
-import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.DatabaseCommands;
-import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVLoginFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.*;
 
-public class SampleListFrame extends JFrame {
+public class SampleListFrame extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private TableRowSorter<SampleListTableModel> sorter;
 
-	//Menu
-	private JMenuBar menuBar;
-	private JMenu adminMenu;
-	private JMenuItem enterSampleMenuItem;
-	private JMenuItem monitorPipelinesItem;
-	private JMenuItem newAssayMenuItem;
-	private JMenuItem databaseInformationMenuItem;
-	private JMenu qualityControlMenuItem;
-
-    //sample
-	private ArrayList<Sample> samples;
+	private HMVVFrame parent;
 
 	//Table
 	private JTable table;
@@ -94,199 +73,54 @@ public class SampleListFrame extends JFrame {
 	private JTextField mrnTextField;
 	
 	private JLabel runIDLabel;
-	private JTextField runIDTextField;	
+	private JTextField runIDTextField;
 	
 
 	private HMVVTableColumn[] customColumns;
-
-	//Asynchronous sample status updates
-	private Thread pipelineRefreshThread;
-	private final int secondsToSleep = 60;
-	private volatile long timeLastRefreshed = 0;
-	private volatile ArrayList<Pipeline> pipelines;
-	private volatile JMenuItem refreshLabel;
+	
 	private int loadSampleResultsColumn = 0;
 	private int mrnColumn = 3;
 	private int runIDColumn = 10;
-	private int qcColumn = 19;
-	private int sampleEditColumn = 20;
+	private int qcColumn = 16;
+	private int sampleEditColumn = 17;
+
+	private volatile ArrayList<Pipeline> pipelines;
 	
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) throws Exception {
-		super( Configurations.DATABASE_NAME + " : Sample List");
-		this.samples = samples;
-		
+	public SampleListFrame(HMVVFrame parent, ArrayList<Sample> samples) throws Exception {
+		super();
+		this.parent = parent;
 		tableModel = new SampleListTableModel(samples);
-
-		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
-		setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
-
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		addWindowListener(new WindowAdapter(){
-			public void windowClosing(WindowEvent e){
-				SSHConnection.shutdown();
-			}
-		});		
-
 		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), loadSampleResultsColumn, qcColumn, mrnColumn, runIDColumn, sampleEditColumn);
 		pipelines = new ArrayList<Pipeline>();//initialize as blank so that if setupPipelineRefreshThread() fails, the object is still instantiated
-
-		createMenu();
+		
 		createComponents();
 		layoutComponents();
 		activateComponents();
-		setLocationRelativeTo(parent);
-		setupPipelineRefreshThread();
-
 	}
-
-	private void setupPipelineRefreshThread() {		
-		pipelineRefreshThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				//loop forever (will exit when JFrame is closed).
-				while(true) {
-					long currentTimeInMillis = System.currentTimeMillis();
-					if(timeLastRefreshed + (1000 * secondsToSleep) < currentTimeInMillis) {
-						refreshLabel.setText("Refreshing table...");
-						if(!updatePipelinesASynch()){
-							JOptionPane.showMessageDialog(SampleListFrame.this, "Failure to update pipeline status details. Please contact the administrator.");
-							refreshLabel.setText("Status refresh disabled");
-							return;
-						}
-					}
-
-					setRefreshLabelText();
-
-					try {
-						Thread.sleep(1 * 1000);
-					} catch (InterruptedException e) {}
-				}
-			}
-		});
-		pipelineRefreshThread.setName("Sample List Pipeline Status Refresh");
-		pipelineRefreshThread.start();
+	
+	public SampleListTableModel getSampleTabelModel() {
+		return this.tableModel;
 	}
-
-	private boolean updatePipelinesASynch() {
+	
+	public void addSample(Sample sample){
+		tableModel.addSample(sample);
+		updatePipelinesASynch();
+	}
+	
+	public boolean updatePipelinesASynch() {
 		try {
 			pipelines = DatabaseCommands.getAllPipelines();
-			table.repaint();							
-			timeLastRefreshed = System.currentTimeMillis();
+			table.repaint();
 			return true;
 		} catch (Exception e) {
 			return false;
 		}
 	}
-
-	private void setRefreshLabelText() {
-		long currentTimeInMillis = System.currentTimeMillis();
-		long timeToRefresh = timeLastRefreshed + (1000 * secondsToSleep);
-		long diff = timeToRefresh - currentTimeInMillis;
-		long secondsRemaining = diff / 1000;
-		refreshLabel.setText("Status refresh in " + secondsRemaining + "s");
-	}
-
-	private void createMenu(){
-		menuBar = new JMenuBar();
-		adminMenu = new JMenu("Admin");
-		enterSampleMenuItem = new JMenuItem("Enter Sample");
-		enterSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
-		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
-		databaseInformationMenuItem = new JMenuItem("Database Information");
-		qualityControlMenuItem = new JMenu("Quality Control");
-		newAssayMenuItem = new JMenuItem("Create New Assay");
-		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
-		refreshLabel = new JMenuItem("Loading status refresh...");
-		refreshLabel.setEnabled(false);
-
-		menuBar.add(adminMenu);
-		adminMenu.add(enterSampleMenuItem);
-		adminMenu.add(monitorPipelinesItem);
-		adminMenu.add(newAssayMenuItem);
-
-		adminMenu.addSeparator();
-		adminMenu.add(qualityControlMenuItem);
-		try{
-			for(String assay : DatabaseCommands.getAllAssays()){
-				if(assay.equals("tmb")) {
-					JMenuItem tmbDashboard = new JMenuItem(assay + "_Assay");
-					qualityControlMenuItem.add(tmbDashboard);
-					tmbDashboard.addActionListener(new ActionListener(){
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							try {
-									QualityControlTumorMutationBurden tmbDashboard = new QualityControlTumorMutationBurden(SampleListFrame.this,samples);
-									tmbDashboard.setVisible(true);
-							} catch (Exception e1) {
-								HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
-							}
-						}
-					});
-				} else {
-					JMenuItem variantAlleleFrequencyMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
-					qualityControlMenuItem.add(variantAlleleFrequencyMenuItem);
-					variantAlleleFrequencyMenuItem.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							try {
-								TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
-								QualityControlFrame qcFrame = new QualityControlFrame(SampleListFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
-								qcFrame.setVisible(true);
-							} catch (Exception e1) {
-								HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
-							}
-						}
-					});
-				}
-			}
-		}catch(Exception e){
-			//unable to get assays
-		}
-
-		adminMenu.addSeparator();
-		adminMenu.add(databaseInformationMenuItem);
-		adminMenu.add(refreshLabel);
-
-		setJMenuBar(menuBar);
-
-		ActionListener listener = new ActionListener(){
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					if(e.getSource() == enterSampleMenuItem){
-						EnterSample sampleEnter = new EnterSample(SampleListFrame.this, tableModel);
-						sampleEnter.setVisible(true);
-					}else if(e.getSource() == monitorPipelinesItem) {
-						handleMonitorPipelineClick();
-					}else if(e.getSource() == databaseInformationMenuItem){
-						handledatabaseInformationClick();
-					}else if(e.getSource() == newAssayMenuItem){
-						CreateAssay createAssay = new CreateAssay(SampleListFrame.this);
-						createAssay.setVisible(true);
-						}
-				} catch (Exception e1) {
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e1);
-				}
-			}
-		};
-
-		enterSampleMenuItem.addActionListener(listener);
-		newAssayMenuItem.addActionListener(listener);
-		monitorPipelinesItem.addActionListener(listener);
-		qualityControlMenuItem.addActionListener(listener);
-		databaseInformationMenuItem.addActionListener(listener);
-	}
-
-	public void addSample(Sample sample){
-		tableModel.addSample(sample);
-		updatePipelinesASynch();
-	}
-
+	
 	private void createComponents(){
 		table = new JTable(tableModel){
 			private static final long serialVersionUID = 1L;
@@ -353,7 +187,7 @@ public class SampleListFrame extends JFrame {
 				assayComboBox.addItem(item);	
 			}
 		} catch (Exception e) {
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 		
 		instrumentComboBox = new JComboBox<String>();
@@ -363,7 +197,7 @@ public class SampleListFrame extends JFrame {
 				instrumentComboBox.addItem(item);	
 			}
 		} catch (Exception e) {
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 
 		sampleSearchButton = new JButton("Sample Search");
@@ -394,7 +228,7 @@ public class SampleListFrame extends JFrame {
 	}
 
 	private void layoutComponents(){
-		GroupLayout groupLayout = new GroupLayout(getContentPane());
+		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
@@ -444,10 +278,10 @@ public class SampleListFrame extends JFrame {
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
 						.addGap(25))
 				);
-		getContentPane().setLayout(groupLayout);
+		setLayout(groupLayout);
 
 		if(Configurations.isTestEnvironment()) {
-			getContentPane().setBackground(Configurations.TEST_ENV_COLOR);
+			setBackground(Configurations.TEST_ENV_COLOR);
 		}
 
 		resizeColumnWidths();
@@ -556,59 +390,13 @@ public class SampleListFrame extends JFrame {
 				handleRunIDClick();
 			}
 		}catch (Exception e){
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 	}
 
-	private void handleMonitorPipelineClick() throws Exception{
-		Thread monitorPipelineThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					MonitorPipelines monitorpipelines = new MonitorPipelines(SampleListFrame.this);
-					monitorpipelines.setVisible(true);
-				} catch (Exception e) {
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading Monitor Pipeline window.");
-				}
-				setCursor(Cursor.getDefaultCursor());
-			}
-		});
-		monitorPipelineThread.start();
-	}
-
-	private void handledatabaseInformationClick() throws Exception {
-		DatabaseInformation dbinfo = new DatabaseInformation(this);
-		dbinfo.setVisible(true);
-	}
-
 	private void handleMutationClick() throws Exception{
-		Thread mutationListThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					Sample currentSample = getCurrentlySelectedSample();
-
-					if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
-
-					    TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(SampleListFrame.this, (TMBSample)currentSample);
-					    tmbFrame.setVisible(true);
-
-					} else{
-						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(currentSample);
-						MutationList mutationList = new MutationList(mutations);
-						MutationListFrame mutationListFrame = new MutationListFrame(SampleListFrame.this, currentSample, mutationList);
-						mutationListFrame.setVisible(true);
-					}
-
-				} catch (Exception e) {
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e, "Error loading mutation data.");
-				}
-				table.setCursor(Cursor.getDefaultCursor());
-			}
-		});
-		mutationListThread.start();
+		Sample currentSample = getCurrentlySelectedSample();
+		parent.createMutationTab(currentSample);
 	}
 
 	private void handleQCClick(){
@@ -618,18 +406,18 @@ public class SampleListFrame extends JFrame {
 
 			if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
 
-			    TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(this, (TMBSample)currentSample);
+			    TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(parent, (TMBSample)currentSample);
                 tmbQC.setVisible(true);
 
 			}else {
 
-			    ViewAmpliconFrame amplicon = new ViewAmpliconFrame(this, currentSample);
+			    ViewAmpliconFrame amplicon = new ViewAmpliconFrame(parent, currentSample);
 				amplicon.setVisible(true);
 
 			}
 		} catch (Exception e) {
 
-		    HMVVDefectReportFrame.showHMVVDefectReportFrame(SampleListFrame.this, e);
+		    HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 
 		}
 		table.setCursor(Cursor.getDefaultCursor());
@@ -653,7 +441,7 @@ public class SampleListFrame extends JFrame {
 		final int modelRow = table.convertRowIndexToModel(viewRow);
 		Sample sample = getCurrentlySelectedSample();
 
-		EditSampleFrame editSample = new EditSampleFrame(this, sample);
+		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
 		editSample.setVisible(true);
 		editSample.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -20,20 +20,20 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 
 public abstract class ReportFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
 	private JPanel buttonPanel;
-	protected MutationListFrame parent;
+	protected HMVVFrame parent;
 	
 	/**
 	 * Create the frame.
 	 */
-	public ReportFrame(MutationListFrame parent, String title) {
+	public ReportFrame(HMVVFrame parent, String title) {
 		super(parent, title);
 		this.parent = parent;
 	}
