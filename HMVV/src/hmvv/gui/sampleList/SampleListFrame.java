@@ -117,12 +117,8 @@ public class SampleListFrame extends JFrame {
 	 */
 	public SampleListFrame(HMVVLoginFrame parent, ArrayList<Sample> samples) throws Exception {
 		super( Configurations.DATABASE_NAME + " : Sample List");
-
 		this.samples = samples;
-        if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)) {
-            addExceptionSamples();
-        }
-
+		
 		tableModel = new SampleListTableModel(samples);
 
 		Rectangle bounds = GUICommonTools.getScreenBounds(parent);
@@ -781,18 +777,5 @@ public class SampleListFrame extends JFrame {
 		instrumentComboBox.setSelectedIndex(0);
 		mrnTextField.setText("");
 		runIDTextField.setText("");
-	}
-
-	private void addExceptionSamples() throws Exception{
-
-			ArrayList<Sample> exception_samples = new ArrayList<>();
-
-			for (Sample s : this.samples){
-				ArrayList<Sample> new_samples = DatabaseCommands.getExceptionSamples(s.sampleID,s.getMRN());
-				if (new_samples.size()>0) {
-                    exception_samples.addAll(new_samples);
-                }
-			}
-			this.samples.addAll(exception_samples);
 	}
 }
