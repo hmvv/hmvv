@@ -33,7 +33,6 @@ import hmvv.gui.sampleList.TumorMutationBurdenFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.model.GeneQCDataElementTrend;
-import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
 
@@ -129,29 +128,15 @@ public class HMVVFrame extends JFrame{
 		tabbedPane.setSelectedComponent(panel);
 	}
 	
-	public void createMutationTab(Sample sample) {
-		Thread mutationListThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					if (sample instanceof TMBSample){//not ideal to condition using instanceof
-					    TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(HMVVFrame.this, (TMBSample)sample);
-					    tmbFrame.setVisible(true);
-					} else{
-						ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(sample);
-						MutationList mutationList = new MutationList(mutations);
-						MutationListFrame mutationListFrame = new MutationListFrame(HMVVFrame.this, sample, mutationList);
-						createTab(sample.getLastName() + ", " + sample.getFirstName() + " [" + sample.sampleID + ", " +
-							sample.assay + ", " + sample.instrument + "-" + sample.runID + "-" + sample.sampleName + "]", mutationListFrame);
-					}
-				} catch (Exception e) {
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVFrame.this, e, "Error loading mutation data.");
-				}
-				setCursor(Cursor.getDefaultCursor());
-			}
-		});
-		mutationListThread.start();
+	public void createMutationTab(Sample sample, MutationList mutationList) {
+		MutationListFrame mutationListFrame = new MutationListFrame(this, sample, mutationList);
+		createTab(sample.getLastName() + ", " + sample.getFirstName() + " [" + sample.sampleID + ", " +
+			sample.assay + ", " + sample.instrument + "-" + sample.runID + "-" + sample.sampleName + "]", mutationListFrame);
+	}
+	
+	public void createTumorMutationBurdenFrame(TMBSample sample) throws Exception {
+		TumorMutationBurdenFrame tmbFrame = new TumorMutationBurdenFrame(HMVVFrame.this, (TMBSample)sample);
+	    tmbFrame.setVisible(true);
 	}
 
 	private void createMenu(){

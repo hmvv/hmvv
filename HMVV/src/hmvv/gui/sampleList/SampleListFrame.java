@@ -29,6 +29,7 @@ import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -39,6 +40,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
+import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
@@ -314,15 +316,19 @@ public class SampleListFrame extends JPanel {
 		table.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				int column = table.columnAtPoint(e.getPoint());
-				table.setCursor(customColumns[column].cursor);
+				if(!mutationListLoading) {
+					int column = table.columnAtPoint(e.getPoint());
+					table.setCursor(customColumns[column].cursor);	
+				}
 			}
 		});
 		
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent c) {
-				handleTableMousePressed(c);
+				if(!mutationListLoading) {
+					handleTableMousePressed(c);
+				}
 			}
 		});
 
@@ -376,6 +382,11 @@ public class SampleListFrame extends JPanel {
 	}
 	
 	private void handleTableMousePressed(MouseEvent c) {
+		if(c.getClickCount() != 1) {
+			//ignore multi-clicks
+			return;
+		}
+		
 		try{
 			Point pClick = c.getPoint();
 			if(table.columnAtPoint (pClick) == loadSampleResultsColumn){
@@ -396,7 +407,12 @@ public class SampleListFrame extends JPanel {
 
 	private void handleMutationClick() throws Exception{
 		Sample currentSample = getCurrentlySelectedSample();
-		parent.createMutationTab(currentSample);
+	    if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
+		    parent.createTumorMutationBurdenFrame((TMBSample) currentSample);
+		} else{
+			MutationListLoader loader = new MutationListLoader(parent, currentSample);
+			loader.execute();
+		}
 	}
 
 	private void handleQCClick(){
@@ -565,5 +581,36 @@ public class SampleListFrame extends JPanel {
 		instrumentComboBox.setSelectedIndex(0);
 		mrnTextField.setText("");
 		runIDTextField.setText("");
+	}
+	
+	private volatile boolean mutationListLoading = false;
+	class MutationListLoader extends SwingWorker<MutationList, Void>{
+
+		private final HMVVFrame frame;
+		private final Sample sample;
+		
+		public MutationListLoader(HMVVFrame frame, Sample sample) {
+			table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			this.frame = frame;
+			this.sample = sample;
+			mutationListLoading = true;
+		}
+		
+		@Override
+		protected MutationList doInBackground() throws Exception {
+			ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(sample);
+			return new MutationList(mutations);
+		}
+
+		@Override
+	    public void done() {
+			table.setCursor(Cursor.getDefaultCursor());
+			mutationListLoading = false;
+			try {
+				frame.createMutationTab(sample, get());
+			} catch (Exception e) {
+				HMVVDefectReportFrame.showHMVVDefectReportFrame(frame, e, "Error loading mutation data.");
+			}
+	    }	
 	}
 }
