@@ -1,15 +1,15 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.PmkbTableModel;
 import hmvv.io.InternetCommands;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Mutation;
 
 public class PmkbTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public PmkbTable(MutationListFrame parent, PmkbTableModel model) {
+    public PmkbTable(HMVVFrame parent, PmkbTableModel model) {
         super(parent, model);
     }
 

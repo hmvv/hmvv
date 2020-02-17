@@ -8,6 +8,7 @@ public class Mutation {
 
     //common
     private boolean reported;
+    private ArrayList<Mutation> otherMutations;
     private String chr;
     private String pos;
     private String ref;
@@ -85,7 +86,7 @@ public class Mutation {
     private String pmkb_tissue_type;
 
     public Mutation() {
-
+    	otherMutations = new ArrayList<Mutation>();
     }
 
     /**
@@ -105,6 +106,25 @@ public class Mutation {
         this.reported = reported;
     }
 
+    public void addOtherMutation(Mutation otherMutation) {
+    	this.otherMutations.add(otherMutation);
+    }
+    
+    public String getOtherMutationsString() {
+    	StringBuilder sb = new StringBuilder();
+    	for(int i = 0; i < otherMutations.size(); i++) {
+    		Mutation otherMutation = otherMutations.get(i);
+    		if(i != 0) {
+    			sb.append(", ");
+    		}
+    		sb.append(otherMutation.sampleID + "");
+    		if(otherMutation.reported) {
+    			sb.append("(R)");
+    		}
+    	}
+    	return sb.toString();
+    }
+    
     public boolean isSelected() {
         return selected;
     }
@@ -583,5 +603,13 @@ public class Mutation {
 
     public void setPmkb_tissue_type(String pmkb_tissue_type) {
         this.pmkb_tissue_type = pmkb_tissue_type;
+    }
+    
+    public boolean equals(Object o) {
+    	if(o instanceof Mutation) {
+    		Mutation m = (Mutation) o;
+    		return m.getCoordinate().equals(getCoordinate());
+    	}
+    	return false;
     }
 }

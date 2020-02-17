@@ -22,6 +22,7 @@ import javax.swing.JScrollPane;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Sample;
 
 public class EditSampleFrame extends JDialog {
@@ -46,7 +47,7 @@ public class EditSampleFrame extends JDialog {
 	/**
 	 * Create the frame.
 	 */
-	public EditSampleFrame(SampleListFrame parent, Sample sample) {
+	public EditSampleFrame(HMVVFrame parent, Sample sample) {
 		super(parent, "Edit Sample");
 		this.sample = sample;
 		
@@ -158,6 +159,15 @@ public class EditSampleFrame extends JDialog {
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Sample Name", createJLabel(sample.sampleName)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Caller ID", createJLabel(sample.callerID)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Coverage ID", createJLabel(sample.coverageID)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+		
+		labelPanel.add(createPair("Entered by", createJLabel(sample.enteredBy)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Run Date", createJLabel(sample.runDate)));

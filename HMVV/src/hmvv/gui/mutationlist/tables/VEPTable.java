@@ -1,15 +1,15 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.VEPTableModel;
 import hmvv.io.InternetCommands;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Mutation;
 
 public class VEPTable extends CommonTable{
         private static final long serialVersionUID = 1L;
 
-        public VEPTable(MutationListFrame parent, VEPTableModel model){
+        public VEPTable(HMVVFrame parent, VEPTableModel model){
             super(parent, model);
         }
 

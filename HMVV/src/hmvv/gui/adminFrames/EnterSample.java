@@ -2,11 +2,11 @@ package hmvv.gui.adminFrames;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
-import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Patient;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
@@ -20,8 +20,7 @@ import java.util.Calendar;
 public class EnterSample extends JDialog {
 
     private static final long serialVersionUID = 1L;
-
-    private SampleListFrame parent;
+    
     private JTextField textRunID;
     private JTextField textTMBNormalRunID;
     private JTextField textMRN;
@@ -50,17 +49,16 @@ public class EnterSample extends JDialog {
 
     private JPanel samplePanel;
 
-    private SampleListTableModel sampleListTableModel;
+    private SampleListFrame sampleListFrame;
 
     private static String defaultCoverageAndCallerID = "-";
 
     private Thread findRunThread;
     private Thread enterSampleThread;
 
-    public EnterSample(SampleListFrame parent, SampleListTableModel sampleListTableModel) {
+    public EnterSample(HMVVFrame parent, SampleListFrame sampleListFrame) {
         super(parent, "Enter Sample");
-        this.parent = parent;
-        this.sampleListTableModel = sampleListTableModel;
+        this.sampleListFrame = sampleListFrame;
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -477,7 +475,7 @@ public class EnterSample extends JDialog {
         if(variantCallerID == null)
             variantCallerID = defaultCoverageAndCallerID;
 
-        Sample sample = sampleListTableModel.getSample(instrument, runID, coverageID, variantCallerID, sampleName);
+        Sample sample = sampleListFrame.getSampleTabelModel().getSample(instrument, runID, coverageID, variantCallerID, sampleName);
         if(sample != null){
             updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
         }else{
@@ -630,7 +628,7 @@ public class EnterSample extends JDialog {
         try {
             Sample sample = constructSampleFromTextFields();
             DatabaseCommands.insertDataIntoDatabase(sample);
-            parent.addSample(sample);
+            sampleListFrame.addSample(sample);
 
             //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
             updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);

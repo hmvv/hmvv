@@ -18,4 +18,8 @@ public class PatientHistory {
 		this.reportRevisionNumber = reportRevisionNumber;
 		this.reportSignoutDate = reportSignoutDate;
 	}
+	
+	public String toString() {
+		return reportType + "-" + reportSignoutDate;
+	}
 }

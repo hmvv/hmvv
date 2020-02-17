@@ -12,9 +12,9 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineProgram;
 import hmvv.model.PipelineStatus;
@@ -36,7 +36,7 @@ public class MonitorPipelines extends JDialog {
 	 * Create the frame.
 	 * @throws Exception 
 	 */
-	public MonitorPipelines(SampleListFrame parent) throws Exception {
+	public MonitorPipelines(HMVVFrame parent) throws Exception {
 		super(parent, "Monitor Pipelines");
 
 		tableModel = new MonitorPipelinesTableModel();

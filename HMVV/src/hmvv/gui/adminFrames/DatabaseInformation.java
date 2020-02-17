@@ -1,7 +1,7 @@
 package hmvv.gui.adminFrames;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Database;
 
 import javax.swing.*;
@@ -22,7 +22,7 @@ public class DatabaseInformation extends JDialog {
 
     private ArrayList<Database> databases;
 
-    public DatabaseInformation(SampleListFrame parent) throws Exception {
+    public DatabaseInformation(HMVVFrame parent) throws Exception {
         super(parent, "Database Information");
 
         tableModel = new DatabaseInformationTableModel();

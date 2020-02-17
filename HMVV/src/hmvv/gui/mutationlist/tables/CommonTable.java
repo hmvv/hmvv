@@ -17,13 +17,12 @@ import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
 import hmvv.gui.mutationlist.CosmicInfoPopup;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
-import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
@@ -32,12 +31,12 @@ import hmvv.model.Mutation;
 public abstract class CommonTable extends JTable{
 	private static final long serialVersionUID = 1L;
 	
-	protected MutationListFrame parent;
+	protected HMVVFrame parent;
 	protected CommonTableModel model;
 	
 	private HMVVTableColumn[] customColumns;
 	
-	public CommonTable(MutationListFrame parent, CommonTableModel model){
+	public CommonTable(HMVVFrame parent, CommonTableModel model){
 		super();
 		this.parent = parent;
 		this.model = model;
@@ -195,10 +194,8 @@ public abstract class CommonTable extends JTable{
 	}
 	
 	protected void searchGoogleForGene() throws Exception{
-		int viewRow = getSelectedRow();
-		int modelRow = convertRowIndexToModel(viewRow);
-		String gene = (getModel().getValueAt(modelRow, 3)).toString();
-		InternetCommands.searchGene(gene);
+		Mutation mutation = getSelectedMutation();
+		InternetCommands.searchGene(mutation.getGene());
 	}
 
 	protected void searchGoogleForDNAChange() throws Exception{

@@ -1,15 +1,15 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.OncokbTableModel;
 import hmvv.io.InternetCommands;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Mutation;
 
 public class OncokbTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public OncokbTable(MutationListFrame parent, OncokbTableModel model) {
+    public OncokbTable(HMVVFrame parent, OncokbTableModel model) {
         super(parent, model);
     }
 

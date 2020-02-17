@@ -1,15 +1,15 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.GnomadTableModel;
 import hmvv.io.InternetCommands;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Mutation;
 
 public class GnomadTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 
-	public GnomadTable (MutationListFrame parent, GnomadTableModel model){
+	public GnomadTable (HMVVFrame parent, GnomadTableModel model){
 		super(parent, model);
 	}
 
