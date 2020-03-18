@@ -39,10 +39,9 @@ The databases used by HMVV 3.3 application along with version number and release
 
 
 # Set up your linux server
-Setup your file structure to match that indicated by the constructCommandArray() method in hmvv/io/SampleEnterCommands.java.
+Setup your file structure to match that indicated by the shell commands in hmvv/io/SSHConnection.java.
 
-The bioinformatics pipeline scripts associated with this application is uploaded to github - please see https://github.com/hmvv/ngs_pipelines.
-
+The bioinformatics pipeline scripts associated with this application is uploaded to github - please see https://github.com/hmvv/ngs_pipelines. Setup a cron job to run the MAIN_runPipelines.sh script.
 
 # Disclaimer
 
