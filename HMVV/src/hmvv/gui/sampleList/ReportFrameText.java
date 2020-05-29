@@ -4,6 +4,8 @@ import java.awt.Component;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
+import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.main.HMVVFrame;
 
 public class ReportFrameText extends ReportFrame{
@@ -11,7 +13,7 @@ public class ReportFrameText extends ReportFrame{
 	
 	private JTextArea textArea;
 	
-	public ReportFrameText(HMVVFrame parent, String title, String report) {
+	public ReportFrameText(MutationListFrame parent, String title, String report) {
 		super(parent, title);
 		
 		textArea = new JTextArea(report);

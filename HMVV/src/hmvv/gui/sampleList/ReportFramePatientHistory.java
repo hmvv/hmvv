@@ -18,6 +18,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.io.LIS.LISConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
@@ -29,14 +30,14 @@ public class ReportFramePatientHistory extends JPanel{
 
 	private ArrayList<PatientHistory> patientHistory;
 	private String labOrderNumber;
-	private HMVVFrame parent;
+	private MutationListFrame parent;
 	private JTree tree;
 	private TreeSet<String> distinctOrderNumbers = new TreeSet<String>();
 	private TreeSet<String> distinctTechnologies = new TreeSet<String>();
 	private DefaultMutableTreeNode rootNode;
 	private JTextArea interpretation;
 	
-	public ReportFramePatientHistory(HMVVFrame parent, Sample sample, String labOrderNumber, ArrayList<PatientHistory> patientHistory) {
+	public ReportFramePatientHistory(MutationListFrame  parent, Sample sample, String labOrderNumber, ArrayList<PatientHistory> patientHistory) {
 		this.parent = parent;
 		this.labOrderNumber = labOrderNumber;
 		this.patientHistory = patientHistory;

@@ -14,6 +14,7 @@ import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.sampleList.ReportFrame;
 import hmvv.gui.sampleList.ReportFramePatientHistory;
 import hmvv.gui.sampleList.ReportFrameText;
+import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.MutationReportGenerator;
@@ -32,20 +33,17 @@ public class MutationListMenuBar extends JMenuBar {
 	private JMenuItem shortReportMenuItem;
 	private JMenuItem longReportMenuItem;
 	private JMenuItem exportMutationsMenuItem;
-	private JMenu patientSampleHistoryMenu;
-	private JMenu patientHistoryMenu;
-	private JMenuItem loadPatientHistory;
 	private JMenu filteredMutationsMenu;
 	private JMenuItem loadFilteredMutationsMenuItem;
 	
-	private HMVVFrame parent;
+	private MutationListFrame parent;
 	private MutationListFrame mutationListPanel;
 	
 	private Sample sample;
 	private MutationList mutationList;
 	private MutationFilterPanel mutationFilterPanel;
 
-	MutationListMenuBar(HMVVFrame parent, MutationListFrame mutationListPanel, Sample sample, MutationList mutationList, MutationFilterPanel mutationFilterPanel) {
+	MutationListMenuBar(MutationListFrame parent, MutationListFrame mutationListPanel, Sample sample, MutationList mutationList, MutationFilterPanel mutationFilterPanel) {
 		this.parent = parent;
 		this.mutationListPanel = mutationListPanel;
 		
@@ -70,16 +68,7 @@ public class MutationListMenuBar extends JMenuBar {
 		exportMutationsMenuItem = new JMenuItem("Export mutations");
 		exportMutationsMenuItem.setToolTipText("Export the mutations to a text file");
 		
-		patientSampleHistoryMenu = new JMenu("Patient Sample History");
-		patientSampleHistoryMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
-		
-		patientHistoryMenu = new JMenu("Patient History");
-		patientHistoryMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
-		loadPatientHistory = new JMenuItem("Load Patient History...");
-		loadPatientHistory.setToolTipText("Obtain the patient's history from the LIS");
-		if(sample.getOrderNumber().length() == 0 && sample.getPathNumber().length() == 0) {
-			loadPatientHistory.setEnabled(false);
-		}
+
 		
 		filteredMutationsMenu = new JMenu("Filtered Mutations");
 		filteredMutationsMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
@@ -93,25 +82,6 @@ public class MutationListMenuBar extends JMenuBar {
 		reportMenu.add(longReportMenuItem);
 		reportMenu.add(exportMutationsMenuItem);
 		
-		JMenu separator = new JMenu("|");
-		separator.setEnabled(false);
-		add(separator);
-		
-		if(sample.getLinkedPatientSamples().size() > 0) {
-			add(patientSampleHistoryMenu);
-			for(Sample otherSample : sample.getLinkedPatientSamples()) {
-				JMenuItem otherSampleMenuItem = new JMenuItem(otherSample.sampleID + "");
-				patientSampleHistoryMenu.add(otherSampleMenuItem);
-			}
-			
-			JMenu separator1 = new JMenu("|");
-			separator1.setEnabled(false);
-			add(separator1);
-		}
-
-		add(patientHistoryMenu);
-		patientHistoryMenu.add(loadPatientHistory);
-		
 		JMenu separator1 = new JMenu("|");
 		separator1.setEnabled(false);
 		add(separator1);
@@ -124,9 +94,7 @@ public class MutationListMenuBar extends JMenuBar {
 		ActionListener actionListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (e.getSource() == loadPatientHistory) {
-					showPatientHistory();
-				} else if (e.getSource() == shortReportMenuItem) {
+				if (e.getSource() == shortReportMenuItem) {
 					showShortReportFrame();
 				} else if (e.getSource() == longReportMenuItem) {
 					showLongReportFrame();
@@ -143,7 +111,6 @@ public class MutationListMenuBar extends JMenuBar {
 			}
 		};
 		
-		loadPatientHistory.addActionListener(actionListener);
 		shortReportMenuItem.addActionListener(actionListener);
 		longReportMenuItem.addActionListener(actionListener);
 		exportMutationsMenuItem.addActionListener(actionListener);
@@ -168,20 +135,6 @@ public class MutationListMenuBar extends JMenuBar {
 		int returnValue = saveAs.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			mutationListPanel.exportReport(saveAs.getSelectedFile());
-		}
-	}
-
-	private void showPatientHistory() {
-		try {
-			String labOrderNumber = sample.getOrderNumber();
-			if(labOrderNumber.length() == 0) {
-				labOrderNumber = LISConnection.getLabOrderNumber(sample.assay, sample.getPathNumber(), sample.sampleName);
-			}
-			ArrayList<PatientHistory> history = LISConnection.getPatientHistory(labOrderNumber);
-			ReportFramePatientHistory reportFrame = new ReportFramePatientHistory(parent, sample, labOrderNumber, history);
-			parent.createTab("Patient History", reportFrame);
-		} catch (Exception e) {
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 	}
 	
