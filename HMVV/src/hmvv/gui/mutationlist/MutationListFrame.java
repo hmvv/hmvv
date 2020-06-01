@@ -1,6 +1,8 @@
 package hmvv.gui.mutationlist;
 
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,11 +81,15 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	private Sample sample;
 	private MutationFilterPanel mutationFilterPanel;
-	
-	private volatile boolean isWindowClosed = false;
+
+	private volatile boolean isWindowClosed;
 		
 	public MutationListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
 		super();
+		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
+				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
+		setTitle(title);
+
 		this.parent = parent;
 		this.mutationList = mutationList;
 		this.sample = sample;
@@ -100,10 +106,20 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		setMinimumSize(new Dimension(700, getHeight()/3));
 
 		setLocationRelativeTo(parent);
+		setAlwaysOnTop(true);
 
 		for(int i = 0; i < mutationList.getMutationCount(); i++){
 			mutationList.getMutation(i).setCosmicID("LOADING...");
 		}
+
+		isWindowClosed = false;
+		addWindowListener(new WindowAdapter(){
+			@Override
+			public void windowClosed(WindowEvent arg0) {
+				isWindowClosed = true;
+			}
+		});
+
 		AsynchronousMutationDataIO.loadMissingDataAsynchronous(mutationList, this);
 
 
