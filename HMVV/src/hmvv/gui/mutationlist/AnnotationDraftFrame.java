@@ -34,6 +34,7 @@ public class AnnotationDraftFrame extends JFrame {
         pack();
         setResizable(false);
         setLocationRelativeTo(parent);
+        setAlwaysOnTop(true);
     }
     
     private void createComponents(){

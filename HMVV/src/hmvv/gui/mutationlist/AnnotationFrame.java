@@ -98,6 +98,7 @@ public class AnnotationFrame extends JFrame {
 		pack();
 		setResizable(true);
 		setLocationRelativeTo(mutationListFrame);
+		setAlwaysOnTop(true);
 	}
 
 	private void createComponents(){

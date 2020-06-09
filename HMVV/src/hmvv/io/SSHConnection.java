@@ -473,7 +473,7 @@ public class SSHConnection {
 	}
     
     public static ArrayList<String> readConfigurationFile() throws Exception{
-    	String command = "cat /home/pipelines/" + Configurations.getEnvironment() + "/config/config_v2.ini";
+    	String command = "cat /home/ngs_config/hmvv_app_config.ini";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 		if(rs.exitStatus != 0) {
 			throw new Exception(String.format("Error finding or reading configuration file."));

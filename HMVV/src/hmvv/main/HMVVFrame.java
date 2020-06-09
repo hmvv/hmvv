@@ -79,14 +79,13 @@ public class HMVVFrame extends JFrame{
 		createMenu();
 		createComponents();
 		layoutComponents();
-		activateComponents();
 		setupPipelineRefreshThread();
 		setLocationRelativeTo(parent);
 	}
 
 	private void createComponents() throws Exception {
 		samplePanel = new SampleListFrame(this, samples);
-		
+
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		tabbedPane.addTab("Samples", null, samplePanel, null);
@@ -94,44 +93,6 @@ public class HMVVFrame extends JFrame{
 	
 	private void layoutComponents() {
 		add(tabbedPane);
-	}
-	
-	private void activateComponents() {
-		createChangeListener();
-	}
-	
-	private void createChangeListener(){
-		tabbedPane.addChangeListener(new ChangeListener() {
-	        public void stateChanged(ChangeEvent e) {
-	        	int selectedIndex = tabbedPane.getSelectedIndex();
-	        	
-	        	if(selectedIndex == 1 && tabbedPane.getTabCount() == 3) {//the user switch from an extra window
-	        		tabbedPane.remove(2);
-	        	}else if(selectedIndex == 0) {//the user switched from the mutation list to the sample list
-	        		if(tabbedPane.getComponentAt(1) instanceof MutationListFrame){
-	        			((MutationListFrame) tabbedPane.getComponentAt(1)).setClosed();//notify asynchronous load to quit
-	        		}
-	        		
-	        		if(tabbedPane.getTabCount() == 3) {
-	        			tabbedPane.remove(2);
-	        		}
-	        		tabbedPane.remove(1);
-	        		setJMenuBar(menuBar);
-	        		
-	        	}
-	        }
-	    });
-	}
-	
-	public void createTab(String title, JPanel panel) {
-		tabbedPane.addTab(title, null, panel, null);
-		tabbedPane.setSelectedComponent(panel);
-	}
-	
-	public void createMutationTab(Sample sample, MutationList mutationList) {
-		MutationListFrame mutationListFrame = new MutationListFrame(this, sample, mutationList);
-		createTab(sample.getLastName() + ", " + sample.getFirstName() + " [" + sample.sampleID + ", " +
-			sample.assay + ", " + sample.instrument + "-" + sample.runID + "-" + sample.sampleName + "]", mutationListFrame);
 	}
 	
 	public void createTumorMutationBurdenFrame(TMBSample sample) throws Exception {
