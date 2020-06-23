@@ -45,8 +45,7 @@ public class MutationListFilters {
 		filteredMutations.clear();
 		filteredMutations.addAll(newFilteredMutations);
 	}
-	
-	
+
 	private boolean includeMutation(Mutation mutation){
 		for(Filter f : filters) {
 			if(f.exclude(mutation)) {

@@ -7,11 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JTree;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -24,20 +20,21 @@ import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.PatientHistory;
 import hmvv.model.Sample;
+import jdk.nashorn.internal.scripts.JD;
 
 public class ReportFramePatientHistory extends JPanel{
 	private static final long serialVersionUID = 1L;
 
 	private ArrayList<PatientHistory> patientHistory;
 	private String labOrderNumber;
-	private MutationListFrame parent;
+	private JDialog parent;
 	private JTree tree;
 	private TreeSet<String> distinctOrderNumbers = new TreeSet<String>();
 	private TreeSet<String> distinctTechnologies = new TreeSet<String>();
 	private DefaultMutableTreeNode rootNode;
 	private JTextArea interpretation;
 	
-	public ReportFramePatientHistory(MutationListFrame  parent, Sample sample, String labOrderNumber, ArrayList<PatientHistory> patientHistory) {
+	public ReportFramePatientHistory(JDialog parent, Sample sample, String labOrderNumber, ArrayList<PatientHistory> patientHistory) {
 		this.parent = parent;
 		this.labOrderNumber = labOrderNumber;
 		this.patientHistory = patientHistory;

@@ -41,6 +41,7 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
+import hmvv.gui.mutationlist.MutationListFrameGermline;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
@@ -609,7 +610,7 @@ public class SampleListFrame extends JPanel {
 			table.setCursor(Cursor.getDefaultCursor());
 			mutationListLoading = false;
 			try {
-				MutationListFrame mutationListFrame = new MutationListFrame(parent, sample, get());
+				MutationListFrameGermline mutationListFrame = new MutationListFrameGermline(parent, sample, get());
 				mutationListFrame.setVisible(true);
 			} catch (Exception e) {
 				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error loading mutation data.");

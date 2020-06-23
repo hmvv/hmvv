@@ -164,4 +164,19 @@ public class MutationReportGenerator{
 
 		outFile.close();
 	}
+	public static void exportReportGermline(File outputFile, ClinVarTableModel clinvarTable) throws IOException{
+		File fileName = outputFile;
+		if(!outputFile.getName().endsWith(".txt")){
+			fileName = new File(outputFile.toString() + ".txt");
+		}
+		BufferedWriter outFile = new BufferedWriter(new FileWriter(fileName));
+
+
+		for (int col = 5; col < clinvarTable.getColumnCount(); col++){
+			outFile.write(clinvarTable.getColumnName(col) + "\t");
+		}
+		outFile.write("\r\n");
+
+		outFile.close();
+	}
 }

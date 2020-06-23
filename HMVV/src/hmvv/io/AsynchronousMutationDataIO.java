@@ -79,4 +79,19 @@ public class AsynchronousMutationDataIO {
 		// default selection
 		mutation.setSelected(false);
 	}
+
+	public static void getMutationDataGermline(Mutation mutation) throws Exception {
+		//cosmic
+		ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
+		mutation.setCosmicID(cosmicIDs);
+
+		int count = DatabaseCommands.getOccurrenceCount(mutation);
+		mutation.setOccurrence(count);
+
+		//gnomad
+		mutation.setGnomadID();
+
+		// default selection
+		mutation.setSelected(false);
+	}
 }
