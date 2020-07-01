@@ -39,12 +39,24 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	private GnomadTable gnomadTabTable;
 	private GnomadTableModel gnomadTabTableModel;
 
+	private GermlineTranscriptTable germlineTranscriptTable;
+	private GermlineTranscriptTableModel germlineTranscriptTableModel;
+
+	private GermlinePredictionTable germlinePredictionTable;
+	private GermlinePredictionTableModel germlinePredictionTableModel;
+
+	private GermlineCardiacAtlasTable germlineCardiacAtlasTable;
+	private GermlineCardiacAtlasTableModel germlineCardiacAtlasTableModel;
+
 	private ReportFramePatientHistory reportFrame;
 
 	private JScrollPane vepTabScrollPane;
 	private JScrollPane clinVarTabScrollPane;
 	private JScrollPane gnomadTabScrollPane;
+	private JScrollPane germlineTranscriptScrollPane;
+	private JScrollPane germlinePredictionScrollPane;
 	private JScrollPane patientHistoryTabScrollPane;
+	private JScrollPane germlineCardiacAtlasScrollPane;
 
 	private MutationList mutationList;
 	private MutationListFilters mutationListFilters;
@@ -120,6 +132,19 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		gnomadTabTable = new GnomadTable(parent, gnomadTabTableModel);
 		gnomadTabTable.setAutoCreateRowSorter(true);
 
+		germlineTranscriptTableModel = new GermlineTranscriptTableModel(mutationList);
+		germlineTranscriptTable = new GermlineTranscriptTable(parent, germlineTranscriptTableModel);
+		germlineTranscriptTable.setAutoCreateRowSorter(true);
+
+
+		germlinePredictionTableModel = new GermlinePredictionTableModel(mutationList);
+		germlinePredictionTable = new GermlinePredictionTable(parent, germlinePredictionTableModel);
+		germlinePredictionTable.setAutoCreateRowSorter(true);
+
+		germlineCardiacAtlasTableModel = new GermlineCardiacAtlasTableModel(mutationList);
+		germlineCardiacAtlasTable = new GermlineCardiacAtlasTable(parent, germlineCardiacAtlasTableModel);
+		germlineCardiacAtlasTable.setAutoCreateRowSorter(true);
+
 	}
 	
 	private void layoutComponents(){
@@ -132,6 +157,9 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		tabbedPane.addTab("VEP", null, vepTabScrollPane, null);
 		tabbedPane.addTab("ClinVar", null, clinVarTabScrollPane, null);
 		tabbedPane.addTab("Gnomad", null, gnomadTabScrollPane, null);
+		tabbedPane.addTab("CardiacAtlas", null, germlineCardiacAtlasScrollPane, null);
+		tabbedPane.addTab("Transcript", null, germlineTranscriptScrollPane, null);
+		tabbedPane.addTab("Prediction", null, germlinePredictionScrollPane, null);
 
 		if (patientHistoryAvailable()) {
 			createPatientHistory();
@@ -139,7 +167,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 			tabbedPane.addTab("Patient History", null, patientHistoryTabScrollPane, null);
 		}else{
 			tabbedPane.addTab("Patient History", null, null);
-			tabbedPane.setEnabledAt(3, false);
+			tabbedPane.setEnabledAt(6, false);
 		}
 
 		selectedTable = vepTabTable;
