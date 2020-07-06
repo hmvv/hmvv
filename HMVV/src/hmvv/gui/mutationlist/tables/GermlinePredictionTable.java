@@ -5,7 +5,7 @@ import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
 import hmvv.gui.mutationlist.tablemodels.GermlinePredictionTableModel;
 import hmvv.main.HMVVFrame;
 
-public class GermlinePredictionTable extends CommonTable{
+public class GermlinePredictionTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
 
 	public GermlinePredictionTable(HMVVFrame parent, GermlinePredictionTableModel model){
@@ -14,12 +14,12 @@ public class GermlinePredictionTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 7);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 3);
 	}
 	
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
-		if(column == 7){
+		if(column == 4){
 			searchCosmic();
 		}
 	}

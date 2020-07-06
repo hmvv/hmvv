@@ -7,7 +7,7 @@ import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
 import hmvv.model.Mutation;
 
-public class GermlineSNPEFFTable extends CommonTable{
+public class GermlineSNPEFFTable extends CommonTableGermline{
         private static final long serialVersionUID = 1L;
 
         public GermlineSNPEFFTable(HMVVFrame parent, GermlineSNPEFFTableModel model){
@@ -16,14 +16,14 @@ public class GermlineSNPEFFTable extends CommonTable{
 
         @Override
         protected HMVVTableColumn[] constructCustomColumns(){
-            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 7, 8);
+            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 2,3);
         }
 
         @Override
         protected void handleMousePressed(int column) throws Exception{
-           if(column == 7){
+           if(column == 4){
                searchGoogleForDNAChange();
-           }else if(column == 8){
+           }else if(column == 4){
                 searchGoogleForProteinChange();
            }
         }

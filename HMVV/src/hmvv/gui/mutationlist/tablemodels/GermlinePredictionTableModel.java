@@ -2,27 +2,26 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-public class GermlinePredictionTableModel extends CommonTableModel {
+public class GermlinePredictionTableModel extends CommonTableModelGermline {
 	private static final long serialVersionUID = 1L;
 
 
-	public GermlinePredictionTableModel(MutationList mutationList){
+	public GermlinePredictionTableModel(MutationListGermline mutationList){
 		super(mutationList);
 	}
 	
-	protected ArrayList<MutationTableModelColumn> constructColumns(){
-		ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
-		columns.add(MutationTableModelColumn.reportedColumn);
+	protected ArrayList<MutationTableModelColumnGermline> constructColumns(){
+		ArrayList<MutationTableModelColumnGermline> columns = new ArrayList<MutationTableModelColumnGermline>();
+		columns.add(MutationTableModelColumnGermline.reportedColumn);
 
-		columns.add(MutationTableModelColumn.geneColumn);
-		columns.add(MutationTableModelColumn.exonsColumn);
+		columns.add(MutationTableModelColumnGermline.geneColumn);
+		columns.add(MutationTableModelColumnGermline.exonsColumn);
 
-		columns.add(MutationTableModelColumn.chrColumn);
-		columns.add(MutationTableModelColumn.posColumn);
-		columns.add(MutationTableModelColumn.refColumn);
-		columns.add(MutationTableModelColumn.altColumn);
+		columns.add(MutationTableModelColumnGermline.chrColumn);
+		columns.add(MutationTableModelColumnGermline.posColumn);
+		columns.add(MutationTableModelColumnGermline.refColumn);
+		columns.add(MutationTableModelColumnGermline.altColumn);
 
-		columns.add(MutationTableModelColumn.cosmicIDColumn);
 		return columns;
 	}
 }

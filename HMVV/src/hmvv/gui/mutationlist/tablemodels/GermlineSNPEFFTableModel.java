@@ -1,38 +1,40 @@
 package hmvv.gui.mutationlist.tablemodels;
 
+import hmvv.gui.mutationlist.tables.CommonTableGermline;
+
 import java.util.ArrayList;
 
-public class GermlineSNPEFFTableModel extends CommonTableModel  {
+public class GermlineSNPEFFTableModel extends CommonTableModelGermline {
 
     private static final long serialVersionUID = 1L;
 
 
-    public GermlineSNPEFFTableModel(MutationList mutationList){
+    public GermlineSNPEFFTableModel(MutationListGermline mutationList){
         super(mutationList);
     }
 
-    protected ArrayList<MutationTableModelColumn> constructColumns(){
-        ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
-        columns.add(MutationTableModelColumn.reportedColumn);
+    protected ArrayList<MutationTableModelColumnGermline> constructColumns(){
+        ArrayList<MutationTableModelColumnGermline> columns = new ArrayList<MutationTableModelColumnGermline>();
+        columns.add(MutationTableModelColumnGermline.reportedColumn);
 
-        columns.add(MutationTableModelColumn.geneColumn);
-        columns.add(MutationTableModelColumn.exonsColumn);
+        columns.add(MutationTableModelColumnGermline.geneColumn);
+        columns.add(MutationTableModelColumnGermline.exonsColumn);
 
-        columns.add(MutationTableModelColumn.chrColumn);
-        columns.add(MutationTableModelColumn.posColumn);
-        columns.add(MutationTableModelColumn.refColumn);
-        columns.add(MutationTableModelColumn.altColumn);
+        columns.add(MutationTableModelColumnGermline.chrColumn);
+        columns.add(MutationTableModelColumnGermline.posColumn);
+        columns.add(MutationTableModelColumnGermline.refColumn);
+        columns.add(MutationTableModelColumnGermline.altColumn);
 
-        columns.add(MutationTableModelColumn.HGVScColumn);
-        columns.add(MutationTableModelColumn.HGVSpColumn);
+        columns.add(MutationTableModelColumnGermline.HGVScColumn);
+        columns.add(MutationTableModelColumnGermline.HGVSpColumn);
 
-        columns.add(MutationTableModelColumn.variantClassificationColumn);
-        columns.add(MutationTableModelColumn.typeColumn);
-        columns.add(MutationTableModelColumn.altFreqColumn);
-        columns.add(MutationTableModelColumn.readDPColumn);
-        columns.add(MutationTableModelColumn.altReadDPColumn);
+        columns.add(MutationTableModelColumnGermline.variantClassificationColumn);
+        columns.add(MutationTableModelColumnGermline.typeColumn);
+        columns.add(MutationTableModelColumnGermline.altFreqColumn);
+        columns.add(MutationTableModelColumnGermline.readDPColumn);
+        columns.add(MutationTableModelColumnGermline.altReadDPColumn);
 
-        columns.add(MutationTableModelColumn.ConsequenceColumn);
+        columns.add(MutationTableModelColumnGermline.ConsequenceColumn);
 
 
         return columns;

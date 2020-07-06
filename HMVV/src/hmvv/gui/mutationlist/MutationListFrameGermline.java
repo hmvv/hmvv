@@ -33,11 +33,6 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	private GermlineSNPEFFTable vepTabTable;
 	private GermlineSNPEFFTableModel vepTabTableModel;
 
-	private ClinVarTable clinVarTabTable;
-	private ClinVarTableModel clinVarTabTableModel;
-
-	private GnomadTable gnomadTabTable;
-	private GnomadTableModel gnomadTabTableModel;
 
 	private GermlineTranscriptTable germlineTranscriptTable;
 	private GermlineTranscriptTableModel germlineTranscriptTableModel;
@@ -51,18 +46,16 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	private ReportFramePatientHistory reportFrame;
 
 	private JScrollPane vepTabScrollPane;
-	private JScrollPane clinVarTabScrollPane;
-	private JScrollPane gnomadTabScrollPane;
 	private JScrollPane germlineTranscriptScrollPane;
 	private JScrollPane germlinePredictionScrollPane;
 	private JScrollPane patientHistoryTabScrollPane;
 	private JScrollPane germlineCardiacAtlasScrollPane;
 
-	private MutationList mutationList;
-	private MutationListFilters mutationListFilters;
+	private MutationListGermline mutationList;
+	private MutationListFiltersGermline mutationListFilters;
 
 	private JTabbedPane tabbedPane;
-	private CommonTable selectedTable;
+	private CommonTableGermline selectedTable;
 	private JScrollPane selectedScrollPane;
 
 	private Sample sample;
@@ -70,7 +63,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 
 	private volatile boolean isWindowClosed;
 
-	public MutationListFrameGermline(HMVVFrame parent, Sample sample, MutationList mutationList){
+	public MutationListFrameGermline(HMVVFrame parent, Sample sample, MutationListGermline mutationList){
 		super();
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
@@ -79,7 +72,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		this.parent = parent;
 		this.mutationList = mutationList;
 		this.sample = sample;
-		this.mutationListFilters = new MutationListFilters();
+		this.mutationListFilters = new MutationListFiltersGermline();
 		
 		constructComponents();
 		layoutComponents();
@@ -124,14 +117,6 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		vepTabTable = new GermlineSNPEFFTable(parent, vepTabTableModel);
 		vepTabTable.setAutoCreateRowSorter(true);
 
-		clinVarTabTableModel = new ClinVarTableModel(mutationList);
-		clinVarTabTable = new ClinVarTable(parent, clinVarTabTableModel);
-		clinVarTabTable.setAutoCreateRowSorter(true);
-
-		gnomadTabTableModel = new GnomadTableModel(mutationList);
-		gnomadTabTable = new GnomadTable(parent, gnomadTabTableModel);
-		gnomadTabTable.setAutoCreateRowSorter(true);
-
 		germlineTranscriptTableModel = new GermlineTranscriptTableModel(mutationList);
 		germlineTranscriptTable = new GermlineTranscriptTable(parent, germlineTranscriptTableModel);
 		germlineTranscriptTable.setAutoCreateRowSorter(true);
@@ -150,13 +135,9 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	private void layoutComponents(){
 
 		vepTabScrollPane = new JScrollPane(vepTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		clinVarTabScrollPane = new JScrollPane(clinVarTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		gnomadTabScrollPane = new JScrollPane(gnomadTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("VEP", null, vepTabScrollPane, null);
-		tabbedPane.addTab("ClinVar", null, clinVarTabScrollPane, null);
-		tabbedPane.addTab("Gnomad", null, gnomadTabScrollPane, null);
 		tabbedPane.addTab("CardiacAtlas", null, germlineCardiacAtlasScrollPane, null);
 		tabbedPane.addTab("Transcript", null, germlineTranscriptScrollPane, null);
 		tabbedPane.addTab("Prediction", null, germlinePredictionScrollPane, null);
@@ -167,7 +148,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 			tabbedPane.addTab("Patient History", null, patientHistoryTabScrollPane, null);
 		}else{
 			tabbedPane.addTab("Patient History", null, null);
-			tabbedPane.setEnabledAt(6, false);
+			tabbedPane.setEnabledAt(4, false);
 		}
 
 		selectedTable = vepTabTable;
@@ -206,13 +187,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	        	if(selectedIndex == 0){
 					selectedTable = vepTabTable;
 					selectedScrollPane = vepTabScrollPane;
-				}else if(selectedIndex == 1){
-					selectedTable = clinVarTabTable;
-					selectedScrollPane = clinVarTabScrollPane;
-				}else if(selectedIndex == 2){
-					selectedTable = gnomadTabTable;
-					selectedScrollPane = gnomadTabScrollPane;
-	        	}else{
+				}else{
 	        		//undefined
 	        		return;
 	        	}
@@ -227,9 +202,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	    });
 	}
 	
-	void exportReport(File exportFile) throws IOException {
-		MutationReportGenerator.exportReportGermline(exportFile, clinVarTabTableModel);
-	}	
+
 	
 	public void disableInputForAsynchronousLoad() {
 		if(sample != null) {

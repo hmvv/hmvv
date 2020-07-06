@@ -2,6 +2,7 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
+import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
@@ -32,13 +33,13 @@ public class MutationFilterPanelGermline extends JPanel {
 
 	private Sample sample;
     private MutationListFrameGermline parent;
-	private MutationList mutationList;
-	private MutationListFilters mutationListFilters;
+	private MutationListGermline mutationList;
+	private MutationListFiltersGermline mutationListFilters;
 
     private JButton resetButton;
     private LoadIGVButton loadIGVButton;
 
-	MutationFilterPanelGermline(MutationListFrameGermline parent, Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
+	MutationFilterPanelGermline(MutationListFrameGermline parent, Sample sample, MutationListGermline mutationList, MutationListFiltersGermline mutationListFilters){
 		this.parent = parent;
 	    this.sample = sample;
 		this.mutationList = mutationList;
