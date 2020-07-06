@@ -88,6 +88,11 @@ public class DatabaseCommands {
 		DatabaseCommands_Mutations.updateReportedStatus(setToReported, sampleID, coordinate);
 	}
 
+	public static ArrayList<GermlineMutation> getGermlineMutationsBySample(Sample sample) throws Exception{
+		return DatabaseCommands_Mutations.getGermlineMutationDataByID(sample);
+	}
+
+
 	/* ************************************************************************
 	 * Sample Queries
 	 *************************************************************************/

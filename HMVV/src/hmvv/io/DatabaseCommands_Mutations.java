@@ -7,11 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import hmvv.main.Configurations;
-import hmvv.model.Annotation;
-import hmvv.model.Coordinate;
-import hmvv.model.Mutation;
-import hmvv.model.Sample;
-import hmvv.model.VariantPredictionClass;
+import hmvv.model.*;
 
 public class DatabaseCommands_Mutations {
 
@@ -72,9 +68,40 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.close();
 		return mutations;
 	}
-	
 
-	
+
+	public static ArrayList<GermlineMutation> getGermlineMutationDataByID(Sample sample) throws Exception{
+		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
+				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
+				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
+
+				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, "
+
+				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
+
+				+ " t8.AF "
+
+				+ " from sampleVariantsGermline as t2"
+				+ " join samples as t1 on t2.sampleID = t1.sampleID "
+				+ " join assays as t6 on t1.assayID = t6.assayID"
+
+				+ " left join db_clinvar_42019 as t5"
+				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
+
+				+ " left join db_gnomad_r211 as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
+
+				+ " where t2.sampleID = ? ";
+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, ""+sample.sampleID);
+		ResultSet rs = preparedStatement.executeQuery();
+		ArrayList<GermlineMutation> mutations = makeGermlineModel(rs);
+		preparedStatement.close();
+		return mutations;
+	}
+
+
+
 	/**
 	 * Get all reported mutations from the MRN on the provided sample
 	 * @param sample
@@ -308,6 +335,67 @@ public class DatabaseCommands_Mutations {
 
 			//temp holder fields - filled later separately
 			mutation.setCosmicID(getStringOrBlank(rs, "cosmicID"));
+			mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
+
+
+			//annotation history
+			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation);
+			mutation.setAnnotationHistory(annotationHistory);
+
+			//gnomad
+			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
+			if(gnomadAllFreq != null) {
+				mutation.setGnomad_allfreq(gnomadAllFreq);
+			}
+
+			mutations.add(mutation);
+		}
+		return mutations;
+	}
+
+	private static ArrayList<GermlineMutation> makeGermlineModel(ResultSet rs) throws Exception{
+		ArrayList<GermlineMutation> mutations = new ArrayList<GermlineMutation>();
+
+		while(rs.next()){
+			GermlineMutation mutation = new GermlineMutation();
+
+			//common
+			boolean reported = Integer.parseInt(rs.getString("reported")) != 0;
+			mutation.setReported(reported);
+			mutation.setGene(getStringOrBlank(rs, "gene"));
+			mutation.setExons(getStringOrBlank(rs, "exon"));
+			mutation.setChr(getStringOrBlank(rs, "chr"));
+			mutation.setPos(getStringOrBlank(rs, "pos"));
+			mutation.setRef(getStringOrBlank(rs, "ref"));
+			mutation.setAlt(getStringOrBlank(rs, "alt"));
+			VariantPredictionClass variantPredictionClass = VariantPredictionClass.createPredictionClass(getStringOrBlank(rs, "impact"));
+			mutation.setVariantPredictionClass(variantPredictionClass);
+			mutation.setType(getStringOrBlank(rs, "type"));
+			mutation.setAltFreq(getDoubleOrNull(rs, "altFreq"));
+			mutation.setReadDP(getIntegerOrNull(rs, "readDepth"));
+			mutation.setAltReadDP(getIntegerOrNull(rs, "altReadDepth"));
+			mutation.setConsequence(getStringOrBlank(rs, "consequence"));
+			mutation.setHGVSc(getStringOrBlank(rs, "HGVSc"));
+			mutation.setHGVSp(getStringOrBlank(rs, "HGVSp"));
+
+
+			//Sample
+			mutation.setLastName(getStringOrBlank(rs, "lastName"));
+			mutation.setFirstName(getStringOrBlank(rs, "firstName"));
+			mutation.setOrderNumber(getStringOrBlank(rs, "orderNumber"));
+			mutation.setAssay(getStringOrBlank(rs, "assayName"));
+			mutation.setSampleID(getIntegerOrNull(rs, "sampleID"));
+
+
+			//ClinVar
+			mutation.setClinvarID(getStringOrBlank(rs, "clinvarID"));
+			mutation.setClinicaldisease(getStringOrBlank(rs, "cln_disease"));
+			mutation.setClinicalsignificance(getStringOrBlank(rs, "cln_significance"));
+			mutation.setClinicalconsequence(getStringOrBlank(rs, "cln_consequence"));
+			mutation.setClinicalorigin(getStringOrBlank(rs, "cln_origin"));
+
+
+			//temp holder fields - filled later separately
 			mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
 
 

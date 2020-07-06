@@ -12,6 +12,7 @@ import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.MutationFilterPanel.ServerTask;
 import hmvv.gui.mutationlist.MutationFilterPanelGermline.ServerTaskGermline;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
+import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
 import hmvv.main.Configurations;
 import hmvv.main.Configurations.USER_TYPE;
 import hmvv.main.Configurations.USER_FUNCTION;
@@ -399,7 +400,7 @@ public class SSHConnection {
 
 	}
 
-	public static String createTempParametersFileGermline(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerTaskGermline serverTask) throws Exception {
+	public static String createTempParametersFileGermline(Sample sample, MutationListGermline mutationList, JButton loadIGVButton, ServerTaskGermline serverTask) throws Exception {
 
 		//create a local temp file
 		int bamCoverage = 25;
