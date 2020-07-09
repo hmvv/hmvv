@@ -2,13 +2,13 @@ package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineCardiacAtlasTableModel;
-import hmvv.gui.mutationlist.tablemodels.GermlineTranscriptTableModel;
+import hmvv.gui.mutationlist.tablemodels.GermlineGnomadTableModel;
 import hmvv.main.HMVVFrame;
 
-public class GermlineCardiacAtlasTable extends CommonTableGermline{
+public class GermlineGnomadTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
 
-	public GermlineCardiacAtlasTable(HMVVFrame parent, GermlineCardiacAtlasTableModel model){
+	public GermlineGnomadTable(HMVVFrame parent, GermlineGnomadTableModel model){
 		super(parent, model);
 	}
 
@@ -19,7 +19,7 @@ public class GermlineCardiacAtlasTable extends CommonTableGermline{
 
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
-		if(column == 0){
+		if(column == 4){
 //			searchCosmic();
 		}
 	}

@@ -5,6 +5,7 @@ import hmvv.gui.mutationlist.tablemodels.GermlineSNPEFFTableModel;
 import hmvv.gui.mutationlist.tablemodels.VEPTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
+import hmvv.model.GermlineMutation;
 import hmvv.model.Mutation;
 
 public class GermlineSNPEFFTable extends CommonTableGermline{
@@ -22,17 +23,8 @@ public class GermlineSNPEFFTable extends CommonTableGermline{
         @Override
         protected void handleMousePressed(int column) throws Exception{
            if(column == 4){
-               searchGoogleForDNAChange();
-           }else if(column == 4){
-                searchGoogleForProteinChange();
+//               searchGoogleForDNAChange();
            }
         }
 
-    private void searchPubmed() throws Exception{
-        Mutation mutation = getSelectedMutation();
-        String pubmed = mutation.getPubmed();
-        if(!pubmed.equals("") && !pubmed.equals("null")){
-            InternetCommands.searchPubmed(pubmed);
-        }
-    }
 }

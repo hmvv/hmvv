@@ -4,7 +4,7 @@ import hmvv.main.Configurations;
 
 import java.util.ArrayList;
 
-public class GermlineMutation extends Mutation {
+public class GermlineMutation{
 
     //common
     private boolean reported;
@@ -43,6 +43,80 @@ public class GermlineMutation extends Mutation {
     private String assay;
     private Integer sampleID;
 
+    //ClinVar
+    private String clinvarID;
+    private String clinicaldisease;
+    private String clinicalsignificance;
+    private String clinicalconsequence;
+    private String clinicalorigin;
+
+    //gnomad
+    private Double gnomad_allfreq;
+    private Double gnomad_allfreq_afr;
+    private Double gnomad_allfreq_amr;
+    private Double gnomad_allfreq_asj;
+    private Double gnomad_allfreq_eas;
+    private Double gnomad_allfreq_fin;
+    private Double gnomad_allfreq_nfe;
+    private Double gnomad_allfreq_sas;
+    private Double gnomad_allfreq_oth;
+    private Double gnomad_allfreq_male;
+    private Double gnomad_allfreq_female;
+
+    //cardiac_atlas
+    private String cds_variant;
+    private String protein_variant;
+    private String variant_type;
+
+
+    public String getClinvarID() {
+        return clinvarID;
+    }
+
+    public void setClinvarID(String clinvarID) {
+        this.clinvarID = clinvarID;
+    }
+
+    public String getClinicaldisease() {
+        return clinicaldisease;
+    }
+
+    public void setClinicaldisease(String clinicaldisease) {
+        this.clinicaldisease = clinicaldisease;
+    }
+
+    public String getClinicalsignificance() {
+        return clinicalsignificance;
+    }
+
+    public void setClinicalsignificance(String clinicalsignificance) {
+        this.clinicalsignificance = clinicalsignificance;
+    }
+
+    public String getClinicalconsequence() {
+        return clinicalconsequence;
+    }
+
+    public void setClinicalconsequence(String clinicalconsequence) {
+        this.clinicalconsequence = clinicalconsequence;
+    }
+
+    public String getClinicalorigin() {
+        return clinicalorigin;
+    }
+
+    public void setClinicalorigin(String clinicalorigin) {
+        this.clinicalorigin = clinicalorigin;
+    }
+
+
+    public Double getGnomad_allfreq() {
+        return gnomad_allfreq;
+    }
+
+    public void setGnomad_allfreq(Double gnomad_allfreq) {
+        this.gnomad_allfreq = gnomad_allfreq;
+    }
 
 
     public GermlineMutation() {
@@ -125,6 +199,29 @@ public class GermlineMutation extends Mutation {
         HGVSp = hGVSp;
     }
 
+    public String getAlt_transcript_start() {
+        return alt_transcript_start;
+    }
+
+    public void setAlt_transcript_start(String alt_transcript_start) {
+        this.alt_transcript_start = alt_transcript_start;
+    }
+
+    public String getAlt_transcript_end() {
+        return alt_transcript_end;
+    }
+
+    public void setAlt_transcript_end(String alt_transcript_end) {
+        this.alt_transcript_end = alt_transcript_end;
+    }
+
+    public String getAlt_transcript_position() {
+        return alt_transcript_position;
+    }
+
+    public void setAlt_transcript_position(String alt_transcript_position) {
+        this.alt_transcript_position = alt_transcript_position;
+    }
 
     public String getType() {
         return type;
@@ -254,6 +351,109 @@ public class GermlineMutation extends Mutation {
         this.sampleID = sampleID;
     }
 
+    public Double getGnomad_allfreq_afr() {
+        return gnomad_allfreq_afr;
+    }
+
+    public void setGnomad_allfreq_afr(Double gnomad_allfreq_afr) {
+        this.gnomad_allfreq_afr = gnomad_allfreq_afr;
+    }
+
+    public Double getGnomad_allfreq_amr() {
+        return gnomad_allfreq_amr;
+    }
+
+    public void setGnomad_allfreq_amr(Double gnomad_allfreq_amr) {
+        this.gnomad_allfreq_amr = gnomad_allfreq_amr;
+    }
+
+    public Double getGnomad_allfreq_asj() {
+        return gnomad_allfreq_asj;
+    }
+
+    public void setGnomad_allfreq_asj(Double gnomad_allfreq_asj) {
+        this.gnomad_allfreq_asj = gnomad_allfreq_asj;
+    }
+
+    public Double getGnomad_allfreq_eas() {
+        return gnomad_allfreq_eas;
+    }
+
+    public void setGnomad_allfreq_eas(Double gnomad_allfreq_eas) {
+        this.gnomad_allfreq_eas = gnomad_allfreq_eas;
+    }
+
+    public Double getGnomad_allfreq_fin() {
+        return gnomad_allfreq_fin;
+    }
+
+    public void setGnomad_allfreq_fin(Double gnomad_allfreq_fin) {
+        this.gnomad_allfreq_fin = gnomad_allfreq_fin;
+    }
+
+    public Double getGnomad_allfreq_nfe() {
+        return gnomad_allfreq_nfe;
+    }
+
+    public void setGnomad_allfreq_nfe(Double gnomad_allfreq_nfe) {
+        this.gnomad_allfreq_nfe = gnomad_allfreq_nfe;
+    }
+
+    public Double getGnomad_allfreq_sas() {
+        return gnomad_allfreq_sas;
+    }
+
+    public void setGnomad_allfreq_sas(Double gnomad_allfreq_sas) {
+        this.gnomad_allfreq_sas = gnomad_allfreq_sas;
+    }
+
+    public Double getGnomad_allfreq_oth() {
+        return gnomad_allfreq_oth;
+    }
+
+    public void setGnomad_allfreq_oth(Double gnomad_allfreq_oth) {
+        this.gnomad_allfreq_oth = gnomad_allfreq_oth;
+    }
+
+    public Double getGnomad_allfreq_male() {
+        return gnomad_allfreq_male;
+    }
+
+    public void setGnomad_allfreq_male(Double gnomad_allfreq_male) {
+        this.gnomad_allfreq_male = gnomad_allfreq_male;
+    }
+
+    public Double getGnomad_allfreq_female() {
+        return gnomad_allfreq_female;
+    }
+
+    public void setGnomad_allfreq_female(Double gnomad_allfreq_female) {
+        this.gnomad_allfreq_female = gnomad_allfreq_female;
+    }
+
+    public String getCds_variant() {
+        return cds_variant;
+    }
+
+    public void setCds_variant(String cds_variant) {
+        this.cds_variant = cds_variant;
+    }
+
+    public String getProtein_variant() {
+        return protein_variant;
+    }
+
+    public void setProtein_variant(String protein_variant) {
+        this.protein_variant = protein_variant;
+    }
+
+    public String getVariant_type() {
+        return variant_type;
+    }
+
+    public void setVariant_type(String variant_type) {
+        this.variant_type = variant_type;
+    }
 
     public void addAnnotation(Annotation annotation) {
         annotationHistory.add(annotation);

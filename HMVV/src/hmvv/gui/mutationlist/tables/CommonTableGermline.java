@@ -11,10 +11,7 @@ import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
-import hmvv.model.Annotation;
-import hmvv.model.Coordinate;
-import hmvv.model.GeneAnnotation;
-import hmvv.model.Mutation;
+import hmvv.model.*;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -142,10 +139,10 @@ public abstract class CommonTableGermline extends JTable{
 		((DefaultTableCellRenderer)getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.LEFT);
 	}
 	
-	protected final Mutation getSelectedMutation(){
+	protected final GermlineMutation getSelectedMutation(){
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
-		Mutation mutation = model.getMutation(modelRow);
+		GermlineMutation mutation = model.getMutation(modelRow);
 		return mutation;
 	}
 	
@@ -191,25 +188,7 @@ public abstract class CommonTableGermline extends JTable{
 	    }
 	}
 	
-	protected void searchGoogleForGene() throws Exception{
-		Mutation mutation = getSelectedMutation();
-		InternetCommands.searchGene(mutation.getGene());
-	}
 
-	protected void searchGoogleForDNAChange() throws Exception{
-		Mutation mutation = getSelectedMutation();
-		String change = mutation.getHGVSc();
-		searchGoogleForMutation(mutation, change);
-	}
-
-	protected void searchGoogleForProteinChange() throws Exception{
-		Mutation mutation = getSelectedMutation();
-		String change = mutation.getHGVSp();
-		searchGoogleForMutation(mutation, change);
-		
-		String abbreviatedChange = Configurations.abbreviationtoLetter(change);
-		searchGoogleForMutation(mutation, abbreviatedChange);
-	}
 	
 	protected void searchGoogleForMutation(Mutation mutation, String change) throws Exception{
 		String gene = mutation.getGene();
@@ -219,28 +198,11 @@ public abstract class CommonTableGermline extends JTable{
 		InternetCommands.searchGoogle(search);
 	}
 	
-	protected void searchSNP() throws Exception{
-		Mutation mutation = getSelectedMutation();
-		String dbSNP = mutation.getDbSNPID();
-		if(!dbSNP.equals("")){
-			InternetCommands.searchSNP(dbSNP);
-		}
-	}
 
-	protected void searchCosmic(){
-		Mutation mutation = getSelectedMutation();
-		if(mutation.getCosmicID().size() > 0){
-			try {
-				CosmicInfoPopup.handleCosmicClick(parent, mutation);
-			} catch (Exception e) {
-				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error locating Cosmic Info.");
-			}
-		}
-	}
 
 	protected void handleAnnotationClick() throws Exception{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		Mutation mutation = getSelectedMutation();		
+		GermlineMutation mutation = getSelectedMutation();
 		String gene = mutation.getGene();
 		
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
@@ -267,7 +229,7 @@ public abstract class CommonTableGermline extends JTable{
 			try {
 				if(e.getColumn() == 0){
 					int row = e.getFirstRow();
-					Mutation mutation = model.getMutation(row);
+					GermlineMutation mutation = model.getMutation(row);
 					Boolean reported = mutation.isReported();
 					Integer sampleID = mutation.getSampleID();
 					Coordinate coordinate = mutation.getCoordinate();

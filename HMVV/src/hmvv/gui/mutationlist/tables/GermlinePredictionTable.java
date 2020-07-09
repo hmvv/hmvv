@@ -20,7 +20,7 @@ public class GermlinePredictionTable extends CommonTableGermline{
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
 		if(column == 4){
-			searchCosmic();
+//			searchCosmic();
 		}
 	}
 }

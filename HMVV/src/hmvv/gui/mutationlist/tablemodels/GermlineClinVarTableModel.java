@@ -2,11 +2,11 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-public class GermlineTranscriptTableModel extends CommonTableModelGermline {
+public class GermlineClinVarTableModel extends CommonTableModelGermline {
 	private static final long serialVersionUID = 1L;
 
 
-	public GermlineTranscriptTableModel(MutationListGermline mutationList){
+	public GermlineClinVarTableModel(MutationListGermline mutationList){
 		super(mutationList);
 	}
 	
@@ -22,11 +22,13 @@ public class GermlineTranscriptTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.refColumn);
 		columns.add(MutationTableModelColumnGermline.altColumn);
 
-		columns.add(MutationTableModelColumnGermline.HGVSpColumn);
+		columns.add(MutationTableModelColumnGermline.clinvarID);
 
-		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_START);
-		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_END);
-		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_POSITION);
+		columns.add(MutationTableModelColumnGermline.originColumn);
+		columns.add(MutationTableModelColumnGermline.clinicalDisease);
+		columns.add(MutationTableModelColumnGermline.clinicalSignificance);
+		columns.add(MutationTableModelColumnGermline.clinicalConsequence);
+
 		return columns;
 	}
 }

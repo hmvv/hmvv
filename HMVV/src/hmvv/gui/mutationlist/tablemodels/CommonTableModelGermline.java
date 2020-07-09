@@ -1,5 +1,6 @@
 package hmvv.gui.mutationlist.tablemodels;
 
+import hmvv.model.GermlineMutation;
 import hmvv.model.Mutation;
 
 import javax.swing.table.AbstractTableModel;
@@ -19,7 +20,7 @@ public abstract class CommonTableModelGermline extends AbstractTableModel implem
 	
 	protected abstract ArrayList<MutationTableModelColumnGermline> constructColumns();
 	
-	public final Mutation getMutation(int row){
+	public final GermlineMutation getMutation(int row){
 		return mutationList.getMutation(row);
 	}
 	
@@ -55,7 +56,7 @@ public abstract class CommonTableModelGermline extends AbstractTableModel implem
 
 	@Override
 	public  final Object getValueAt(int row, int column) {
-		Mutation mutation = mutationList.getMutation(row);
+		GermlineMutation mutation = mutationList.getMutation(row);
 		return columns.get(column).getValue(mutation);
 	}
 	
