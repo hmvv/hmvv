@@ -16,6 +16,9 @@ public class GermlineSNPEFFTableModel extends CommonTableModelGermline {
     protected ArrayList<MutationTableModelColumnGermline> constructColumns(){
         ArrayList<MutationTableModelColumnGermline> columns = new ArrayList<MutationTableModelColumnGermline>();
         columns.add(MutationTableModelColumnGermline.reportedColumn);
+        columns.add(MutationTableModelColumnGermline.otherReportedColumn);
+        columns.add(MutationTableModelColumnGermline.gotoIGVColumn);
+        columns.add(MutationTableModelColumnGermline.igvLoadColumn);
 
         columns.add(MutationTableModelColumnGermline.geneColumn);
         columns.add(MutationTableModelColumnGermline.exonsColumn);

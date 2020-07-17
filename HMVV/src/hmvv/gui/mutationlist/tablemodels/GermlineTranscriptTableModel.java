@@ -22,7 +22,7 @@ public class GermlineTranscriptTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.refColumn);
 		columns.add(MutationTableModelColumnGermline.altColumn);
 
-		columns.add(MutationTableModelColumnGermline.HGVSpColumn);
+		columns.add(MutationTableModelColumnGermline.HGVScColumn);
 
 		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_START);
 		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_END);

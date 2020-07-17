@@ -22,6 +22,7 @@ public class GermlineGnomadTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.refColumn);
 		columns.add(MutationTableModelColumnGermline.altColumn);
 
+		columns.add(MutationTableModelColumnGermline.gnomadIDColumn);
 		columns.add(MutationTableModelColumnGermline.gnomadAltFreqColumn);
 		columns.add(MutationTableModelColumnGermline.gnomadAltFreq_afrColumn);
 		columns.add(MutationTableModelColumnGermline.gnomadAltFreq_amrColumn);

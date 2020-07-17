@@ -1,5 +1,18 @@
 package hmvv.gui.mutationlist.tables;
 
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.*;
+
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
@@ -12,16 +25,6 @@ import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.*;
-
-import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.util.ArrayList;
 
 public abstract class CommonTableGermline extends JTable{
 	private static final long serialVersionUID = 1L;
@@ -36,38 +39,38 @@ public abstract class CommonTableGermline extends JTable{
 		this.parent = parent;
 		this.model = model;
 		setModel(model);
-		
+
 		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		
+
 		customColumns = constructCustomColumns();
 		formatTable();
 		constructListeners();
 	}
-	
+
 	//Implement table header tool tips.
 	protected JTableHeader createDefaultTableHeader() {
 		return new JTableHeader(columnModel) {
 			private static final long serialVersionUID = 1L;
-			
+
 			public String getToolTipText(MouseEvent e) {
 				int index = table.columnAtPoint(e.getPoint());
 				int realIndex = table.convertColumnIndexToModel(index);
 				if(realIndex >= 0) {
-					return model.getColumnDescription(realIndex);					
+					return model.getColumnDescription(realIndex);
 				}else {
 					return "";
 				}
 			}
 		};
 	}
-	
+
 	/**
 	 * Can be overwritten by subclasses to create different behaviors
 	 * @return
 	 */
 	protected abstract HMVVTableColumn[] constructCustomColumns();
-	
+
 	private void constructListeners(){
 		addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
@@ -97,9 +100,9 @@ public abstract class CommonTableGermline extends JTable{
 		});
 		model.addTableModelListener(new ReportedCheckboxChangeListener());
 	}
-	
+
 	protected abstract void handleMousePressed(int column) throws Exception;
-	
+
 	@Override
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
 		Component c = super.prepareRenderer(renderer, row, column);
@@ -131,95 +134,117 @@ public abstract class CommonTableGermline extends JTable{
 		c.setForeground(customColumns[column].color);
 		return c;
 	}
-	
+
 	private void constructRenderers(){
 		setDefaultRenderer(Boolean.class, new BooleanRenderer());
 		((DefaultTableCellRenderer)getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.LEFT);
 		((DefaultTableCellRenderer)getDefaultRenderer(Double.class)).setHorizontalAlignment(SwingConstants.LEFT);
 		((DefaultTableCellRenderer)getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.LEFT);
 	}
-	
+
 	protected final GermlineMutation getSelectedMutation(){
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
 		GermlineMutation mutation = model.getMutation(modelRow);
 		return mutation;
 	}
-	
+
 	public final CommonTableModelGermline getTableModel(){
 		return model;
 	}
-	
-	@Override 
+
+	@Override
 	public boolean isCellEditable(int row, int column) {
 		return column == 0;
 	}
-	
+
 	private void formatTable(){
 		setAutoCreateRowSorter(true);
 		constructRenderers();
 		resizeColumnWidths();
 	}
-	
+
 	public void resizeColumnWidths() {
-	    TableColumnModel columnModel = getColumnModel();    
-	    int buffer = 12;
-	    if(parent.getWidth() < 1200) {
-	    	buffer = 0;
-	    }
-	    
-	    for (int column = 0; column < getColumnCount(); column++) {
-	        TableColumn tableColumn = columnModel.getColumn(column);
+		TableColumnModel columnModel = getColumnModel();
+		int buffer = 12;
+		if(parent.getWidth() < 1200) {
+			buffer = 0;
+		}
 
-	        TableCellRenderer headerRenderer = getTableHeader().getDefaultRenderer();
-	        Component headerComp = headerRenderer.getTableCellRendererComponent(this, tableColumn.getHeaderValue(), false, false, 0, 0);
-	        
-	    	int minWidth = headerComp.getPreferredSize().width + buffer;
-	    	int maxWidth = 225;
-	    	
-	        int width = minWidth;
-	        for (int row = 0; row < getRowCount(); row++) {
-	            TableCellRenderer renderer = getCellRenderer(row, column);
-	            Component comp = prepareRenderer(renderer, row, column);
-	            width = Math.max(comp.getPreferredSize().width + buffer , width);
-	        }
-	        width = Math.min(maxWidth, width);
-	        columnModel.getColumn(column).setPreferredWidth(width);
-	    }
+		for (int column = 0; column < getColumnCount(); column++) {
+			TableColumn tableColumn = columnModel.getColumn(column);
+
+			TableCellRenderer headerRenderer = getTableHeader().getDefaultRenderer();
+			Component headerComp = headerRenderer.getTableCellRendererComponent(this, tableColumn.getHeaderValue(), false, false, 0, 0);
+
+			int minWidth = headerComp.getPreferredSize().width + buffer;
+			int maxWidth = 225;
+
+			int width = minWidth;
+			for (int row = 0; row < getRowCount(); row++) {
+				TableCellRenderer renderer = getCellRenderer(row, column);
+				Component comp = prepareRenderer(renderer, row, column);
+				width = Math.max(comp.getPreferredSize().width + buffer , width);
+			}
+			width = Math.min(maxWidth, width);
+			columnModel.getColumn(column).setPreferredWidth(width);
+		}
 	}
-	
 
-	
-	protected void searchGoogleForMutation(Mutation mutation, String change) throws Exception{
+	protected void searchGoogleForGene() throws Exception{
+		GermlineMutation mutation = getSelectedMutation();
+		InternetCommands.searchGene(mutation.getGene());
+	}
+
+	protected void searchGoogleForDNAChange() throws Exception{
+		GermlineMutation mutation = getSelectedMutation();
+		String change = mutation.getHGVSc();
+		searchGoogleForMutation(mutation, change);
+	}
+
+	protected void searchGoogleForProteinChange() throws Exception{
+		GermlineMutation mutation = getSelectedMutation();
+		String change = mutation.getHGVSp();
+		searchGoogleForMutation(mutation, change);
+
+		String abbreviatedChange = Configurations.abbreviationtoLetter(change);
+		searchGoogleForMutation(mutation, abbreviatedChange);
+	}
+
+	protected void searchGoogleForMutation(GermlineMutation mutation, String change) throws Exception{
 		String gene = mutation.getGene();
 		String changeOnly = change.replaceAll(".*:", "");
 		String changeFinal = changeOnly.replaceAll(">", "%3E");
 		String search = gene + "+" + changeFinal;
 		InternetCommands.searchGoogle(search);
 	}
-	
 
-
-	protected void handleAnnotationClick() throws Exception{
-		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+	protected void searchClinvarID() throws Exception{
 		GermlineMutation mutation = getSelectedMutation();
-		String gene = mutation.getGene();
-		
-		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-
-
-//		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, this, parent);
-////		editAnnotation.setVisible(true);
-////		this.setCursor(Cursor.getDefaultCursor());
+		InternetCommands.searchClinvarID(mutation.getClinvarID());
 	}
-	
+
+
+//	protected void handleAnnotationClick() throws Exception{
+//		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+//		Mutation mutation = getSelectedMutation();
+//		String gene = mutation.getGene();
+//
+//		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
+//
+//
+//		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, this, parent);
+//		editAnnotation.setVisible(true);
+//		this.setCursor(Cursor.getDefaultCursor());
+//	}
+
 	public void notifyAnnotationUpdated(Annotation annotation) {
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
 		CommonTableModel model = (CommonTableModel)getModel();
 		model.mutationUpdated(modelRow);
 	}
-	
+
 	/**
 	 * Here we are assuming all tables have the reported field on column 0
 	 */

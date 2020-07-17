@@ -51,6 +51,7 @@ public class GermlineMutation{
     private String clinicalorigin;
 
     //gnomad
+    private String gnomad_id;
     private Double gnomad_allfreq;
     private Double gnomad_allfreq_afr;
     private Double gnomad_allfreq_amr;
@@ -64,6 +65,7 @@ public class GermlineMutation{
     private Double gnomad_allfreq_female;
 
     //cardiac_atlas
+    private String cardiacAtlasId;
     private String cds_variant;
     private String protein_variant;
     private String variant_type;
@@ -433,6 +435,22 @@ public class GermlineMutation{
 
     public String getCds_variant() {
         return cds_variant;
+    }
+
+    public String getGnomad_id() {
+        return gnomad_id;
+    }
+
+    public void setGnomad_id() {
+        this.gnomad_id = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
+    }
+
+    public String getCardiacAtlasId() {
+        return cardiacAtlasId;
+    }
+
+    public void setCardiacAtlasId(String cardiacAtlasGene) {
+        this.cardiacAtlasId = cardiacAtlasGene;
     }
 
     public void setCds_variant(String cds_variant) {

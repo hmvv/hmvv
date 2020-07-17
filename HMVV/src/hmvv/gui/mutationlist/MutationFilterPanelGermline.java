@@ -6,6 +6,7 @@ import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
+import hmvv.model.GermlineMutation;
 import hmvv.model.Mutation;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
@@ -24,6 +25,7 @@ public class MutationFilterPanelGermline extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private JCheckBox reportedOnlyCheckbox;
+	private JCheckBox transcriptFlagCheckbox;
 	private JCheckBox selectAllCheckbox;
 
 	private JTextField textFreqFrom;
@@ -58,6 +60,10 @@ public class MutationFilterPanelGermline extends JPanel {
 		reportedOnlyCheckbox = new JCheckBox("Show Reported Mutations Only");
 		reportedOnlyCheckbox.addActionListener(actionListener);
 		reportedOnlyCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
+
+		transcriptFlagCheckbox = new JCheckBox("Show Flagged Transcripts Only");
+		transcriptFlagCheckbox.addActionListener(actionListener);
+		transcriptFlagCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
 		selectAllCheckbox = new JCheckBox("Select all mutations for IGV");
 		selectAllCheckbox.addActionListener(actionListener);
@@ -134,6 +140,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		//construct filter objects
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
+		mutationListFilters.addTranscriptFlagGermlineFilter(transcriptFlagCheckbox);
 		mutationListFilters.addVariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo);
 		mutationListFilters.addVariantPredicationClassFilter(predictionFilterComboBox);
 	}
@@ -148,6 +155,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		
         checkboxPanel.add(resetButtonPanel);
 		checkboxPanel.add(reportedOnlyCheckbox);
+		checkboxPanel.add(transcriptFlagCheckbox);
 		checkboxPanel.add(selectAllCheckbox);
 		
 		JPanel igvButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -198,6 +206,7 @@ public class MutationFilterPanelGermline extends JPanel {
 
 	void resetFilters(){
 		reportedOnlyCheckbox.setSelected(false);
+		transcriptFlagCheckbox.setSelected(false);
 		selectAllCheckbox.setSelected(false);
 		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
@@ -209,6 +218,7 @@ public class MutationFilterPanelGermline extends JPanel {
 
 	void disableInputForAsynchronousLoad() {
 		reportedOnlyCheckbox.setEnabled(false);
+		transcriptFlagCheckbox.setEnabled(false);
 		loadIGVButton.setEnabled(false);
 		selectAllCheckbox.setEnabled(false);
 		textFreqFrom.setEditable(false);
@@ -220,6 +230,7 @@ public class MutationFilterPanelGermline extends JPanel {
 
 	void enableInputAfterAsynchronousLoad() {
 		reportedOnlyCheckbox.setEnabled(true);
+		transcriptFlagCheckbox.setEnabled(true);
 		loadIGVButton.setEnabled(true);
 		selectAllCheckbox.setEnabled(true);
 		textFreqFrom.setEditable(true);
@@ -235,7 +246,7 @@ public class MutationFilterPanelGermline extends JPanel {
 
     private void handleSelectAllClick(boolean choice) {
 		for (int i = 0; i < mutationList.getMutationCount(); i++) {
-			Mutation mutation = mutationList.getMutation(i);
+			GermlineMutation mutation = mutationList.getMutation(i);
 			if (choice){mutation.setSelected(true);}
 			else {mutation.setSelected(false);}
 		}

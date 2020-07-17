@@ -23,7 +23,7 @@ public class MutationListGermline {
 	}
 	
 	public void updateReportedStatus(boolean reported, int index){
-		Mutation mutation = getMutation(index);
+		GermlineMutation mutation = getMutation(index);
 		mutation.setReported(reported);
 		notifyReportedStatusChanged(index);
 	}
@@ -50,7 +50,7 @@ public class MutationListGermline {
 		notifyDataChanged();
 	}
 	
-	public final Mutation getMutation(int index){
+	public final GermlineMutation getMutation(int index){
 		return mutations.get(index);
 	}
 	
@@ -61,7 +61,7 @@ public class MutationListGermline {
 	public int getSelectedMutationCount() {
 		int count = 0;
 		for (int i = 0; i < mutations.size(); i++) {
-			Mutation mutation = mutations.get(i);
+			GermlineMutation mutation = mutations.get(i);
 			if (mutation.isSelected()) {
 				count++;
 			}
@@ -69,12 +69,12 @@ public class MutationListGermline {
 		return count;
 	}
 
-	public ArrayList<Mutation> getSelectedMutations() {
+	public ArrayList<GermlineMutation> getSelectedMutations() {
 
-		ArrayList<Mutation> selectedMutations = new ArrayList<Mutation>();
+		ArrayList<GermlineMutation> selectedMutations = new ArrayList<GermlineMutation>();
 
 		for (int i = 0; i < mutations.size(); i++){
-			Mutation m = mutations.get(i);
+			GermlineMutation m = mutations.get(i);
 			if (m.isSelected()) {
 				selectedMutations.add(m);
 			}
@@ -86,7 +86,7 @@ public class MutationListGermline {
 		return filteredMutations.size();
 	}
 	
-	public Mutation getFilteredMutation(int index) {
+	public GermlineMutation getFilteredMutation(int index) {
 		return filteredMutations.get(index);
 	}
 	

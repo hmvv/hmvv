@@ -28,6 +28,7 @@ public class GnomadTableModel  extends CommonTableModel  {
             columns.add(MutationTableModelColumn.gnomadID);
             columns.add(MutationTableModelColumn.gnomadAltFreqColumn);
 
+
             return columns;
         }
     }

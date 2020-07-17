@@ -92,6 +92,10 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getGermlineMutationDataByID(sample);
 	}
 
+	public static void updateGermlineCardiacAtlasInfo(GermlineMutation mutation) throws Exception{
+		DatabaseCommands_Mutations.updateGermlineCardiacAtlasInfo(mutation);
+	}
+
 
 	/* ************************************************************************
 	 * Sample Queries

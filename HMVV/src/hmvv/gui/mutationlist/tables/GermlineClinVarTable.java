@@ -14,13 +14,15 @@ public class GermlineClinVarTable extends CommonTableGermline{
 
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 3);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1,7);
 	}
 
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
-		if(column == 4){
-//			searchCosmic();
+		if(column == 1){
+			searchGoogleForGene();
+		}else if(column == 7){
+			searchClinvarID();
 		}
 	}
 }

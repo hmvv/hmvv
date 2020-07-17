@@ -79,7 +79,7 @@ public class DatabaseCommands_Mutations {
 
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
 
-				+ " t8.AF "
+				+ " t8.AF, t8.AF_afr, t8.AF_amr, t8.AF_asj, t8.AF_eas, t8.AF_fin, t8.AF_nfe, t8.AF_sas, t8.AF_oth, t8.AF_male, t8.AF_female "
 
 				+ " from sampleVariantsGermline as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
@@ -88,7 +88,7 @@ public class DatabaseCommands_Mutations {
 				+ " left join db_clinvar_42019 as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 
-				+ " left join db_gnomad_r211 as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
+				+ " left join db_gnomad_r211_lf as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 
 				+ " where t2.sampleID = ? ";
 
@@ -224,6 +224,26 @@ public class DatabaseCommands_Mutations {
 		if(rs.next()){
 			mutation.setCivic_variant_origin(getStringOrBlank(rs, "variant_origin"));
 			mutation.setCivic_variant_url(getStringOrBlank(rs, "variant_civic_url"));
+		}
+		preparedStatement.close();
+	}
+
+
+	static void updateGermlineCardiacAtlasInfo(GermlineMutation mutation) throws Exception{
+		String[] getHGVScArray = mutation.getHGVSc().split("\\:");
+		String cds_variant = getHGVScArray[1];
+
+		String query = "select gene, cds_variant,protein_variant,variant_type from db_cardiac_72020 where gene = ? and cds_variant = ? limit 1";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, mutation.getGene());
+		preparedStatement.setString(2, cds_variant);
+		ResultSet rs = preparedStatement.executeQuery();
+		if(rs.next()){
+			mutation.setCardiacAtlasId(getStringOrBlank(rs, "gene"));
+			mutation.setCds_variant(getStringOrBlank(rs, "cds_variant"));
+			mutation.setProtein_variant(getStringOrBlank(rs, "protein_variant"));
+			mutation.setVariant_type(getStringOrBlank(rs, "variant_type"));
+
 		}
 		preparedStatement.close();
 	}
@@ -378,6 +398,10 @@ public class DatabaseCommands_Mutations {
 			mutation.setHGVSc(getStringOrBlank(rs, "HGVSc"));
 			mutation.setHGVSp(getStringOrBlank(rs, "HGVSp"));
 
+			//transcript
+			mutation.setAlt_transcript_start(getStringOrBlank(rs,"ALT_TRANSCRIPT_START"));
+			mutation.setAlt_transcript_end(getStringOrBlank(rs,"ALT_TRANSCRIPT_END"));
+			mutation.setAlt_transcript_position(getStringOrBlank(rs,"ALT_VARIANT_POSITION"));
 
 			//Sample
 			mutation.setLastName(getStringOrBlank(rs, "lastName"));
@@ -400,13 +424,25 @@ public class DatabaseCommands_Mutations {
 
 
 			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation);
-			mutation.setAnnotationHistory(annotationHistory);
+//			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation);
+//			mutation.setAnnotationHistory(annotationHistory);
 
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
 			if(gnomadAllFreq != null) {
 				mutation.setGnomad_allfreq(gnomadAllFreq);
+
+				mutation.setGnomad_allfreq_afr(getDoubleOrNull(rs, "AF_afr"));
+				mutation.setGnomad_allfreq_amr(getDoubleOrNull(rs, "AF_amr"));
+				mutation.setGnomad_allfreq_asj(getDoubleOrNull(rs, "AF_asj"));
+				mutation.setGnomad_allfreq_eas(getDoubleOrNull(rs, "AF_eas"));
+				mutation.setGnomad_allfreq_fin(getDoubleOrNull(rs, "AF_fin"));
+				mutation.setGnomad_allfreq_nfe(getDoubleOrNull(rs, "AF_nfe"));
+				mutation.setGnomad_allfreq_sas(getDoubleOrNull(rs, "AF_sas"));
+				mutation.setGnomad_allfreq_oth(getDoubleOrNull(rs, "AF_oth"));
+				mutation.setGnomad_allfreq_male(getDoubleOrNull(rs, "AF_male"));
+				mutation.setGnomad_allfreq_female(getDoubleOrNull(rs, "AF_female"));
+
 			}
 
 			mutations.add(mutation);

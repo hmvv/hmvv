@@ -22,6 +22,7 @@ public class GermlineCardiacAtlasTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.refColumn);
 		columns.add(MutationTableModelColumnGermline.altColumn);
 
+		columns.add(MutationTableModelColumnGermline.cardiacAtlasIDColumn);
 		columns.add(MutationTableModelColumnGermline.cardiac_cdsVariant_Column);
 		columns.add(MutationTableModelColumnGermline.cardiac_proteinVariant_Column);
 		columns.add(MutationTableModelColumnGermline.cardiac_variantType_Column);

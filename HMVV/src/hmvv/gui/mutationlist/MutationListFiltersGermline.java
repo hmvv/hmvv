@@ -76,6 +76,11 @@ public class MutationListFiltersGermline {
 	public void addVariantPredicationClassFilter(JComboBox<VariantPredictionClass> predictionFilterComboBox) {
 		addFilter(new VariantPredicationClassGermlineFilter(predictionFilterComboBox));
 	}
+
+	public void addTranscriptFlagGermlineFilter(JCheckBox transcriptFlagCheckBox) {
+		addFilter(new TranscriptFlagGermlineFilter(transcriptFlagCheckBox));
+	}
+
 }
 
 interface GermlineFilter {
@@ -210,4 +215,22 @@ class VariantPredicationClassGermlineFilter implements GermlineFilter{
 		return false;
 	}
 
+}
+
+class TranscriptFlagGermlineFilter implements GermlineFilter{
+
+	private JCheckBox transcriptFlagCheckBox;
+
+	public TranscriptFlagGermlineFilter(JCheckBox transcriptFlagCheckBox) {
+		this.transcriptFlagCheckBox = transcriptFlagCheckBox;
+	}
+
+	@Override
+	public boolean exclude(GermlineMutation mutation) {
+		boolean includeTranscriptFlagOnly = transcriptFlagCheckBox.isSelected();
+		if(includeTranscriptFlagOnly && mutation.getAlt_transcript_position().equals("MIDDLE")) {
+			return true;
+		}
+		return false;
+	}
 }

@@ -409,14 +409,14 @@ public class SSHConnection {
 		bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
 		bw.newLine();
 
-		ArrayList<Mutation> selectedMutations = mutationList.getSelectedMutations();
+		ArrayList<GermlineMutation> selectedMutations = mutationList.getSelectedMutations();
 
 		// verify chr/position pair is unique
 		ArrayList<Coordinate> selectedCoordinates = new ArrayList<>();
 
 		for (int index = 0; index < selectedMutations.size(); index++) {
 
-			Mutation mutation = selectedMutations.get(index);
+			GermlineMutation mutation = selectedMutations.get(index);
 
 			if (selectedCoordinates.isEmpty()){
 				selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));

@@ -23,7 +23,6 @@ public class GermlineClinVarTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.altColumn);
 
 		columns.add(MutationTableModelColumnGermline.clinvarID);
-
 		columns.add(MutationTableModelColumnGermline.originColumn);
 		columns.add(MutationTableModelColumnGermline.clinicalDisease);
 		columns.add(MutationTableModelColumnGermline.clinicalSignificance);
