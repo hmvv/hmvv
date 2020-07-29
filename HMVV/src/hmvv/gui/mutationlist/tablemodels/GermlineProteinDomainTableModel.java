@@ -2,11 +2,11 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-public class GermlinePredictionTableModel extends CommonTableModelGermline {
+public class GermlineProteinDomainTableModel extends CommonTableModelGermline {
 	private static final long serialVersionUID = 1L;
 
 
-	public GermlinePredictionTableModel(MutationListGermline mutationList){
+	public GermlineProteinDomainTableModel(MutationListGermline mutationList){
 		super(mutationList);
 	}
 	
@@ -21,13 +21,12 @@ public class GermlinePredictionTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.posColumn);
 		columns.add(MutationTableModelColumnGermline.refColumn);
 
-
-		columns.add(MutationTableModelColumnGermline.polyphen_column);
-		columns.add(MutationTableModelColumnGermline.sift_column);
-		columns.add(MutationTableModelColumnGermline.revel_column);
-		columns.add(MutationTableModelColumnGermline.cadd_raw_column);
-		columns.add(MutationTableModelColumnGermline.cadd_phred_column);
-		columns.add(MutationTableModelColumnGermline.canonical_column);
+		columns.add(MutationTableModelColumnGermline.uniprot_variant_column);
+		columns.add(MutationTableModelColumnGermline.nextprot_column);
+		columns.add(MutationTableModelColumnGermline.expasy_column);
+		columns.add(MutationTableModelColumnGermline.uniprot_column);
+		columns.add(MutationTableModelColumnGermline.pfam_column);
+		columns.add(MutationTableModelColumnGermline.scoop_column);
 		return columns;
 	}
 }

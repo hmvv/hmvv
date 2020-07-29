@@ -236,54 +236,54 @@ public class MutationTableModelColumnGermline extends HMVVTableModelColumn{
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_afrColumn = new MutationTableModelColumnGermline("The AFR allele frequency",
-			"AFR",
+			"African American",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_afr());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_amrColumn = new MutationTableModelColumnGermline("The AMR allele frequency",
-			"AMR",
+			"American Admixed/Latino",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_amr());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_asjColumn = new MutationTableModelColumnGermline("The ASJ allele frequency",
-			"ASJ",
+			"Ashkenazi Jewish",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_asj());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_easColumn = new MutationTableModelColumnGermline("The EAS allele frequency",
-			"EAS",
+			"East Asian",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_eas());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_finColumn = new MutationTableModelColumnGermline("The FIN allele frequency",
-			"FIN",
+			"Finnish",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_fin());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_nfeColumn = new MutationTableModelColumnGermline("The NFE allele frequency",
-			"NFE",
+			"Non-Finnish European",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_nfe());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_sasColumn = new MutationTableModelColumnGermline("The SAS allele frequency",
-			"SAS",
+			"South Asian",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_sas());
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_othColumn = new MutationTableModelColumnGermline("The OTHERS allele frequency",
-			"OTH",
+			"Other",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_oth());
 
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_maleColumn = new MutationTableModelColumnGermline("The MALE allele frequency",
-			"MALE",
+			"Male",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_male());
 
 
 	public static final MutationTableModelColumnGermline gnomadAltFreq_femaleColumn = new MutationTableModelColumnGermline("The FEMALE allele frequency",
-			"FEMALE",
+			"Female",
 			Double.class,
 			(GermlineMutation mutation) -> mutation.getGnomad_allfreq_female());
 
@@ -307,6 +307,74 @@ public class MutationTableModelColumnGermline extends HMVVTableModelColumn{
 			"variant-type",
 			String.class,
 			(GermlineMutation mutation) -> mutation.getVariant_type());
+
+	//protein domain
+	public static final MutationTableModelColumnGermline nextprot_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
+			"nextprot",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getNextprot());
+
+
+	public static final MutationTableModelColumnGermline uniprot_column = new MutationTableModelColumnGermline("The protein domain from uniprot database",
+			"uniprot",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getUniprot_id());
+
+	public static final MutationTableModelColumnGermline pfam_column = new MutationTableModelColumnGermline("The protein domain from pfam database",
+			"pfam",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getPfam());
+
+	public static final MutationTableModelColumnGermline scoop_column = new MutationTableModelColumnGermline("The protein domain from scoop database",
+			"scoop",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getScoop());
+	public static final MutationTableModelColumnGermline uniprot_variant_column = new MutationTableModelColumnGermline("The protein domain from nextprot variant database",
+			"uniprot_variant",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getUniprot_variant());
+	public static final MutationTableModelColumnGermline expasy_column = new MutationTableModelColumnGermline("The protein domain from expasy database",
+			"expasy",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getExpasy_id());
+
+	//variant prediction
+	public static final MutationTableModelColumnGermline revel_column = new MutationTableModelColumnGermline("The variant effect prediction from revel database",
+			"revel",
+			Double.class,
+			(GermlineMutation mutation) -> mutation.getRevel());
+
+	public static final MutationTableModelColumnGermline cadd_raw_column = new MutationTableModelColumnGermline("The variant effect prediction from cadd database",
+			"cadd_raw",
+			Double.class,
+			(GermlineMutation mutation) -> mutation.getCadd_raw());
+
+	public static final MutationTableModelColumnGermline cadd_phred_column = new MutationTableModelColumnGermline("The variant effect prediction from cadd database",
+			"cadd_phred",
+			Double.class,
+			(GermlineMutation mutation) -> mutation.getCadd_phred());
+
+	public static final MutationTableModelColumnGermline canonical_column = new MutationTableModelColumnGermline("The variant effect prediction from canonical database",
+			"canonical",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getCanonical());
+	public static final MutationTableModelColumnGermline sift_column = new MutationTableModelColumnGermline("The variant effect prediction from sift database",
+			"sift",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getSift());
+
+	public static final MutationTableModelColumnGermline polyphen_column = new MutationTableModelColumnGermline("The variant effect prediction from polyphen database",
+			"polyphen",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getPolyphen());
+
+
+
+
+
+
+
+
 
 	/**
 	 * The Lambda interface object

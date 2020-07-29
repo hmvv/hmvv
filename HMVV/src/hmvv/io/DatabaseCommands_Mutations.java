@@ -75,6 +75,10 @@ public class DatabaseCommands_Mutations {
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
 				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
 
+				+ " t2.nextprot,t2.uniprot_id, t2.pfam, t2.scoop, t2.uniprot_variant,t2.expasy_id,"
+
+				+ " t2.revel,t2.cadd_raw, t2.cadd_phred, t2.canonical, t2.sift,t2.polyphen,"
+
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, "
 
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
@@ -402,6 +406,22 @@ public class DatabaseCommands_Mutations {
 			mutation.setAlt_transcript_start(getStringOrBlank(rs,"ALT_TRANSCRIPT_START"));
 			mutation.setAlt_transcript_end(getStringOrBlank(rs,"ALT_TRANSCRIPT_END"));
 			mutation.setAlt_transcript_position(getStringOrBlank(rs,"ALT_VARIANT_POSITION"));
+
+			//protein
+			mutation.setNextprot(getStringOrBlank(rs,"nextprot"));
+			mutation.setUniprot_id(getStringOrBlank(rs,"uniprot_id"));
+			mutation.setPfam(getStringOrBlank(rs,"pfam"));
+			mutation.setScoop(getStringOrBlank(rs,"scoop"));
+			mutation.setUniprot_variant(getStringOrBlank(rs,"uniprot_variant"));
+			mutation.setExpasy_id(getStringOrBlank(rs,"expasy_id"));
+
+			//prediction
+			mutation.setRevel(getDoubleOrNull(rs,"revel"));
+			mutation.setCadd_raw(getDoubleOrNull(rs,"cadd_raw"));
+			mutation.setCadd_phred(getDoubleOrNull(rs,"cadd_phred"));
+			mutation.setCanonical(getStringOrBlank(rs,"canonical"));
+			mutation.setSift(getStringOrBlank(rs,"sift"));
+			mutation.setPolyphen(getStringOrBlank(rs,"polyphen"));
 
 			//Sample
 			mutation.setLastName(getStringOrBlank(rs, "lastName"));

@@ -101,4 +101,17 @@ public class InternetCommands {
 	public static void searchClinvarID(String term) throws Exception{
 		browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term +"/");
 	}
+
+	public static void searchExpasyVariant(String term) throws Exception{
+		browseToURL("https://web.expasy.org/variant_pages/" + term +".html");
+	}
+
+	public static void searchUniprotProtein(String term) throws Exception{
+
+		if (term.contains("NP_")){
+			browseToURL("https://www.ncbi.nlm.nih.gov/protein/" + term);
+		} else{
+			browseToURL("https://www.uniprot.org/uniprot/" + term);}
+
+	}
 }

@@ -36,6 +36,9 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	private GermlinePredictionTable predictionTable;
 	private GermlinePredictionTableModel predictionTableModel;
 
+	private GermlineProteinDomainTable proteinDomainTable;
+	private GermlineProteinDomainTableModel proteinDomainTableModel;
+
 	private GermlineCardiacAtlasTable cardiacAtlasTable;
 	private GermlineCardiacAtlasTableModel cardiacAtlasTableModel;
 
@@ -50,6 +53,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	private JScrollPane vepTabScrollPane;
 	private JScrollPane transcriptScrollPane;
 	private JScrollPane predictionScrollPane;
+	private JScrollPane proteinDomainScrollPane;
 	private JScrollPane patientHistoryTabScrollPane;
 	private JScrollPane cardiacAtlasScrollPane;
 	private JScrollPane clinVarScrollPane;
@@ -126,6 +130,10 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		predictionTable = new GermlinePredictionTable(parent, predictionTableModel);
 		predictionTable.setAutoCreateRowSorter(true);
 
+		proteinDomainTableModel = new GermlineProteinDomainTableModel(mutationList);
+		proteinDomainTable = new GermlineProteinDomainTable(parent, proteinDomainTableModel);
+		proteinDomainTable.setAutoCreateRowSorter(true);
+
 		cardiacAtlasTableModel = new GermlineCardiacAtlasTableModel(mutationList);
 		cardiacAtlasTable = new GermlineCardiacAtlasTable(parent, cardiacAtlasTableModel);
 		cardiacAtlasTable.setAutoCreateRowSorter(true);
@@ -147,6 +155,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		cardiacAtlasScrollPane = new JScrollPane(cardiacAtlasTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		transcriptScrollPane = new JScrollPane(transcriptTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		predictionScrollPane = new JScrollPane(predictionTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		proteinDomainScrollPane = new JScrollPane(proteinDomainTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		clinVarScrollPane = new JScrollPane(clinVarTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		gnomadScrollPane = new JScrollPane(gnomadTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
@@ -157,6 +166,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		tabbedPane.addTab("CardiacAtlas", null, cardiacAtlasScrollPane, null);
 		tabbedPane.addTab("Transcript", null, transcriptScrollPane, null);
 		tabbedPane.addTab("Prediction", null, predictionScrollPane, null);
+		tabbedPane.addTab("ProteinDomain", null, proteinDomainScrollPane, null);
 
 		if (patientHistoryAvailable()) {
 			createPatientHistory();
@@ -164,7 +174,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 			tabbedPane.addTab("Patient History", null, patientHistoryTabScrollPane, null);
 		}else{
 			tabbedPane.addTab("Patient History", null, null);
-			tabbedPane.setEnabledAt(6, false);
+			tabbedPane.setEnabledAt(7, false);
 		}
 
 		selectedTable = vepTabTable;
@@ -218,7 +228,10 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 				}else if(selectedIndex == 5){
 					selectedTable = predictionTable;
 					selectedScrollPane = predictionScrollPane;
-	        	} else{
+	        	}else if(selectedIndex == 6){
+					selectedTable = proteinDomainTable;
+					selectedScrollPane = proteinDomainScrollPane;
+				} else{
 	        		//undefined
 	        		return;
 	        	}

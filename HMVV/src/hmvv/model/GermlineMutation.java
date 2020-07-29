@@ -70,6 +70,22 @@ public class GermlineMutation{
     private String protein_variant;
     private String variant_type;
 
+    //protein
+    private String nextprot;
+    private String uniprot_id;
+    private String pfam;
+    private String scoop;
+    private String uniprot_variant;
+    private String expasy_id;
+
+    //prediction
+    private Double revel;
+    private Double cadd_raw;
+    private Double cadd_phred;
+    private String canonical;
+    private String sift;
+    private String polyphen;
+
 
     public String getClinvarID() {
         return clinvarID;
@@ -471,6 +487,106 @@ public class GermlineMutation{
 
     public void setVariant_type(String variant_type) {
         this.variant_type = variant_type;
+    }
+
+    public void setGnomad_id(String gnomad_id) {
+        this.gnomad_id = gnomad_id;
+    }
+
+    public String getNextprot() {
+        return nextprot;
+    }
+
+    public void setNextprot(String nextprot) {
+        this.nextprot = nextprot;
+    }
+
+    public String getUniprot_id() {
+        return uniprot_id;
+    }
+
+    public void setUniprot_id(String uniprot_id) {
+        this.uniprot_id = uniprot_id;
+    }
+
+    public String getPfam() {
+        return pfam;
+    }
+
+    public void setPfam(String pfam) {
+        this.pfam = pfam;
+    }
+
+    public String getScoop() {
+        return scoop;
+    }
+
+    public void setScoop(String scoop) {
+        this.scoop = scoop;
+    }
+
+    public String getUniprot_variant() {
+        return uniprot_variant;
+    }
+
+    public void setUniprot_variant(String uniprot_variant) {
+        this.uniprot_variant = uniprot_variant;
+    }
+
+    public String getExpasy_id() {
+        return expasy_id;
+    }
+
+    public void setExpasy_id(String expasy_id) {
+        this.expasy_id = expasy_id;
+    }
+
+    public Double getRevel() {
+        return revel;
+    }
+
+    public void setRevel(Double revel) {
+        this.revel = revel;
+    }
+
+    public Double getCadd_raw() {
+        return cadd_raw;
+    }
+
+    public void setCadd_raw(Double cadd_raw) {
+        this.cadd_raw = cadd_raw;
+    }
+
+    public Double getCadd_phred() {
+        return cadd_phred;
+    }
+
+    public void setCadd_phred(Double cadd_phred) {
+        this.cadd_phred = cadd_phred;
+    }
+
+    public String getCanonical() {
+        return canonical;
+    }
+
+    public void setCanonical(String canonical) {
+        this.canonical = canonical;
+    }
+
+    public String getSift() {
+        return sift;
+    }
+
+    public void setSift(String sift) {
+        this.sift = sift;
+    }
+
+    public String getPolyphen() {
+        return polyphen;
+    }
+
+    public void setPolyphen(String polyphen) {
+        this.polyphen = polyphen;
     }
 
     public void addAnnotation(Annotation annotation) {

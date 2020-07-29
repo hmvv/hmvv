@@ -31,6 +31,7 @@ public class MutationFilterPanelGermline extends JPanel {
 	private JTextField textFreqFrom;
 	private JTextField textVarFreqTo;
 	private JTextField minReadDepthTextField;
+	private JTextField maxGnomadGlobalFreqTextField;
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
 
 	private Sample sample;
@@ -64,6 +65,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		transcriptFlagCheckbox = new JCheckBox("Show Flagged Transcripts Only");
 		transcriptFlagCheckbox.addActionListener(actionListener);
 		transcriptFlagCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		transcriptFlagCheckbox.setHorizontalTextPosition(SwingConstants.LEFT);
 
 		selectAllCheckbox = new JCheckBox("Select all mutations for IGV");
 		selectAllCheckbox.addActionListener(actionListener);
@@ -130,6 +132,11 @@ public class MutationFilterPanelGermline extends JPanel {
 		minReadDepthTextField.getDocument().addDocumentListener(documentListener);
 		minReadDepthTextField.setColumns(textFieldColumnWidth);
 
+		maxGnomadGlobalFreqTextField = new JTextField();
+		maxGnomadGlobalFreqTextField.getDocument().addDocumentListener(documentListener);
+		maxGnomadGlobalFreqTextField.setColumns(textFieldColumnWidth);
+
+
 		predictionFilterComboBox = new JComboBox<VariantPredictionClass>(VariantPredictionClass.getAllClassifications());
 		predictionFilterComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -138,6 +145,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		});
 		
 		//construct filter objects
+		mutationListFilters.addMaxGnomadFrequencyFilter(maxGnomadGlobalFreqTextField);
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
 		mutationListFilters.addTranscriptFlagGermlineFilter(transcriptFlagCheckbox);
@@ -155,7 +163,6 @@ public class MutationFilterPanelGermline extends JPanel {
 		
         checkboxPanel.add(resetButtonPanel);
 		checkboxPanel.add(reportedOnlyCheckbox);
-		checkboxPanel.add(transcriptFlagCheckbox);
 		checkboxPanel.add(selectAllCheckbox);
 		
 		JPanel igvButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -164,9 +171,8 @@ public class MutationFilterPanelGermline extends JPanel {
 		
 		leftFilterPanel.add(checkboxPanel);
 
-
         JPanel vepPanel = new JPanel(new GridLayout(0,1));
-        vepPanel.add(new JLabel("VEP:"));
+        vepPanel.add(new JLabel("Annotation Filters:"));
 
         JPanel readDepthPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel minReadDepthLabel = new JLabel("Read Depth Min-");
@@ -193,13 +199,31 @@ public class MutationFilterPanelGermline extends JPanel {
         predictionFilterPanel.add(predictionFilterComponentsPanel);
         vepPanel.add(predictionFilterPanel);
 
+		JPanel gnomadGlobalFreqPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel gnomadGlobalFreqLabel = new JLabel("Gnomad Global Frequency Max-");
+		gnomadGlobalFreqLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		gnomadGlobalFreqPanel.add(gnomadGlobalFreqLabel);
+		gnomadGlobalFreqPanel.add(maxGnomadGlobalFreqTextField);
+
+
+
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
+
+		JPanel lastrightFilterPanel = new JPanel();
+
+		JPanel extraFilterPanel = new JPanel(new GridLayout(0,1));
+		extraFilterPanel.add(gnomadGlobalFreqPanel);
+		extraFilterPanel.add(transcriptFlagCheckbox);
+		lastrightFilterPanel.add(extraFilterPanel);
+
 		
         leftFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(leftFilterPanel);
         rightFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(rightFilterPanel);
+		lastrightFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
+		add(lastrightFilterPanel);
 
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
@@ -211,7 +235,8 @@ public class MutationFilterPanelGermline extends JPanel {
 		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
 		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
-		predictionFilterComboBox.setSelectedIndex(1);
+		maxGnomadGlobalFreqTextField.setText(Configurations.GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
+		predictionFilterComboBox.setSelectedIndex(4);
 		applyRowFilters();
 		handleSelectAllClick(false);
 	}
@@ -224,6 +249,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		textFreqFrom.setEditable(false);
 		textVarFreqTo.setEditable(false);
 		minReadDepthTextField.setEditable(false);
+		maxGnomadGlobalFreqTextField.setEditable(false);
 		predictionFilterComboBox.setEnabled(false);
         resetButton.setEnabled(false);
 	}
@@ -236,6 +262,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		textFreqFrom.setEditable(true);
 		textVarFreqTo.setEditable(true);
 		minReadDepthTextField.setEditable(true);
+		maxGnomadGlobalFreqTextField.setEditable(true);
 		predictionFilterComboBox.setEnabled(true);
         resetButton.setEnabled(true);
 	}

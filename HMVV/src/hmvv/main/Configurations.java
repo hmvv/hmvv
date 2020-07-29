@@ -225,6 +225,7 @@ public class Configurations {
 	public static int MAX_OCCURENCE_FILTER = 1000000;
 	public static int ALLELE_FREQ_FILTER = 10;
 	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
+	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 5;
 
 	public static int getAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){
