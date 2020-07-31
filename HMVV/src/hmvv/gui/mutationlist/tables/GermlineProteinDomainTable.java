@@ -16,18 +16,18 @@ public class GermlineProteinDomainTable extends CommonTableGermline{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1,6,8,9);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1,6,13,15,16);
 	}
 	
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
 		if(column == 1){
 			searchGoogleForGene();
-		}else if(column == 6){
+		}else if(column == 13){
 			searchUniprotProteinVariant();
-		}else if(column == 8){
+		}else if(column == 15){
 			searchExpasyVariant();
-		}else if(column == 9){
+		}else if(column == 16){
 			searchUniprotProtein();
 		}
 	}

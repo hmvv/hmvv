@@ -2,6 +2,7 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Mutation;
 
@@ -42,7 +43,7 @@ public class AnnotationDraftFrame extends JFrame {
         annotationTextArea.setWrapStyleWord(true);
         annotationTextArea.setLineWrap(true);
         try {
-        	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate()));
+        	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate(),Configurations.MUTATION_TYPE.SOMATIC));
         } catch (Exception e) {
         	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
         }
@@ -101,7 +102,7 @@ public class AnnotationDraftFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText());
+                    DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText(),Configurations.MUTATION_TYPE.SOMATIC);
                     AnnotationDraftFrame.this.dispose();
                 } catch (Exception e) {
                 	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);

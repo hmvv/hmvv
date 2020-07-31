@@ -25,7 +25,6 @@ public class GermlinePredictionTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.polyphen_column);
 		columns.add(MutationTableModelColumnGermline.sift_column);
 		columns.add(MutationTableModelColumnGermline.revel_column);
-		columns.add(MutationTableModelColumnGermline.cadd_raw_column);
 		columns.add(MutationTableModelColumnGermline.cadd_phred_column);
 		columns.add(MutationTableModelColumnGermline.canonical_column);
 		return columns;

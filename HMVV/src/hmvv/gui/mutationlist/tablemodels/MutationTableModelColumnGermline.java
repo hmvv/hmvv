@@ -152,6 +152,10 @@ public class MutationTableModelColumnGermline extends HMVVTableModelColumn{
 			(GermlineMutation mutation) -> mutation.getHGVSp());
 
     //transcript
+	public static final MutationTableModelColumnGermline TRANSCRIPT_STRAND = new MutationTableModelColumnGermline("Strand direction of the selected transcript.",
+			"Strand",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getTranscript_strand());
 	public static final MutationTableModelColumnGermline ALT_TRANSCRIPT_START = new MutationTableModelColumnGermline("Start genomic location of the selected transcript.",
 			"Start",
 			String.class,
@@ -308,7 +312,41 @@ public class MutationTableModelColumnGermline extends HMVVTableModelColumn{
 			String.class,
 			(GermlineMutation mutation) -> mutation.getVariant_type());
 
+
 	//protein domain
+
+	public static final MutationTableModelColumnGermline protein_id_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
+			"protein_id",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getProtein_id());
+
+
+	public static final MutationTableModelColumnGermline protein_type_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
+			"protein_type",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getProtein_type());
+
+
+	public static final MutationTableModelColumnGermline protein_feature_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
+			"protein_feature",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getProtein_feature());
+
+	public static final MutationTableModelColumnGermline protein_note_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
+			"protein_note",
+			String.class,
+			(GermlineMutation mutation) -> mutation.getProtein_note());
+
+	public static final MutationTableModelColumnGermline protein_start_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
+			"protein_start",
+			Double.class,
+			(GermlineMutation mutation) -> mutation.getProtein_start());
+
+	public static final MutationTableModelColumnGermline protein_end_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
+			"protein_end",
+			Double.class,
+			(GermlineMutation mutation) -> mutation.getProtein_end());
+
 	public static final MutationTableModelColumnGermline nextprot_column = new MutationTableModelColumnGermline("The protein domain from nextprot database",
 			"nextprot",
 			String.class,
@@ -341,17 +379,12 @@ public class MutationTableModelColumnGermline extends HMVVTableModelColumn{
 	//variant prediction
 	public static final MutationTableModelColumnGermline revel_column = new MutationTableModelColumnGermline("The variant effect prediction from revel database",
 			"revel",
-			Double.class,
+			String.class,
 			(GermlineMutation mutation) -> mutation.getRevel());
-
-	public static final MutationTableModelColumnGermline cadd_raw_column = new MutationTableModelColumnGermline("The variant effect prediction from cadd database",
-			"cadd_raw",
-			Double.class,
-			(GermlineMutation mutation) -> mutation.getCadd_raw());
 
 	public static final MutationTableModelColumnGermline cadd_phred_column = new MutationTableModelColumnGermline("The variant effect prediction from cadd database",
 			"cadd_phred",
-			Double.class,
+			String.class,
 			(GermlineMutation mutation) -> mutation.getCadd_phred());
 
 	public static final MutationTableModelColumnGermline canonical_column = new MutationTableModelColumnGermline("The variant effect prediction from canonical database",
@@ -367,13 +400,6 @@ public class MutationTableModelColumnGermline extends HMVVTableModelColumn{
 			"polyphen",
 			String.class,
 			(GermlineMutation mutation) -> mutation.getPolyphen());
-
-
-
-
-
-
-
 
 
 	/**

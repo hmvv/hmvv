@@ -70,14 +70,16 @@ public class DatabaseCommands_Mutations {
 	}
 
 
-	public static ArrayList<GermlineMutation> getGermlineMutationDataByID(Sample sample) throws Exception{
+	public static ArrayList<GermlineMutation> getGermlineMutationDataByID(Sample sample,boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
-				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
+				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.STRAND, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
+
+				+ " t2.protein_id, t2.protein_type, t2.protein_feature, t2.protein_note, t2.protein_start, t2.protein_end ,"
 
 				+ " t2.nextprot,t2.uniprot_id, t2.pfam, t2.scoop, t2.uniprot_variant,t2.expasy_id,"
 
-				+ " t2.revel,t2.cadd_raw, t2.cadd_phred, t2.canonical, t2.sift,t2.polyphen,"
+				+ " t2.revel,t2.cadd_phred, t2.canonical, t2.sift,t2.polyphen,"
 
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, "
 
@@ -95,7 +97,13 @@ public class DatabaseCommands_Mutations {
 				+ " left join db_gnomad_r211_lf as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 
 				+ " where t2.sampleID = ? ";
-
+		String where = " ( t2.altFreq >= " + Configurations.GERMLINE_ALLELE_FREQ_FILTER +
+				" and t2.readDepth >= " + Configurations.GERMLINE_READ_DEPTH_FILTER +
+				" and t8.AF <= " + Configurations.GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER +  ")";
+		if(getFilteredData) {
+			where = " !" + where;
+		}
+		query = query + " and " + where ;
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -115,9 +123,9 @@ public class DatabaseCommands_Mutations {
 	private static void addReportedMutationsByMRN(Sample sample, ArrayList<Mutation> mutations) throws Exception {
 		ArrayList<Mutation> reportedMutations = new ArrayList<Mutation>();
 		for(Sample otherSample : sample.getLinkedPatientSamples()) {
-			reportedMutations.addAll(getMutationDataByID(otherSample, false));			
+			reportedMutations.addAll(getMutationDataByID(otherSample, false));
 		}
-		
+
 		for(Mutation mutation : mutations) {
 			for(Mutation other : reportedMutations) {
 				if(mutation.equals(other)) {
@@ -126,7 +134,7 @@ public class DatabaseCommands_Mutations {
 			}
 		}
 	}
-	
+
 	/**
 	 * Acquires the cosmicID from the database. If it isn't found, an empty array is returned
 	 */
@@ -300,7 +308,7 @@ public class DatabaseCommands_Mutations {
 		updateStatement.executeUpdate();
 		updateStatement.close();
 	}
-	
+
 	private static ArrayList<Mutation> makeModel(ResultSet rs) throws Exception{
 		ArrayList<Mutation> mutations = new ArrayList<Mutation>();
 
@@ -403,11 +411,18 @@ public class DatabaseCommands_Mutations {
 			mutation.setHGVSp(getStringOrBlank(rs, "HGVSp"));
 
 			//transcript
+			mutation.setTranscript_strand(getStringOrBlank(rs,"STRAND"));
 			mutation.setAlt_transcript_start(getStringOrBlank(rs,"ALT_TRANSCRIPT_START"));
 			mutation.setAlt_transcript_end(getStringOrBlank(rs,"ALT_TRANSCRIPT_END"));
 			mutation.setAlt_transcript_position(getStringOrBlank(rs,"ALT_VARIANT_POSITION"));
 
 			//protein
+			mutation.setProtein_id(getStringOrBlank(rs,"protein_id"));
+			mutation.setProtein_type(getStringOrBlank(rs,"protein_type"));
+			mutation.setProtein_feature(getStringOrBlank(rs,"protein_feature"));
+			mutation.setProtein_note(getStringOrBlank(rs,"protein_note"));
+			mutation.setProtein_start(getDoubleOrNull(rs,"protein_start"));
+			mutation.setProtein_end(getDoubleOrNull(rs,"protein_end"));
 			mutation.setNextprot(getStringOrBlank(rs,"nextprot"));
 			mutation.setUniprot_id(getStringOrBlank(rs,"uniprot_id"));
 			mutation.setPfam(getStringOrBlank(rs,"pfam"));
@@ -416,9 +431,8 @@ public class DatabaseCommands_Mutations {
 			mutation.setExpasy_id(getStringOrBlank(rs,"expasy_id"));
 
 			//prediction
-			mutation.setRevel(getDoubleOrNull(rs,"revel"));
-			mutation.setCadd_raw(getDoubleOrNull(rs,"cadd_raw"));
-			mutation.setCadd_phred(getDoubleOrNull(rs,"cadd_phred"));
+			mutation.setRevel(getStringOrBlank(rs,"revel"));
+			mutation.setCadd_phred(getStringOrBlank(rs,"cadd_phred"));
 			mutation.setCanonical(getStringOrBlank(rs,"canonical"));
 			mutation.setSift(getStringOrBlank(rs,"sift"));
 			mutation.setPolyphen(getStringOrBlank(rs,"polyphen"));

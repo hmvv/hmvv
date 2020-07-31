@@ -643,7 +643,7 @@ public class SampleListFrame extends JPanel {
 		protected MutationListGermline doInBackground() throws Exception {
 
 				ArrayList<GermlineMutation>  mutations = new ArrayList<GermlineMutation>();
-				mutations = DatabaseCommands.getGermlineMutationsBySample(sample);
+				mutations = DatabaseCommands.getBaseGermlineMutationsBySample(sample);
 				return new MutationListGermline(mutations);
 
 		}

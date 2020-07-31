@@ -137,9 +137,9 @@ public abstract class CommonTableGermline extends JTable{
 
 	private void constructRenderers(){
 		setDefaultRenderer(Boolean.class, new BooleanRenderer());
-		((DefaultTableCellRenderer)getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.LEFT);
-		((DefaultTableCellRenderer)getDefaultRenderer(Double.class)).setHorizontalAlignment(SwingConstants.LEFT);
-		((DefaultTableCellRenderer)getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.LEFT);
+		((DefaultTableCellRenderer)getDefaultRenderer(Integer.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)getDefaultRenderer(Double.class)).setHorizontalAlignment(SwingConstants.CENTER);
+		((DefaultTableCellRenderer)getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
 	protected final GermlineMutation getSelectedMutation(){

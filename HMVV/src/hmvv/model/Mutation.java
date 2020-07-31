@@ -612,4 +612,9 @@ public class Mutation {
     	}
     	return false;
     }
+
+
+    public Configurations.MUTATION_TYPE getMutationType(){
+        return Configurations.MUTATION_TYPE.SOMATIC;
+    }
 }

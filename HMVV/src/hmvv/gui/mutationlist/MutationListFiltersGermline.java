@@ -139,7 +139,7 @@ class MinReadDepthGermlineFilter implements GermlineFilter{
 	
 	@Override
 	public boolean exclude(GermlineMutation mutation) {
-		int minReadDepth = GUICommonTools.getNumber(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
+		int minReadDepth = GUICommonTools.getNumber(minReadDepthTextField, Configurations.GERMLINE_READ_DEPTH_FILTER);
 		if(mutation.getReadDP() != null){
 			int readDepth = mutation.getReadDP();
 			if(minReadDepth > readDepth){
@@ -180,7 +180,7 @@ class VariantAlleleFrequencyGermlineFilter implements GermlineFilter{
 	
 	@Override
 	public boolean exclude(GermlineMutation mutation) {
-		int frequencyFrom =  GUICommonTools.getNumber(frequencyFromTextField, Configurations.ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
+		int frequencyFrom =  GUICommonTools.getNumber(frequencyFromTextField, Configurations.GERMLINE_ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
 		int frequencyTo = GUICommonTools.getNumber(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
 		
 		double variantFrequency = mutation.getAltFreq();

@@ -232,9 +232,9 @@ public class MutationFilterPanelGermline extends JPanel {
 		reportedOnlyCheckbox.setSelected(false);
 		transcriptFlagCheckbox.setSelected(false);
 		selectAllCheckbox.setSelected(false);
-		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
+		textFreqFrom.setText(Configurations.GERMLINE_ALLELE_FREQ_FILTER+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
-		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
+		minReadDepthTextField.setText(Configurations.GERMLINE_READ_DEPTH_FILTER+"");
 		maxGnomadGlobalFreqTextField.setText(Configurations.GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(4);
 		applyRowFilters();

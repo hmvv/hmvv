@@ -245,7 +245,7 @@ public abstract class CommonTable extends JTable{
 		Mutation mutation = getSelectedMutation();		
 		String gene = mutation.getGene();
 		
-		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
+		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.SOMATIC);
 
 
 		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, this, parent);

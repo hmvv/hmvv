@@ -88,8 +88,12 @@ public class DatabaseCommands {
 		DatabaseCommands_Mutations.updateReportedStatus(setToReported, sampleID, coordinate);
 	}
 
-	public static ArrayList<GermlineMutation> getGermlineMutationsBySample(Sample sample) throws Exception{
-		return DatabaseCommands_Mutations.getGermlineMutationDataByID(sample);
+	public static ArrayList<GermlineMutation> getBaseGermlineMutationsBySample(Sample sample) throws Exception{
+		return DatabaseCommands_Mutations.getGermlineMutationDataByID(sample,false);
+	}
+
+	public static ArrayList<GermlineMutation> getExtraGermlineMutationsBySample(Sample sample) throws Exception{
+		return DatabaseCommands_Mutations.getGermlineMutationDataByID(sample,true);
 	}
 
 	public static void updateGermlineCardiacAtlasInfo(GermlineMutation mutation) throws Exception{
@@ -127,24 +131,24 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Annotation Queries
 	 *************************************************************************/
-	public static ArrayList<GeneAnnotation> getGeneAnnotationHistory(String gene) throws Exception{
-		return DatabaseCommands_Annotations.getGeneAnnotationHistory(gene);
+	public static ArrayList<GeneAnnotation> getGeneAnnotationHistory(String gene, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+		return DatabaseCommands_Annotations.getGeneAnnotationHistory(gene,mutation_type);
 	}
 	
-	public static String getVariantAnnotationDraft(Coordinate coordinate) throws Exception{
-		return DatabaseCommands_Annotations.getVariantAnnotationDraft(coordinate);
+	public static String getVariantAnnotationDraft(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+		return DatabaseCommands_Annotations.getVariantAnnotationDraft(coordinate,mutation_type);
 	}
 	
-	public static void addGeneAnnotationCuration(GeneAnnotation geneAnnotation) throws Exception{
-		DatabaseCommands_Annotations.addGeneAnnotationCuration(geneAnnotation);
+	public static void addGeneAnnotationCuration(GeneAnnotation geneAnnotation, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+		DatabaseCommands_Annotations.addGeneAnnotationCuration(geneAnnotation,mutation_type);
 	}
 	
-	public static void addVariantAnnotationCuration(Annotation annotation) throws Exception{
-		DatabaseCommands_Annotations.addVariantAnnotationCuration(annotation);
+	public static void addVariantAnnotationCuration(Annotation annotation, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+		DatabaseCommands_Annotations.addVariantAnnotationCuration(annotation, mutation_type);
 	}
 	
-	public static void addVariantAnnotationDraft(Coordinate coordinate, String draft) throws Exception{
-		DatabaseCommands_Annotations.addVariantAnnotationDraft(coordinate, draft);
+	public static void addVariantAnnotationDraft(Coordinate coordinate, String draft, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+		DatabaseCommands_Annotations.addVariantAnnotationDraft(coordinate, draft, mutation_type);
 	}
 	
 	/* ************************************************************************

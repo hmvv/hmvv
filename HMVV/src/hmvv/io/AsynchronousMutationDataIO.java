@@ -115,19 +115,19 @@ public class AsynchronousMutationDataIO {
 			}
 		}
 
-//		for(int index = 0; index < mutationList.getFilteredMutationCount(); index++){
-////			if(callback.isCallbackClosed()){
-////				return;
-////			}
-////
-////			try{
-////				GermlineMutation mutation = mutationList.getFilteredMutation(index);
-////				getMutationDataGermline(mutation);
-////				callback.mutationListIndexUpdated(index);
-////			}catch(Exception e){
-////				callback.showErrorMessage(e, "Could not load mutation dbs data - filtered.");
-////			}
-////		}
+		for(int index = 0; index < mutationList.getFilteredMutationCount(); index++){
+			if(callback.isCallbackClosed()){
+				return;
+			}
+
+			try{
+				GermlineMutation mutation = mutationList.getFilteredMutation(index);
+				getMutationDataGermline(mutation);
+				callback.mutationListIndexUpdated(index);
+			}catch(Exception e){
+				callback.showErrorMessage(e, "Could not load mutation dbs data - filtered.");
+			}
+		}
 	}
 
 
@@ -139,7 +139,7 @@ public class AsynchronousMutationDataIO {
 		//gnomad
 		mutation.setGnomad_id();
 
-		//pmkb
+		//cardiac atlas
 		DatabaseCommands.updateGermlineCardiacAtlasInfo(mutation);
 
 		// default selection

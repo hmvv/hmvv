@@ -4,7 +4,7 @@ import hmvv.main.Configurations;
 
 import java.util.ArrayList;
 
-public class GermlineMutation{
+public class GermlineMutation implements CommonMutation {
 
     //common
     private boolean reported;
@@ -32,6 +32,7 @@ public class GermlineMutation{
     private String HGVSp;
 
     //transcript
+    private String transcript_strand;
     private String alt_transcript_start;
     private String alt_transcript_end;
     private String alt_transcript_position;
@@ -71,6 +72,12 @@ public class GermlineMutation{
     private String variant_type;
 
     //protein
+    private String protein_id;
+    private String protein_type;
+    private String protein_feature;
+    private String protein_note;
+    private Double protein_start;
+    private Double protein_end;
     private String nextprot;
     private String uniprot_id;
     private String pfam;
@@ -79,9 +86,8 @@ public class GermlineMutation{
     private String expasy_id;
 
     //prediction
-    private Double revel;
-    private Double cadd_raw;
-    private Double cadd_phred;
+    private String revel;
+    private String cadd_phred;
     private String canonical;
     private String sift;
     private String polyphen;
@@ -215,6 +221,14 @@ public class GermlineMutation{
 
     public void setHGVSp(String hGVSp) {
         HGVSp = hGVSp;
+    }
+
+    public String getTranscript_strand() {
+        return transcript_strand;
+    }
+
+    public void setTranscript_strand(String transcript_strand) {
+        this.transcript_strand = transcript_strand;
     }
 
     public String getAlt_transcript_start() {
@@ -493,6 +507,54 @@ public class GermlineMutation{
         this.gnomad_id = gnomad_id;
     }
 
+    public String getProtein_id() {
+        return protein_id;
+    }
+
+    public void setProtein_id(String protein_id) {
+        this.protein_id = protein_id;
+    }
+
+    public String getProtein_type() {
+        return protein_type;
+    }
+
+    public void setProtein_type(String protein_type) {
+        this.protein_type = protein_type;
+    }
+
+    public String getProtein_feature() {
+        return protein_feature;
+    }
+
+    public void setProtein_feature(String protein_feature) {
+        this.protein_feature = protein_feature;
+    }
+
+    public String getProtein_note() {
+        return protein_note;
+    }
+
+    public void setProtein_note(String protein_note) {
+        this.protein_note = protein_note;
+    }
+
+    public Double getProtein_start() {
+        return protein_start;
+    }
+
+    public void setProtein_start(Double protein_start) {
+        this.protein_start = protein_start;
+    }
+
+    public Double getProtein_end() {
+        return protein_end;
+    }
+
+    public void setProtein_end(Double protein_end) {
+        this.protein_end = protein_end;
+    }
+
     public String getNextprot() {
         return nextprot;
     }
@@ -541,27 +603,19 @@ public class GermlineMutation{
         this.expasy_id = expasy_id;
     }
 
-    public Double getRevel() {
+    public String getRevel() {
         return revel;
     }
 
-    public void setRevel(Double revel) {
+    public void setRevel(String revel) {
         this.revel = revel;
     }
 
-    public Double getCadd_raw() {
-        return cadd_raw;
-    }
-
-    public void setCadd_raw(Double cadd_raw) {
-        this.cadd_raw = cadd_raw;
-    }
-
-    public Double getCadd_phred() {
+    public String getCadd_phred() {
         return cadd_phred;
     }
 
-    public void setCadd_phred(Double cadd_phred) {
+    public void setCadd_phred(String cadd_phred) {
         this.cadd_phred = cadd_phred;
     }
 
@@ -619,5 +673,9 @@ public class GermlineMutation{
     		return m.getCoordinate().equals(getCoordinate());
     	}
     	return false;
+    }
+
+    public Configurations.MUTATION_TYPE getMutationType(){
+        return Configurations.MUTATION_TYPE.GERMLINE;
     }
 }
