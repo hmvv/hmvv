@@ -84,7 +84,7 @@ public class DatabaseCommands_Annotations {
 	}
 
 	static void addVariantAnnotationCuration(Annotation annotation, Configurations.MUTATION_TYPE mutation_type) throws Exception{
-		Coordinate coordinate = annotation.mutation.getCoordinate();
+		Coordinate coordinate = annotation.cordinate;
 		String chr = coordinate.getChr();
 		String pos = coordinate.getPos();
 		String ref = coordinate.getRef();

@@ -20,7 +20,7 @@ public class GermlineSNPEFFTable extends CommonTableGermline{
 
         @Override
         protected HMVVTableColumn[] constructCustomColumns(){
-            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 2,3,4,10,11);
+            return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 2,3,4,10,11,18);
         }
 
         @Override
@@ -43,6 +43,8 @@ public class GermlineSNPEFFTable extends CommonTableGermline{
                 searchGoogleForDNAChange();
             } else if (column == 11) {
                 searchGoogleForProteinChange();
+            } else if (column == 18) {
+                handleAnnotationClick();
             }
         }
 

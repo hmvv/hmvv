@@ -371,7 +371,7 @@ public class DatabaseCommands_Mutations {
 
 
 			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation);
+			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.SOMATIC);
 			mutation.setAnnotationHistory(annotationHistory);
 
 			//gnomad
@@ -458,8 +458,8 @@ public class DatabaseCommands_Mutations {
 
 
 			//annotation history
-//			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation);
-//			mutation.setAnnotationHistory(annotationHistory);
+			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.GERMLINE);
+			mutation.setAnnotationHistory(annotationHistory);
 
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
@@ -513,17 +513,26 @@ public class DatabaseCommands_Mutations {
 		}
 	}
 	
-	private static ArrayList<Annotation> getVariantAnnotationHistory(Mutation mutation) throws Exception{
-		Coordinate coordinate = mutation.getCoordinate();
+	private static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+
 		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select annotationID, classification, curation, somatic, enteredBy, enterDate from variantAnnotation where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc");
+
+		String tablename = "";
+		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
+			tablename = "variantAnnotation";
+		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
+			tablename = "germlineVariantAnnotation";
+		}
+
+		final String query = String.format("select annotationID, classification, curation, somatic, enteredBy, enterDate from %s where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc",tablename);
+		PreparedStatement selectStatement = databaseConnection.prepareStatement(query);
 		selectStatement.setString(1, coordinate.getChr());
 		selectStatement.setString(2, coordinate.getPos());
 		selectStatement.setString(3, coordinate.getRef());
 		selectStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = selectStatement.executeQuery();
 		while(rs.next()){
-			annotations.add(new Annotation(rs.getInt("annotationID"), mutation, rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getTimestamp(6)));
+			annotations.add(new Annotation(rs.getInt("annotationID"),coordinate, rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getTimestamp(6)));
 		}
 		selectStatement.close();
 		return annotations;

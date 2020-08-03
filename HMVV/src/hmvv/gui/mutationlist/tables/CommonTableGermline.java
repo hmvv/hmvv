@@ -16,6 +16,7 @@ import javax.swing.table.*;
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
+import hmvv.gui.mutationlist.AnnotationFrameGermline;
 import hmvv.gui.mutationlist.CosmicInfoPopup;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModelGermline;
@@ -225,23 +226,22 @@ public abstract class CommonTableGermline extends JTable{
 	}
 
 
-//	protected void handleAnnotationClick() throws Exception{
-//		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-//		Mutation mutation = getSelectedMutation();
-//		String gene = mutation.getGene();
-//
-//		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-//
-//
-//		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, this, parent);
-//		editAnnotation.setVisible(true);
-//		this.setCursor(Cursor.getDefaultCursor());
-//	}
+	protected void handleAnnotationClick() throws Exception{
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		GermlineMutation mutation = getSelectedMutation();
+		String gene = mutation.getGene();
+
+		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.GERMLINE);
+
+		AnnotationFrameGermline editAnnotation = new AnnotationFrameGermline(mutation, geneAnnotationHistory, this, parent);
+		editAnnotation.setVisible(true);
+		this.setCursor(Cursor.getDefaultCursor());
+	}
 
 	public void notifyAnnotationUpdated(Annotation annotation) {
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
-		CommonTableModel model = (CommonTableModel)getModel();
+		CommonTableModelGermline model = (CommonTableModelGermline) getModel();
 		model.mutationUpdated(modelRow);
 	}
 
