@@ -4,32 +4,8 @@ import hmvv.main.Configurations;
 
 import java.util.ArrayList;
 
-public class GermlineMutation implements CommonMutation {
+public class GermlineMutation extends CommonMutation{
 
-    //common
-    private boolean reported;
-    private ArrayList<GermlineMutation> otherMutations;
-    private String chr;
-    private String pos;
-    private String ref;
-    private String alt;
-    private String gene;
-    private String exons;
-
-    // custom
-    private boolean selected;
-    private Integer occurrence;
-    private ArrayList<Annotation> annotationHistory;
-
-   //snpeff
-    private String type;
-    private VariantPredictionClass variantPredictionClass;
-    private Double altFreq;
-    private Integer readDP;
-    private Integer altReadDP;
-    private String consequence;
-    private String HGVSc;
-    private String HGVSp;
 
     //transcript
     private String transcript_strand;
@@ -37,19 +13,6 @@ public class GermlineMutation implements CommonMutation {
     private String alt_transcript_end;
     private String alt_transcript_position;
 
-    //Sample
-    private String lastName;
-    private String firstName;
-    private String orderNumber;
-    private String assay;
-    private Integer sampleID;
-
-    //ClinVar
-    private String clinvarID;
-    private String clinicaldisease;
-    private String clinicalsignificance;
-    private String clinicalconsequence;
-    private String clinicalorigin;
 
     //gnomad
     private String gnomad_id;
@@ -93,46 +56,6 @@ public class GermlineMutation implements CommonMutation {
     private String polyphen;
 
 
-    public String getClinvarID() {
-        return clinvarID;
-    }
-
-    public void setClinvarID(String clinvarID) {
-        this.clinvarID = clinvarID;
-    }
-
-    public String getClinicaldisease() {
-        return clinicaldisease;
-    }
-
-    public void setClinicaldisease(String clinicaldisease) {
-        this.clinicaldisease = clinicaldisease;
-    }
-
-    public String getClinicalsignificance() {
-        return clinicalsignificance;
-    }
-
-    public void setClinicalsignificance(String clinicalsignificance) {
-        this.clinicalsignificance = clinicalsignificance;
-    }
-
-    public String getClinicalconsequence() {
-        return clinicalconsequence;
-    }
-
-    public void setClinicalconsequence(String clinicalconsequence) {
-        this.clinicalconsequence = clinicalconsequence;
-    }
-
-    public String getClinicalorigin() {
-        return clinicalorigin;
-    }
-
-    public void setClinicalorigin(String clinicalorigin) {
-        this.clinicalorigin = clinicalorigin;
-    }
-
 
     public Double getGnomad_allfreq() {
         return gnomad_allfreq;
@@ -142,86 +65,11 @@ public class GermlineMutation implements CommonMutation {
         this.gnomad_allfreq = gnomad_allfreq;
     }
 
-
-    public GermlineMutation() {
-    	otherMutations = new ArrayList<GermlineMutation>();
-    }
-
     /**
      * Assumes a chr, pos, ref, and alt key are set
      *
      * @return
      */
-    public Coordinate getCoordinate() {
-        return new Coordinate(chr, pos, ref, alt);
-    }
-
-    public boolean isReported() {
-        return reported;
-    }
-
-    public void setReported(boolean reported) {
-        this.reported = reported;
-    }
-
-    public void addOtherMutation(GermlineMutation otherMutation) {
-    	this.otherMutations.add(otherMutation);
-    }
-    
-    public String getOtherMutationsString() {
-    	StringBuilder sb = new StringBuilder();
-    	for(int i = 0; i < otherMutations.size(); i++) {
-    		GermlineMutation otherMutation = otherMutations.get(i);
-    		if(i != 0) {
-    			sb.append(", ");
-    		}
-    		sb.append(otherMutation.sampleID + "");
-    		if(otherMutation.reported) {
-    			sb.append("(R)");
-    		}
-    	}
-    	return sb.toString();
-    }
-    
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    public String getGene() {
-        return gene;
-    }
-
-    public void setGene(String gene) {
-        this.gene = gene;
-    }
-
-    public String getExons() {
-        return exons;
-    }
-
-    public void setExons(String exons) {
-        this.exons = exons;
-    }
-
-    public String getHGVSc() {
-        return HGVSc;
-    }
-
-    public void setHGVSc(String hGVSc) {
-        HGVSc = hGVSc;
-    }
-
-    public String getHGVSp() {
-        return HGVSp;
-    }
-
-    public void setHGVSp(String hGVSp) {
-        HGVSp = hGVSp;
-    }
 
     public String getTranscript_strand() {
         return transcript_strand;
@@ -255,133 +103,6 @@ public class GermlineMutation implements CommonMutation {
         this.alt_transcript_position = alt_transcript_position;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public VariantPredictionClass getVariantPredictionClass() {
-        return variantPredictionClass;
-    }
-
-    public void setVariantPredictionClass(VariantPredictionClass variantPredictionClass) {
-        this.variantPredictionClass = variantPredictionClass;
-    }
-
-    public Double getAltFreq() {
-        return altFreq;
-    }
-
-    public void setAltFreq(Double altFreq) {
-        this.altFreq = altFreq;
-    }
-
-    public Integer getReadDP() {
-        return readDP;
-    }
-
-    public void setReadDP(Integer readDP) {
-        this.readDP = readDP;
-    }
-
-    public Integer getAltReadDP() {
-        return altReadDP;
-    }
-
-    public void setAltReadDP(Integer altReadDP) {
-        this.altReadDP = altReadDP;
-    }
-
-    public Integer getOccurrence() {
-        return occurrence;
-    }
-
-    public void setOccurrence(Integer occurrence) {
-        this.occurrence = occurrence;
-    }
-
-    public String getChr() {
-        return chr;
-    }
-
-    public void setChr(String chr) {
-        this.chr = chr;
-    }
-
-    public String getPos() {
-        return pos;
-    }
-
-    public void setPos(String pos) {
-        this.pos = pos;
-    }
-
-    public String getRef() {
-        return ref;
-    }
-
-    public void setRef(String ref) {
-        this.ref = ref;
-    }
-
-    public String getAlt() {
-        return alt;
-    }
-
-    public void setAlt(String alt) {
-        this.alt = alt;
-    }
-
-    public String getConsequence() {
-        return consequence;
-    }
-
-    public void setConsequence(String consequence) {
-        this.consequence = consequence;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(String orderNumber) {
-        this.orderNumber = orderNumber;
-    }
-
-    public String getAssay() {
-        return assay;
-    }
-
-    public void setAssay(String assay) {
-        this.assay = assay;
-    }
-
-    public Integer getSampleID() {
-        return sampleID;
-    }
-
-    public void setSampleID(Integer sampleID) {
-        this.sampleID = sampleID;
-    }
 
     public Double getGnomad_allfreq_afr() {
         return gnomad_allfreq_afr;
@@ -471,10 +192,9 @@ public class GermlineMutation implements CommonMutation {
         return gnomad_id;
     }
 
-    public void setGnomad_id() {
-        this.gnomad_id = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
+    public void setGnomadID() {
+        this.gnomad_id = this.getChr().substring(3, this.getChr().length()) + "-" + this.getPos() + "-" + this.getRef() + "-" + this.getAlt();
     }
-
     public String getCardiacAtlasId() {
         return cardiacAtlasId;
     }
@@ -503,9 +223,6 @@ public class GermlineMutation implements CommonMutation {
         this.variant_type = variant_type;
     }
 
-    public void setGnomad_id(String gnomad_id) {
-        this.gnomad_id = gnomad_id;
-    }
 
     public String getProtein_id() {
         return protein_id;
@@ -641,29 +358,6 @@ public class GermlineMutation implements CommonMutation {
 
     public void setPolyphen(String polyphen) {
         this.polyphen = polyphen;
-    }
-
-    public void addAnnotation(Annotation annotation) {
-        annotationHistory.add(annotation);
-    }
-
-    public int getAnnotationHistorySize() {
-        return annotationHistory.size();
-    }
-
-    public Annotation getAnnotation(int index) {
-        return annotationHistory.get(index);
-    }
-
-    public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
-        this.annotationHistory = annotationHistory;
-    }
-    
-    public Annotation getLatestAnnotation() {
-    	if (annotationHistory.size() == 0) {
-            return null;
-        }
-    	return annotationHistory.get(annotationHistory.size() - 1);
     }
 
 

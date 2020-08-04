@@ -1,16 +1,14 @@
 package hmvv.gui.mutationlist;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Calendar;
+import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.tables.CommonTableGermline;
+import hmvv.gui.sampleList.ContextMenuMouseListener;
+import hmvv.io.DatabaseCommands;
+import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
+import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
+import hmvv.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -19,25 +17,15 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.DocumentFilter;
-
-import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tables.CommonTable;
-import hmvv.gui.sampleList.ContextMenuMouseListener;
-import hmvv.io.DatabaseCommands;
-import hmvv.io.SSHConnection;
-import hmvv.main.Configurations;
-import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
-import hmvv.model.Annotation;
-import hmvv.model.CommonAnnotation;
-import hmvv.model.GeneAnnotation;
-import hmvv.model.Mutation;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 public class AnnotationFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
-	private CommonTable parent;
-	
 	private JButton okButton;
 	private JButton cancelButton;
 	private JButton previousGeneAnnotationButton;
@@ -45,37 +33,36 @@ public class AnnotationFrame extends JFrame {
 	private JButton nextGeneAnnotationButton;
 	private JButton nextAnnotationButton;
 	private JButton draftButton;
-	
+
 	private JComboBox<String> pathogenicityComboBox;
 	private JComboBox<String> mutationTypeComboBox;
-	
+
 	private JTextArea geneAnnotationTextArea;
 	private JTextArea annotationTextArea;
 	private int maxCharacters = 5000;
 	private DefaultStyledDocument defaultStyledDocument;
-	
+
 	private JLabel historyLabelGeneAnnotation;
 	private JLabel historyLabelAnnotation;
-	
+
 	private Boolean readOnly;
 	private Integer currentGeneAnnotationIndex;
 	private Integer currentAnnotationIndex;
-	
+
 	private ArrayList<GeneAnnotation> geneAnnotationHistory;
-	private Mutation mutation;
-	
+	private CommonMutation mutation;
+
 	private final Color readOnlyColor = new Color(245,245,245);
 	private final Color readWriteColor = Color.WHITE;
-	
+
 	/**
 	 * Create the dialog.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public AnnotationFrame( Mutation mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, CommonTable parent, HMVVFrame mutationListFrame) throws Exception {
+	public AnnotationFrame(CommonMutation mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, HMVVFrame mutationListFrame) throws Exception {
 		super("Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString());
 		this.mutation = mutation;
 		this.readOnly = !SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN);
-		this.parent = parent;
 		
 		this.geneAnnotationHistory = geneAnnotationHistory;
 		currentGeneAnnotationIndex = geneAnnotationHistory.size() - 1; 
@@ -116,6 +103,7 @@ public class AnnotationFrame extends JFrame {
 		mutationTypeComboBox.addItem("Germline");
 		mutationTypeComboBox.addItem("Unknown");
 		mutationTypeComboBox.addItem("Artifact");
+		mutationTypeComboBox.addItem("Both Somatic and Germline");
 		mutationTypeComboBox.addItem("Not Confirmed Somatic");
 		
 		previousGeneAnnotationButton = new JButton("Previous");
@@ -212,7 +200,7 @@ public class AnnotationFrame extends JFrame {
 		String HGVSp = (mutation.getHGVSp().startsWith("ENSP")) ? mutation.getHGVSp().split(":")[1] : mutation.getHGVSp();
 		addItem(itemPanel, "HGVSp", HGVSp);
 		addItem(itemPanel, "Classification", pathogenicityComboBox);
-		addItem(itemPanel, "Somatic", mutationTypeComboBox);
+		addItem(itemPanel, "Origin", mutationTypeComboBox);
 		
 		Dimension textAreaDimension = new Dimension(300,550);
 		
@@ -352,9 +340,9 @@ public class AnnotationFrame extends JFrame {
 					);
 			Annotation latestAnnotation = mutation.getLatestAnnotation();
 			if (latestAnnotation == null || !latestAnnotation.equals(newAnnotation)) {
-				DatabaseCommands.addVariantAnnotationCuration(newAnnotation,Configurations.MUTATION_TYPE.SOMATIC);
+				DatabaseCommands.addVariantAnnotationCuration(newAnnotation,Configurations.MUTATION_TYPE.GERMLINE);
 				mutation.addAnnotation(newAnnotation);
-				parent.notifyAnnotationUpdated(newAnnotation);
+//				parent.notifyAnnotationUpdated(newAnnotation);
 			}
 		}
 	}
@@ -370,7 +358,7 @@ public class AnnotationFrame extends JFrame {
 					);
 			GeneAnnotation latestGeneAnnotation = (geneAnnotationHistory.isEmpty()) ? null : geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);		
 			if(latestGeneAnnotation == null || !latestGeneAnnotation.equals(newGeneAnnotation)) {
-				DatabaseCommands.addGeneAnnotationCuration(newGeneAnnotation,Configurations.MUTATION_TYPE.SOMATIC);
+				DatabaseCommands.addGeneAnnotationCuration(newGeneAnnotation,Configurations.MUTATION_TYPE.GERMLINE);
 				geneAnnotationHistory.add(newGeneAnnotation);//may not be necessary as no GUI object currently stores this list
 			}
 		}
@@ -480,7 +468,7 @@ public class AnnotationFrame extends JFrame {
 	}
 
 	private void showAnnotationDraftFrame(){
-		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation.getCoordinate());
+		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);
 		annotationdraftframe.setVisible(true);
 	}
 }

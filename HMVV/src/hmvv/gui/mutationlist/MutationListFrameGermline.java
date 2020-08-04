@@ -89,7 +89,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
+		setSize((int)(bounds.width*.90), (int)(bounds.height*.85));
 		setMinimumSize(new Dimension(700, getHeight()/3));
 
 		setLocationRelativeTo(parent);

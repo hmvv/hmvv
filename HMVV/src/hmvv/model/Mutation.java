@@ -4,43 +4,18 @@ import hmvv.main.Configurations;
 
 import java.util.ArrayList;
 
-public class Mutation {
+public class Mutation extends CommonMutation{
 
-    //common
-    private boolean reported;
-    private ArrayList<Mutation> otherMutations;
-    private String chr;
-    private String pos;
-    private String ref;
-    private String alt;
-    private String gene;
-    private String exons;
-
-    // custom
-    private boolean selected;
-    private Integer occurrence;
-    private ArrayList<Annotation> annotationHistory;
+    //Sample
+    private String tumorSource;
+    private String tumorPercent;
 
    //vep
-    private String type;
-    private VariantPredictionClass variantPredictionClass;
-    private Double altFreq;
-    private Integer readDP;
-    private Integer altReadDP;
-    private String consequence;
     private String sift;
     private String polyPhen;
     private String dbSNPID;
-    private String HGVSc;
-    private String HGVSp;
     private String pubmed;
 
-    //ClinVar
-    private String clinvarID;
-    private String clinicaldisease;
-    private String clinicalsignificance;
-    private String clinicalconsequence;
-    private String clinicalorigin;
 
     //cosmic
     private ArrayList<String> cosmicIDs;
@@ -54,15 +29,6 @@ public class Mutation {
     private Double southAsianFreq;
     private Double afrFreq;
     private Double eurFreq;
-
-    //Sample
-    private String lastName;
-    private String firstName;
-    private String orderNumber;
-    private String assay;
-    private Integer sampleID;
-    private String tumorSource;
-    private String tumorPercent;
 
     //gnomad
     private String gnomadID;
@@ -85,85 +51,6 @@ public class Mutation {
     private String pmkb_tumor_type;
     private String pmkb_tissue_type;
 
-    public Mutation() {
-    	otherMutations = new ArrayList<Mutation>();
-    }
-
-    /**
-     * Assumes a chr, pos, ref, and alt key are set
-     *
-     * @return
-     */
-    public Coordinate getCoordinate() {
-        return new Coordinate(chr, pos, ref, alt);
-    }
-
-    public boolean isReported() {
-        return reported;
-    }
-
-    public void setReported(boolean reported) {
-        this.reported = reported;
-    }
-
-    public void addOtherMutation(Mutation otherMutation) {
-    	this.otherMutations.add(otherMutation);
-    }
-    
-    public String getOtherMutationsString() {
-    	StringBuilder sb = new StringBuilder();
-    	for(int i = 0; i < otherMutations.size(); i++) {
-    		Mutation otherMutation = otherMutations.get(i);
-    		if(i != 0) {
-    			sb.append(", ");
-    		}
-    		sb.append(otherMutation.sampleID + "");
-    		if(otherMutation.reported) {
-    			sb.append("(R)");
-    		}
-    	}
-    	return sb.toString();
-    }
-    
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    public String getGene() {
-        return gene;
-    }
-
-    public void setGene(String gene) {
-        this.gene = gene;
-    }
-
-    public String getExons() {
-        return exons;
-    }
-
-    public void setExons(String exons) {
-        this.exons = exons;
-    }
-
-    public String getHGVSc() {
-        return HGVSc;
-    }
-
-    public void setHGVSc(String hGVSc) {
-        HGVSc = hGVSc;
-    }
-
-    public String getHGVSp() {
-        return HGVSp;
-    }
-
-    public void setHGVSp(String hGVSp) {
-        HGVSp = hGVSp;
-    }
 
     public String getDbSNPID() {
         return dbSNPID;
@@ -197,92 +84,6 @@ public class Mutation {
         this.cosmicIDs.add(cosmicID);
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public VariantPredictionClass getVariantPredictionClass() {
-        return variantPredictionClass;
-    }
-
-    public void setVariantPredictionClass(VariantPredictionClass variantPredictionClass) {
-        this.variantPredictionClass = variantPredictionClass;
-    }
-
-    public Double getAltFreq() {
-        return altFreq;
-    }
-
-    public void setAltFreq(Double altFreq) {
-        this.altFreq = altFreq;
-    }
-
-    public Integer getReadDP() {
-        return readDP;
-    }
-
-    public void setReadDP(Integer readDP) {
-        this.readDP = readDP;
-    }
-
-    public Integer getAltReadDP() {
-        return altReadDP;
-    }
-
-    public void setAltReadDP(Integer altReadDP) {
-        this.altReadDP = altReadDP;
-    }
-
-    public Integer getOccurrence() {
-        return occurrence;
-    }
-
-    public void setOccurrence(Integer occurrence) {
-        this.occurrence = occurrence;
-    }
-
-    public String getClinvarID() {
-        return clinvarID;
-    }
-    public String getClinicaldisease() {
-        return clinicaldisease;
-    }
-
-    public String getClinicalsignificance() {
-        return clinicalsignificance;
-    }
-
-    public String getClinicalconsequence() {
-        return clinicalconsequence;
-    }
-
-    public String getClinicalorigin() {
-        return clinicalorigin;
-    }
-
-    public void setClinvarID(String id) {
-        this.clinvarID = id ;
-    }
-
-    public void setClinicaldisease(String clinicaldisease) {
-        this.clinicaldisease = clinicaldisease;
-    }
-
-    public void setClinicalsignificance(String clinicalsignificance) {
-        this.clinicalsignificance = clinicalsignificance;
-    }
-
-    public void setClinicalconsequence(String clinicalconsequence) {
-        this.clinicalconsequence = clinicalconsequence;
-    }
-
-    public void setClinicalorigin(String clinicalorigin) {
-        this.clinicalorigin = clinicalorigin;
-    }
 
     public String getPubmed() {
         return pubmed;
@@ -290,46 +91,6 @@ public class Mutation {
 
     public void setPubmed(String pubmed) {
         this.pubmed = pubmed;
-    }
-
-    public String getChr() {
-        return chr;
-    }
-
-    public void setChr(String chr) {
-        this.chr = chr;
-    }
-
-    public String getPos() {
-        return pos;
-    }
-
-    public void setPos(String pos) {
-        this.pos = pos;
-    }
-
-    public String getRef() {
-        return ref;
-    }
-
-    public void setRef(String ref) {
-        this.ref = ref;
-    }
-
-    public String getAlt() {
-        return alt;
-    }
-
-    public void setAlt(String alt) {
-        this.alt = alt;
-    }
-
-    public String getConsequence() {
-        return consequence;
-    }
-
-    public void setConsequence(String consequence) {
-        this.consequence = consequence;
     }
 
     public String getSift() {
@@ -412,47 +173,7 @@ public class Mutation {
         this.eurFreq = eurFreq;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(String orderNumber) {
-        this.orderNumber = orderNumber;
-    }
-
-    public String getAssay() {
-        return assay;
-    }
-
-    public void setAssay(String assay) {
-        this.assay = assay;
-    }
-
-    public Integer getSampleID() {
-        return sampleID;
-    }
-
-    public void setSampleID(Integer sampleID) {
-        this.sampleID = sampleID;
-    }
-
-    public String getTumorSource() {
+       public String getTumorSource() {
         return tumorSource;
     }
 
@@ -468,29 +189,6 @@ public class Mutation {
         this.tumorPercent = tumorPercent;
     }
 
-    public void addAnnotation(Annotation annotation) {
-        annotationHistory.add(annotation);
-    }
-
-    public int getAnnotationHistorySize() {
-        return annotationHistory.size();
-    }
-
-    public Annotation getAnnotation(int index) {
-        return annotationHistory.get(index);
-    }
-
-    public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
-        this.annotationHistory = annotationHistory;
-    }
-    
-    public Annotation getLatestAnnotation() {
-    	if (annotationHistory.size() == 0) {
-            return null;
-        }
-    	return annotationHistory.get(annotationHistory.size() - 1);
-    }
-
     public Double getGnomad_allfreq() {
         return gnomad_allfreq;
     }
@@ -504,7 +202,7 @@ public class Mutation {
     }
 
     public void setGnomadID() {
-    	this.gnomadID = this.chr.substring(3, this.chr.length()) + "-" + this.pos + "-" + this.ref + "-" + this.alt;
+    	this.gnomadID = this.getChr().substring(3, this.getChr().length()) + "-" + this.getPos() + "-" + this.getRef() + "-" + this.getAlt();
     }
 
     public String getOncokbID() {
@@ -612,7 +310,6 @@ public class Mutation {
     	}
     	return false;
     }
-
 
     public Configurations.MUTATION_TYPE getMutationType(){
         return Configurations.MUTATION_TYPE.SOMATIC;

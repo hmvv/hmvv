@@ -4,6 +4,7 @@ import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.model.CommonMutation;
 import hmvv.model.Coordinate;
 import hmvv.model.Mutation;
 
@@ -22,12 +23,12 @@ public class AnnotationDraftFrame extends JFrame {
     private JButton clearButton;
     private JButton saveButton;
     
-    private Coordinate coordinate;
+    private CommonMutation mutation;
     private JFrame parent;
     
-    public AnnotationDraftFrame( JFrame parent, Coordinate coordinate) throws HeadlessException {
+    public AnnotationDraftFrame( JFrame parent, CommonMutation mutation) throws HeadlessException {
         this.parent = parent;
-        this.coordinate = coordinate;
+        this.mutation = mutation;
         
         createComponents();
         layoutComponents();
@@ -44,7 +45,7 @@ public class AnnotationDraftFrame extends JFrame {
         annotationTextArea.setWrapStyleWord(true);
         annotationTextArea.setLineWrap(true);
         try {
-        	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(coordinate,Configurations.MUTATION_TYPE.SOMATIC));
+        	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate(),mutation.getMutationType()));
         } catch (Exception e) {
         	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
         }
@@ -103,7 +104,7 @@ public class AnnotationDraftFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    DatabaseCommands.addVariantAnnotationDraft(coordinate,annotationTextArea.getText(),Configurations.MUTATION_TYPE.SOMATIC);
+                    DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText(),mutation.getMutationType());
                     AnnotationDraftFrame.this.dispose();
                 } catch (Exception e) {
                 	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);

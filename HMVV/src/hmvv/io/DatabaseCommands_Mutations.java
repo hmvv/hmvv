@@ -263,19 +263,34 @@ public class DatabaseCommands_Mutations {
 	/**
 	 * Acquires the number of occurrences of this mutation from the database.
 	 */
-	static int getOccurrenceCount(Mutation mutation) throws Exception{
+	static int getOccurrenceCount(CommonMutation mutation) throws Exception{
 
         Coordinate coordinate = mutation.getCoordinate();
 		String assay = mutation.getAssay();
-		String query = "select count(*) as occurrence "
 
-				+ " from sampleVariants"
-				+ " join samples on samples.sampleID = sampleVariants.sampleID "
-				+ " join assays on assays.assayID = samples.assayID "
+		String query = "";
 
-				+ " where sampleVariants.impact != 'No Call' and sampleVariants.chr = ? and sampleVariants.pos = ? and sampleVariants.ref = ? and sampleVariants.alt = ? and assays.assayName = ?"
-				+ " and sampleVariants.altFreq >= " + Configurations.ALLELE_FREQ_FILTER
-				+ " and samples.lastName not like 'Horizon%' ";//Filter control samples from occurrence count
+		if (mutation.getMutationType() == Configurations.MUTATION_TYPE.SOMATIC) {
+
+			query = query + "select count(*) as occurrence "
+					+ " from sampleVariants"
+					+ " join samples on samples.sampleID = sampleVariants.sampleID "
+					+ " join assays on assays.assayID = samples.assayID "
+					+ " where sampleVariants.impact != 'No Call' and sampleVariants.chr = ? and sampleVariants.pos = ? and sampleVariants.ref = ? and sampleVariants.alt = ? and assays.assayName = ?"
+					+ " and sampleVariants.altFreq >= " + Configurations.ALLELE_FREQ_FILTER
+					+ " and samples.lastName not like 'Horizon%' ";//Filter control samples from occurrence count
+
+		} else if (mutation.getMutationType() == Configurations.MUTATION_TYPE.GERMLINE) {
+
+			query = query + "select count(*) as occurrence "
+					+ " from sampleVariantsGermline"
+					+ " join samples on samples.sampleID = sampleVariantsGermline.sampleID "
+					+ " join assays on assays.assayID = samples.assayID "
+					+ " where sampleVariantsGermline.impact != 'No Call' and sampleVariantsGermline.chr = ? and sampleVariantsGermline.pos = ? and sampleVariantsGermline.ref = ? and sampleVariantsGermline.alt = ? and assays.assayName = ?"
+					+ " and sampleVariantsGermline.altFreq >= " + Configurations.GERMLINE_ALLELE_FREQ_FILTER
+					+ " and samples.lastName not like 'Horizon%' ";//Filter control samples from occurrence count
+		}
+
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());

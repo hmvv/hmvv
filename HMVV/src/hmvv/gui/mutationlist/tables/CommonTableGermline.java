@@ -16,9 +16,6 @@ import javax.swing.table.*;
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
-import hmvv.gui.mutationlist.AnnotationFrameGermline;
-import hmvv.gui.mutationlist.CosmicInfoPopup;
-import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModelGermline;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
@@ -233,7 +230,7 @@ public abstract class CommonTableGermline extends JTable{
 
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.GERMLINE);
 
-		AnnotationFrameGermline editAnnotation = new AnnotationFrameGermline(mutation, geneAnnotationHistory, this, parent);
+		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, parent);
 		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
 	}

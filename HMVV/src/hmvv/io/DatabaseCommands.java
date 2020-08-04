@@ -80,7 +80,7 @@ public class DatabaseCommands {
 		DatabaseCommands_Mutations.updateCivicInfo(mutation);
 	}
 	
-	public static int getOccurrenceCount(Mutation mutation) throws Exception{
+	public static int getOccurrenceCount(CommonMutation mutation) throws Exception{
 		return DatabaseCommands_Mutations.getOccurrenceCount(mutation);
 	}
 	

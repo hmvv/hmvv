@@ -38,6 +38,7 @@ public class GermlineSNPEFFTableModel extends CommonTableModelGermline {
         columns.add(MutationTableModelColumnGermline.altReadDPColumn);
 
         columns.add(MutationTableModelColumnGermline.ConsequenceColumn);
+        columns.add(MutationTableModelColumnGermline.occurrenceColumn);
         columns.add(MutationTableModelColumnGermline.annotationColumn);
 
 

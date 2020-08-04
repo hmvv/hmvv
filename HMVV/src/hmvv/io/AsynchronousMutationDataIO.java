@@ -133,11 +133,11 @@ public class AsynchronousMutationDataIO {
 
 	public static void getMutationDataGermline(GermlineMutation mutation) throws Exception {
 
-//		int count = DatabaseCommands.getOccurrenceCount(mutation);
-//		mutation.setOccurrence(count);
+		int count = DatabaseCommands.getOccurrenceCount(mutation);
+		mutation.setOccurrence(count);
 
 		//gnomad
-		mutation.setGnomad_id();
+		mutation.setGnomadID();
 
 		//cardiac atlas
 		DatabaseCommands.updateGermlineCardiacAtlasInfo(mutation);

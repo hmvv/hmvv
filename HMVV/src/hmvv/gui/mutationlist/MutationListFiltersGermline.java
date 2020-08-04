@@ -81,6 +81,9 @@ public class MutationListFiltersGermline {
 		addFilter(new TranscriptFlagGermlineFilter(transcriptFlagCheckBox));
 	}
 
+	public void addSynonymousFlagGermlineFilter(JCheckBox synonymousFlagCheckBox) {
+		addFilter(new SynonymousFlagGermlineFilter(synonymousFlagCheckBox));
+	}
 }
 
 interface GermlineFilter {
@@ -229,6 +232,24 @@ class TranscriptFlagGermlineFilter implements GermlineFilter{
 	public boolean exclude(GermlineMutation mutation) {
 		boolean includeTranscriptFlagOnly = transcriptFlagCheckBox.isSelected();
 		if(includeTranscriptFlagOnly && mutation.getAlt_transcript_position().equals("MIDDLE")) {
+			return true;
+		}
+		return false;
+	}
+}
+
+class SynonymousFlagGermlineFilter implements GermlineFilter{
+
+	private JCheckBox synonymousFlagCheckBox;
+
+	public SynonymousFlagGermlineFilter(JCheckBox synonymousFlagCheckBox) {
+		this.synonymousFlagCheckBox = synonymousFlagCheckBox;
+	}
+
+	@Override
+	public boolean exclude(GermlineMutation mutation) {
+		boolean includeSynonymousFlagOnly = synonymousFlagCheckBox.isSelected();
+		if(includeSynonymousFlagOnly && mutation.getConsequence().equals("synonymous_variant")) {
 			return true;
 		}
 		return false;

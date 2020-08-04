@@ -22,12 +22,13 @@ public class GermlineProteinDomainTableModel extends CommonTableModelGermline {
 		columns.add(MutationTableModelColumnGermline.refColumn);
 
 		columns.add(MutationTableModelColumnGermline.HGVSpColumn);
+		columns.add(MutationTableModelColumnGermline.protein_start_column);
+		columns.add(MutationTableModelColumnGermline.protein_end_column);
 		columns.add(MutationTableModelColumnGermline.protein_id_column);
 		columns.add(MutationTableModelColumnGermline.protein_type_column);
 		columns.add(MutationTableModelColumnGermline.protein_feature_column);
 		columns.add(MutationTableModelColumnGermline.protein_note_column);
-		columns.add(MutationTableModelColumnGermline.protein_start_column);
-		columns.add(MutationTableModelColumnGermline.protein_end_column);
+
 
 		columns.add(MutationTableModelColumnGermline.uniprot_variant_column);
 		columns.add(MutationTableModelColumnGermline.nextprot_column);

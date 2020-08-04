@@ -216,7 +216,8 @@ public class Configurations {
 
 	public enum MUTATION_TYPE{
 		SOMATIC,
-		GERMLINE
+		GERMLINE,
+		COMMON
 	}
     
 	/**
