@@ -3,12 +3,19 @@ package hmvv.io;
 import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.model.Mutation;
+import hmvv.main.Configurations;
+import hmvv.model.MutationGermline;
+import hmvv.model.MutationSomatic;
 
 public class AsynchronousMutationDataIO {
 	
 	public static void loadMissingDataAsynchronous(MutationList mutationList, AsynchronousCallback callback){
-		createExtraMutationDataThread(mutationList, callback);
+
+		if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.SOMATIC) {
+			createExtraMutationDataThread(mutationList, callback);
+		} else if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.GERMLINE){
+			createExtraGermlineMutationDataThread(mutationList, callback);
+		}
 	}
 	
 	private static void createExtraMutationDataThread(MutationList mutationList, AsynchronousCallback callback){
@@ -30,7 +37,7 @@ public class AsynchronousMutationDataIO {
 			}
 			try{
 
-				Mutation mutation = mutationList.getMutation(index);
+				MutationSomatic mutation = (MutationSomatic)mutationList.getMutation(index);
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
@@ -44,7 +51,7 @@ public class AsynchronousMutationDataIO {
 			}
 			
 			try{
-				Mutation mutation = mutationList.getFilteredMutation(index);
+				MutationSomatic mutation = (MutationSomatic)mutationList.getFilteredMutation(index);
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
@@ -53,7 +60,7 @@ public class AsynchronousMutationDataIO {
 		}
 	}
 	
-	public static void getMutationData(Mutation mutation) throws Exception {
+	public static void getMutationData(MutationSomatic mutation) throws Exception {
 		//cosmic
 		ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
 		mutation.setCosmicID(cosmicIDs);
@@ -75,6 +82,64 @@ public class AsynchronousMutationDataIO {
 		//pmkb
 		DatabaseCommands.updatePmkbInfo(mutation);
 		mutation.setPmkbID();
+
+		// default selection
+		mutation.setSelected(false);
+	}
+
+	private static void createExtraGermlineMutationDataThread(MutationList mutationList, AsynchronousCallback callback){
+		Thread missingDataThread = new Thread(new Runnable(){
+			@Override
+			public void run() {
+				callback.disableInputForAsynchronousLoad();
+				getDatabaseGermlineMutationData(mutationList, callback);
+				callback.enableInputAfterAsynchronousLoad();
+			}
+		});
+		missingDataThread.start();
+	}
+
+	private static void getDatabaseGermlineMutationData(MutationList mutationList, AsynchronousCallback callback){
+		for(int index = 0; index < mutationList.getMutationCount(); index++) {
+			if(callback.isCallbackClosed()){
+				return;
+			}
+			try{
+
+				MutationGermline mutation = (MutationGermline)mutationList.getMutation(index);
+				getMutationDataGermline(mutation);
+				callback.mutationListIndexUpdated(index);
+			}catch(Exception e){
+				callback.showErrorMessage(e, "Could not load mutation dbs data - main.");
+			}
+		}
+
+		for(int index = 0; index < mutationList.getFilteredMutationCount(); index++){
+			if(callback.isCallbackClosed()){
+				return;
+			}
+
+			try{
+				MutationGermline mutation = (MutationGermline)mutationList.getFilteredMutation(index);
+				getMutationDataGermline(mutation);
+				callback.mutationListIndexUpdated(index);
+			}catch(Exception e){
+				callback.showErrorMessage(e, "Could not load mutation dbs data - filtered.");
+			}
+		}
+	}
+
+
+	public static void getMutationDataGermline(MutationGermline mutation) throws Exception {
+
+		int count = DatabaseCommands.getOccurrenceCount(mutation);
+		mutation.setOccurrence(count);
+
+		//gnomad
+		mutation.setGnomadID();
+
+		//cardiac atlas
+		DatabaseCommands.updateGermlineCardiacAtlasInfo(mutation);
 
 		// default selection
 		mutation.setSelected(false);

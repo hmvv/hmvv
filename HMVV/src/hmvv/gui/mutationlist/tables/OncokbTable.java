@@ -4,7 +4,7 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.OncokbTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 
 public class OncokbTable extends CommonTable {
     private static final long serialVersionUID = 1L;
@@ -26,7 +26,7 @@ public class OncokbTable extends CommonTable {
     }
 
     private void searchOncokb() throws Exception {
-        Mutation mutation = getSelectedMutation();
+        MutationSomatic mutation = getSelectedMutation();
         String onco_id = mutation.getOncokbID();
         if (!onco_id.equals("") && !onco_id.equals("null")) {
             InternetCommands.searchOncokb(onco_id);

@@ -174,10 +174,10 @@ public class Configurations {
 	 */
 	public enum USER_TYPE{
 		TECHNOLOGIST,
-        ROTATOR,
-        FELLOW,
-        PATHOLOGIST
-    }
+		ROTATOR,
+		FELLOW,
+		PATHOLOGIST
+	}
 	
     public enum USER_FUNCTION{
         ENTER_SAMPLE{
@@ -191,18 +191,18 @@ public class Configurations {
 	    		return userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST;
 	    	}
         },
-        
-        ANNOTATE_MAIN{
-        	public boolean isSuperUser(USER_TYPE userType) {
-        		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST;
-	    	}
-        },
-        
-        ANNOTATE_DRAFT{
-        	public boolean isSuperUser(USER_TYPE userType) {
-	    		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR;
-	    	}
-        },
+
+		ANNOTATE_MAIN{
+			public boolean isSuperUser(USER_TYPE userType) {
+				return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST;
+			}
+		},
+
+		ANNOTATE_DRAFT{
+			public boolean isSuperUser(USER_TYPE userType) {
+				return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR;
+			}
+		},
 
 		RESTRICT_SAMPLE_ACCESS{
 			public boolean isSuperUser(USER_TYPE userType) {
@@ -213,6 +213,12 @@ public class Configurations {
     	public abstract boolean isSuperUser(USER_TYPE userType);
     }
 
+
+	public enum MUTATION_TYPE{
+		SOMATIC,
+		GERMLINE,
+		COMMON
+	}
     
 	/**
 	 * The Linux group which defines super users.
@@ -225,6 +231,9 @@ public class Configurations {
 	public static int MAX_OCCURENCE_FILTER = 1000000;
 	public static int ALLELE_FREQ_FILTER = 10;
 	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
+	public static int GERMLINE_READ_DEPTH_FILTER = 10;
+	public static int GERMLINE_ALLELE_FREQ_FILTER = 15;
+	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
 
 	public static int getAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){

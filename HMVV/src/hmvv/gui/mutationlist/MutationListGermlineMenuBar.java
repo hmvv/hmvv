@@ -1,13 +1,5 @@
+
 package hmvv.gui.mutationlist;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
@@ -17,31 +9,37 @@ import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.model.MutationSomatic;
+import hmvv.model.MutationGermline;
 import hmvv.model.Sample;
 
-public class MutationListMenuBar extends JMenuBar {
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class MutationListGermlineMenuBar extends JMenuBar {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private JMenu reportMenu;
 	private JMenuItem shortReportMenuItem;
 	private JMenuItem longReportMenuItem;
 	private JMenuItem exportMutationsMenuItem;
 	private JMenu filteredMutationsMenu;
 	private JMenuItem loadFilteredMutationsMenuItem;
-	
-	private MutationListFrame parent;
-	private MutationListFrame mutationListPanel;
-	
+
+	private MutationGermlineListFrame mutationListPanel;
+
 	private Sample sample;
 	private MutationList mutationList;
-	private MutationFilterPanel mutationFilterPanel;
+	private MutationGermlineFilterPanel mutationFilterPanel;
 
-	MutationListMenuBar(MutationListFrame parent, MutationListFrame mutationListPanel, Sample sample, MutationList mutationList, MutationFilterPanel mutationFilterPanel) {
-		this.parent = parent;
+	MutationListGermlineMenuBar(MutationGermlineListFrame mutationListPanel, Sample sample, MutationList mutationList, MutationGermlineFilterPanel mutationFilterPanel) {
 		this.mutationListPanel = mutationListPanel;
-		
+
 		this.sample = sample;
 		this.mutationList = mutationList;
 		this.mutationFilterPanel = mutationFilterPanel;
@@ -56,15 +54,15 @@ public class MutationListMenuBar extends JMenuBar {
 		reportMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
 		shortReportMenuItem = new JMenuItem("Short Report");
 		shortReportMenuItem.setToolTipText("Generate a short report for the mutations marked as reported");
-		
+
 		longReportMenuItem = new JMenuItem("Long Report");
 		longReportMenuItem.setToolTipText("Generate a long report for the mutations marked as reported");
-		
+
 		exportMutationsMenuItem = new JMenuItem("Export mutations");
 		exportMutationsMenuItem.setToolTipText("Export the mutations to a text file");
-		
 
-		
+
+
 		filteredMutationsMenu = new JMenu("Filtered Mutations");
 		filteredMutationsMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
 		loadFilteredMutationsMenuItem = new JMenuItem("Load Filtered Mutations");
@@ -76,15 +74,15 @@ public class MutationListMenuBar extends JMenuBar {
 		reportMenu.add(shortReportMenuItem);
 		reportMenu.add(longReportMenuItem);
 		reportMenu.add(exportMutationsMenuItem);
-		
+
 		JMenu separator1 = new JMenu("|");
 		separator1.setEnabled(false);
 		add(separator1);
-		
+
 		add(filteredMutationsMenu);
 		filteredMutationsMenu.add(loadFilteredMutationsMenuItem);
 	}
-	
+
 	private void activateMenuComponents(){
 		ActionListener actionListener = new ActionListener() {
 			@Override
@@ -97,15 +95,15 @@ public class MutationListMenuBar extends JMenuBar {
 					try {
 						exportTable();
 					} catch (IOException ex) {
-						HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
+						HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, ex);
 					}
 				} else if(e.getSource() == loadFilteredMutationsMenuItem) {
 					loadFilteredMutationsMenuItem.setEnabled(false);
-	                loadFilteredMutationsAsynchronous();
+					loadFilteredMutationsAsynchronous();
 				}
 			}
 		};
-		
+
 		shortReportMenuItem.addActionListener(actionListener);
 		longReportMenuItem.addActionListener(actionListener);
 		exportMutationsMenuItem.addActionListener(actionListener);
@@ -132,73 +130,73 @@ public class MutationListMenuBar extends JMenuBar {
 			mutationListPanel.exportReport(saveAs.getSelectedFile());
 		}
 	}
-	
+
 	private void showShortReportFrame() {
 		try {
 			String report = MutationReportGenerator.generateShortReport(mutationList);
 			showReportFrameText("Short Variant Report", report);
 		} catch (Exception e) {
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e);
 		}
 	}
 
-	private void showLongReportFrame() {
+		private void showLongReportFrame() {
 		try {
 			String report = MutationReportGenerator.generateLongReport(mutationList);
 			showReportFrameText("Long Variant Report", report);
 		} catch (Exception e) {
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e);
 		}
 	}
-	
+//
 	private void showReportFrameText(String title, String report) {
-		ReportFrame reportPanel = new ReportFrameText(parent, title, report);
+		ReportFrame reportPanel = new ReportFrameText(mutationListPanel, title, report);
 		reportPanel.setVisible(true);
 	}
-	
-	private void loadFilteredMutationsAsynchronous() {
-        createLoadFilteredMutationDataThread();
-    }
 
-    private void createLoadFilteredMutationDataThread(){
-        Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
-            @Override
-            public void run() {
-            	mutationListPanel.disableInputForAsynchronousLoad();
-                getFilteredMutationData();
-                mutationListPanel.enableInputAfterAsynchronousLoad();
-                filteredMutationsMenu.setEnabled(false);
-            }
-        });
-        loadFilteredMutationDataThread.start();
-    }
-    
-    private void getFilteredMutationData() {
-        try{
-        	filteredMutationsMenu.setText("Loading...");
-            ArrayList<MutationSomatic> mutations = DatabaseCommands.getExtraMutationsBySample(sample);
-            for(int i = 0; i < mutations.size(); i++) {
-                if(mutationListPanel.isCallbackClosed()){
-                    return;
-                }
-                filteredMutationsMenu.setText("Loading " + (i+1) + " of " + mutations.size());
-                
-                try{
-                    MutationSomatic mutation = mutations.get(i);
-                    AsynchronousMutationDataIO.getMutationData(mutation);
-                    //no need to call parent.mutationListIndexUpdated() here these mutations are not current displayed
-                    mutationList.addFilteredMutation(mutation);
-                }catch(Exception e){
-                	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Could not load additional mutation data.");
-                }
-            }
-            mutationFilterPanel.applyRowFilters();
-        }catch(Exception ex){
-        	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
-        }
-        filteredMutationsMenu.setText("Filtered mutations loaded");
-    }
-	
+	private void loadFilteredMutationsAsynchronous() {
+		createLoadFilteredMutationDataThread();
+	}
+
+	private void createLoadFilteredMutationDataThread(){
+		Thread loadFilteredMutationDataThread = new Thread(new Runnable(){
+			@Override
+			public void run() {
+				mutationListPanel.disableInputForAsynchronousLoad();
+				getFilteredMutationData();
+				mutationListPanel.enableInputAfterAsynchronousLoad();
+				filteredMutationsMenu.setEnabled(false);
+			}
+		});
+		loadFilteredMutationDataThread.start();
+	}
+
+	private void getFilteredMutationData() {
+		try{
+			filteredMutationsMenu.setText("Loading...");
+			ArrayList<MutationGermline> mutations = DatabaseCommands.getExtraGermlineMutationsBySample(sample);
+			for(int i = 0; i < mutations.size(); i++) {
+				if(mutationListPanel.isCallbackClosed()){
+					return;
+				}
+				filteredMutationsMenu.setText("Loading " + (i+1) + " of " + mutations.size());
+
+				try{
+					MutationGermline mutation = mutations.get(i);
+					AsynchronousMutationDataIO.getMutationDataGermline(mutation);
+					//no need to call parent.mutationListIndexUpdated() here these mutations are not current displayed
+					mutationList.addFilteredMutation(mutation);
+				}catch(Exception e){
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e, "Could not load additional mutation data.");
+				}
+			}
+			mutationFilterPanel.applyRowFilters();
+		}catch(Exception ex){
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, ex);
+		}
+		filteredMutationsMenu.setText("Filtered mutations loaded");
+	}
+
 	void disableInputForAsynchronousLoad() {
 		shortReportMenuItem.setEnabled(false);
 		longReportMenuItem.setEnabled(false);

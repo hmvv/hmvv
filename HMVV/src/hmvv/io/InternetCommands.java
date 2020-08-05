@@ -93,4 +93,25 @@ public class InternetCommands {
 		String search = "http://" + Configurations.SSH_SERVER_ADDRESS + "/hmvv3/bugs.html";
 		browseToURL(search);
 	}
+
+	public static void searchCardiacAtlas(String term) throws Exception{
+		browseToURL("https://www.cardiodb.org/acgv/acgv_gene.php?gene=" + term );
+	}
+
+	public static void searchClinvarID(String term) throws Exception{
+		browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term +"/");
+	}
+
+	public static void searchExpasyVariant(String term) throws Exception{
+		browseToURL("https://web.expasy.org/variant_pages/" + term +".html");
+	}
+
+	public static void searchUniprotProtein(String term) throws Exception{
+
+		if (term.contains("NP_")){
+			browseToURL("https://www.ncbi.nlm.nih.gov/protein/" + term);
+		} else{
+			browseToURL("https://www.uniprot.org/uniprot/" + term);}
+
+	}
 }

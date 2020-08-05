@@ -26,7 +26,7 @@ import hmvv.main.HMVVFrame;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 
 public abstract class CommonTable extends JTable{
 	private static final long serialVersionUID = 1L;
@@ -144,10 +144,10 @@ public abstract class CommonTable extends JTable{
 		((DefaultTableCellRenderer)getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.LEFT);
 	}
 	
-	protected final Mutation getSelectedMutation(){
+	protected final MutationSomatic getSelectedMutation(){
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
-		Mutation mutation = model.getMutation(modelRow);
+		MutationSomatic mutation = model.getMutation(modelRow);
 		return mutation;
 	}
 	
@@ -172,7 +172,7 @@ public abstract class CommonTable extends JTable{
 	    if(parent.getWidth() < 1200) {
 	    	buffer = 0;
 	    }
-	    
+
 	    for (int column = 0; column < getColumnCount(); column++) {
 	        TableColumn tableColumn = columnModel.getColumn(column);
 
@@ -194,18 +194,18 @@ public abstract class CommonTable extends JTable{
 	}
 	
 	protected void searchGoogleForGene() throws Exception{
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		InternetCommands.searchGene(mutation.getGene());
 	}
 
 	protected void searchGoogleForDNAChange() throws Exception{
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		String change = mutation.getHGVSc();
 		searchGoogleForMutation(mutation, change);
 	}
 
 	protected void searchGoogleForProteinChange() throws Exception{
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		String change = mutation.getHGVSp();
 		searchGoogleForMutation(mutation, change);
 		
@@ -213,7 +213,7 @@ public abstract class CommonTable extends JTable{
 		searchGoogleForMutation(mutation, abbreviatedChange);
 	}
 	
-	protected void searchGoogleForMutation(Mutation mutation, String change) throws Exception{
+	protected void searchGoogleForMutation(MutationSomatic mutation, String change) throws Exception{
 		String gene = mutation.getGene();
 		String changeOnly = change.replaceAll(".*:", "");
 		String changeFinal = changeOnly.replaceAll(">", "%3E");
@@ -222,7 +222,7 @@ public abstract class CommonTable extends JTable{
 	}
 	
 	protected void searchSNP() throws Exception{
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		String dbSNP = mutation.getDbSNPID();
 		if(!dbSNP.equals("")){
 			InternetCommands.searchSNP(dbSNP);
@@ -230,7 +230,7 @@ public abstract class CommonTable extends JTable{
 	}
 
 	protected void searchCosmic(){
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		if(mutation.getCosmicID().size() > 0){
 			try {
 				CosmicInfoPopup.handleCosmicClick(parent, mutation);
@@ -242,13 +242,13 @@ public abstract class CommonTable extends JTable{
 
 	protected void handleAnnotationClick() throws Exception{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		Mutation mutation = getSelectedMutation();		
+		MutationSomatic mutation = getSelectedMutation();
 		String gene = mutation.getGene();
 		
-		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
+		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,mutation.getMutationType());
 
 
-		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, this, parent);
+		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, parent);
 		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
 	}
@@ -269,7 +269,7 @@ public abstract class CommonTable extends JTable{
 			try {
 				if(e.getColumn() == 0){
 					int row = e.getFirstRow();
-					Mutation mutation = model.getMutation(row);
+					MutationSomatic mutation = model.getMutation(row);
 					Boolean reported = mutation.isReported();
 					Integer sampleID = mutation.getSampleID();
 					Coordinate coordinate = mutation.getCoordinate();

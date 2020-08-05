@@ -41,6 +41,7 @@ import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
+import hmvv.gui.mutationlist.MutationGermlineListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
@@ -410,7 +411,10 @@ public class SampleListFrame extends JPanel {
 		Sample currentSample = getCurrentlySelectedSample();
 	    if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
 		    parent.createTumorMutationBurdenFrame((TMBSample) currentSample);
-		} else{
+		} else if (currentSample.assay.equals("cardiac_exome")){
+			MutationListLoaderGermline loader = new MutationListLoaderGermline(parent, currentSample);
+			loader.execute();
+		}else{
 			MutationListLoader loader = new MutationListLoader(parent, currentSample);
 			loader.execute();
 		}
@@ -600,8 +604,15 @@ public class SampleListFrame extends JPanel {
 		
 		@Override
 		protected MutationList doInBackground() throws Exception {
-			ArrayList<Mutation> mutations = DatabaseCommands.getBaseMutationsBySample(sample);
-			return new MutationList(mutations);
+
+				ArrayList<MutationSomatic>  mutations = new ArrayList<MutationSomatic>();
+				mutations = DatabaseCommands.getBaseMutationsBySample(sample);
+
+                // trying to find a better way than copying, confirmed via reference address in both arraylists
+				ArrayList<MutationCommon> common_mutations = new ArrayList<MutationCommon>();
+				common_mutations.addAll(mutations);
+				return new MutationList(common_mutations,Configurations.MUTATION_TYPE.SOMATIC);
+
 		}
 
 		@Override
@@ -615,5 +626,43 @@ public class SampleListFrame extends JPanel {
 				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error loading mutation data.");
 			}
 	    }	
+	}
+
+	class MutationListLoaderGermline extends SwingWorker<MutationList, Void>{
+		//
+		private final HMVVFrame parent;
+		private final Sample sample;
+
+
+		public MutationListLoaderGermline(HMVVFrame parent, Sample sample) {
+			table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			this.parent = parent;
+			this.sample = sample;
+			mutationListLoading = true;
+		}
+
+		@Override
+		protected MutationList doInBackground() throws Exception {
+
+				ArrayList<MutationGermline>  mutations = new ArrayList<MutationGermline>();
+				mutations = DatabaseCommands.getBaseGermlineMutationsBySample(sample);
+
+			    ArrayList<MutationCommon>  common_mutations = new ArrayList<MutationCommon>();
+			    common_mutations.addAll(mutations);
+				return new MutationList(common_mutations,Configurations.MUTATION_TYPE.GERMLINE);
+
+		}
+
+		@Override
+		public void done() {
+			table.setCursor(Cursor.getDefaultCursor());
+			mutationListLoading = false;
+			try {
+				MutationGermlineListFrame mutationListFrame = new MutationGermlineListFrame(parent, sample, get());
+				mutationListFrame.setVisible(true);
+			} catch (Exception e) {
+				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error loading mutation data.");
+			}
+		}
 	}
 }

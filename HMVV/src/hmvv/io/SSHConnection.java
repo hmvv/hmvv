@@ -9,7 +9,7 @@ import javax.swing.*;
 import com.jcraft.jsch.*;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.MutationFilterPanel.ServerTask;
+import hmvv.gui.mutationlist.ServerWorker;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.main.Configurations.USER_TYPE;
@@ -318,7 +318,7 @@ public class SSHConnection {
 		}
 	}
 
-	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerTask serverTask) throws Exception {
+	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerWorker serverWorker) throws Exception {
 
 	    //create a local temp file
 		int bamCoverage = 25;
@@ -327,14 +327,14 @@ public class SSHConnection {
         bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
         bw.newLine();
 
-        ArrayList<Mutation> selectedMutations = mutationList.getSelectedMutations();
+        ArrayList<MutationCommon> selectedMutations = mutationList.getSelectedMutations();
 
         // verify chr/position pair is unique
         ArrayList<Coordinate> selectedCoordinates = new ArrayList<>();
 
         for (int index = 0; index < selectedMutations.size(); index++) {
 
-            Mutation mutation = selectedMutations.get(index);
+            MutationCommon mutation = selectedMutations.get(index);
 
             if (selectedCoordinates.isEmpty()){
 				selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
@@ -392,7 +392,7 @@ public class SSHConnection {
 
 		loadIGVButton.setText("Finished server work.");
 
-		serverTask.setStatus(1);
+		serverWorker.setStatus(1);
 
         return tempFile.getName();
 

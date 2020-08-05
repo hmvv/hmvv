@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 
+import hmvv.main.Configurations;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
@@ -15,9 +16,18 @@ public class DatabaseCommands_Annotations {
 		DatabaseCommands_Annotations.databaseConnection = databaseConnection;
 	}
 	
-	static ArrayList<GeneAnnotation> getGeneAnnotationHistory(String gene) throws Exception{
+	static ArrayList<GeneAnnotation> getGeneAnnotationHistory(String gene, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 		ArrayList<GeneAnnotation>  geneannotations = new ArrayList<GeneAnnotation>() ;
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select geneAnnotationID, gene, curation, enteredBy, enterDate from geneAnnotation where gene = ? order by geneAnnotationID asc");
+
+		String tablename = "";
+		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
+			tablename = "geneAnnotation";
+		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
+			tablename = "germlineGeneAnnotation";
+		}
+
+		final String query = String.format("select geneAnnotationID, gene, curation, enteredBy, enterDate from %s where gene = ? order by geneAnnotationID asc",tablename);
+		PreparedStatement selectStatement = databaseConnection.prepareStatement(query);
 		selectStatement.setString(1, gene);
 		ResultSet rs = selectStatement.executeQuery();
 		while(rs.next()){
@@ -27,9 +37,18 @@ public class DatabaseCommands_Annotations {
 		return geneannotations;
 	}
 
-	static String getVariantAnnotationDraft(Coordinate coordinate) throws Exception{
+	static String getVariantAnnotationDraft(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+
+		String tablename = "";
+		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
+			tablename = "variantAnnotationDraft";
+		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
+			tablename = "germlineVariantAnnotationDraft";
+		}
+
 		String draft="";
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select draft from variantAnnotationDraft where chr = ? and pos = ? and ref = ? and alt = ?");
+		final String query = String.format("select draft from %s where chr = ? and pos = ? and ref = ? and alt = ?",tablename);
+		PreparedStatement selectStatement = databaseConnection.prepareStatement(query);
 		selectStatement.setString(1, coordinate.getChr());
 		selectStatement.setString(2, coordinate.getPos());
 		selectStatement.setString(3, coordinate.getRef());
@@ -42,11 +61,20 @@ public class DatabaseCommands_Annotations {
 		return draft;
 	}
 
-	static void addGeneAnnotationCuration(GeneAnnotation geneAnnotation) throws Exception{
+	static void addGeneAnnotationCuration(GeneAnnotation geneAnnotation, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 		String gene = geneAnnotation.gene;
 		String curation = geneAnnotation.curation;
 		String enteredBy = geneAnnotation.enteredBy;
-		PreparedStatement pstEnterGeneAnnotation = databaseConnection.prepareStatement("insert into geneAnnotation (gene, curation, enteredBy, enterDate) values (?, ?, ?, ?)");
+
+		String tablename = "";
+		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
+			tablename = "geneAnnotation";
+		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
+			tablename = "germlineGeneAnnotation";
+		}
+
+		final String query = String.format("insert into %s (gene, curation, enteredBy, enterDate) values (?, ?, ?, ?)",tablename);
+		PreparedStatement pstEnterGeneAnnotation = databaseConnection.prepareStatement(query);
 		pstEnterGeneAnnotation.setString(1, gene);
 		pstEnterGeneAnnotation.setString(2, curation);
 		pstEnterGeneAnnotation.setString(3, enteredBy);
@@ -55,8 +83,8 @@ public class DatabaseCommands_Annotations {
 		pstEnterGeneAnnotation.close();
 	}
 
-	static void addVariantAnnotationCuration(Annotation annotation) throws Exception{
-		Coordinate coordinate = annotation.mutation.getCoordinate();
+	static void addVariantAnnotationCuration(Annotation annotation, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+		Coordinate coordinate = annotation.cordinate;
 		String chr = coordinate.getChr();
 		String pos = coordinate.getPos();
 		String ref = coordinate.getRef();
@@ -66,8 +94,16 @@ public class DatabaseCommands_Annotations {
 		String somatic = annotation.somatic;
 		String enteredBy = annotation.enteredBy;
 
-		PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("insert into variantAnnotation ( chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate) "
-				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		String tablename = "";
+		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
+			tablename = "variantAnnotation";
+		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
+			tablename = "germlineVariantAnnotation";
+		}
+
+		final String query = String.format("insert into %s ( chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate) "
+						+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",tablename);
+		PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement(query);
 		pstEnterAnnotation.setString(1, chr);
 		pstEnterAnnotation.setString(2, pos);
 		pstEnterAnnotation.setString(3, ref);
@@ -81,13 +117,21 @@ public class DatabaseCommands_Annotations {
 		pstEnterAnnotation.close();
 	}
 
-	static void addVariantAnnotationDraft(Coordinate coordinate, String draft) throws Exception{
+	static void addVariantAnnotationDraft(Coordinate coordinate, String draft, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 		String chr = coordinate.getChr();
 		String pos = coordinate.getPos();
 		String ref = coordinate.getRef();
 		String alt = coordinate.getAlt();
 
-		PreparedStatement selectStatement = databaseConnection.prepareStatement("select draft from variantAnnotationDraft where chr = ? and pos = ? and ref = ? and alt = ?");
+		String tablename = "";
+		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
+			tablename = "variantAnnotationDraft";
+		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
+			tablename = "germlineVariantAnnotationDraft";
+		}
+
+		final String query = String.format("select draft from %s where chr = ? and pos = ? and ref = ? and alt = ?",tablename);
+		PreparedStatement selectStatement = databaseConnection.prepareStatement(query);
 		selectStatement.setString(1, chr);
 		selectStatement.setString(2, pos);
 		selectStatement.setString(3, ref);
@@ -95,7 +139,8 @@ public class DatabaseCommands_Annotations {
 		ResultSet rsCheckSample = selectStatement.executeQuery();
 
 		if(rsCheckSample.next()){
-			PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("update variantAnnotationDraft set draft=? where chr = ? and pos = ? and ref = ? and alt = ?");
+			final String update_query = String.format("update %s set draft=? where chr = ? and pos = ? and ref = ? and alt = ?",tablename);
+			PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement(update_query);
 			pstEnterAnnotation.setString(1, draft);
 			pstEnterAnnotation.setString(2, chr);
 			pstEnterAnnotation.setString(3, pos);
@@ -104,8 +149,9 @@ public class DatabaseCommands_Annotations {
 			pstEnterAnnotation.executeUpdate();
 			pstEnterAnnotation.close(); }
 		else {
-			PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement("insert into variantAnnotationDraft ( chr, pos, ref, alt, draft) "
-					+ "values (?, ?, ?, ?, ?)");
+			final String insert_query = String.format("insert into %s ( chr, pos, ref, alt, draft) "
+							+ "values (?, ?, ?, ?, ?)",tablename);
+			PreparedStatement pstEnterAnnotation = databaseConnection.prepareStatement(insert_query);
 			pstEnterAnnotation.setString(1, chr);
 			pstEnterAnnotation.setString(2, pos);
 			pstEnterAnnotation.setString(3, ref);
