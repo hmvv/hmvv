@@ -2,31 +2,31 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-public class GermlineClinVarTableModel extends CommonTableModelGermline {
+public class GermlineClinVarTableModel extends GermlineCommonTableModel {
 	private static final long serialVersionUID = 1L;
 
 
-	public GermlineClinVarTableModel(MutationListGermline mutationList){
+	public GermlineClinVarTableModel(MutationList mutationList){
 		super(mutationList);
 	}
 	
-	protected ArrayList<MutationTableModelColumnGermline> constructColumns(){
-		ArrayList<MutationTableModelColumnGermline> columns = new ArrayList<MutationTableModelColumnGermline>();
-		columns.add(MutationTableModelColumnGermline.reportedColumn);
+	protected ArrayList<GermlineMutationTableModelColumn> constructColumns(){
+		ArrayList<GermlineMutationTableModelColumn> columns = new ArrayList<GermlineMutationTableModelColumn>();
+		columns.add(GermlineMutationTableModelColumn.reportedColumn);
 
-		columns.add(MutationTableModelColumnGermline.geneColumn);
-		columns.add(MutationTableModelColumnGermline.exonsColumn);
+		columns.add(GermlineMutationTableModelColumn.geneColumn);
+		columns.add(GermlineMutationTableModelColumn.exonsColumn);
 
-		columns.add(MutationTableModelColumnGermline.chrColumn);
-		columns.add(MutationTableModelColumnGermline.posColumn);
-		columns.add(MutationTableModelColumnGermline.refColumn);
-		columns.add(MutationTableModelColumnGermline.altColumn);
+		columns.add(GermlineMutationTableModelColumn.chrColumn);
+		columns.add(GermlineMutationTableModelColumn.posColumn);
+		columns.add(GermlineMutationTableModelColumn.refColumn);
+		columns.add(GermlineMutationTableModelColumn.altColumn);
 
-		columns.add(MutationTableModelColumnGermline.clinvarID);
-		columns.add(MutationTableModelColumnGermline.originColumn);
-		columns.add(MutationTableModelColumnGermline.clinicalDisease);
-		columns.add(MutationTableModelColumnGermline.clinicalSignificance);
-		columns.add(MutationTableModelColumnGermline.clinicalConsequence);
+		columns.add(GermlineMutationTableModelColumn.clinvarID);
+		columns.add(GermlineMutationTableModelColumn.originColumn);
+		columns.add(GermlineMutationTableModelColumn.clinicalDisease);
+		columns.add(GermlineMutationTableModelColumn.clinicalSignificance);
+		columns.add(GermlineMutationTableModelColumn.clinicalConsequence);
 
 		return columns;
 	}

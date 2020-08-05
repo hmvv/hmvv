@@ -2,12 +2,9 @@ package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineSNPEFFTableModel;
-import hmvv.gui.mutationlist.tablemodels.VEPTableModel;
 import hmvv.io.IGVConnection;
-import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
-import hmvv.model.GermlineMutation;
-import hmvv.model.Mutation;
+import hmvv.model.MutationGermline;
 
 import javax.swing.*;
 
@@ -51,7 +48,7 @@ public class GermlineSNPEFFTable extends CommonTableGermline{
 
 
     private void handleIGVClick() throws Exception{
-        GermlineMutation mutation = getSelectedMutation();
+        MutationGermline mutation = getSelectedMutation();
         String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
         if(result.length() > 0) {
             JOptionPane.showMessageDialog(this, result);
@@ -59,7 +56,7 @@ public class GermlineSNPEFFTable extends CommonTableGermline{
     }
 
     private void handleLoadIGVCheckBoxClick(){
-        GermlineMutation mutation = getSelectedMutation();
+        MutationGermline mutation = getSelectedMutation();
         if (mutation.isSelected()){
             mutation.setSelected(false);
         }else{

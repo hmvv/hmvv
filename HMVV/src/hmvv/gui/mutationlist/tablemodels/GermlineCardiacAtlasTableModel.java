@@ -2,30 +2,30 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-public class GermlineCardiacAtlasTableModel extends CommonTableModelGermline {
+public class GermlineCardiacAtlasTableModel extends GermlineCommonTableModel {
 	private static final long serialVersionUID = 1L;
 
 
-	public GermlineCardiacAtlasTableModel(MutationListGermline mutationList){
+	public GermlineCardiacAtlasTableModel(MutationList mutationList){
 		super(mutationList);
 	}
 	
-	protected ArrayList<MutationTableModelColumnGermline> constructColumns(){
-		ArrayList<MutationTableModelColumnGermline> columns = new ArrayList<MutationTableModelColumnGermline>();
-		columns.add(MutationTableModelColumnGermline.reportedColumn);
+	protected ArrayList<GermlineMutationTableModelColumn> constructColumns(){
+		ArrayList<GermlineMutationTableModelColumn> columns = new ArrayList<GermlineMutationTableModelColumn>();
+		columns.add(GermlineMutationTableModelColumn.reportedColumn);
 
-		columns.add(MutationTableModelColumnGermline.geneColumn);
-		columns.add(MutationTableModelColumnGermline.exonsColumn);
+		columns.add(GermlineMutationTableModelColumn.geneColumn);
+		columns.add(GermlineMutationTableModelColumn.exonsColumn);
 
-		columns.add(MutationTableModelColumnGermline.chrColumn);
-		columns.add(MutationTableModelColumnGermline.posColumn);
-		columns.add(MutationTableModelColumnGermline.refColumn);
-		columns.add(MutationTableModelColumnGermline.altColumn);
+		columns.add(GermlineMutationTableModelColumn.chrColumn);
+		columns.add(GermlineMutationTableModelColumn.posColumn);
+		columns.add(GermlineMutationTableModelColumn.refColumn);
+		columns.add(GermlineMutationTableModelColumn.altColumn);
 
-		columns.add(MutationTableModelColumnGermline.cardiacAtlasIDColumn);
-		columns.add(MutationTableModelColumnGermline.cardiac_cdsVariant_Column);
-		columns.add(MutationTableModelColumnGermline.cardiac_proteinVariant_Column);
-		columns.add(MutationTableModelColumnGermline.cardiac_variantType_Column);
+		columns.add(GermlineMutationTableModelColumn.cardiacAtlasIDColumn);
+		columns.add(GermlineMutationTableModelColumn.cardiac_cdsVariant_Column);
+		columns.add(GermlineMutationTableModelColumn.cardiac_proteinVariant_Column);
+		columns.add(GermlineMutationTableModelColumn.cardiac_variantType_Column);
 
 		return columns;
 	}

@@ -2,31 +2,31 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-public class GermlinePredictionTableModel extends CommonTableModelGermline {
+public class GermlinePredictionTableModel extends GermlineCommonTableModel {
 	private static final long serialVersionUID = 1L;
 
 
-	public GermlinePredictionTableModel(MutationListGermline mutationList){
+	public GermlinePredictionTableModel(MutationList mutationList){
 		super(mutationList);
 	}
 	
-	protected ArrayList<MutationTableModelColumnGermline> constructColumns(){
-		ArrayList<MutationTableModelColumnGermline> columns = new ArrayList<MutationTableModelColumnGermline>();
-		columns.add(MutationTableModelColumnGermline.reportedColumn);
+	protected ArrayList<GermlineMutationTableModelColumn> constructColumns(){
+		ArrayList<GermlineMutationTableModelColumn> columns = new ArrayList<GermlineMutationTableModelColumn>();
+		columns.add(GermlineMutationTableModelColumn.reportedColumn);
 
-		columns.add(MutationTableModelColumnGermline.geneColumn);
-		columns.add(MutationTableModelColumnGermline.exonsColumn);
+		columns.add(GermlineMutationTableModelColumn.geneColumn);
+		columns.add(GermlineMutationTableModelColumn.exonsColumn);
 
-		columns.add(MutationTableModelColumnGermline.chrColumn);
-		columns.add(MutationTableModelColumnGermline.posColumn);
-		columns.add(MutationTableModelColumnGermline.refColumn);
+		columns.add(GermlineMutationTableModelColumn.chrColumn);
+		columns.add(GermlineMutationTableModelColumn.posColumn);
+		columns.add(GermlineMutationTableModelColumn.refColumn);
 
 
-		columns.add(MutationTableModelColumnGermline.polyphen_column);
-		columns.add(MutationTableModelColumnGermline.sift_column);
-		columns.add(MutationTableModelColumnGermline.revel_column);
-		columns.add(MutationTableModelColumnGermline.cadd_phred_column);
-		columns.add(MutationTableModelColumnGermline.canonical_column);
+		columns.add(GermlineMutationTableModelColumn.polyphen_column);
+		columns.add(GermlineMutationTableModelColumn.sift_column);
+		columns.add(GermlineMutationTableModelColumn.revel_column);
+		columns.add(GermlineMutationTableModelColumn.cadd_phred_column);
+		columns.add(GermlineMutationTableModelColumn.canonical_column);
 		return columns;
 	}
 }

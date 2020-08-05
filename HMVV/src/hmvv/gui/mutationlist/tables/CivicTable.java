@@ -4,7 +4,7 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.CivicTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 
 public class CivicTable extends CommonTable {
     private static final long serialVersionUID = 1L;
@@ -26,7 +26,7 @@ public class CivicTable extends CommonTable {
     }
 
     private void searchCivic() throws Exception {
-        Mutation mutation = getSelectedMutation();
+        MutationSomatic mutation = getSelectedMutation();
         String civic_url = mutation.getCivic_variant_url();
         if (!civic_url.equals("") && !civic_url.equals("null")) {
             InternetCommands.searchCivic(civic_url);

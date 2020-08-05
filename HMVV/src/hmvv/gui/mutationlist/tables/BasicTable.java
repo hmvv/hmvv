@@ -5,7 +5,7 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.io.IGVConnection;
 import hmvv.main.HMVVFrame;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 
 public class BasicTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
@@ -58,7 +58,7 @@ public class BasicTable extends CommonTable{
 	}
 
 	private void handleIGVClick() throws Exception{
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
 		if(result.length() > 0) {
 			JOptionPane.showMessageDialog(this, result);
@@ -66,7 +66,7 @@ public class BasicTable extends CommonTable{
 	}
 
 	private void handleLoadIGVCheckBoxClick(){
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		if (mutation.isSelected()){
 			mutation.setSelected(false);
 		}else{

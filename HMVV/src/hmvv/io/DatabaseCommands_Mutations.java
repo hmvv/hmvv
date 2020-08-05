@@ -16,19 +16,19 @@ public class DatabaseCommands_Mutations {
 		DatabaseCommands_Mutations.databaseConnection = databaseConnection;
 	}
 	
-	static ArrayList<Mutation> getBaseMutationsBySample(Sample sample) throws Exception{
-		ArrayList<Mutation> mutations = getMutationDataByID(sample, false);
+	static ArrayList<MutationSomatic> getBaseMutationsBySample(Sample sample) throws Exception{
+		ArrayList<MutationSomatic> mutations = getMutationDataByID(sample, false);
 		addReportedMutationsByMRN(sample, mutations);		
 		return mutations;
 	}
 
-	static ArrayList<Mutation> getExtraMutationsBySample(Sample sample) throws Exception{
-		ArrayList<Mutation> mutations = getMutationDataByID(sample, true);
+	static ArrayList<MutationSomatic> getExtraMutationsBySample(Sample sample) throws Exception{
+		ArrayList<MutationSomatic> mutations = getMutationDataByID(sample, true);
 		addReportedMutationsByMRN(sample, mutations);		
 		return mutations;
 	}
 
-	private static ArrayList<Mutation> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
+	private static ArrayList<MutationSomatic> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
 				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID,t2.pubmed,"
@@ -64,13 +64,13 @@ public class DatabaseCommands_Mutations {
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<Mutation> mutations = makeModel(rs);
+		ArrayList<MutationSomatic> mutations = makeModel(rs);
 		preparedStatement.close();
 		return mutations;
 	}
 
 
-	public static ArrayList<GermlineMutation> getGermlineMutationDataByID(Sample sample,boolean getFilteredData) throws Exception{
+	public static ArrayList<MutationGermline> getGermlineMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
 				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.STRAND, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
@@ -107,7 +107,7 @@ public class DatabaseCommands_Mutations {
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ""+sample.sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<GermlineMutation> mutations = makeGermlineModel(rs);
+		ArrayList<MutationGermline> mutations = makeGermlineModel(rs);
 		preparedStatement.close();
 		return mutations;
 	}
@@ -120,14 +120,14 @@ public class DatabaseCommands_Mutations {
 	 * @return
 	 * @throws Exception
 	 */
-	private static void addReportedMutationsByMRN(Sample sample, ArrayList<Mutation> mutations) throws Exception {
-		ArrayList<Mutation> reportedMutations = new ArrayList<Mutation>();
+	private static void addReportedMutationsByMRN(Sample sample, ArrayList<MutationSomatic> mutations) throws Exception {
+		ArrayList<MutationSomatic> reportedMutations = new ArrayList<MutationSomatic>();
 		for(Sample otherSample : sample.getLinkedPatientSamples()) {
 			reportedMutations.addAll(getMutationDataByID(otherSample, false));
 		}
 
-		for(Mutation mutation : mutations) {
-			for(Mutation other : reportedMutations) {
+		for(MutationSomatic mutation : mutations) {
+			for(MutationSomatic other : reportedMutations) {
 				if(mutation.equals(other)) {
 					mutation.addOtherMutation(other);
 				}
@@ -138,7 +138,7 @@ public class DatabaseCommands_Mutations {
 	/**
 	 * Acquires the cosmicID from the database. If it isn't found, an empty array is returned
 	 */
-	static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
+	static ArrayList<String> getCosmicIDs(MutationSomatic mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
 		String query = "select cosmicID from db_cosmic_grch37v86 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -169,7 +169,7 @@ public class DatabaseCommands_Mutations {
 		return info;
 	}
 
-	static void updateOncokbInfo(Mutation mutation) throws Exception{
+	static void updateOncokbInfo(MutationSomatic mutation) throws Exception{
 		String ENST_id = mutation.getHGVSc().split("\\.")[0];
 
 		String ENSP = "";
@@ -196,7 +196,7 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.close();
 	}
 
-	static void updatePmkbInfo(Mutation mutation) throws Exception{
+	static void updatePmkbInfo(MutationSomatic mutation) throws Exception{
 		String ENSP = "";
 		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
 		if(getHGVSpArray.length > 1) {
@@ -218,7 +218,7 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.close();
 	}
 
-	static void updateCivicInfo(Mutation mutation) throws Exception{
+	static void updateCivicInfo(MutationSomatic mutation) throws Exception{
 		String ENSP = "";
 		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
 		if(getHGVSpArray.length > 1) {
@@ -241,7 +241,7 @@ public class DatabaseCommands_Mutations {
 	}
 
 
-	static void updateGermlineCardiacAtlasInfo(GermlineMutation mutation) throws Exception{
+	static void updateGermlineCardiacAtlasInfo(MutationGermline mutation) throws Exception{
 		String[] getHGVScArray = mutation.getHGVSc().split("\\:");
 		String cds_variant = getHGVScArray[1];
 
@@ -263,7 +263,7 @@ public class DatabaseCommands_Mutations {
 	/**
 	 * Acquires the number of occurrences of this mutation from the database.
 	 */
-	static int getOccurrenceCount(CommonMutation mutation) throws Exception{
+	static int getOccurrenceCount(MutationCommon mutation) throws Exception{
 
         Coordinate coordinate = mutation.getCoordinate();
 		String assay = mutation.getAssay();
@@ -324,11 +324,11 @@ public class DatabaseCommands_Mutations {
 		updateStatement.close();
 	}
 
-	private static ArrayList<Mutation> makeModel(ResultSet rs) throws Exception{
-		ArrayList<Mutation> mutations = new ArrayList<Mutation>();
+	private static ArrayList<MutationSomatic> makeModel(ResultSet rs) throws Exception{
+		ArrayList<MutationSomatic> mutations = new ArrayList<MutationSomatic>();
 
 		while(rs.next()){
-			Mutation mutation = new Mutation();
+			MutationSomatic mutation = new MutationSomatic();
 
 			//common
 			boolean reported = Integer.parseInt(rs.getString("reported")) != 0;
@@ -400,11 +400,11 @@ public class DatabaseCommands_Mutations {
 		return mutations;
 	}
 
-	private static ArrayList<GermlineMutation> makeGermlineModel(ResultSet rs) throws Exception{
-		ArrayList<GermlineMutation> mutations = new ArrayList<GermlineMutation>();
+	private static ArrayList<MutationGermline> makeGermlineModel(ResultSet rs) throws Exception{
+		ArrayList<MutationGermline> mutations = new ArrayList<MutationGermline>();
 
 		while(rs.next()){
-			GermlineMutation mutation = new GermlineMutation();
+			MutationGermline mutation = new MutationGermline();
 
 			//common
 			boolean reported = Integer.parseInt(rs.getString("reported")) != 0;

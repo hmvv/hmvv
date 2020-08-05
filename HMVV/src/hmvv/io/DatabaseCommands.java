@@ -52,15 +52,15 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Mutation Queries
 	 *************************************************************************/
-	public static ArrayList<Mutation> getBaseMutationsBySample(Sample sample) throws Exception{
+	public static ArrayList<MutationSomatic> getBaseMutationsBySample(Sample sample) throws Exception{
 		return DatabaseCommands_Mutations.getBaseMutationsBySample(sample);
 	}
 
-	public static ArrayList<Mutation> getExtraMutationsBySample(Sample sample) throws Exception{
+	public static ArrayList<MutationSomatic> getExtraMutationsBySample(Sample sample) throws Exception{
 		return DatabaseCommands_Mutations.getExtraMutationsBySample(sample);
 	}
 	
-	public static ArrayList<String> getCosmicIDs(Mutation mutation) throws Exception{
+	public static ArrayList<String> getCosmicIDs(MutationSomatic mutation) throws Exception{
 		return DatabaseCommands_Mutations.getCosmicIDs(mutation);
 	}
 
@@ -68,19 +68,19 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getCosmicInfo(cosmicID);
 	}
 
-	public static void updateOncokbInfo(Mutation mutation) throws Exception{
+	public static void updateOncokbInfo(MutationSomatic mutation) throws Exception{
 		DatabaseCommands_Mutations.updateOncokbInfo(mutation);
 	}
 
-	public static void updatePmkbInfo(Mutation mutation) throws Exception{
+	public static void updatePmkbInfo(MutationSomatic mutation) throws Exception{
 		DatabaseCommands_Mutations.updatePmkbInfo(mutation);
 	}
 
-	public static void updateCivicInfo(Mutation mutation) throws Exception{
+	public static void updateCivicInfo(MutationSomatic mutation) throws Exception{
 		DatabaseCommands_Mutations.updateCivicInfo(mutation);
 	}
 	
-	public static int getOccurrenceCount(CommonMutation mutation) throws Exception{
+	public static int getOccurrenceCount(MutationCommon mutation) throws Exception{
 		return DatabaseCommands_Mutations.getOccurrenceCount(mutation);
 	}
 	
@@ -88,15 +88,15 @@ public class DatabaseCommands {
 		DatabaseCommands_Mutations.updateReportedStatus(setToReported, sampleID, coordinate);
 	}
 
-	public static ArrayList<GermlineMutation> getBaseGermlineMutationsBySample(Sample sample) throws Exception{
+	public static ArrayList<MutationGermline> getBaseGermlineMutationsBySample(Sample sample) throws Exception{
 		return DatabaseCommands_Mutations.getGermlineMutationDataByID(sample,false);
 	}
 
-	public static ArrayList<GermlineMutation> getExtraGermlineMutationsBySample(Sample sample) throws Exception{
+	public static ArrayList<MutationGermline> getExtraGermlineMutationsBySample(Sample sample) throws Exception{
 		return DatabaseCommands_Mutations.getGermlineMutationDataByID(sample,true);
 	}
 
-	public static void updateGermlineCardiacAtlasInfo(GermlineMutation mutation) throws Exception{
+	public static void updateGermlineCardiacAtlasInfo(MutationGermline mutation) throws Exception{
 		DatabaseCommands_Mutations.updateGermlineCardiacAtlasInfo(mutation);
 	}
 

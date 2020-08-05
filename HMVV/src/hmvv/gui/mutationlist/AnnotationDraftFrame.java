@@ -2,11 +2,8 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
-import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.model.CommonMutation;
-import hmvv.model.Coordinate;
-import hmvv.model.Mutation;
+import hmvv.model.MutationCommon;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -23,10 +20,10 @@ public class AnnotationDraftFrame extends JFrame {
     private JButton clearButton;
     private JButton saveButton;
     
-    private CommonMutation mutation;
+    private MutationCommon mutation;
     private JFrame parent;
     
-    public AnnotationDraftFrame( JFrame parent, CommonMutation mutation) throws HeadlessException {
+    public AnnotationDraftFrame( JFrame parent, MutationCommon mutation) throws HeadlessException {
         this.parent = parent;
         this.mutation = mutation;
         

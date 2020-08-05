@@ -2,11 +2,9 @@ package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineCardiacAtlasTableModel;
-import hmvv.gui.mutationlist.tablemodels.GermlineTranscriptTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
-import hmvv.model.GermlineMutation;
-import hmvv.model.Mutation;
+import hmvv.model.MutationGermline;
 
 public class GermlineCardiacAtlasTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
@@ -31,7 +29,7 @@ public class GermlineCardiacAtlasTable extends CommonTableGermline{
 	}
 
 	private void searchCardiacAtlas() throws Exception{
-		GermlineMutation mutation = getSelectedMutation();
+		MutationGermline mutation = getSelectedMutation();
 		String cardiacAtlas_id = mutation.getCardiacAtlasId();
 		if(!cardiacAtlas_id.equals("") && !cardiacAtlas_id.equals("null")){
 			InternetCommands.searchCardiacAtlas(cardiacAtlas_id);

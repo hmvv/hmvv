@@ -4,7 +4,7 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 
 public class ClinVarTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
@@ -26,7 +26,7 @@ public class ClinVarTable extends CommonTable{
 	}
 
     private void searchClinVar() throws Exception{
-        Mutation mutation = getSelectedMutation();
+        MutationSomatic mutation = getSelectedMutation();
         String id = mutation.getClinvarID();
         if(!id.equals("") && !id.equals("null")){
             InternetCommands.searchClinvar(id);

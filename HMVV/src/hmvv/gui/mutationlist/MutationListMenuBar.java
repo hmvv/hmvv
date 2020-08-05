@@ -12,17 +12,12 @@ import javax.swing.filechooser.FileFilter;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.sampleList.ReportFrame;
-import hmvv.gui.sampleList.ReportFramePatientHistory;
 import hmvv.gui.sampleList.ReportFrameText;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.MutationReportGenerator;
-import hmvv.io.LIS.LISConnection;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
-import hmvv.model.Mutation;
-import hmvv.model.PatientHistory;
+import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
 
 public class MutationListMenuBar extends JMenuBar {
@@ -181,7 +176,7 @@ public class MutationListMenuBar extends JMenuBar {
     private void getFilteredMutationData() {
         try{
         	filteredMutationsMenu.setText("Loading...");
-            ArrayList<Mutation> mutations = DatabaseCommands.getExtraMutationsBySample(sample);
+            ArrayList<MutationSomatic> mutations = DatabaseCommands.getExtraMutationsBySample(sample);
             for(int i = 0; i < mutations.size(); i++) {
                 if(mutationListPanel.isCallbackClosed()){
                     return;
@@ -189,7 +184,7 @@ public class MutationListMenuBar extends JMenuBar {
                 filteredMutationsMenu.setText("Loading " + (i+1) + " of " + mutations.size());
                 
                 try{
-                    Mutation mutation = mutations.get(i);
+                    MutationSomatic mutation = mutations.get(i);
                     AsynchronousMutationDataIO.getMutationData(mutation);
                     //no need to call parent.mutationListIndexUpdated() here these mutations are not current displayed
                     mutationList.addFilteredMutation(mutation);

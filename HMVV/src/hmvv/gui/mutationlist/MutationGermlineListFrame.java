@@ -7,6 +7,7 @@ import hmvv.gui.sampleList.ReportFramePatientHistory;
 import hmvv.io.AsynchronousCallback;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.LIS.LISConnection;
+import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.PatientHistory;
@@ -18,14 +19,16 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
-public class MutationListFrameGermline extends JDialog implements AsynchronousCallback{
+public class MutationGermlineListFrame extends JDialog implements AsynchronousCallback{
 	private static final long serialVersionUID = 1L;
 
 	public final HMVVFrame parent;
 
-	private MutationListMenuBarGermline mutationListMenuBar;
+	private MutationListGermlineMenuBar mutationListMenuBar;
 
 	private GermlineSNPEFFTable vepTabTable;
 	private GermlineSNPEFFTableModel vepTabTableModel;
@@ -59,19 +62,19 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	private JScrollPane clinVarScrollPane;
 	private JScrollPane gnomadScrollPane;
 
-	private MutationListGermline mutationList;
-	private MutationListFiltersGermline mutationListFilters;
+	private MutationList mutationList;
+	private MutationListFilters mutationListFilters;
 
 	private JTabbedPane tabbedPane;
 	private CommonTableGermline selectedTable;
 	private JScrollPane selectedScrollPane;
 
 	private Sample sample;
-	private MutationFilterPanelGermline mutationFilterPanel;
+	private MutationGermlineFilterPanel mutationFilterPanel;
 
 	private volatile boolean isWindowClosed;
 
-	public MutationListFrameGermline(HMVVFrame parent, Sample sample, MutationListGermline mutationList){
+	public MutationGermlineListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
 		super();
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
@@ -80,7 +83,7 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 		this.parent = parent;
 		this.mutationList = mutationList;
 		this.sample = sample;
-		this.mutationListFilters = new MutationListFiltersGermline();
+		this.mutationListFilters = new MutationListFilters();
 		
 		constructComponents();
 		layoutComponents();
@@ -107,10 +110,10 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	}
 
 	private void constructComponents() {
-		mutationFilterPanel = new MutationFilterPanelGermline(this,sample, mutationList, mutationListFilters);
+		mutationFilterPanel = new MutationGermlineFilterPanel(this,sample, mutationList, mutationListFilters);
 		mutationFilterPanel.resetFilters();
 		
-		mutationListMenuBar = new MutationListMenuBarGermline(this, this, sample, mutationList, mutationFilterPanel);
+		mutationListMenuBar = new MutationListGermlineMenuBar(this, sample, mutationList, mutationFilterPanel);
 		setJMenuBar(mutationListMenuBar);
 		constructTabs();
 	}
@@ -245,9 +248,11 @@ public class MutationListFrameGermline extends JDialog implements AsynchronousCa
 	        }
 	    });
 	}
-	
 
-	
+	void exportReport(File exportFile) throws IOException {
+		MutationReportGenerator.exportReportGermline(exportFile,  clinVarTableModel);
+	}
+
 	public void disableInputForAsynchronousLoad() {
 		if(sample != null) {
 			mutationListMenuBar.disableInputForAsynchronousLoad();

@@ -16,7 +16,7 @@ import javax.swing.table.*;
 import hmvv.gui.BooleanRenderer;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
-import hmvv.gui.mutationlist.tablemodels.CommonTableModelGermline;
+import hmvv.gui.mutationlist.tablemodels.GermlineCommonTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
@@ -28,11 +28,11 @@ public abstract class CommonTableGermline extends JTable{
 	private static final long serialVersionUID = 1L;
 
 	protected HMVVFrame parent;
-	protected CommonTableModelGermline model;
+	protected GermlineCommonTableModel model;
 
 	private HMVVTableColumn[] customColumns;
 
-	public CommonTableGermline(HMVVFrame parent, CommonTableModelGermline model){
+	public CommonTableGermline(HMVVFrame parent, GermlineCommonTableModel model){
 		super();
 		this.parent = parent;
 		this.model = model;
@@ -140,14 +140,14 @@ public abstract class CommonTableGermline extends JTable{
 		((DefaultTableCellRenderer)getDefaultRenderer(String.class)).setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
-	protected final GermlineMutation getSelectedMutation(){
+	protected final MutationGermline getSelectedMutation(){
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
-		GermlineMutation mutation = model.getMutation(modelRow);
+		MutationGermline mutation = model.getMutation(modelRow);
 		return mutation;
 	}
 
-	public final CommonTableModelGermline getTableModel(){
+	public final GermlineCommonTableModel getTableModel(){
 		return model;
 	}
 
@@ -190,18 +190,18 @@ public abstract class CommonTableGermline extends JTable{
 	}
 
 	protected void searchGoogleForGene() throws Exception{
-		GermlineMutation mutation = getSelectedMutation();
+		MutationGermline mutation = getSelectedMutation();
 		InternetCommands.searchGene(mutation.getGene());
 	}
 
 	protected void searchGoogleForDNAChange() throws Exception{
-		GermlineMutation mutation = getSelectedMutation();
+		MutationGermline mutation = getSelectedMutation();
 		String change = mutation.getHGVSc();
 		searchGoogleForMutation(mutation, change);
 	}
 
 	protected void searchGoogleForProteinChange() throws Exception{
-		GermlineMutation mutation = getSelectedMutation();
+		MutationGermline mutation = getSelectedMutation();
 		String change = mutation.getHGVSp();
 		searchGoogleForMutation(mutation, change);
 
@@ -209,7 +209,7 @@ public abstract class CommonTableGermline extends JTable{
 		searchGoogleForMutation(mutation, abbreviatedChange);
 	}
 
-	protected void searchGoogleForMutation(GermlineMutation mutation, String change) throws Exception{
+	protected void searchGoogleForMutation(MutationGermline mutation, String change) throws Exception{
 		String gene = mutation.getGene();
 		String changeOnly = change.replaceAll(".*:", "");
 		String changeFinal = changeOnly.replaceAll(">", "%3E");
@@ -218,14 +218,14 @@ public abstract class CommonTableGermline extends JTable{
 	}
 
 	protected void searchClinvarID() throws Exception{
-		GermlineMutation mutation = getSelectedMutation();
+		MutationGermline mutation = getSelectedMutation();
 		InternetCommands.searchClinvarID(mutation.getClinvarID());
 	}
 
 
 	protected void handleAnnotationClick() throws Exception{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		GermlineMutation mutation = getSelectedMutation();
+		MutationGermline mutation = getSelectedMutation();
 		String gene = mutation.getGene();
 
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.GERMLINE);
@@ -238,7 +238,7 @@ public abstract class CommonTableGermline extends JTable{
 	public void notifyAnnotationUpdated(Annotation annotation) {
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
-		CommonTableModelGermline model = (CommonTableModelGermline) getModel();
+		GermlineCommonTableModel model = (GermlineCommonTableModel) getModel();
 		model.mutationUpdated(modelRow);
 	}
 
@@ -251,7 +251,7 @@ public abstract class CommonTableGermline extends JTable{
 			try {
 				if(e.getColumn() == 0){
 					int row = e.getFirstRow();
-					GermlineMutation mutation = model.getMutation(row);
+					MutationGermline mutation = model.getMutation(row);
 					Boolean reported = mutation.isReported();
 					Integer sampleID = mutation.getSampleID();
 					Coordinate coordinate = mutation.getCoordinate();

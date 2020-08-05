@@ -2,14 +2,10 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
-import hmvv.model.GermlineMutation;
-import hmvv.model.Mutation;
-import hmvv.model.Sample;
-import hmvv.model.VariantPredictionClass;
+import hmvv.model.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -21,7 +17,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
 
-public class MutationFilterPanelGermline extends JPanel {
+public class MutationGermlineFilterPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private JCheckBox reportedOnlyCheckbox;
@@ -36,14 +32,14 @@ public class MutationFilterPanelGermline extends JPanel {
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
 
 	private Sample sample;
-    private MutationListFrameGermline parent;
-	private MutationListGermline mutationList;
-	private MutationListFiltersGermline mutationListFilters;
+    private MutationGermlineListFrame parent;
+	private MutationList mutationList;
+	private MutationListFilters mutationListFilters;
 
     private JButton resetButton;
     private LoadIGVButton loadIGVButton;
 
-	MutationFilterPanelGermline(MutationListFrameGermline parent, Sample sample, MutationListGermline mutationList, MutationListFiltersGermline mutationListFilters){
+	MutationGermlineFilterPanel(MutationGermlineListFrame parent, Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
 		this.parent = parent;
 	    this.sample = sample;
 		this.mutationList = mutationList;
@@ -68,7 +64,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		transcriptFlagCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		transcriptFlagCheckbox.setHorizontalTextPosition(SwingConstants.LEFT);
 
-		synonymousFlagCheckbox = new JCheckBox("Show Non-synonymous Variants Only");
+		synonymousFlagCheckbox = new JCheckBox("Show Nonsynonymous Variants Only");
 		synonymousFlagCheckbox.addActionListener(actionListener);
 		synonymousFlagCheckbox.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		synonymousFlagCheckbox.setHorizontalTextPosition(SwingConstants.LEFT);
@@ -151,12 +147,12 @@ public class MutationFilterPanelGermline extends JPanel {
 		});
 		
 		//construct filter objects
-		mutationListFilters.addMaxGnomadFrequencyFilter(maxGnomadGlobalFreqTextField);
-		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
+		mutationListFilters.addMaxGnomadFrequencyGermlineFilter(maxGnomadGlobalFreqTextField);
+		mutationListFilters.addMinReadDepthGermlineFilter(minReadDepthTextField);
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
 		mutationListFilters.addTranscriptFlagGermlineFilter(transcriptFlagCheckbox);
 		mutationListFilters.addSynonymousFlagGermlineFilter(synonymousFlagCheckbox);
-		mutationListFilters.addVariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo);
+		mutationListFilters.addVariantAlleleFrequencyGermlineFilter(textFreqFrom, textVarFreqTo);
 		mutationListFilters.addVariantPredicationClassFilter(predictionFilterComboBox);
 	}
 
@@ -284,7 +280,7 @@ public class MutationFilterPanelGermline extends JPanel {
 
     private void handleSelectAllClick(boolean choice) {
 		for (int i = 0; i < mutationList.getMutationCount(); i++) {
-			GermlineMutation mutation = mutationList.getMutation(i);
+			MutationCommon mutation = mutationList.getMutation(i);
 			if (choice){mutation.setSelected(true);}
 			else {mutation.setSelected(false);}
 		}
@@ -325,9 +321,9 @@ public class MutationFilterPanelGermline extends JPanel {
     
     private void loadIGVAsynchronous_Filtered() throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		ServerTaskGermline serverTask = new ServerTaskGermline(0);
-		loadIGVButtonTimerLabel(serverTask);
-		String bamServerFileName = SSHConnection.createTempParametersFileGermline(sample, mutationList, loadIGVButton, serverTask);
+		ServerWorker serverWorker = new ServerWorker(0);
+		loadIGVButtonTimerLabel(serverWorker);
+		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverWorker);
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		loadIGVButton.setText("Finding BAM File...");
@@ -343,7 +339,7 @@ public class MutationFilterPanelGermline extends JPanel {
 		}
 	}
     
-    private void loadIGVButtonTimerLabel(ServerTaskGermline task) {
+    private void loadIGVButtonTimerLabel(ServerWorker task) {
 		int seconds = 3 * mutationList.getSelectedMutationCount();
 		final long duration = seconds * 1000;   // calculate to milliseconds
 		final Timer timer = new Timer(1, new ActionListener() {
@@ -369,21 +365,5 @@ public class MutationFilterPanelGermline extends JPanel {
 		});
 		timer.start();
 	}
-    
-    public class ServerTaskGermline {
 
-		int status;
-
-		public ServerTaskGermline(int s) {
-			this.status = s;
-		}
-
-		public int getStatus() {
-			return status;
-		}
-
-		public void setStatus(int s) {
-			this.status = s;
-		}
-	}
 }

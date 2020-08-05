@@ -3,19 +3,18 @@ package hmvv.io;
 import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
-import hmvv.gui.mutationlist.tables.GermlineClinVarTable;
-import hmvv.model.GermlineMutation;
-import hmvv.model.Mutation;
+import hmvv.main.Configurations;
+import hmvv.model.MutationGermline;
+import hmvv.model.MutationSomatic;
 
 public class AsynchronousMutationDataIO {
 	
-	public static void loadMissingDataAsynchronous(Object mutationList, AsynchronousCallback callback){
+	public static void loadMissingDataAsynchronous(MutationList mutationList, AsynchronousCallback callback){
 
-		if (mutationList instanceof MutationList) {
-			createExtraMutationDataThread((MutationList)mutationList, callback);
-		} else if (mutationList instanceof MutationListGermline){
-			createExtraGermlineMutationDataThread((MutationListGermline)mutationList, callback);
+		if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.SOMATIC) {
+			createExtraMutationDataThread(mutationList, callback);
+		} else if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.GERMLINE){
+			createExtraGermlineMutationDataThread(mutationList, callback);
 		}
 	}
 	
@@ -38,7 +37,7 @@ public class AsynchronousMutationDataIO {
 			}
 			try{
 
-				Mutation mutation = mutationList.getMutation(index);
+				MutationSomatic mutation = (MutationSomatic)mutationList.getMutation(index);
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
@@ -52,7 +51,7 @@ public class AsynchronousMutationDataIO {
 			}
 			
 			try{
-				Mutation mutation = mutationList.getFilteredMutation(index);
+				MutationSomatic mutation = (MutationSomatic)mutationList.getFilteredMutation(index);
 				getMutationData(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
@@ -61,7 +60,7 @@ public class AsynchronousMutationDataIO {
 		}
 	}
 	
-	public static void getMutationData(Mutation mutation) throws Exception {
+	public static void getMutationData(MutationSomatic mutation) throws Exception {
 		//cosmic
 		ArrayList<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
 		mutation.setCosmicID(cosmicIDs);
@@ -88,7 +87,7 @@ public class AsynchronousMutationDataIO {
 		mutation.setSelected(false);
 	}
 
-	private static void createExtraGermlineMutationDataThread(MutationListGermline mutationList, AsynchronousCallback callback){
+	private static void createExtraGermlineMutationDataThread(MutationList mutationList, AsynchronousCallback callback){
 		Thread missingDataThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
@@ -100,14 +99,14 @@ public class AsynchronousMutationDataIO {
 		missingDataThread.start();
 	}
 
-	private static void getDatabaseGermlineMutationData(MutationListGermline mutationList, AsynchronousCallback callback){
+	private static void getDatabaseGermlineMutationData(MutationList mutationList, AsynchronousCallback callback){
 		for(int index = 0; index < mutationList.getMutationCount(); index++) {
 			if(callback.isCallbackClosed()){
 				return;
 			}
 			try{
 
-				GermlineMutation mutation = mutationList.getMutation(index);
+				MutationGermline mutation = (MutationGermline)mutationList.getMutation(index);
 				getMutationDataGermline(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
@@ -121,7 +120,7 @@ public class AsynchronousMutationDataIO {
 			}
 
 			try{
-				GermlineMutation mutation = mutationList.getFilteredMutation(index);
+				MutationGermline mutation = (MutationGermline)mutationList.getFilteredMutation(index);
 				getMutationDataGermline(mutation);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
@@ -131,7 +130,7 @@ public class AsynchronousMutationDataIO {
 	}
 
 
-	public static void getMutationDataGermline(GermlineMutation mutation) throws Exception {
+	public static void getMutationDataGermline(MutationGermline mutation) throws Exception {
 
 		int count = DatabaseCommands.getOccurrenceCount(mutation);
 		mutation.setOccurrence(count);

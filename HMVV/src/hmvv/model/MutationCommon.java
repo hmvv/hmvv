@@ -4,11 +4,11 @@ import hmvv.main.Configurations;
 
 import java.util.ArrayList;
 
-public class CommonMutation {
+public class MutationCommon {
 
     //common
     private boolean reported;
-    private ArrayList<CommonMutation> otherMutations;
+    private ArrayList<MutationCommon> otherMutations;
     private String chr;
     private String pos;
     private String ref;
@@ -88,8 +88,8 @@ public class CommonMutation {
     }
 
 
-    public CommonMutation() {
-    	otherMutations = new ArrayList<CommonMutation>();
+    public MutationCommon() {
+    	otherMutations = new ArrayList<MutationCommon>();
     }
 
     /**
@@ -109,14 +109,14 @@ public class CommonMutation {
         this.reported = reported;
     }
 
-    public void addOtherMutation(CommonMutation otherMutation) {
+    public void addOtherMutation(MutationCommon otherMutation) {
     	this.otherMutations.add(otherMutation);
     }
     
     public String getOtherMutationsString() {
     	StringBuilder sb = new StringBuilder();
     	for(int i = 0; i < otherMutations.size(); i++) {
-    		CommonMutation otherMutation = otherMutations.get(i);
+    		MutationCommon otherMutation = otherMutations.get(i);
     		if(i != 0) {
     			sb.append(", ");
     		}
@@ -322,8 +322,8 @@ public class CommonMutation {
 
 
     public boolean equals(Object o) {
-    	if(o instanceof CommonMutation) {
-    		CommonMutation m = (CommonMutation) o;
+    	if(o instanceof MutationCommon) {
+    		MutationCommon m = (MutationCommon) o;
     		return m.getCoordinate().equals(getCoordinate());
     	}
     	return false;

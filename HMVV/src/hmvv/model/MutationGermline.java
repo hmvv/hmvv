@@ -2,9 +2,7 @@ package hmvv.model;
 
 import hmvv.main.Configurations;
 
-import java.util.ArrayList;
-
-public class GermlineMutation extends CommonMutation{
+public class MutationGermline extends MutationCommon {
 
 
     //transcript
@@ -54,8 +52,6 @@ public class GermlineMutation extends CommonMutation{
     private String canonical;
     private String sift;
     private String polyphen;
-
-
 
     public Double getGnomad_allfreq() {
         return gnomad_allfreq;
@@ -362,8 +358,8 @@ public class GermlineMutation extends CommonMutation{
 
 
     public boolean equals(Object o) {
-    	if(o instanceof GermlineMutation) {
-    		GermlineMutation m = (GermlineMutation) o;
+    	if(o instanceof MutationGermline) {
+    		MutationGermline m = (MutationGermline) o;
     		return m.getCoordinate().equals(getCoordinate());
     	}
     	return false;

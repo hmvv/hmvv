@@ -3,15 +3,13 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
 import hmvv.gui.sampleList.ReportFrame;
 import hmvv.gui.sampleList.ReportFrameText;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.model.GermlineMutation;
-import hmvv.model.Mutation;
+import hmvv.model.MutationGermline;
 import hmvv.model.Sample;
 
 import javax.swing.*;
@@ -22,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class MutationListMenuBarGermline extends JMenuBar {
+public class MutationListGermlineMenuBar extends JMenuBar {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,15 +31,13 @@ public class MutationListMenuBarGermline extends JMenuBar {
 	private JMenu filteredMutationsMenu;
 	private JMenuItem loadFilteredMutationsMenuItem;
 
-	private MutationListFrameGermline parent;
-	private MutationListFrameGermline mutationListPanel;
+	private MutationGermlineListFrame mutationListPanel;
 
 	private Sample sample;
-	private MutationListGermline mutationList;
-	private MutationFilterPanelGermline mutationFilterPanel;
+	private MutationList mutationList;
+	private MutationGermlineFilterPanel mutationFilterPanel;
 
-	MutationListMenuBarGermline(MutationListFrameGermline parent, MutationListFrameGermline mutationListPanel, Sample sample, MutationListGermline mutationList, MutationFilterPanelGermline mutationFilterPanel) {
-		this.parent = parent;
+	MutationListGermlineMenuBar(MutationGermlineListFrame mutationListPanel, Sample sample, MutationList mutationList, MutationGermlineFilterPanel mutationFilterPanel) {
 		this.mutationListPanel = mutationListPanel;
 
 		this.sample = sample;
@@ -92,14 +88,14 @@ public class MutationListMenuBarGermline extends JMenuBar {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == shortReportMenuItem) {
-//					showShortReportFrame();
+					showShortReportFrame();
 				} else if (e.getSource() == longReportMenuItem) {
-//					showLongReportFrame();
+					showLongReportFrame();
 				} else if (e.getSource() == exportMutationsMenuItem) {
 					try {
 						exportTable();
 					} catch (IOException ex) {
-						HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
+						HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, ex);
 					}
 				} else if(e.getSource() == loadFilteredMutationsMenuItem) {
 					loadFilteredMutationsMenuItem.setEnabled(false);
@@ -131,30 +127,30 @@ public class MutationListMenuBarGermline extends JMenuBar {
 
 		int returnValue = saveAs.showSaveDialog(this);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
-//			mutationListPanel.exportReport(saveAs.getSelectedFile());
+			mutationListPanel.exportReport(saveAs.getSelectedFile());
 		}
 	}
 
-//	private void showShortReportFrame() {
-//		try {
-//			String report = MutationReportGenerator.generateShortReport(mutationList);
-//			showReportFrameText("Short Variant Report", report);
-//		} catch (Exception e) {
-//			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
-//		}
-//	}
+	private void showShortReportFrame() {
+		try {
+			String report = MutationReportGenerator.generateShortReport(mutationList);
+			showReportFrameText("Short Variant Report", report);
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e);
+		}
+	}
 
-	//	private void showLongReportFrame() {
-//		try {
-//			String report = MutationReportGenerator.generateLongReport(mutationList);
-//			showReportFrameText("Long Variant Report", report);
-//		} catch (Exception e) {
-//			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
-//		}
-//	}
+		private void showLongReportFrame() {
+		try {
+			String report = MutationReportGenerator.generateLongReport(mutationList);
+			showReportFrameText("Long Variant Report", report);
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e);
+		}
+	}
 //
 	private void showReportFrameText(String title, String report) {
-		ReportFrame reportPanel = new ReportFrameText(parent, title, report);
+		ReportFrame reportPanel = new ReportFrameText(mutationListPanel, title, report);
 		reportPanel.setVisible(true);
 	}
 
@@ -178,7 +174,7 @@ public class MutationListMenuBarGermline extends JMenuBar {
 	private void getFilteredMutationData() {
 		try{
 			filteredMutationsMenu.setText("Loading...");
-			ArrayList<GermlineMutation> mutations = DatabaseCommands.getExtraGermlineMutationsBySample(sample);
+			ArrayList<MutationGermline> mutations = DatabaseCommands.getExtraGermlineMutationsBySample(sample);
 			for(int i = 0; i < mutations.size(); i++) {
 				if(mutationListPanel.isCallbackClosed()){
 					return;
@@ -186,17 +182,17 @@ public class MutationListMenuBarGermline extends JMenuBar {
 				filteredMutationsMenu.setText("Loading " + (i+1) + " of " + mutations.size());
 
 				try{
-					GermlineMutation mutation = mutations.get(i);
+					MutationGermline mutation = mutations.get(i);
 					AsynchronousMutationDataIO.getMutationDataGermline(mutation);
 					//no need to call parent.mutationListIndexUpdated() here these mutations are not current displayed
 					mutationList.addFilteredMutation(mutation);
 				}catch(Exception e){
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Could not load additional mutation data.");
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e, "Could not load additional mutation data.");
 				}
 			}
 			mutationFilterPanel.applyRowFilters();
 		}catch(Exception ex){
-			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, ex);
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, ex);
 		}
 		filteredMutationsMenu.setText("Filtered mutations loaded");
 	}

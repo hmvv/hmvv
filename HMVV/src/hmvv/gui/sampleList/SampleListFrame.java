@@ -40,12 +40,10 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFiltersGermline;
 import hmvv.gui.mutationlist.MutationListFrame;
-import hmvv.gui.mutationlist.MutationListFrameGermline;
+import hmvv.gui.mutationlist.MutationGermlineListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
@@ -607,9 +605,13 @@ public class SampleListFrame extends JPanel {
 		@Override
 		protected MutationList doInBackground() throws Exception {
 
-				ArrayList<Mutation>  mutations = new ArrayList<Mutation>();
+				ArrayList<MutationSomatic>  mutations = new ArrayList<MutationSomatic>();
 				mutations = DatabaseCommands.getBaseMutationsBySample(sample);
-				return new MutationList(mutations);
+
+                // trying to find a better way than copying, confirmed via reference address in both arraylists
+				ArrayList<MutationCommon> common_mutations = new ArrayList<MutationCommon>();
+				common_mutations.addAll(mutations);
+				return new MutationList(common_mutations,Configurations.MUTATION_TYPE.SOMATIC);
 
 		}
 
@@ -626,7 +628,7 @@ public class SampleListFrame extends JPanel {
 	    }	
 	}
 
-	class MutationListLoaderGermline extends SwingWorker<MutationListGermline, Void>{
+	class MutationListLoaderGermline extends SwingWorker<MutationList, Void>{
 		//
 		private final HMVVFrame parent;
 		private final Sample sample;
@@ -640,11 +642,14 @@ public class SampleListFrame extends JPanel {
 		}
 
 		@Override
-		protected MutationListGermline doInBackground() throws Exception {
+		protected MutationList doInBackground() throws Exception {
 
-				ArrayList<GermlineMutation>  mutations = new ArrayList<GermlineMutation>();
+				ArrayList<MutationGermline>  mutations = new ArrayList<MutationGermline>();
 				mutations = DatabaseCommands.getBaseGermlineMutationsBySample(sample);
-				return new MutationListGermline(mutations);
+
+			    ArrayList<MutationCommon>  common_mutations = new ArrayList<MutationCommon>();
+			    common_mutations.addAll(mutations);
+				return new MutationList(common_mutations,Configurations.MUTATION_TYPE.GERMLINE);
 
 		}
 
@@ -653,7 +658,7 @@ public class SampleListFrame extends JPanel {
 			table.setCursor(Cursor.getDefaultCursor());
 			mutationListLoading = false;
 			try {
-				MutationListFrameGermline mutationListFrame = new MutationListFrameGermline(parent, sample, get());
+				MutationGermlineListFrame mutationListFrame = new MutationGermlineListFrame(parent, sample, get());
 				mutationListFrame.setVisible(true);
 			} catch (Exception e) {
 				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error loading mutation data.");

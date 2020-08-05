@@ -1,27 +1,26 @@
 package hmvv.gui.mutationlist.tablemodels;
 
-import hmvv.model.GermlineMutation;
-import hmvv.model.Mutation;
+import hmvv.model.MutationGermline;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 
-public abstract class CommonTableModelGermline extends AbstractTableModel implements MutationListListener{
+public abstract class GermlineCommonTableModel extends AbstractTableModel implements MutationListListener{
 	private static final long serialVersionUID = 1L;
 
-	protected MutationListGermline mutationList;
-	protected ArrayList<MutationTableModelColumnGermline> columns;
+	protected MutationList mutationList;
+	protected ArrayList<GermlineMutationTableModelColumn> columns;
 
-	public CommonTableModelGermline(MutationListGermline mutationList){
+	public GermlineCommonTableModel(MutationList mutationList){
 		this.mutationList = mutationList;
-		mutationList.addListener(this);
+		mutationList.addListenerGermline(this);
 		columns = constructColumns();
 	}
 	
-	protected abstract ArrayList<MutationTableModelColumnGermline> constructColumns();
+	protected abstract ArrayList<GermlineMutationTableModelColumn> constructColumns();
 	
-	public final GermlineMutation getMutation(int row){
-		return mutationList.getMutation(row);
+	public final MutationGermline getMutation(int row){
+		return (MutationGermline)mutationList.getMutation(row);
 	}
 	
 	/**
@@ -56,7 +55,7 @@ public abstract class CommonTableModelGermline extends AbstractTableModel implem
 
 	@Override
 	public  final Object getValueAt(int row, int column) {
-		GermlineMutation mutation = mutationList.getMutation(row);
+		MutationGermline mutation = (MutationGermline)mutationList.getMutation(row);
 		return columns.get(column).getValue(mutation);
 	}
 	

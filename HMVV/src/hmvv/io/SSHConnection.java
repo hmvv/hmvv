@@ -9,10 +9,8 @@ import javax.swing.*;
 import com.jcraft.jsch.*;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.MutationFilterPanel.ServerTask;
-import hmvv.gui.mutationlist.MutationFilterPanelGermline.ServerTaskGermline;
+import hmvv.gui.mutationlist.ServerWorker;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
-import hmvv.gui.mutationlist.tablemodels.MutationListGermline;
 import hmvv.main.Configurations;
 import hmvv.main.Configurations.USER_TYPE;
 import hmvv.main.Configurations.USER_FUNCTION;
@@ -320,7 +318,7 @@ public class SSHConnection {
 		}
 	}
 
-	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerTask serverTask) throws Exception {
+	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerWorker serverWorker) throws Exception {
 
 	    //create a local temp file
 		int bamCoverage = 25;
@@ -329,14 +327,14 @@ public class SSHConnection {
         bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
         bw.newLine();
 
-        ArrayList<Mutation> selectedMutations = mutationList.getSelectedMutations();
+        ArrayList<MutationCommon> selectedMutations = mutationList.getSelectedMutations();
 
         // verify chr/position pair is unique
         ArrayList<Coordinate> selectedCoordinates = new ArrayList<>();
 
         for (int index = 0; index < selectedMutations.size(); index++) {
 
-            Mutation mutation = selectedMutations.get(index);
+            MutationCommon mutation = selectedMutations.get(index);
 
             if (selectedCoordinates.isEmpty()){
 				selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
@@ -394,89 +392,9 @@ public class SSHConnection {
 
 		loadIGVButton.setText("Finished server work.");
 
-		serverTask.setStatus(1);
+		serverWorker.setStatus(1);
 
         return tempFile.getName();
-
-	}
-
-	public static String createTempParametersFileGermline(Sample sample, MutationListGermline mutationList, JButton loadIGVButton, ServerTaskGermline serverTask) throws Exception {
-
-		//create a local temp file
-		int bamCoverage = 25;
-		File tempFile = File.createTempFile(sample.sampleName+"_"+sample.runID+"_",".params");
-		BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
-		bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
-		bw.newLine();
-
-		ArrayList<GermlineMutation> selectedMutations = mutationList.getSelectedMutations();
-
-		// verify chr/position pair is unique
-		ArrayList<Coordinate> selectedCoordinates = new ArrayList<>();
-
-		for (int index = 0; index < selectedMutations.size(); index++) {
-
-			GermlineMutation mutation = selectedMutations.get(index);
-
-			if (selectedCoordinates.isEmpty()){
-				selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
-			} else {
-				int duplicate = 0;
-				for (Coordinate coordinate:selectedCoordinates){
-
-					if ( (coordinate.getChr().equals(mutation.getChr())) && (coordinate.getPos().equals(mutation.getPos()))) {
-						duplicate = 1;
-						break;
-					}
-				}
-				if (duplicate == 0){
-					selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
-				}
-			}
-		}
-
-		for (int index = 0; index < selectedCoordinates.size(); index++) {
-			Coordinate coordinate = selectedCoordinates.get(index);
-			Integer lower = Integer.parseInt(coordinate.getPos()) - bamCoverage;
-			Integer higher = Integer.parseInt(coordinate.getPos()) + bamCoverage;
-			String line = coordinate.getChr() + ':' + lower.toString() + '-' + higher.toString();
-			bw.write(line);
-			bw.newLine();
-		}
-		bw.close();
-
-		loadIGVButton.setText("Sending mutations to server.");
-
-		// load file to server
-		Channel channel = null;
-		try {
-			channel = sshSession.openChannel("sftp");
-			channel.connect();
-			ChannelSftp channelSftp = (ChannelSftp) channel;
-			channelSftp.put(tempFile.getAbsolutePath(), "/home/scratch/hmvv3/igv/"+tempFile.getName());
-
-		} catch (SftpException e) {
-			e.printStackTrace();
-		} catch (JSchException e) {
-			e.printStackTrace();
-		} finally {
-			if (channel != null) {
-				channel.disconnect();
-			}
-		}
-
-		//delete local temp file
-		deleteFile(tempFile);
-
-		loadIGVButton.setText("Server started.");
-
-		createTempBamFileONServer(tempFile.getName());
-
-		loadIGVButton.setText("Finished server work.");
-
-		serverTask.setStatus(1);
-
-		return tempFile.getName();
 
 	}
 

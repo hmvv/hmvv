@@ -1,12 +1,10 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.tablemodels.GermlineCardiacAtlasTableModel;
 import hmvv.gui.mutationlist.tablemodels.GermlineGnomadTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
-import hmvv.model.GermlineMutation;
-import hmvv.model.Mutation;
+import hmvv.model.MutationGermline;
 
 public class GermlineGnomadTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
@@ -30,7 +28,7 @@ public class GermlineGnomadTable extends CommonTableGermline{
 	}
 
 	private void searchGnomad() throws Exception{
-		GermlineMutation mutation = getSelectedMutation();
+		MutationGermline mutation = getSelectedMutation();
 		String gnomad_id = mutation.getGnomad_id();
 		if(!gnomad_id.equals("") && !gnomad_id.equals("null")){
 			InternetCommands.searchGnomad(gnomad_id);

@@ -1,7 +1,6 @@
 package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tables.CommonTableGermline;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
@@ -50,7 +49,7 @@ public class AnnotationFrame extends JFrame {
 	private Integer currentAnnotationIndex;
 
 	private ArrayList<GeneAnnotation> geneAnnotationHistory;
-	private CommonMutation mutation;
+	private MutationCommon mutation;
 
 	private final Color readOnlyColor = new Color(245,245,245);
 	private final Color readWriteColor = Color.WHITE;
@@ -59,7 +58,7 @@ public class AnnotationFrame extends JFrame {
 	 * Create the dialog.
 	 * @throws Exception
 	 */
-	public AnnotationFrame(CommonMutation mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, HMVVFrame mutationListFrame) throws Exception {
+	public AnnotationFrame(MutationCommon mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, HMVVFrame mutationListFrame) throws Exception {
 		super("Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString());
 		this.mutation = mutation;
 		this.readOnly = !SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN);

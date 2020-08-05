@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -22,6 +21,7 @@ import hmvv.io.LIS.LISConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
+import hmvv.model.MutationSomatic;
 import hmvv.model.PatientHistory;
 import hmvv.model.Sample;
 
@@ -109,7 +109,8 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		setAlwaysOnTop(true);
 
 		for(int i = 0; i < mutationList.getMutationCount(); i++){
-			mutationList.getMutation(i).setCosmicID("LOADING...");
+			MutationSomatic current_mutation = (MutationSomatic)mutationList.getMutation(i);
+			current_mutation.setCosmicID("LOADING...");
 		}
 
 		isWindowClosed = false;
@@ -284,7 +285,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	}
 	
 	void exportReport(File exportFile) throws IOException {
-		MutationReportGenerator.exportReport(exportFile, basicTabTableModel, clinVarTabTableModel, cosmicTabTableModel, g1000TabTableModel);
+		MutationReportGenerator.exportReportSomatic(exportFile, basicTabTableModel, clinVarTabTableModel, cosmicTabTableModel, g1000TabTableModel);
 	}	
 	
 	public void disableInputForAsynchronousLoad() {

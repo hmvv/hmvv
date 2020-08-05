@@ -2,32 +2,32 @@ package hmvv.gui.mutationlist.tablemodels;
 
 import java.util.ArrayList;
 
-public class GermlineTranscriptTableModel extends CommonTableModelGermline {
+public class GermlineTranscriptTableModel extends GermlineCommonTableModel {
 	private static final long serialVersionUID = 1L;
 
 
-	public GermlineTranscriptTableModel(MutationListGermline mutationList){
+	public GermlineTranscriptTableModel(MutationList mutationList){
 		super(mutationList);
 	}
 	
-	protected ArrayList<MutationTableModelColumnGermline> constructColumns(){
-		ArrayList<MutationTableModelColumnGermline> columns = new ArrayList<MutationTableModelColumnGermline>();
-		columns.add(MutationTableModelColumnGermline.reportedColumn);
+	protected ArrayList<GermlineMutationTableModelColumn> constructColumns(){
+		ArrayList<GermlineMutationTableModelColumn> columns = new ArrayList<GermlineMutationTableModelColumn>();
+		columns.add(GermlineMutationTableModelColumn.reportedColumn);
 
-		columns.add(MutationTableModelColumnGermline.geneColumn);
-		columns.add(MutationTableModelColumnGermline.exonsColumn);
+		columns.add(GermlineMutationTableModelColumn.geneColumn);
+		columns.add(GermlineMutationTableModelColumn.exonsColumn);
 
-		columns.add(MutationTableModelColumnGermline.chrColumn);
-		columns.add(MutationTableModelColumnGermline.posColumn);
-		columns.add(MutationTableModelColumnGermline.refColumn);
-		columns.add(MutationTableModelColumnGermline.altColumn);
+		columns.add(GermlineMutationTableModelColumn.chrColumn);
+		columns.add(GermlineMutationTableModelColumn.posColumn);
+		columns.add(GermlineMutationTableModelColumn.refColumn);
+		columns.add(GermlineMutationTableModelColumn.altColumn);
 
-		columns.add(MutationTableModelColumnGermline.HGVScColumn);
+		columns.add(GermlineMutationTableModelColumn.HGVScColumn);
 
-		columns.add(MutationTableModelColumnGermline.TRANSCRIPT_STRAND);
-		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_START);
-		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_END);
-		columns.add(MutationTableModelColumnGermline.ALT_TRANSCRIPT_POSITION);
+		columns.add(GermlineMutationTableModelColumn.TRANSCRIPT_STRAND);
+		columns.add(GermlineMutationTableModelColumn.ALT_TRANSCRIPT_START);
+		columns.add(GermlineMutationTableModelColumn.ALT_TRANSCRIPT_END);
+		columns.add(GermlineMutationTableModelColumn.ALT_TRANSCRIPT_POSITION);
 		return columns;
 	}
 }
