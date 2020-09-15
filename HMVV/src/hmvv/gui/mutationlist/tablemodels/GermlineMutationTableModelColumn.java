@@ -401,6 +401,11 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(MutationGermline mutation) -> mutation.getPolyphen());
 
+	public static final GermlineMutationTableModelColumn HGMDID_column = new GermlineMutationTableModelColumn("The ID of HGMD database",
+			"HGMD",
+			String.class,
+			(MutationGermline mutation) -> mutation.getHgmd_id());
+
 
 	/**
 	 * The Lambda interface object

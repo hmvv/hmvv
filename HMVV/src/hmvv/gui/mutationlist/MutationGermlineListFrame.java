@@ -39,6 +39,9 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 	private GermlinePredictionTable predictionTable;
 	private GermlinePredictionTableModel predictionTableModel;
 
+	private GermlineHGMDTable HGMDTable;
+	private GermlineHGMDTableModel HGMDTableModel;
+
 	private GermlineProteinDomainTable proteinDomainTable;
 	private GermlineProteinDomainTableModel proteinDomainTableModel;
 
@@ -61,6 +64,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 	private JScrollPane cardiacAtlasScrollPane;
 	private JScrollPane clinVarScrollPane;
 	private JScrollPane gnomadScrollPane;
+	private JScrollPane HGMDScrollPane;
 
 	private MutationList mutationList;
 	private MutationListFilters mutationListFilters;
@@ -106,7 +110,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 			}
 		});
 
-		AsynchronousMutationDataIO.loadMissingDataAsynchronous(mutationList, this);
+		AsynchronousMutationDataIO.loadMissingDataAsynchronous(sample,mutationList, this);
 	}
 
 	private void constructComponents() {
@@ -132,6 +136,10 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		predictionTableModel = new GermlinePredictionTableModel(mutationList);
 		predictionTable = new GermlinePredictionTable(parent, predictionTableModel);
 		predictionTable.setAutoCreateRowSorter(true);
+
+		HGMDTableModel = new GermlineHGMDTableModel(mutationList);
+		HGMDTable = new GermlineHGMDTable(parent, HGMDTableModel);
+		HGMDTable.setAutoCreateRowSorter(true);
 
 		proteinDomainTableModel = new GermlineProteinDomainTableModel(mutationList);
 		proteinDomainTable = new GermlineProteinDomainTable(parent, proteinDomainTableModel);
@@ -161,6 +169,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		proteinDomainScrollPane = new JScrollPane(proteinDomainTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		clinVarScrollPane = new JScrollPane(clinVarTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		gnomadScrollPane = new JScrollPane(gnomadTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		HGMDScrollPane = new JScrollPane(HGMDTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("snpEFF", null, vepTabScrollPane, null);
@@ -169,7 +178,8 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		tabbedPane.addTab("CardiacAtlas", null, cardiacAtlasScrollPane, null);
 		tabbedPane.addTab("Transcript", null, transcriptScrollPane, null);
 		tabbedPane.addTab("Prediction", null, predictionScrollPane, null);
-		tabbedPane.addTab("ProteinDomain", null, proteinDomainScrollPane, null);
+		tabbedPane.addTab("HGMD", null, HGMDScrollPane, null);
+
 
 		if (patientHistoryAvailable()) {
 			createPatientHistory();

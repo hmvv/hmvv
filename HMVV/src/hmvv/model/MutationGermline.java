@@ -2,6 +2,9 @@ package hmvv.model;
 
 import hmvv.main.Configurations;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MutationGermline extends MutationCommon {
 
 
@@ -52,6 +55,10 @@ public class MutationGermline extends MutationCommon {
     private String canonical;
     private String sift;
     private String polyphen;
+
+    //hgmd
+    private String hgmd_id;
+    private Map<String, String> hgmd_info = new HashMap<String, String>();
 
     public Double getGnomad_allfreq() {
         return gnomad_allfreq;
@@ -367,5 +374,21 @@ public class MutationGermline extends MutationCommon {
 
     public Configurations.MUTATION_TYPE getMutationType(){
         return Configurations.MUTATION_TYPE.GERMLINE;
+    }
+
+    public String getHgmd_id() {
+        return hgmd_id;
+    }
+
+    public void setHgmd_id(String hgmd_id) {
+        this.hgmd_id = hgmd_id;
+    }
+
+    public Map<String, String> getHgmd_info() {
+        return hgmd_info;
+    }
+
+    public void setHgmd_info(Map<String, String> hgmd_info) {
+        this.hgmd_info = hgmd_info;
     }
 }
