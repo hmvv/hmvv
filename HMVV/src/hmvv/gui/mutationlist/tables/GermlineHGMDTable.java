@@ -17,12 +17,14 @@ public class GermlineHGMDTable extends CommonTableGermline{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 6);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1,7);
 	}
 
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
-		if (column == 6){
+		if (column == 1){
+			searchGoogleForGene();
+		}else if (column == 7){
 			loadHGMDWindow();
 		}
 	}

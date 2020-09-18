@@ -1,6 +1,6 @@
 package hmvv.gui.mutationlist.tablemodels;
 
-import hmvv.model.HGMDDatabaseEntry;
+import hmvv.model.MutationHGMD;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -8,11 +8,11 @@ import java.util.ArrayList;
 public class HGMDDatabaseInformationTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
-    private ArrayList<HGMDDatabaseEntry> entries;
+    private ArrayList<MutationHGMD> entries;
     private ArrayList<HGMDDatabaseInformationTableModelColumn> columns;
 
     public HGMDDatabaseInformationTableModel(){
-        this.entries = new ArrayList<HGMDDatabaseEntry>();
+        this.entries = new ArrayList<MutationHGMD>();
         constructColumns();
     }
 
@@ -21,21 +21,21 @@ public class HGMDDatabaseInformationTableModel extends AbstractTableModel {
         columns.add(new HGMDDatabaseInformationTableModelColumn("The database feature",
                 "Feature",
                 String.class,
-                (HGMDDatabaseEntry entry) -> entry.getFeature()));
+                (MutationHGMD entry) -> entry.getFeature()));
 
         columns.add(new HGMDDatabaseInformationTableModelColumn("The database value for corresponding feature",
                 "Value",
                 String.class,
-                (HGMDDatabaseEntry entry) -> entry.getValue()));
+                (MutationHGMD entry) -> entry.getValue()));
 
     }
 
-    public void addHGMDEntry(HGMDDatabaseEntry entry){
+    public void addHGMDEntry(MutationHGMD entry){
         entries.add(entry);
         fireTableRowsInserted(entries.size()-1, entries.size()-1);
     }
 
-    public HGMDDatabaseEntry getSample(int row){
+    public MutationHGMD getSample(int row){
         return entries.get(row);
     }
 
@@ -66,7 +66,7 @@ public class HGMDDatabaseInformationTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int column) {
-        HGMDDatabaseEntry entry = entries.get(row);
+        MutationHGMD entry = entries.get(row);
         return columns.get(column).getValue(entry);
     }
 

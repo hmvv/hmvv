@@ -20,7 +20,7 @@ public class GermlinePredictionTableModel extends GermlineCommonTableModel {
 		columns.add(GermlineMutationTableModelColumn.chrColumn);
 		columns.add(GermlineMutationTableModelColumn.posColumn);
 		columns.add(GermlineMutationTableModelColumn.refColumn);
-
+		columns.add(GermlineMutationTableModelColumn.altColumn);
 
 		columns.add(GermlineMutationTableModelColumn.polyphen_column);
 		columns.add(GermlineMutationTableModelColumn.sift_column);

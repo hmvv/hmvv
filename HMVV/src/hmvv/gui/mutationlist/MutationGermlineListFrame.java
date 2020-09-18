@@ -100,7 +100,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		setMinimumSize(new Dimension(700, getHeight()/3));
 
 		setLocationRelativeTo(parent);
-		setAlwaysOnTop(true);
+		setAlwaysOnTop(false);
 
 		isWindowClosed = false;
 		addWindowListener(new WindowAdapter(){

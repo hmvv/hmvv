@@ -3,12 +3,12 @@ package hmvv.gui.mutationlist;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.HGMDDatabaseInformationTableModel;
 import hmvv.io.DatabaseCommands;
-import hmvv.io.DatabaseCommands_HGMD;
 import hmvv.main.HMVVFrame;
-import hmvv.model.HGMDDatabaseEntry;
+import hmvv.model.MutationHGMD;
 import hmvv.model.MutationGermline;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
@@ -47,11 +47,11 @@ public class MutationGermlineHGMDFrame extends JFrame {
 
 //		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.55), (int)(bounds.height*.60));
+		setSize((int)(bounds.width*.60), (int)(bounds.height*.50));
 		setMinimumSize(new Dimension(500, getHeight()/3));
 
 		setLocationRelativeTo(parent);
-		setAlwaysOnTop(true);
+		setAlwaysOnTop(false);
 
 
 	}
@@ -84,7 +84,7 @@ public class MutationGermlineHGMDFrame extends JFrame {
 			String tableName = attribute.split("_")[0];
 			String columnName = attribute.split("_")[1];
 			String columnValue = hgmdInfo.get(attribute);
-			hgmdTableModels.get(tableName).addHGMDEntry(new HGMDDatabaseEntry(columnName,columnValue));
+			hgmdTableModels.get(tableName).addHGMDEntry(new MutationHGMD(columnName,columnValue));
 		}
 	}
 
@@ -123,9 +123,9 @@ public class MutationGermlineHGMDFrame extends JFrame {
 		JTable new_table = new JTable(new_table_model);
 		JScrollPane new_tabscrollpane =  new JScrollPane(new_table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		ArrayList<HGMDDatabaseEntry> mutations = DatabaseCommands.getAllMutationForGene(mutation.getGene());
-		for(HGMDDatabaseEntry entry : mutations){
-			new_table_model.addHGMDEntry(new HGMDDatabaseEntry(entry.getFeature(),entry.getValue()));
+		ArrayList<MutationHGMD> mutations = DatabaseCommands.getAllMutationForGene(mutation.getGene());
+		for(MutationHGMD entry : mutations){
+			new_table_model.addHGMDEntry(new MutationHGMD(entry.getFeature(),entry.getValue()));
 		}
 
 		geneTabbedPane.addTab("Gene:"+mutation.getGene(), null, new_tabscrollpane, null);
@@ -140,7 +140,10 @@ public class MutationGermlineHGMDFrame extends JFrame {
 
 		setLayout(new BorderLayout());
 		add(northPanel, BorderLayout.WEST);
-		add(southPanel, BorderLayout.EAST);
+		add(southPanel, BorderLayout.CENTER);
+
+		southPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+		northPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
 	}
 

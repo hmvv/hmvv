@@ -20,7 +20,7 @@ public class GermlineProteinDomainTableModel extends GermlineCommonTableModel {
 		columns.add(GermlineMutationTableModelColumn.chrColumn);
 		columns.add(GermlineMutationTableModelColumn.posColumn);
 		columns.add(GermlineMutationTableModelColumn.refColumn);
-
+		columns.add(GermlineMutationTableModelColumn.altColumn);
 		columns.add(GermlineMutationTableModelColumn.HGVSpColumn);
 		columns.add(GermlineMutationTableModelColumn.protein_start_column);
 		columns.add(GermlineMutationTableModelColumn.protein_end_column);

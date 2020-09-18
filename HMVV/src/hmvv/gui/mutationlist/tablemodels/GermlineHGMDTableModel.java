@@ -20,7 +20,7 @@ public class GermlineHGMDTableModel extends GermlineCommonTableModel {
 		columns.add(GermlineMutationTableModelColumn.chrColumn);
 		columns.add(GermlineMutationTableModelColumn.posColumn);
 		columns.add(GermlineMutationTableModelColumn.refColumn);
-
+		columns.add(GermlineMutationTableModelColumn.altColumn);
 
 		columns.add(GermlineMutationTableModelColumn.HGMDID_column);
 
