@@ -1,0 +1,87 @@
+package hmvv.model;
+
+import hmvv.gui.GUICommonTools;
+
+import java.text.ParseException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+public class MutationGermlineHGMD {
+
+    private String id;
+    private String variant;
+    private String AAchange;
+    private String disease;
+    private String category;
+    private String pmid;
+    private String pmid_info;
+    private String extra_pmids;
+
+    public MutationGermlineHGMD(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public void setVariant(String variant) {
+        this.variant = variant;
+    }
+
+    public String getAAchange() {
+        return AAchange;
+    }
+
+    public void setAAchange(String AAchange) {
+        this.AAchange = AAchange;
+    }
+
+    public String getDisease() {
+        return disease;
+    }
+
+    public void setDisease(String disease) {
+        this.disease = disease;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getPmid() {
+        return pmid;
+    }
+
+    public void setPmid(String pmid) {
+        this.pmid = pmid;
+    }
+
+    public String getPmid_info() {
+        return pmid_info;
+    }
+
+    public void setPmid_info(String pmid_info) {
+        this.pmid_info = pmid_info;
+    }
+
+    public String getExtra_pmids() {
+        return extra_pmids;
+    }
+
+    public void setExtra_pmids(String extra_pmids) {
+        this.extra_pmids = extra_pmids;
+    }
+}

@@ -81,6 +81,10 @@ public class DatabaseCommands_Mutations {
 
 				+ " t2.revel,t2.cadd_phred, t2.canonical, t2.sift,t2.polyphen,"
 
+				+ " t2.phastCons100, t2.phyloP100, t2.phastCons20, t2.phyloP20, t2.GERP_RS,"
+
+		        + "  t2.hgmd_ID, t2.hgmd_Variant, t2.hgmd_AAchange, t2.hgmd_Disease, t2.hgmd_Category, t2.hgmd_PMID,t2.hgmd_Citation,t2.hgmd_ExtraCitations,"
+
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, "
 
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
@@ -452,6 +456,13 @@ public class DatabaseCommands_Mutations {
 			mutation.setSift(getStringOrBlank(rs,"sift"));
 			mutation.setPolyphen(getStringOrBlank(rs,"polyphen"));
 
+			//conservation
+			mutation.setPhastCons100(getStringOrBlank(rs,"phastCons100"));
+			mutation.setPhyloP100(getStringOrBlank(rs,"phyloP100"));
+			mutation.setPhastCons20(getStringOrBlank(rs,"phastCons20"));
+			mutation.setPhyloP20(getStringOrBlank(rs,"phyloP20"));
+			mutation.setGERP_RS(getStringOrBlank(rs,"GERP_RS"));
+
 			//Sample
 			mutation.setLastName(getStringOrBlank(rs, "lastName"));
 			mutation.setFirstName(getStringOrBlank(rs, "firstName"));
@@ -466,6 +477,17 @@ public class DatabaseCommands_Mutations {
 			mutation.setClinicalsignificance(getStringOrBlank(rs, "cln_significance"));
 			mutation.setClinicalconsequence(getStringOrBlank(rs, "cln_consequence"));
 			mutation.setClinicalorigin(getStringOrBlank(rs, "cln_origin"));
+
+			//HGMD mutation
+			MutationGermlineHGMD mutationGermlineHGMD = new MutationGermlineHGMD(getStringOrBlank(rs, "hgmd_ID"));
+			mutation.setMutationGermlineHGMD(mutationGermlineHGMD);
+			mutationGermlineHGMD.setVariant(getStringOrBlank(rs,"hgmd_Variant"));
+			mutationGermlineHGMD.setAAchange(getStringOrBlank(rs,"hgmd_AAchange"));
+			mutationGermlineHGMD.setDisease(getStringOrBlank(rs,"hgmd_Disease"));
+			mutationGermlineHGMD.setCategory(getStringOrBlank(rs,"hgmd_Category"));
+			mutationGermlineHGMD.setPmid(getStringOrBlank(rs,"hgmd_PMID"));
+			mutationGermlineHGMD.setPmid_info(getStringOrBlank(rs,"hgmd_Citation"));
+			mutationGermlineHGMD.setExtra_pmids(getStringOrBlank(rs,"hgmd_ExtraCitations"));
 
 
 			//temp holder fields - filled later separately

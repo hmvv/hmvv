@@ -180,8 +180,8 @@ public class AsynchronousMutationDataIO {
 				if (row_map.get("hgmd_variantid").replace(" ","").equals(mutation.getChr()+"-"+mutation.getPos()+"-"+mutation.getRef()+"-"+mutation.getAlt())){
 //					System.out.println(row_map.get("variant_id"));
 //					System.out.println(mutation.getChr()+"_"+mutation.getPos()+"_"+mutation.getRef()+"_"+mutation.getAlt());
-					mutation.setHgmd_id(row_map.get("hgmd_id"));
-					mutation.setHgmd_info(row_map);
+//					mutation.setHgmd_id(row_map.get("hgmd_id"));
+//					mutation.setHgmd_info(row_map);
 				}
 			}
 
@@ -191,8 +191,8 @@ public class AsynchronousMutationDataIO {
 				if (row_map.get("hgmd_variantid").equals(mutation.getChr()+"_"+mutation.getPos()+"_"+mutation.getRef()+"_"+mutation.getAlt())){
 //					System.out.println(row_map.get("variant_id"));
 //					System.out.println(mutation.getChr()+"_"+mutation.getPos()+"_"+mutation.getRef()+"_"+mutation.getAlt());
-					mutation.setHgmd_id(row_map.get("hgmd_id"));
-					mutation.setHgmd_info(row_map);
+//					mutation.setHgmd_id(row_map.get("hgmd_id"));
+//					mutation.setHgmd_info(row_map);
 				}
 			}
 

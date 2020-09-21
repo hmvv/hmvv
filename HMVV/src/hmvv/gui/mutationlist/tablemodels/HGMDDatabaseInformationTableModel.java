@@ -1,6 +1,6 @@
 package hmvv.gui.mutationlist.tablemodels;
 
-import hmvv.model.MutationHGMD;
+import hmvv.model.MutationGermlineHGMD;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
@@ -8,11 +8,11 @@ import java.util.ArrayList;
 public class HGMDDatabaseInformationTableModel extends AbstractTableModel {
     private static final long serialVersionUID = 1L;
 
-    private ArrayList<MutationHGMD> entries;
+    private ArrayList<MutationGermlineHGMD> entries;
     private ArrayList<HGMDDatabaseInformationTableModelColumn> columns;
 
     public HGMDDatabaseInformationTableModel(){
-        this.entries = new ArrayList<MutationHGMD>();
+        this.entries = new ArrayList<MutationGermlineHGMD>();
         constructColumns();
     }
 
@@ -21,21 +21,21 @@ public class HGMDDatabaseInformationTableModel extends AbstractTableModel {
         columns.add(new HGMDDatabaseInformationTableModelColumn("The database feature",
                 "Feature",
                 String.class,
-                (MutationHGMD entry) -> entry.getFeature()));
+                (MutationGermlineHGMD entry) -> entry.getId()));
 
         columns.add(new HGMDDatabaseInformationTableModelColumn("The database value for corresponding feature",
                 "Value",
                 String.class,
-                (MutationHGMD entry) -> entry.getValue()));
+                (MutationGermlineHGMD entry) -> entry.getAAchange()));
 
     }
 
-    public void addHGMDEntry(MutationHGMD entry){
+    public void addHGMDEntry(MutationGermlineHGMD entry){
         entries.add(entry);
         fireTableRowsInserted(entries.size()-1, entries.size()-1);
     }
 
-    public MutationHGMD getSample(int row){
+    public MutationGermlineHGMD getSample(int row){
         return entries.get(row);
     }
 
@@ -66,7 +66,7 @@ public class HGMDDatabaseInformationTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int row, int column) {
-        MutationHGMD entry = entries.get(row);
+        MutationGermlineHGMD entry = entries.get(row);
         return columns.get(column).getValue(entry);
     }
 

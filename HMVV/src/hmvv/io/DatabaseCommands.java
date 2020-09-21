@@ -189,7 +189,7 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * HGMD Database queries
 	 *************************************************************************/
-	public static ArrayList<MutationHGMD> getAllMutationForGene(String gene) throws Exception{
+	public static ArrayList<MutationGermlineHGMD> getAllMutationForGene(String gene) throws Exception{
 		return DatabaseCommands_HGMD.getAllMutationForGene(gene);
 	}
 }

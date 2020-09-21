@@ -2,9 +2,6 @@ package hmvv.model;
 
 import hmvv.main.Configurations;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MutationGermline extends MutationCommon {
 
 
@@ -56,9 +53,15 @@ public class MutationGermline extends MutationCommon {
     private String sift;
     private String polyphen;
 
+    //conservation
+    private String phastCons100;
+    private String phyloP100;
+    private String phastCons20;
+    private String phyloP20;
+    private String GERP_RS;
+
     //hgmd
-    private String hgmd_id;
-    private Map<String, String> hgmd_info = new HashMap<String, String>();
+    private MutationGermlineHGMD mutationGermlineHGMD;
 
     public Double getGnomad_allfreq() {
         return gnomad_allfreq;
@@ -376,19 +379,52 @@ public class MutationGermline extends MutationCommon {
         return Configurations.MUTATION_TYPE.GERMLINE;
     }
 
-    public String getHgmd_id() {
-        return hgmd_id;
+
+    public String getPhastCons100() {
+        return phastCons100;
     }
 
-    public void setHgmd_id(String hgmd_id) {
-        this.hgmd_id = hgmd_id;
+    public void setPhastCons100(String phastCons100) {
+        this.phastCons100 = phastCons100;
     }
 
-    public Map<String, String> getHgmd_info() {
-        return hgmd_info;
+    public String getPhyloP100() {
+        return phyloP100;
     }
 
-    public void setHgmd_info(Map<String, String> hgmd_info) {
-        this.hgmd_info = hgmd_info;
+    public void setPhyloP100(String phyloP100) {
+        this.phyloP100 = phyloP100;
+    }
+
+    public String getPhastCons20() {
+        return phastCons20;
+    }
+
+    public void setPhastCons20(String phastCons20) {
+        this.phastCons20 = phastCons20;
+    }
+
+    public String getPhyloP20() {
+        return phyloP20;
+    }
+
+    public void setPhyloP20(String phyloP20) {
+        this.phyloP20 = phyloP20;
+    }
+
+    public String getGERP_RS() {
+        return GERP_RS;
+    }
+
+    public void setGERP_RS(String GERP_RS) {
+        this.GERP_RS = GERP_RS;
+    }
+
+    public MutationGermlineHGMD getMutationGermlineHGMD() {
+        return mutationGermlineHGMD;
+    }
+
+    public void setMutationGermlineHGMD(MutationGermlineHGMD mutationGermlineHGMD) {
+        this.mutationGermlineHGMD = mutationGermlineHGMD;
     }
 }

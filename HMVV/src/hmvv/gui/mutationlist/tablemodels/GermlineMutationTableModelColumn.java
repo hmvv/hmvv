@@ -401,11 +401,40 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(MutationGermline mutation) -> mutation.getPolyphen());
 
-	public static final GermlineMutationTableModelColumn HGMDID_column = new GermlineMutationTableModelColumn("The ID of HGMD database",
+	public static final GermlineMutationTableModelColumn HGMDID_column = new GermlineMutationTableModelColumn("The ID from the HGMD database",
 			"HGMD",
 			String.class,
-			(MutationGermline mutation) -> mutation.getHgmd_id());
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getId());
 
+	public static final GermlineMutationTableModelColumn HGMDVariant_column = new GermlineMutationTableModelColumn("The variant from the HGMD database",
+			"Variant",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getVariant());
+
+	public static final GermlineMutationTableModelColumn HGMDAAChange_column = new GermlineMutationTableModelColumn("The AA change from the HGMD database",
+			"AAChange",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getAAchange());
+
+	public static final GermlineMutationTableModelColumn HGMDDisease_column = new GermlineMutationTableModelColumn("The disease from the HGMD database",
+			"Disease",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getDisease());
+
+	public static final GermlineMutationTableModelColumn HGMDCategory_column = new GermlineMutationTableModelColumn("The category from the HGMD database",
+			"Category",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getCategory());
+
+	public static final GermlineMutationTableModelColumn HGMDCitation_column = new GermlineMutationTableModelColumn("The citation from the HGMD database",
+			"Citation",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getPmid_info());
+
+	public static final GermlineMutationTableModelColumn HGMDExtraCitation_column = new GermlineMutationTableModelColumn("The extra citations from the HGMD database",
+			"Extra-Refs",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getExtra_pmids());
 
 	/**
 	 * The Lambda interface object

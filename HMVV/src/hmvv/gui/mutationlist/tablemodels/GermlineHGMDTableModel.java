@@ -14,7 +14,7 @@ public class GermlineHGMDTableModel extends GermlineCommonTableModel {
 		ArrayList<GermlineMutationTableModelColumn> columns = new ArrayList<GermlineMutationTableModelColumn>();
 		columns.add(GermlineMutationTableModelColumn.reportedColumn);
 
-		columns.add(GermlineMutationTableModelColumn.geneColumn);
+
 		columns.add(GermlineMutationTableModelColumn.exonsColumn);
 
 		columns.add(GermlineMutationTableModelColumn.chrColumn);
@@ -23,6 +23,15 @@ public class GermlineHGMDTableModel extends GermlineCommonTableModel {
 		columns.add(GermlineMutationTableModelColumn.altColumn);
 
 		columns.add(GermlineMutationTableModelColumn.HGMDID_column);
+		columns.add(GermlineMutationTableModelColumn.HGMDVariant_column);
+		columns.add(GermlineMutationTableModelColumn.HGMDAAChange_column);
+		columns.add(GermlineMutationTableModelColumn.HGMDDisease_column);
+		columns.add(GermlineMutationTableModelColumn.HGMDCategory_column);
+		columns.add(GermlineMutationTableModelColumn.HGMDCitation_column);
+		columns.add(GermlineMutationTableModelColumn.HGMDExtraCitation_column);
+
+		columns.add(GermlineMutationTableModelColumn.geneColumn);
+
 
 		return columns;
 	}

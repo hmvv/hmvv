@@ -4,7 +4,7 @@ import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.HGMDDatabaseInformationTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVFrame;
-import hmvv.model.MutationHGMD;
+import hmvv.model.MutationGermlineHGMD;
 import hmvv.model.MutationGermline;
 
 import javax.swing.*;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MutationGermlineHGMDFrame extends JFrame {
+public class MutationGermlineHGMDGeneFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	public final HMVVFrame parent;
@@ -33,8 +33,8 @@ public class MutationGermlineHGMDFrame extends JFrame {
 	private JScrollPane selectedScrollPane;
 
 
-	public MutationGermlineHGMDFrame(HMVVFrame parent, MutationGermline mutation) throws Exception {
-		String title = "HGMD:"+mutation.getHgmd_id()+","+mutation.getChr()+", ref:"+mutation.getRef()+
+	public MutationGermlineHGMDGeneFrame(HMVVFrame parent, MutationGermline mutation) throws Exception {
+		String title = "HGMD:"+","+mutation.getChr()+", ref:"+mutation.getRef()+
 				", alt:"+mutation.getAlt();
 		setTitle(title);
 
@@ -59,33 +59,33 @@ public class MutationGermlineHGMDFrame extends JFrame {
 	
 	private void constructComponents(){
 
-		Map<String, String> hgmdInfo = mutation.getHgmd_info();
+//		Map<String, String> hgmdInfo = mutation.getHgmd_info();
 
-		for(String attribute : hgmdInfo.keySet()){
-			String tableName = attribute.split("_")[0];
-			if(hgmdTables.containsKey(tableName)){
-				continue;
-			}
-			HGMDDatabaseInformationTableModel new_table_model = new HGMDDatabaseInformationTableModel();
-			JTable new_table = new JTable(new_table_model);
-			JScrollPane new_tabscrollpane =  new JScrollPane(new_table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			hgmdTableModels.put(tableName,new_table_model);
-			hgmdTables.put(tableName,new_table);
-			hgmdTableScrollpanes.put(tableName,new_tabscrollpane);
-		}
-
-		updateHGMDMutationTableData();
+//		for(String attribute : hgmdInfo.keySet()){
+//			String tableName = attribute.split("_")[0];
+//			if(hgmdTables.containsKey(tableName)){
+//				continue;
+//			}
+//			HGMDDatabaseInformationTableModel new_table_model = new HGMDDatabaseInformationTableModel();
+//			JTable new_table = new JTable(new_table_model);
+//			JScrollPane new_tabscrollpane =  new JScrollPane(new_table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+//			hgmdTableModels.put(tableName,new_table_model);
+//			hgmdTables.put(tableName,new_table);
+//			hgmdTableScrollpanes.put(tableName,new_tabscrollpane);
+//		}
+//
+//		updateHGMDMutationTableData();
 
 	}
 
 	private void updateHGMDMutationTableData(){
-		Map<String, String> hgmdInfo = mutation.getHgmd_info();
-		for(String attribute : hgmdInfo.keySet()){
-			String tableName = attribute.split("_")[0];
-			String columnName = attribute.split("_")[1];
-			String columnValue = hgmdInfo.get(attribute);
-			hgmdTableModels.get(tableName).addHGMDEntry(new MutationHGMD(columnName,columnValue));
-		}
+//		Map<String, String> hgmdInfo = mutation.getHgmd_info();
+//		for(String attribute : hgmdInfo.keySet()){
+//			String tableName = attribute.split("_")[0];
+//			String columnName = attribute.split("_")[1];
+//			String columnValue = hgmdInfo.get(attribute);
+//			hgmdTableModels.get(tableName).addHGMDEntry(new MutationHGMD(columnName,columnValue));
+//		}
 	}
 
 //	private void updateHGMDGeneTableData() throws Exception {
@@ -123,9 +123,9 @@ public class MutationGermlineHGMDFrame extends JFrame {
 		JTable new_table = new JTable(new_table_model);
 		JScrollPane new_tabscrollpane =  new JScrollPane(new_table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		ArrayList<MutationHGMD> mutations = DatabaseCommands.getAllMutationForGene(mutation.getGene());
-		for(MutationHGMD entry : mutations){
-			new_table_model.addHGMDEntry(new MutationHGMD(entry.getFeature(),entry.getValue()));
+		ArrayList<MutationGermlineHGMD> mutations = DatabaseCommands.getAllMutationForGene(mutation.getGene());
+		for(MutationGermlineHGMD entry : mutations){
+//			new_table_model.addHGMDEntry(new MutationHGMD(entry.getFeature(),entry.getValue()));
 		}
 
 		geneTabbedPane.addTab("Gene:"+mutation.getGene(), null, new_tabscrollpane, null);

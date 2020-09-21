@@ -1,6 +1,6 @@
 package hmvv.gui.mutationlist.tablemodels;
 
-import hmvv.model.MutationHGMD;
+import hmvv.model.MutationGermlineHGMD;
 
 public class HGMDDatabaseInformationTableModelColumn extends HMVVTableModelColumn {
 
@@ -17,7 +17,7 @@ public class HGMDDatabaseInformationTableModelColumn extends HMVVTableModelColum
     /**
      * Lambda expression function
      */
-    public Object getValue(MutationHGMD database){
+    public Object getValue(MutationGermlineHGMD database){
         return operation.getValue(database);
     }
 
@@ -26,6 +26,6 @@ public class HGMDDatabaseInformationTableModelColumn extends HMVVTableModelColum
      *
      */
     public interface SampleGetValueAtOperation{
-        Object getValue(MutationHGMD database);
+        Object getValue(MutationGermlineHGMD database);
     }
 }

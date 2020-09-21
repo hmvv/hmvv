@@ -1,6 +1,6 @@
 package hmvv.io;
 
-import hmvv.model.MutationHGMD;
+import hmvv.model.MutationGermlineHGMD;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,15 +13,15 @@ public class DatabaseCommands_HGMD {
 		DatabaseCommands_HGMD.databaseConnection = databaseConnection;
 	}
 	
-	static ArrayList<MutationHGMD> getAllMutationForGene(String gene) throws Exception{
-		ArrayList<MutationHGMD> mutations = new ArrayList<MutationHGMD>();
+	static ArrayList<MutationGermlineHGMD> getAllMutationForGene(String gene) throws Exception{
+		ArrayList<MutationGermlineHGMD> mutations = new ArrayList<MutationGermlineHGMD>();
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select refseq,hgvsALL from db_hgmd_allmut where gene =?");
 		preparedStatement.setString(1, gene);
 
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
-			mutations.add(new MutationHGMD(rs.getString(1),rs.getString(2)));
+//			mutations.add(new MutationHGMD(rs.getString(1),rs.getString(2)));
 		}
 		preparedStatement.close();
 		return mutations;
