@@ -13,17 +13,13 @@ public class GermlineTranscriptTableModel extends GermlineCommonTableModel {
 	protected ArrayList<GermlineMutationTableModelColumn> constructColumns(){
 		ArrayList<GermlineMutationTableModelColumn> columns = new ArrayList<GermlineMutationTableModelColumn>();
 		columns.add(GermlineMutationTableModelColumn.reportedColumn);
-
 		columns.add(GermlineMutationTableModelColumn.geneColumn);
 		columns.add(GermlineMutationTableModelColumn.exonsColumn);
-
 		columns.add(GermlineMutationTableModelColumn.chrColumn);
 		columns.add(GermlineMutationTableModelColumn.posColumn);
 		columns.add(GermlineMutationTableModelColumn.refColumn);
 		columns.add(GermlineMutationTableModelColumn.altColumn);
-
 		columns.add(GermlineMutationTableModelColumn.HGVScColumn);
-
 		columns.add(GermlineMutationTableModelColumn.TRANSCRIPT_STRAND);
 		columns.add(GermlineMutationTableModelColumn.ALT_TRANSCRIPT_START);
 		columns.add(GermlineMutationTableModelColumn.ALT_TRANSCRIPT_END);

@@ -526,7 +526,7 @@ public class DatabaseCommands_Mutations {
 			if( rs.getString(columnLabel) == null) {
 				return "";
 			}
-			return rs.getString(columnLabel);
+			return rs.getString(columnLabel).replaceAll("_"," ");
 		}catch(Exception e){
 			return "";
 		}

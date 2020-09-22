@@ -33,6 +33,11 @@ public class InternetCommands {
 	public static void searchGoogle(String term) throws Exception{
 		browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
 	}
+
+	public static void searchGoogleHGMD(String term) throws Exception{
+		browseToURL("https://www.google.com/#q=" + "HGMD%20" + "%22" + term + "%22" );
+	}
+
 	public static void searchGene(String term) throws Exception{
 		browseToURL("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + term );
 	}
@@ -101,7 +106,10 @@ public class InternetCommands {
 	public static void searchClinvarID(String term) throws Exception{
 		browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term +"/");
 	}
+	public static void searchNCBIProtein(String term) throws Exception{
+		browseToURL("https://www.ncbi.nlm.nih.gov/protein/" + term+"/" );
 
+	}
 	public static void searchExpasyVariant(String term) throws Exception{
 		browseToURL("https://web.expasy.org/variant_pages/" + term +".html");
 	}

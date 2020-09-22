@@ -15,22 +15,31 @@ public class GermlineProteinDomainTable extends CommonTableGermline{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1,6,13,15,16);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1,10,14,16,17);
 	}
 	
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
 		if(column == 1){
 			searchGoogleForGene();
-		}else if(column == 13){
+		}else if(column == 10){
+			searchNCBIProtein();
+		}else if(column == 14){
 			searchUniprotProteinVariant();
-		}else if(column == 15){
-			searchExpasyVariant();
 		}else if(column == 16){
+			searchExpasyVariant();
+		}else if(column == 17){
 			searchUniprotProtein();
 		}
 	}
 
+	private void searchNCBIProtein() throws Exception{
+		MutationGermline mutation = getSelectedMutation();
+		String expasy_id = mutation.getProtein_id();
+		if(!expasy_id.equals("") && !expasy_id.equals("null")){
+			InternetCommands.searchNCBIProtein(expasy_id.replaceAll(" ","_"));
+		}
+	}
 
 	private void searchExpasyVariant() throws Exception{
 		MutationGermline mutation = getSelectedMutation();

@@ -172,12 +172,13 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		HGMDScrollPane = new JScrollPane(HGMDTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.addTab("snpEFF", null, vepTabScrollPane, null);
-		tabbedPane.addTab("clinVar", null, clinVarScrollPane, null);
-		tabbedPane.addTab("gnomad", null, gnomadScrollPane, null);
-		tabbedPane.addTab("CardiacAtlas", null, cardiacAtlasScrollPane, null);
+		tabbedPane.addTab("SNPEFF", null, vepTabScrollPane, null);
+		tabbedPane.addTab("ClinVar", null, clinVarScrollPane, null);
+		tabbedPane.addTab("Gnomad", null, gnomadScrollPane, null);
+		tabbedPane.addTab("Cardiac Atlas", null, cardiacAtlasScrollPane, null);
 		tabbedPane.addTab("Transcript", null, transcriptScrollPane, null);
 		tabbedPane.addTab("Prediction", null, predictionScrollPane, null);
+		tabbedPane.addTab("Protein Domain", null, proteinDomainScrollPane, null);
 		tabbedPane.addTab("HGMD", null, HGMDScrollPane, null);
 
 
@@ -187,7 +188,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 			tabbedPane.addTab("Patient History", null, patientHistoryTabScrollPane, null);
 		}else{
 			tabbedPane.addTab("Patient History", null, null);
-			tabbedPane.setEnabledAt(7, false);
+			tabbedPane.setEnabledAt(8, false);
 		}
 
 		selectedTable = vepTabTable;
@@ -244,6 +245,9 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 	        	}else if(selectedIndex == 6){
 					selectedTable = proteinDomainTable;
 					selectedScrollPane = proteinDomainScrollPane;
+				}else if(selectedIndex == 7){
+					selectedTable = HGMDTable;
+					selectedScrollPane = HGMDScrollPane;
 				} else{
 	        		//undefined
 	        		return;
