@@ -1,6 +1,7 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
+import hmvv.gui.mutationlist.MutationGermlineHGMDGeneFrame;
 import hmvv.gui.mutationlist.tablemodels.GermlineHGMDTableModel;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVFrame;
@@ -55,10 +56,7 @@ public class GermlineHGMDTable extends CommonTableGermline{
 		}
 	}
 	private void loadHGMDGeneInformation() throws Exception{
-		MutationGermline mutation = getSelectedMutation();
-		String pmids = mutation.getMutationGermlineHGMD().getExtra_pmids().replace(",","&");
-		if(!pmids.equals("") && !pmids.equals("null")){
-			InternetCommands.searchPubmed(pmids);
-		}
+		MutationGermlineHGMDGeneFrame hgmd_gene_frame = new MutationGermlineHGMDGeneFrame(parent, getSelectedMutation());
+		hgmd_gene_frame.setVisible(true);
 	}
 }

@@ -202,7 +202,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		add(northPanel, BorderLayout.NORTH);
 		add(tabbedPane, BorderLayout.CENTER);
 		
-//		setBorder(new EmptyBorder(15, 15, 15, 15));
+//
 	}
 
 	public void createTab(String title, JPanel panel) {

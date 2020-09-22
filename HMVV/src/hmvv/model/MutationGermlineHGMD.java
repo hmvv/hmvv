@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 public class MutationGermlineHGMD {
 
     private String id;
+    private String mutation_type;
     private String variant;
     private String AAchange;
     private String disease;
@@ -27,6 +28,14 @@ public class MutationGermlineHGMD {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getMutation_type() {
+        return mutation_type;
+    }
+
+    public void setMutation_type(String mutation_type) {
+        this.mutation_type = mutation_type;
     }
 
     public String getVariant() {
