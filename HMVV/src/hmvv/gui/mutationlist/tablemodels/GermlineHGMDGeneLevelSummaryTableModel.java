@@ -22,7 +22,8 @@ public class GermlineHGMDGeneLevelSummaryTableModel extends AbstractTableModel{
         columns.add(new GermlineHGMDGeneLevelSummaryTableModelColumn("The mutation category",
                 "Category",
                 String.class,
-                (MutationGermlineHGMDGeneLevel mutation) -> mutation.getCategory()));
+                (MutationGermlineHGMDGeneLevel mutation) -> mutation.getCategory()
+        ));
 
         columns.add(new GermlineHGMDGeneLevelSummaryTableModelColumn("The total mutations",
                 "variant",

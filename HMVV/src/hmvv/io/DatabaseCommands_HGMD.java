@@ -8,9 +8,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DatabaseCommands_HGMD {
 	private static Connection databaseConnection = null;
+
+	private static Map<String, String> tableNameDBMap = new HashMap<String, String>() {{
+		put("missense nonsense", "mutation");
+		put("splice", "splice");
+		put("regulatory", "prom");
+		put("small deletions", "deletion");
+		put("small insertions", "insertion");
+		put("small indels", "indel");
+		put("gross deletions", "grosdel");
+		put("gross insertions", "grosins");
+		put("complex rearrangments", "complex");
+		put("repeat variations", "amplet");
+	}};
+
+
 	static void setConnection(Connection databaseConnection) {
 		DatabaseCommands_HGMD.databaseConnection = databaseConnection;
 	}
@@ -58,31 +75,45 @@ public class DatabaseCommands_HGMD {
 		return mutations;
 	}
 
-	static ArrayList<MutationGermlineHGMD> getMutationsByTable(MutationGermline mutation, String table) throws Exception{
+	static ArrayList<MutationGermlineHGMD> getMutationsByTable(MutationGermline mutation, String appTable) throws Exception{
+
+		String table = "db_hgmd_"+ tableNameDBMap.get(appTable);
+
 		ArrayList<MutationGermlineHGMD> mutations = new ArrayList<MutationGermlineHGMD>();
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("" +
-				"select base, amino, disease," +
-				" tag, pmid, year " +
-//				"author, year,fullname,vol,page " +
-				"from "+ table +" where gene=? ;");
+				" select db_hgmd_allmut.acc_num, db_hgmd_allmut.hgvs, db_hgmd_allmut.descr, db_hgmd_allmut.disease," +
+				" db_hgmd_allmut.tag, db_hgmd_allmut.pmid, db_hgmd_allmut.year, " +
+				" db_hgmd_allmut.author, db_hgmd_allmut.year,db_hgmd_allmut.fullname,db_hgmd_allmut.vol,db_hgmd_allmut.page " +
+				" from "+ table +" join db_hgmd_allmut on "+table+".acc_num=db_hgmd_allmut.acc_num "+
+				" where "+table+".gene=? ;");
 		preparedStatement.setString(1, mutation.getGene());
 
 
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 
-			MutationGermlineHGMD hgmd_mutation = new MutationGermlineHGMD(mutation.getMutationGermlineHGMD().getId());
-			hgmd_mutation.setVariant(rs.getString("base"));
-			hgmd_mutation.setAAchange(rs.getString("amino"));
+			MutationGermlineHGMD hgmd_mutation = new MutationGermlineHGMD(rs.getString("acc_num"));
+
+			hgmd_mutation.setMutation_type(appTable);
+			hgmd_mutation.setVariant(rs.getString("hgvs"));
+			hgmd_mutation.setAAchange(rs.getString("descr"));
 			hgmd_mutation.setDisease(rs.getString("disease"));
 			hgmd_mutation.setCategory(rs.getString("tag"));
+			hgmd_mutation.setPmid(rs.getString("pmid"));
+			hgmd_mutation.setPmid_info(rs.getString("author")+"("+
+					rs.getString("year")+") "+
+					rs.getString("fullname")+" "+
+					rs.getString("vol")+"."+
+					rs.getString("vol"));
 
 			mutations.add(hgmd_mutation);
 }
 		preparedStatement.close();
 		return mutations;
 	}
+
+
 }
 
 

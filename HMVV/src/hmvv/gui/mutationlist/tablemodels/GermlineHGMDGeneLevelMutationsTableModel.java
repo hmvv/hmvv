@@ -51,15 +51,17 @@ public class GermlineHGMDGeneLevelMutationsTableModel extends AbstractTableModel
                 "citation",
                 String.class,
                 (MutationGermlineHGMD mutation) -> mutation.getPmid_info()));
-        columns.add(new GermlineHGMDGeneLevelMutationsTableModelColumn("The extra refs",
-                "extra refs",
-                String.class,
-                (MutationGermlineHGMD mutation) -> mutation.getExtra_pmids()));
     }
 
     public void addMutation(MutationGermlineHGMD mutation){
         mutations.add(mutation);
         fireTableRowsInserted(mutations.size()-1, mutations.size()-1);
+    }
+
+    public void updateMutations(ArrayList<MutationGermlineHGMD> mutations){
+        this.mutations.clear();
+        this.mutations = mutations;
+        fireTableDataChanged();
     }
 
     @Override
@@ -91,6 +93,11 @@ public class GermlineHGMDGeneLevelMutationsTableModel extends AbstractTableModel
     public Object getValueAt(int row, int column) {
         MutationGermlineHGMD mutation = mutations.get(row);
         return columns.get(column).getValue(mutation);
+    }
+
+    public MutationGermlineHGMD getMutationAt(int row) {
+        MutationGermlineHGMD mutation = mutations.get(row);
+        return mutation;
     }
 
 }
