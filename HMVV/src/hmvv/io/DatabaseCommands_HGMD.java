@@ -33,6 +33,7 @@ public class DatabaseCommands_HGMD {
 	}
 	
 	static ArrayList<MutationGermlineHGMDGeneLevel> getMutationSummaryForGene(String gene) throws Exception{
+
 		ArrayList<MutationGermlineHGMDGeneLevel> mutations = new ArrayList<MutationGermlineHGMDGeneLevel>();
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("" +
@@ -72,22 +73,34 @@ public class DatabaseCommands_HGMD {
 			mutations.add(new MutationGermlineHGMDGeneLevel("Repeat variations",rs.getInt("RepeatVariations")));
 		}
 		preparedStatement.close();
+
+		Integer total = 0;
+		for (MutationGermlineHGMDGeneLevel entry:mutations){
+			total += entry.getTotal();
+		}
+		mutations.add(new MutationGermlineHGMDGeneLevel("All",total));
+
 		return mutations;
 	}
 
-	static ArrayList<MutationGermlineHGMD> getMutationsByTable(MutationGermline mutation, String appTable) throws Exception{
+	static ArrayList<MutationGermlineHGMD> getMutationsByTable(String gene, String appTable) throws Exception{
 
 		String table = "db_hgmd_"+ tableNameDBMap.get(appTable);
 
 		ArrayList<MutationGermlineHGMD> mutations = new ArrayList<MutationGermlineHGMD>();
 
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("" +
-				" select db_hgmd_allmut.acc_num, db_hgmd_allmut.hgvs, db_hgmd_allmut.descr, db_hgmd_allmut.disease," +
+				" select db_hgmd_allmut.acc_num, db_hgmd_hg19_vcf.pos," +
+				" db_hgmd_allmut.hgvs, db_hgmd_allmut.descr, " +
+				" db_hgmd_allmut.disease," +
 				" db_hgmd_allmut.tag, db_hgmd_allmut.pmid, db_hgmd_allmut.year, " +
 				" db_hgmd_allmut.author, db_hgmd_allmut.year,db_hgmd_allmut.fullname,db_hgmd_allmut.vol,db_hgmd_allmut.page " +
 				" from "+ table +" join db_hgmd_allmut on "+table+".acc_num=db_hgmd_allmut.acc_num "+
+				" left join db_hgmd_hg19_vcf on "+table+".acc_num=db_hgmd_hg19_vcf.id "+
 				" where "+table+".gene=? ;");
-		preparedStatement.setString(1, mutation.getGene());
+
+
+		preparedStatement.setString(1, gene);
 
 
 		ResultSet rs = preparedStatement.executeQuery();
@@ -96,6 +109,7 @@ public class DatabaseCommands_HGMD {
 			MutationGermlineHGMD hgmd_mutation = new MutationGermlineHGMD(rs.getString("acc_num"));
 
 			hgmd_mutation.setMutation_type(appTable);
+			hgmd_mutation.setPosition(rs.getString("pos"));
 			hgmd_mutation.setVariant(rs.getString("hgvs"));
 			hgmd_mutation.setAAchange(rs.getString("descr"));
 			hgmd_mutation.setDisease(rs.getString("disease"));
@@ -111,6 +125,16 @@ public class DatabaseCommands_HGMD {
 }
 		preparedStatement.close();
 		return mutations;
+	}
+
+	static ArrayList<MutationGermlineHGMD> getAllMutationsByGene(String gene) throws Exception{
+		ArrayList<MutationGermlineHGMD> allmutations = new ArrayList<MutationGermlineHGMD>();
+		for(String tablename : tableNameDBMap.keySet()){
+			ArrayList<MutationGermlineHGMD> mutations = getMutationsByTable(gene, tablename);
+			allmutations.addAll(mutations);
+		}
+
+		return allmutations;
 	}
 
 

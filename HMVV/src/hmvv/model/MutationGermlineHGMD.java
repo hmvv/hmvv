@@ -1,15 +1,10 @@
 package hmvv.model;
 
-import hmvv.gui.GUICommonTools;
-
-import java.text.ParseException;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 public class MutationGermlineHGMD {
 
     private String id;
     private String mutation_type;
+    private String position;
     private String variant;
     private String AAchange;
     private String disease;
@@ -36,6 +31,14 @@ public class MutationGermlineHGMD {
 
     public void setMutation_type(String mutation_type) {
         this.mutation_type = mutation_type;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public String getVariant() {

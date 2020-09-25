@@ -25,6 +25,11 @@ public class GermlineHGMDGeneLevelMutationsTableModel extends AbstractTableModel
                 String.class,
                 (MutationGermlineHGMD mutation) -> mutation.getMutation_type()));
 
+        columns.add(new GermlineHGMDGeneLevelMutationsTableModelColumn("The mutation position",
+                "pos",
+                Integer.class,
+                (MutationGermlineHGMD mutation) -> mutation.getPosition()));
+
         columns.add(new GermlineHGMDGeneLevelMutationsTableModelColumn("The mutation ID",
                 "ID",
                 String.class,

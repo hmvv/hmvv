@@ -594,7 +594,6 @@ public class SampleListFrame extends JPanel {
 		private final HMVVFrame parent;
 		private final Sample sample;
 
-		
 		public MutationListLoader(HMVVFrame parent, Sample sample) {
 			table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			this.parent = parent;

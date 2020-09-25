@@ -514,46 +514,4 @@ public class SSHConnection {
 		return stats;
 	}
 
-	public static ArrayList<String> getHGMDInformation(Sample sample) throws  Exception{
-
-
-		String hgmd = "/home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/cardiac_exomeAssay/*_"+sample.runID+"_*/"+
-				sample.sampleName + "/variantAnalysis/"+
-				sample.sampleName+".mutect.annotated.vcf.hgmd.txt";
-
-		String hgmd_command = String.format("ls %s", hgmd);
-
-		CommandResponse rs = SSHConnection.executeCommandAndGetOutput(hgmd_command);
-
-		String hgmd_file_path = rs.responseLines.get(0);
-
-		ChannelSftp channel = (ChannelSftp)sshSession.openChannel("sftp");
-		channel.connect();
-
-		InputStream stream = channel.get(hgmd_file_path);
-
-		ArrayList<String> hgmd_info = new ArrayList<String>();
-
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-			String line;
-			while ((line = br.readLine()) != null) {
-				hgmd_info.add(line);
-			}
-		} catch (IOException io) {
-			System.out.println("Exception occurred during reading file from SFTP server due to " + io.getMessage());
-			io.getMessage();
-
-		} catch (Exception e) {
-			System.out.println("Exception occurred during reading file from SFTP server due to " + e.getMessage());
-			e.getMessage();
-
-		}
-
-		channel.exit();
-
-		return hgmd_info;
-	}
-
-
 }

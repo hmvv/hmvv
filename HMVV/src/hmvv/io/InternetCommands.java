@@ -31,15 +31,17 @@ public class InternetCommands {
 	}
 
 	public static void searchGoogle(String term) throws Exception{
-		browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
+		browseToURL("https://www.google.com/#q=" + term );
 	}
 
-	public static void searchGoogleHGMD(String term) throws Exception{
-		browseToURL("https://www.google.com/#q=" + "HGMD%20" + "%22" + term + "%22" );
+	public static void searchGoogleHGMD(String gene, String id) throws Exception{
+		browseToURL("http://www.hgmd.cf.ac.uk/ac/gene.php?gene=" + gene + "&accession=" + id );
+
+
 	}
 
 	public static void searchGene(String term) throws Exception{
-		browseToURL("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + term );
+		browseToURL("https://www.ncbi.nlm.nih.gov/omim/?term=" + term );
 	}
 	public static void searchSNP(String ID) throws Exception{
 		if(ID.contains(",")){

@@ -18,7 +18,6 @@ public class AsynchronousMutationDataIO {
 			createExtraMutationDataThread(mutationList, callback);
 		} else if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.GERMLINE){
 			createExtraGermlineMutationDataThread(mutationList, callback);
-			createExtraGermlineMutationDataThreadForHGMD(sample,mutationList, callback);
 		}
 	}
 	
@@ -148,74 +147,5 @@ public class AsynchronousMutationDataIO {
 		// default selection
 		mutation.setSelected(false);
 	}
-
-	private static void createExtraGermlineMutationDataThreadForHGMD( Sample sample, MutationList mutationList, AsynchronousCallback callback){
-		Thread missingDataThread = new Thread(new Runnable(){
-			@Override
-			public void run() {
-				callback.disableInputForAsynchronousLoad();
-				try {
-					getDatabaseGermlineMutationHGMDData(sample, mutationList, callback);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				callback.enableInputAfterAsynchronousLoad();
-			}
-		});
-		missingDataThread.start();
-	}
-
-	private static void getDatabaseGermlineMutationHGMDData(Sample sample, MutationList mutationList, AsynchronousCallback callback) throws Exception {
-
-		//HGMD Database
-		ArrayList<String> hgmd_info = SSHConnection.getHGMDInformation(sample);
-
-		for (String line:hgmd_info){
-			Map<String, String> row_map = stringtodict(line.replace("{","").replace("}","").replaceAll("'",""));
-
-
-			for(int index = 0; index < mutationList.getMutationCount(); index++) {
-				MutationGermline mutation = (MutationGermline) mutationList.getMutation(index);
-//				System.out.println(row_map.get("hgmd_variantid"));
-				if (row_map.get("hgmd_variantid").replace(" ","").equals(mutation.getChr()+"-"+mutation.getPos()+"-"+mutation.getRef()+"-"+mutation.getAlt())){
-//					System.out.println(row_map.get("variant_id"));
-//					System.out.println(mutation.getChr()+"_"+mutation.getPos()+"_"+mutation.getRef()+"_"+mutation.getAlt());
-//					mutation.setHgmd_id(row_map.get("hgmd_id"));
-//					mutation.setHgmd_info(row_map);
-				}
-			}
-
-			for(int index = 0; index < mutationList.getFilteredMutationCount(); index++) {
-				MutationGermline mutation = (MutationGermline) mutationList.getFilteredMutation(index);
-
-				if (row_map.get("hgmd_variantid").equals(mutation.getChr()+"_"+mutation.getPos()+"_"+mutation.getRef()+"_"+mutation.getAlt())){
-//					System.out.println(row_map.get("variant_id"));
-//					System.out.println(mutation.getChr()+"_"+mutation.getPos()+"_"+mutation.getRef()+"_"+mutation.getAlt());
-//					mutation.setHgmd_id(row_map.get("hgmd_id"));
-//					mutation.setHgmd_info(row_map);
-				}
-			}
-
-		}
-
-
-
-	}
-
-	public static Map<String, String> stringtodict(String line){
-
-		Map<String, String> row_map = new HashMap<String, String>();
-
-		String[] pairs = line.split(",");
-
-		for (int i=0;i<pairs.length;i++) {
-			String pair = pairs[i];
-			String[] keyValue = pair.split(":");
-			row_map.put(keyValue[0].replace(" ",""), keyValue[1]);
-		}
-
-
-		return row_map;
-	}
-
+	
 }

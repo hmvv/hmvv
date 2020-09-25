@@ -36,7 +36,7 @@ public class GermlineHGMDTable extends CommonTableGermline{
 		MutationGermline mutation = getSelectedMutation();
 		String hgmd_id = mutation.getMutationGermlineHGMD().getId();
 		if(!hgmd_id.equals("") && !hgmd_id.equals("null")){
-			InternetCommands.searchGoogleHGMD(hgmd_id);
+			InternetCommands.searchGoogleHGMD(mutation.getGene(),hgmd_id);
 		}
 	}
 

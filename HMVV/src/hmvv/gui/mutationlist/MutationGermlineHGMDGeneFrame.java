@@ -5,6 +5,7 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineHGMDGeneLevelMutationsTableModel;
 import hmvv.gui.mutationlist.tablemodels.GermlineHGMDGeneLevelSummaryTableModel;
 import hmvv.gui.mutationlist.tables.CommonTable;
+import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
@@ -13,6 +14,8 @@ import hmvv.main.HMVVFrame;
 import hmvv.model.MutationGermline;
 import hmvv.model.MutationGermlineHGMD;
 import hmvv.model.MutationGermlineHGMDGeneLevel;
+import hmvv.model.Sample;
+import org.knowm.xchart.style.markers.None;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -38,6 +41,7 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 	private GermlineHGMDGeneLevelMutationsTableModel mutationTableModel;
 	private JTable mutationTable;
 	private JScrollPane mutationScrollPane;
+	private TableRowSorter<GermlineHGMDGeneLevelMutationsTableModel> mutationsSorter;
 
 	public MutationGermlineHGMDGeneFrame(HMVVFrame parent, MutationGermline mutation) throws Exception {
 		String title = "HGMD-Gene: "+ mutation.getGene();
@@ -49,15 +53,13 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 		constructComponents();
 		layoutComponents();
 
-
 //		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.70), (int)(bounds.height*.75));
+		setSize((int)(bounds.width*.90), (int)(bounds.height*.75));
 		setMinimumSize(new Dimension(500, getHeight()/2));
 
 		setLocationRelativeTo(parent);
 		setAlwaysOnTop(false);
-
 
 	}
 
@@ -70,11 +72,21 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 		summaryTableRenderer();
 		summaryTableConstructListeners();
 
-		ArrayList<MutationGermlineHGMD> mutations = DatabaseCommands.getMutationsByTable(mutation,"missense nonsense");
+		ArrayList<MutationGermlineHGMD> mutations = DatabaseCommands.getAllMutationsByGene(mutation.getGene());
 		mutationTableModel = new GermlineHGMDGeneLevelMutationsTableModel(mutations);
 		mutationTable = new JTable(mutationTableModel);
 		mutationTableRenderer();
 		mutationTableConstructListeners();
+		mutationTable.setAutoCreateRowSorter(true);
+		mutationsSorter = new TableRowSorter<>(mutationTableModel);
+		mutationTable.setRowSorter(mutationsSorter);
+
+        //by default, sort from newest to oldest
+        ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>();
+        sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+        mutationsSorter.setSortKeys(sortKeys);
+        mutationsSorter.sort();
+
 
 	}
 
@@ -147,7 +159,7 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 				Component c = DEFAULT_RENDERER_mutation.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 				DEFAULT_RENDERER_mutation.setHorizontalAlignment(JLabel.CENTER);
 
-				if(column==1 || column==6){
+				if(column == 2 || column == 7){
 					c.setForeground(Color.BLUE);
 				} else {
 					c.setForeground(Color.BLACK);
@@ -171,7 +183,7 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				int column = mutationTable.columnAtPoint(e.getPoint());
-				if(column == 1 || column == 6){
+				if(column == 2 || column == 7){
 					mutationTable.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				}else{
 					mutationTable.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -185,9 +197,9 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 				try{
 					int column = mutationTable.columnAtPoint(c.getPoint());
 					int row = mutationTable.rowAtPoint(c.getPoint());
-					if(column == 1){
+					if(column == 2){
 						handleMousePressedMutationTableHGMDID((String)mutationTable.getValueAt(row,column));
-					} else if(column == 6){
+					} else if(column == 7){
 						handleMousePressedMutationTableHGMDCitation(mutationTableModel.getMutationAt(row).getPmid());
 					}
 
@@ -204,21 +216,21 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 
 		summaryScrollPane = new JScrollPane(summaryTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		summaryScrollPane.setViewportView(summaryTable);
-		summaryScrollPane.setPreferredSize(new Dimension(300,187));
+		summaryScrollPane.setPreferredSize(new Dimension(300,203));
 		summaryScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 		JPanel leftPanel = new JPanel();
-		leftPanel.setPreferredSize(new Dimension(310,200));
+		leftPanel.setPreferredSize(new Dimension(310,210));
 		leftPanel.add(summaryScrollPane);
 		mainPanel.add(leftPanel);
 
 		mutationScrollPane = new JScrollPane(mutationTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		mutationScrollPane.setViewportView(mutationTable);
-		mutationScrollPane.setPreferredSize(new Dimension(1200,390));
+		mutationScrollPane.setPreferredSize(new Dimension(1500,390));
 		mutationScrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
 		JPanel rightPanel = new JPanel();
-		rightPanel.setPreferredSize(new Dimension(1210,400));
+		rightPanel.setPreferredSize(new Dimension(1510,400));
 		rightPanel.add(mutationScrollPane);
 		mainPanel.add(rightPanel);
 		add(mainPanel);
@@ -226,14 +238,12 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 	}
 
 	protected void handleMousePressedSummaryTable(String table) throws Exception{
-		ArrayList<MutationGermlineHGMD> mutations = DatabaseCommands.getMutationsByTable(mutation,table.toLowerCase());
-		mutationTableModel.updateMutations(mutations);
-
+ 	    refilterTable(table);
 	}
 
 	protected  void handleMousePressedMutationTableHGMDID(String hgmd_id) throws Exception {
 		if(!hgmd_id.equals("") && !hgmd_id.equals("null")){
-			InternetCommands.searchGoogleHGMD(hgmd_id);
+			InternetCommands.searchGoogleHGMD(mutation.getGene(),hgmd_id);
 		}
 	}
 
@@ -251,12 +261,37 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 			for (int row = 0; row < table.getRowCount(); row++) {
 				TableCellRenderer renderer = table.getCellRenderer(row, column);
 				Component comp = table.prepareRenderer(renderer, row, column);
-				width = Math.max(comp.getPreferredSize().width +1 , width);
+				width = Math.max(comp.getPreferredSize().width + 1, width);
 			}
-			if(width > 300)
-				width=300;
+			if (width > 300)
+				width = 300;
 			columnModel.getColumn(column).setPreferredWidth(width);
 		}
 	}
+
+	public void refilterTable(String tablename){
+
+		RowFilter<GermlineHGMDGeneLevelMutationsTableModel, Integer> rowFilter = new RowFilter<GermlineHGMDGeneLevelMutationsTableModel, Integer>(){
+
+			private boolean doesMutationTableMatch(Entry<? extends GermlineHGMDGeneLevelMutationsTableModel, ? extends Integer> entry){
+
+                if (tablename.equals("All")){
+                    return true;
+                }else {
+                    int row = entry.getIdentifier();
+                    MutationGermlineHGMD sample = mutationTableModel.getMutationAt(row);
+                    return sample.getMutation_type().equals(tablename.toLowerCase());
+                }
+			}
+
+
+			@Override
+			public boolean include(Entry<? extends GermlineHGMDGeneLevelMutationsTableModel, ? extends Integer> entry) {
+				return doesMutationTableMatch(entry);
+			}
+		};
+		mutationsSorter.setRowFilter(rowFilter);
+	}
 }
+
 
