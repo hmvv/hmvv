@@ -1,7 +1,6 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.tablemodels.GermlineCardiacAtlasTableModel;
 import hmvv.gui.mutationlist.tablemodels.GermlineClinVarTableModel;
 import hmvv.main.HMVVFrame;
 

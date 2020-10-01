@@ -25,6 +25,7 @@ public class DatabaseCommands {
 			DatabaseCommands_Pipelines.setConnection(databaseConnection);
 			DatabaseCommands_QC.setConnection(databaseConnection);
 			DatabaseCommands_Samples.setConnection(databaseConnection);
+			DatabaseCommands_HGMD.setConnection(databaseConnection);
 		}catch (Exception e){
 			throw new Exception("mysql connection error: " + e.getMessage());
 		}
@@ -183,5 +184,20 @@ public class DatabaseCommands {
 	
 	public static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(String assay) throws Exception{
 		return DatabaseCommands_QC.getSampleQCData(assay);
+	}
+
+	/* ************************************************************************
+	 * HGMD Database queries
+	 *************************************************************************/
+	public static ArrayList<MutationGermlineHGMDGeneLevel> getMutationSummaryForGene(String gene) throws Exception{
+		return DatabaseCommands_HGMD.getMutationSummaryForGene(gene);
+	}
+
+	public static ArrayList<MutationGermlineHGMD> getMutationsByTable(String gene, String table) throws Exception{
+		return DatabaseCommands_HGMD.getMutationsByTable(gene,table);
+	}
+
+	public static ArrayList<MutationGermlineHGMD> getAllMutationsByGene(String gene) throws Exception{
+		return DatabaseCommands_HGMD.getAllMutationsByGene(gene);
 	}
 }

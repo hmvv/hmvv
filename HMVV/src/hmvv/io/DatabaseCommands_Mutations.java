@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
 import hmvv.main.Configurations;
 import hmvv.model.*;
 
@@ -32,27 +31,18 @@ public class DatabaseCommands_Mutations {
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
 				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID,t2.pubmed,"
-
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, t1.tumorSource, t1.tumorPercent,"
-
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
-
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
-
 				+ " t8.AF "
-
 				+ " from sampleVariants as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
 				+ " join assays as t6 on t1.assayID = t6.assayID"
-
 				+ " left join db_g1000_phase3v1 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
-
 				+ " left join db_clinvar_42019 as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
-				
 				+ " left join db_gnomad_r211 as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
-
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
 		String where = " ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
@@ -74,28 +64,20 @@ public class DatabaseCommands_Mutations {
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
 				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.STRAND, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
-
 				+ " t2.protein_id, t2.protein_type, t2.protein_feature, t2.protein_note, t2.protein_start, t2.protein_end ,"
-
 				+ " t2.nextprot,t2.uniprot_id, t2.pfam, t2.scoop, t2.uniprot_variant,t2.expasy_id,"
-
 				+ " t2.revel,t2.cadd_phred, t2.canonical, t2.sift,t2.polyphen,"
-
+				+ " t2.phastCons100, t2.phyloP100, t2.phastCons20, t2.phyloP20, t2.GERP_RS,"
+		        + "  t2.hgmd_ID, t2.hgmd_Variant, t2.hgmd_AAchange, t2.hgmd_Disease, t2.hgmd_Category, t2.hgmd_PMID,t2.hgmd_Citation,t2.hgmd_ExtraCitations,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, "
-
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
-
 				+ " t8.AF, t8.AF_afr, t8.AF_amr, t8.AF_asj, t8.AF_eas, t8.AF_fin, t8.AF_nfe, t8.AF_sas, t8.AF_oth, t8.AF_male, t8.AF_female "
-
 				+ " from sampleVariantsGermline as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
 				+ " join assays as t6 on t1.assayID = t6.assayID"
-
 				+ " left join db_clinvar_42019 as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
-
 				+ " left join db_gnomad_r211_lf as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
-
 				+ " where t2.sampleID = ? ";
 		String where = " ( t2.altFreq >= " + Configurations.GERMLINE_ALLELE_FREQ_FILTER +
 				" and t2.readDepth >= " + Configurations.GERMLINE_READ_DEPTH_FILTER +
@@ -111,9 +93,6 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.close();
 		return mutations;
 	}
-
-
-
 	/**
 	 * Get all reported mutations from the MRN on the provided sample
 	 * @param sample
@@ -171,7 +150,6 @@ public class DatabaseCommands_Mutations {
 
 	static void updateOncokbInfo(MutationSomatic mutation) throws Exception{
 		String ENST_id = mutation.getHGVSc().split("\\.")[0];
-
 		String ENSP = "";
 		String[] getHGVSpArray = mutation.getHGVSp().split("\\.");
 		if(getHGVSpArray.length > 1) {
@@ -205,7 +183,6 @@ public class DatabaseCommands_Mutations {
 			//TODO What to do here?
 			return;
 		}
-
 		String query = "select tumor_type,tissue_type from db_pmkb_42019 where gene = ? and variant = ? limit 1";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
@@ -452,6 +429,13 @@ public class DatabaseCommands_Mutations {
 			mutation.setSift(getStringOrBlank(rs,"sift"));
 			mutation.setPolyphen(getStringOrBlank(rs,"polyphen"));
 
+			//conservation
+			mutation.setPhastCons100(getStringOrBlank(rs,"phastCons100"));
+			mutation.setPhyloP100(getStringOrBlank(rs,"phyloP100"));
+			mutation.setPhastCons20(getStringOrBlank(rs,"phastCons20"));
+			mutation.setPhyloP20(getStringOrBlank(rs,"phyloP20"));
+			mutation.setGERP_RS(getStringOrBlank(rs,"GERP_RS"));
+
 			//Sample
 			mutation.setLastName(getStringOrBlank(rs, "lastName"));
 			mutation.setFirstName(getStringOrBlank(rs, "firstName"));
@@ -466,6 +450,17 @@ public class DatabaseCommands_Mutations {
 			mutation.setClinicalsignificance(getStringOrBlank(rs, "cln_significance"));
 			mutation.setClinicalconsequence(getStringOrBlank(rs, "cln_consequence"));
 			mutation.setClinicalorigin(getStringOrBlank(rs, "cln_origin"));
+
+			//HGMD mutation
+			MutationGermlineHGMD mutationGermlineHGMD = new MutationGermlineHGMD(getStringOrBlank(rs, "hgmd_ID"));
+			mutation.setMutationGermlineHGMD(mutationGermlineHGMD);
+			mutationGermlineHGMD.setVariant(getStringOrBlank(rs,"hgmd_Variant"));
+			mutationGermlineHGMD.setAAchange(getStringOrBlank(rs,"hgmd_AAchange"));
+			mutationGermlineHGMD.setDisease(getStringOrBlank(rs,"hgmd_Disease"));
+			mutationGermlineHGMD.setCategory(getStringOrBlank(rs,"hgmd_Category"));
+			mutationGermlineHGMD.setPmid(getStringOrBlank(rs,"hgmd_PMID"));
+			mutationGermlineHGMD.setPmid_info(getStringOrBlank(rs,"hgmd_Citation"));
+			mutationGermlineHGMD.setExtra_pmids(getStringOrBlank(rs,"hgmd_ExtraCitations"));
 
 
 			//temp holder fields - filled later separately
@@ -491,9 +486,7 @@ public class DatabaseCommands_Mutations {
 				mutation.setGnomad_allfreq_oth(getDoubleOrNull(rs, "AF_oth"));
 				mutation.setGnomad_allfreq_male(getDoubleOrNull(rs, "AF_male"));
 				mutation.setGnomad_allfreq_female(getDoubleOrNull(rs, "AF_female"));
-
 			}
-
 			mutations.add(mutation);
 		}
 		return mutations;
@@ -504,7 +497,7 @@ public class DatabaseCommands_Mutations {
 			if( rs.getString(columnLabel) == null) {
 				return "";
 			}
-			return rs.getString(columnLabel);
+			return rs.getString(columnLabel).replaceAll("_"," ");
 		}catch(Exception e){
 			return "";
 		}

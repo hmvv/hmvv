@@ -1,7 +1,6 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
 import hmvv.gui.mutationlist.tablemodels.GermlineTranscriptTableModel;
 import hmvv.main.HMVVFrame;
 

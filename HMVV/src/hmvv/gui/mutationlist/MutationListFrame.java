@@ -121,7 +121,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 			}
 		});
 
-		AsynchronousMutationDataIO.loadMissingDataAsynchronous(mutationList, this);
+		AsynchronousMutationDataIO.loadMissingDataAsynchronous(sample,mutationList, this);
 
 
 	}

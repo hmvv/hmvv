@@ -1,15 +1,18 @@
 package hmvv.io;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.model.MutationGermline;
 import hmvv.model.MutationSomatic;
+import hmvv.model.Sample;
 
 public class AsynchronousMutationDataIO {
 	
-	public static void loadMissingDataAsynchronous(MutationList mutationList, AsynchronousCallback callback){
+	public static void loadMissingDataAsynchronous(Sample sample, MutationList mutationList, AsynchronousCallback callback){
 
 		if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.SOMATIC) {
 			createExtraMutationDataThread(mutationList, callback);
@@ -144,4 +147,5 @@ public class AsynchronousMutationDataIO {
 		// default selection
 		mutation.setSelected(false);
 	}
+	
 }

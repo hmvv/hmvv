@@ -5,7 +5,6 @@ import hmvv.gui.mutationlist.tablemodels.GermlineSNPEFFTableModel;
 import hmvv.io.IGVConnection;
 import hmvv.main.HMVVFrame;
 import hmvv.model.MutationGermline;
-
 import javax.swing.*;
 
 public class GermlineSNPEFFTable extends CommonTableGermline{
@@ -63,5 +62,4 @@ public class GermlineSNPEFFTable extends CommonTableGermline{
             mutation.setSelected(true);
         }
     }
-
 }

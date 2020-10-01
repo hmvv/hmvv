@@ -1,7 +1,6 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
 import hmvv.gui.mutationlist.tablemodels.GermlinePredictionTableModel;
 import hmvv.main.HMVVFrame;
 
@@ -14,13 +13,13 @@ public class GermlinePredictionTable extends CommonTableGermline{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 3);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1);
 	}
 	
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
-		if(column == 4){
-//			searchCosmic();
+		if(column == 1){
+			searchGoogleForGene();
 		}
 	}
 }

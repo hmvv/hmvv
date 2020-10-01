@@ -13,19 +13,21 @@ public class GermlinePredictionTableModel extends GermlineCommonTableModel {
 	protected ArrayList<GermlineMutationTableModelColumn> constructColumns(){
 		ArrayList<GermlineMutationTableModelColumn> columns = new ArrayList<GermlineMutationTableModelColumn>();
 		columns.add(GermlineMutationTableModelColumn.reportedColumn);
-
 		columns.add(GermlineMutationTableModelColumn.geneColumn);
 		columns.add(GermlineMutationTableModelColumn.exonsColumn);
-
 		columns.add(GermlineMutationTableModelColumn.chrColumn);
 		columns.add(GermlineMutationTableModelColumn.posColumn);
 		columns.add(GermlineMutationTableModelColumn.refColumn);
-
-
+		columns.add(GermlineMutationTableModelColumn.altColumn);
 		columns.add(GermlineMutationTableModelColumn.polyphen_column);
 		columns.add(GermlineMutationTableModelColumn.sift_column);
 		columns.add(GermlineMutationTableModelColumn.revel_column);
 		columns.add(GermlineMutationTableModelColumn.cadd_phred_column);
+		columns.add(GermlineMutationTableModelColumn.phastCons100_column);
+		columns.add(GermlineMutationTableModelColumn.phylop100_column);
+		columns.add(GermlineMutationTableModelColumn.phastCons20_column);
+		columns.add(GermlineMutationTableModelColumn.phylop20_column);
+		columns.add(GermlineMutationTableModelColumn.GERP_RS_column);
 		columns.add(GermlineMutationTableModelColumn.canonical_column);
 		return columns;
 	}

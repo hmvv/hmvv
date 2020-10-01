@@ -113,30 +113,30 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			(MutationGermline mutation) -> mutation.getType());
 
 	public static final GermlineMutationTableModelColumn variantClassificationColumn = new GermlineMutationTableModelColumn("Classifcation as predicted by Variant Effect Predictor.",
-			"snpEFF-Prediction",
+			"snpeff prediction",
 			VariantPredictionClass.class,
 			(MutationGermline mutation) -> mutation.getVariantPredictionClass());
 
 	public static final GermlineMutationTableModelColumn altFreqColumn = new GermlineMutationTableModelColumn(
 			"Thermo Fisher: Allele frequency based on Flow Evaluator observation counts. Illumina: The percentage of reads supporting the alternate allele.",
-			"altFreq",
+			"alt Freq",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getAltFreq());
 
 	public static final GermlineMutationTableModelColumn readDPColumn = new GermlineMutationTableModelColumn(
 			"Thermo Fisher: Flow Evaluator read depth at the locus to a position and used in variant calling. Illumina: Number of base calls aligned to a position and used in variant calling.",
-			"readDP",
+			"read DP",
 			Integer.class,
 			(MutationGermline mutation) -> mutation.getReadDP());
 
 	public static final GermlineMutationTableModelColumn altReadDPColumn = new GermlineMutationTableModelColumn(
 			"Thermo Fisher: Flow Evaluator Alternate allele observations. Illumina: The number of alternate calls.",
-			"altReadDP",
+			"altread DP",
 			Integer.class,
 			(MutationGermline mutation) -> mutation.getAltReadDP());
 
 	public static final GermlineMutationTableModelColumn ConsequenceColumn = new GermlineMutationTableModelColumn("Consquence of mutation as predicted by Variant Effect Predictor(VEP)",
-			"snpEFF-Consequence",
+			"snpeff consequence",
 			String.class,
 			(MutationGermline mutation) -> mutation.getConsequence());
 
@@ -153,21 +153,21 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 
     //transcript
 	public static final GermlineMutationTableModelColumn TRANSCRIPT_STRAND = new GermlineMutationTableModelColumn("Strand direction of the selected transcript.",
-			"Strand",
+			"strand",
 			String.class,
 			(MutationGermline mutation) -> mutation.getTranscript_strand());
 	public static final GermlineMutationTableModelColumn ALT_TRANSCRIPT_START = new GermlineMutationTableModelColumn("Start genomic location of the selected transcript.",
-			"Start",
+			"start",
 			String.class,
 			(MutationGermline mutation) -> mutation.getAlt_transcript_start());
 
 	public static final GermlineMutationTableModelColumn ALT_TRANSCRIPT_END = new GermlineMutationTableModelColumn("End genomic location of the selected transcript.",
-			"End",
+			"end",
 			String.class,
 			(MutationGermline mutation) -> mutation.getAlt_transcript_end());
 
 	public static final GermlineMutationTableModelColumn ALT_TRANSCRIPT_POSITION = new GermlineMutationTableModelColumn("Position of variant in the selected transcript",
-			"Position",
+			"position",
 			String.class,
 			(MutationGermline mutation) -> mutation.getAlt_transcript_position());
 
@@ -177,43 +177,43 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 	//clinvar
 
 	public static final GermlineMutationTableModelColumn clinvarID = new GermlineMutationTableModelColumn("ClinVar Variation ID",
-			"clinVarID",
+			"ID",
 			String.class,
 			(MutationGermline mutation) -> mutation.getClinvarID());
 
 	public static final GermlineMutationTableModelColumn clinicalDisease = new GermlineMutationTableModelColumn("ClinVar's preferred disease name for the concept specified by disease identifiers in CLNDISDB",
-			"Disease",
+			"disease",
 			String.class,
 			(MutationGermline mutation) -> mutation.getClinicaldisease());
 
 	public static final GermlineMutationTableModelColumn clinicalSignificance = new GermlineMutationTableModelColumn("Clinical significance for this single variant",
-			"Significance",
+			"significance",
 			String.class,
 			(MutationGermline mutation) -> mutation.getClinicalsignificance());
 
 	public static final GermlineMutationTableModelColumn clinicalConsequence = new GermlineMutationTableModelColumn("",//TODO Find this
-			"Consequence",
+			"consequence",
 			String.class,
 			(MutationGermline mutation) -> mutation.getClinicalconsequence());
 
 	public static final GermlineMutationTableModelColumn originColumn = new GermlineMutationTableModelColumn("Allele origin",
-			"Origin",
+			"origin",
 			String.class,
 			(MutationGermline mutation) -> mutation.getClinicalorigin());
 
 
 	public static final GermlineMutationTableModelColumn lastNameColumn = new GermlineMutationTableModelColumn("The patient's last name.",
-			"lastName",
+			"last name",
 			String.class,
 			(MutationGermline mutation) -> mutation.getLastName());
 
 	public static final GermlineMutationTableModelColumn firstNameColumn = new GermlineMutationTableModelColumn("The patient's first name.",
-			"firstName",
+			"first name",
 			String.class,
 			(MutationGermline mutation) -> mutation.getFirstName());
 
 	public static final GermlineMutationTableModelColumn orderNumberColumn = new GermlineMutationTableModelColumn("The lab order number.",
-			"orderNumber",
+			"order number",
 			String.class,
 			(MutationGermline mutation) -> mutation.getOrderNumber());
 
@@ -223,92 +223,92 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			(MutationGermline mutation) -> mutation.getAssay());
 
 	public static final GermlineMutationTableModelColumn IDColumn = new GermlineMutationTableModelColumn("The unique ID for the sample",
-			"sampleID",
+			"sample ID",
 			Integer.class,
 			(MutationGermline mutation) -> mutation.getSampleID());
 
 
 	// gnomad
 	public static final GermlineMutationTableModelColumn gnomadIDColumn = new GermlineMutationTableModelColumn("The global allele frequency",
-			"GnomadID",
+			"ID",
 			String.class,
 			(MutationGermline mutation) -> mutation.getGnomad_id());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreqColumn = new GermlineMutationTableModelColumn("The global allele frequency",
-			"Global",
+			"global",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_afrColumn = new GermlineMutationTableModelColumn("The AFR allele frequency",
-			"African American",
+			"african american",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_afr());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_amrColumn = new GermlineMutationTableModelColumn("The AMR allele frequency",
-			"American Admixed/Latino",
+			"american admixed/latino",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_amr());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_asjColumn = new GermlineMutationTableModelColumn("The ASJ allele frequency",
-			"Ashkenazi Jewish",
+			"ashkenazi jewish",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_asj());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_easColumn = new GermlineMutationTableModelColumn("The EAS allele frequency",
-			"East Asian",
+			"east asian",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_eas());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_finColumn = new GermlineMutationTableModelColumn("The FIN allele frequency",
-			"Finnish",
+			"finnish",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_fin());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_nfeColumn = new GermlineMutationTableModelColumn("The NFE allele frequency",
-			"Non-Finnish European",
+			"non-finnish european",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_nfe());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_sasColumn = new GermlineMutationTableModelColumn("The SAS allele frequency",
-			"South Asian",
+			"south asian",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_sas());
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_othColumn = new GermlineMutationTableModelColumn("The OTHERS allele frequency",
-			"Other",
+			"other",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_oth());
 
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_maleColumn = new GermlineMutationTableModelColumn("The MALE allele frequency",
-			"Male",
+			"male",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_male());
 
 
 	public static final GermlineMutationTableModelColumn gnomadAltFreq_femaleColumn = new GermlineMutationTableModelColumn("The FEMALE allele frequency",
-			"Female",
+			"female",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getGnomad_allfreq_female());
 
 	public static final GermlineMutationTableModelColumn cardiacAtlasIDColumn = new GermlineMutationTableModelColumn("The global allele frequency",
-			"CardiacAtlasID",
+			"ID",
 			String.class,
 			(MutationGermline mutation) -> mutation.getCardiacAtlasId());
 
 
 	public static final GermlineMutationTableModelColumn cardiac_cdsVariant_Column = new GermlineMutationTableModelColumn("The global allele frequency",
-			"CDS-Variant",
+			"cds variant",
 			String.class,
 			(MutationGermline mutation) -> mutation.getCds_variant());
 
 	public static final GermlineMutationTableModelColumn cardiac_proteinVariant_Column = new GermlineMutationTableModelColumn("The global allele frequency",
-			"Protein-Variant",
+			"protein variant",
 			String.class,
 			(MutationGermline mutation) -> mutation.getProtein_variant());
 
 	public static final GermlineMutationTableModelColumn cardiac_variantType_Column = new GermlineMutationTableModelColumn("The global allele frequency",
-			"variant-type",
+			"variant type",
 			String.class,
 			(MutationGermline mutation) -> mutation.getVariant_type());
 
@@ -316,34 +316,34 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 	//protein domain
 
 	public static final GermlineMutationTableModelColumn protein_id_column = new GermlineMutationTableModelColumn("The protein domain from nextprot database",
-			"protein_id",
+			"ID",
 			String.class,
 			(MutationGermline mutation) -> mutation.getProtein_id());
 
 
 	public static final GermlineMutationTableModelColumn protein_type_column = new GermlineMutationTableModelColumn("The protein domain from nextprot database",
-			"protein_type",
+			"type",
 			String.class,
 			(MutationGermline mutation) -> mutation.getProtein_type());
 
 
 	public static final GermlineMutationTableModelColumn protein_feature_column = new GermlineMutationTableModelColumn("The protein domain from nextprot database",
-			"protein_feature",
+			"feature",
 			String.class,
 			(MutationGermline mutation) -> mutation.getProtein_feature());
 
 	public static final GermlineMutationTableModelColumn protein_note_column = new GermlineMutationTableModelColumn("The protein domain from nextprot database",
-			"protein_note",
+			"note",
 			String.class,
 			(MutationGermline mutation) -> mutation.getProtein_note());
 
 	public static final GermlineMutationTableModelColumn protein_start_column = new GermlineMutationTableModelColumn("The protein domain from nextprot database",
-			"protein_start",
+			"start",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getProtein_start());
 
 	public static final GermlineMutationTableModelColumn protein_end_column = new GermlineMutationTableModelColumn("The protein domain from nextprot database",
-			"protein_end",
+			"end",
 			Double.class,
 			(MutationGermline mutation) -> mutation.getProtein_end());
 
@@ -368,7 +368,7 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(MutationGermline mutation) -> mutation.getScoop());
 	public static final GermlineMutationTableModelColumn uniprot_variant_column = new GermlineMutationTableModelColumn("The protein domain from nextprot variant database",
-			"uniprot_variant",
+			"uniprot variant",
 			String.class,
 			(MutationGermline mutation) -> mutation.getUniprot_variant());
 	public static final GermlineMutationTableModelColumn expasy_column = new GermlineMutationTableModelColumn("The protein domain from expasy database",
@@ -383,7 +383,7 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			(MutationGermline mutation) -> mutation.getRevel());
 
 	public static final GermlineMutationTableModelColumn cadd_phred_column = new GermlineMutationTableModelColumn("The variant effect prediction from cadd database",
-			"cadd_phred",
+			"cadd phred",
 			String.class,
 			(MutationGermline mutation) -> mutation.getCadd_phred());
 
@@ -401,6 +401,68 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(MutationGermline mutation) -> mutation.getPolyphen());
 
+
+	public static final GermlineMutationTableModelColumn phastCons100_column = new GermlineMutationTableModelColumn("The variant effect prediction from PhastCons100 database",
+			"phastcons100",
+			String.class,
+			(MutationGermline mutation) -> mutation.getPhastCons100());
+
+
+	public static final GermlineMutationTableModelColumn phastCons20_column = new GermlineMutationTableModelColumn("The variant effect prediction from PhastCons20 database",
+			"phastcons20",
+			String.class,
+			(MutationGermline mutation) -> mutation.getPhastCons20());
+
+
+	public static final GermlineMutationTableModelColumn phylop100_column = new GermlineMutationTableModelColumn("The variant effect prediction from Phylop100 database",
+			"phylop100",
+			String.class,
+			(MutationGermline mutation) -> mutation.getPhyloP100());
+
+	public static final GermlineMutationTableModelColumn phylop20_column = new GermlineMutationTableModelColumn("The variant effect prediction from Phylop20 database",
+			"phylop20",
+			String.class,
+			(MutationGermline mutation) -> mutation.getPhyloP20());
+
+	public static final GermlineMutationTableModelColumn GERP_RS_column = new GermlineMutationTableModelColumn("The variant effect prediction from GERP_RS database",
+			"GERP RS",
+			String.class,
+			(MutationGermline mutation) -> mutation.getGERP_RS());
+
+	public static final GermlineMutationTableModelColumn HGMDID_column = new GermlineMutationTableModelColumn("The ID from the HGMD database",
+			"ID",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getId());
+
+	public static final GermlineMutationTableModelColumn HGMDVariant_column = new GermlineMutationTableModelColumn("The variant from the HGMD database",
+			"variant",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getVariant());
+
+	public static final GermlineMutationTableModelColumn HGMDAAChange_column = new GermlineMutationTableModelColumn("The AA change from the HGMD database",
+			"AA change",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getAAchange());
+
+	public static final GermlineMutationTableModelColumn HGMDDisease_column = new GermlineMutationTableModelColumn("The disease from the HGMD database",
+			"disease",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getDisease());
+
+	public static final GermlineMutationTableModelColumn HGMDCategory_column = new GermlineMutationTableModelColumn("The category from the HGMD database",
+			"category",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getCategory());
+
+	public static final GermlineMutationTableModelColumn HGMDCitation_column = new GermlineMutationTableModelColumn("The citation from the HGMD database",
+			"citation",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getPmid_info());
+
+	public static final GermlineMutationTableModelColumn HGMDExtraCitation_column = new GermlineMutationTableModelColumn("The extra citations from the HGMD database",
+			"extra refs",
+			String.class,
+			(MutationGermline mutation) -> mutation.getMutationGermlineHGMD().getExtra_pmids());
 
 	/**
 	 * The Lambda interface object

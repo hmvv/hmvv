@@ -1,7 +1,6 @@
 package hmvv.model;
 
 import hmvv.main.Configurations;
-
 import java.util.ArrayList;
 
 public class MutationSomatic extends MutationCommon {
@@ -51,7 +50,6 @@ public class MutationSomatic extends MutationCommon {
     private String pmkb_tumor_type;
     private String pmkb_tissue_type;
 
-
     public String getDbSNPID() {
         return dbSNPID;
     }
@@ -83,7 +81,6 @@ public class MutationSomatic extends MutationCommon {
         this.cosmicIDs = new ArrayList<String>();
         this.cosmicIDs.add(cosmicID);
     }
-
 
     public String getPubmed() {
         return pubmed;
@@ -173,7 +170,7 @@ public class MutationSomatic extends MutationCommon {
         this.eurFreq = eurFreq;
     }
 
-       public String getTumorSource() {
+    public String getTumorSource() {
         return tumorSource;
     }
 

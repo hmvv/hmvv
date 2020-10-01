@@ -1,7 +1,5 @@
 package hmvv.model;
-
 import hmvv.main.Configurations;
-
 import java.util.ArrayList;
 
 public class MutationCommon {
@@ -20,7 +18,6 @@ public class MutationCommon {
     private boolean selected;
     private Integer occurrence;
     private ArrayList<Annotation> annotationHistory;
-
 
     //Sample
     private String lastName;
@@ -86,7 +83,6 @@ public class MutationCommon {
     public void setClinicalorigin(String clinicalorigin) {
         this.clinicalorigin = clinicalorigin;
     }
-
 
     public MutationCommon() {
     	otherMutations = new ArrayList<MutationCommon>();
@@ -295,7 +291,6 @@ public class MutationCommon {
     public void setSampleID(Integer sampleID) {
         this.sampleID = sampleID;
     }
-
 
     public void addAnnotation(Annotation annotation) {
         annotationHistory.add(annotation);
