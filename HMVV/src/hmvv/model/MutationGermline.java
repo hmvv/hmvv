@@ -4,13 +4,11 @@ import hmvv.main.Configurations;
 
 public class MutationGermline extends MutationCommon {
 
-
     //transcript
     private String transcript_strand;
     private String alt_transcript_start;
     private String alt_transcript_end;
     private String alt_transcript_position;
-
 
     //gnomad
     private String gnomad_id;
@@ -108,7 +106,6 @@ public class MutationGermline extends MutationCommon {
     public void setAlt_transcript_position(String alt_transcript_position) {
         this.alt_transcript_position = alt_transcript_position;
     }
-
 
     public Double getGnomad_allfreq_afr() {
         return gnomad_allfreq_afr;
@@ -228,7 +225,6 @@ public class MutationGermline extends MutationCommon {
     public void setVariant_type(String variant_type) {
         this.variant_type = variant_type;
     }
-
 
     public String getProtein_id() {
         return protein_id;
@@ -378,7 +374,6 @@ public class MutationGermline extends MutationCommon {
     public Configurations.MUTATION_TYPE getMutationType(){
         return Configurations.MUTATION_TYPE.GERMLINE;
     }
-
 
     public String getPhastCons100() {
         return phastCons100;

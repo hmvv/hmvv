@@ -4,7 +4,7 @@ public class MutationGermlineHGMD {
 
     private String id;
     private String mutation_type;
-    private String position;
+    private Integer position;
     private String variant;
     private String AAchange;
     private String disease;
@@ -33,11 +33,11 @@ public class MutationGermlineHGMD {
         this.mutation_type = mutation_type;
     }
 
-    public String getPosition() {
+    public Integer getPosition() {
         return position;
     }
 
-    public void setPosition(String position) {
+    public void setPosition(Integer position) {
         this.position = position;
     }
 

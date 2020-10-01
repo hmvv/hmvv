@@ -11,7 +11,6 @@ import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.MutationGermline;
 import hmvv.model.Sample;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.event.ActionEvent;
@@ -60,8 +59,6 @@ public class MutationListGermlineMenuBar extends JMenuBar {
 
 		exportMutationsMenuItem = new JMenuItem("Export mutations");
 		exportMutationsMenuItem.setToolTipText("Export the mutations to a text file");
-
-
 
 		filteredMutationsMenu = new JMenu("Filtered Mutations");
 		filteredMutationsMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
@@ -148,7 +145,7 @@ public class MutationListGermlineMenuBar extends JMenuBar {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e);
 		}
 	}
-//
+
 	private void showReportFrameText(String title, String report) {
 		ReportFrame reportPanel = new ReportFrameText(mutationListPanel, title, report);
 		reportPanel.setVisible(true);

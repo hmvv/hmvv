@@ -1,11 +1,8 @@
 package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineHGMDGeneLevelMutationsTableModel;
 import hmvv.gui.mutationlist.tablemodels.GermlineHGMDGeneLevelSummaryTableModel;
-import hmvv.gui.mutationlist.tables.CommonTable;
-import hmvv.gui.sampleList.SampleListTableModel;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
@@ -14,18 +11,13 @@ import hmvv.main.HMVVFrame;
 import hmvv.model.MutationGermline;
 import hmvv.model.MutationGermlineHGMD;
 import hmvv.model.MutationGermlineHGMDGeneLevel;
-import hmvv.model.Sample;
-import org.knowm.xchart.style.markers.None;
-
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
-import java.util.Currency;
 
 
 public class MutationGermlineHGMDGeneFrame extends JFrame {
@@ -53,7 +45,7 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 		constructComponents();
 		layoutComponents();
 
-//		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.90), (int)(bounds.height*.75));
 		setMinimumSize(new Dimension(500, getHeight()/2));
@@ -81,7 +73,6 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 		mutationsSorter = new TableRowSorter<>(mutationTableModel);
 		mutationTable.setRowSorter(mutationsSorter);
 
-        //by default, sort from newest to oldest
         ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>();
         sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
         mutationsSorter.setSortKeys(sortKeys);
@@ -200,7 +191,9 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 					if(column == 2){
 						handleMousePressedMutationTableHGMDID((String)mutationTable.getValueAt(row,column));
 					} else if(column == 7){
-						handleMousePressedMutationTableHGMDCitation(mutationTableModel.getMutationAt(row).getPmid());
+						int viewRow = mutationTable.getSelectedRow();
+						int modelRow = mutationTable.convertRowIndexToModel(viewRow);
+						handleMousePressedMutationTableHGMDCitation(mutationTableModel.getMutationAt(modelRow).getPmid());
 					}
 
 				}catch(Exception e){
@@ -249,9 +242,9 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 
 
 	protected  void handleMousePressedMutationTableHGMDCitation(String pmid) throws Exception {
-		if(!pmid.equals("") && !pmid.equals("null")){
-			InternetCommands.searchPubmed(pmid);
-		}
+				if (!pmid.equals("") && !pmid.equals("null")) {
+					InternetCommands.searchPubmed(pmid);
+				}
 	}
 
 	private void resizeColumnWidths(JTable table) {
@@ -283,7 +276,6 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
                     return sample.getMutation_type().equals(tablename.toLowerCase());
                 }
 			}
-
 
 			@Override
 			public boolean include(Entry<? extends GermlineHGMDGeneLevelMutationsTableModel, ? extends Integer> entry) {

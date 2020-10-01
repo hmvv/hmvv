@@ -12,7 +12,6 @@ import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.PatientHistory;
 import hmvv.model.Sample;
-
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -201,8 +200,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		setLayout(new BorderLayout());
 		add(northPanel, BorderLayout.NORTH);
 		add(tabbedPane, BorderLayout.CENTER);
-		
-//
+
 	}
 
 	public void createTab(String title, JPanel panel) {

@@ -105,4 +105,8 @@ public class GermlineHGMDGeneLevelMutationsTableModel extends AbstractTableModel
         return mutation;
     }
 
+    public ArrayList<MutationGermlineHGMD> getAllMutations() {
+        return mutations;
+
+    }
 }

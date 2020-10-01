@@ -6,7 +6,6 @@ import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.model.*;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
@@ -159,7 +158,6 @@ public class MutationGermlineFilterPanel extends JPanel {
 	private void layoutComponents() {
 
 		JPanel leftFilterPanel = new JPanel();
-        //leftFilterPanel.setPreferredSize(new Dimension(50, 100));
 		JPanel checkboxPanel = new JPanel(new GridLayout(0,1));
 		JPanel resetButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		resetButtonPanel.add(resetButton);
@@ -208,8 +206,6 @@ public class MutationGermlineFilterPanel extends JPanel {
 		gnomadGlobalFreqPanel.add(gnomadGlobalFreqLabel);
 		gnomadGlobalFreqPanel.add(maxGnomadGlobalFreqTextField);
 
-
-
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
 
@@ -221,7 +217,6 @@ public class MutationGermlineFilterPanel extends JPanel {
 		extraFilterPanel.add(synonymousFlagCheckbox);
 		lastrightFilterPanel.add(extraFilterPanel);
 
-		
         leftFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(leftFilterPanel);
         rightFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));

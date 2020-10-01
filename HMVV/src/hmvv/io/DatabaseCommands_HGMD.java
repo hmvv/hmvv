@@ -1,6 +1,5 @@
 package hmvv.io;
 
-import hmvv.model.MutationGermline;
 import hmvv.model.MutationGermlineHGMD;
 import hmvv.model.MutationGermlineHGMDGeneLevel;
 
@@ -101,15 +100,13 @@ public class DatabaseCommands_HGMD {
 
 
 		preparedStatement.setString(1, gene);
-
-
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){
 
 			MutationGermlineHGMD hgmd_mutation = new MutationGermlineHGMD(rs.getString("acc_num"));
 
 			hgmd_mutation.setMutation_type(appTable);
-			hgmd_mutation.setPosition(rs.getString("pos"));
+			hgmd_mutation.setPosition(getIntegerOrNull(rs,"pos"));
 			hgmd_mutation.setVariant(rs.getString("hgvs"));
 			hgmd_mutation.setAAchange(rs.getString("descr"));
 			hgmd_mutation.setDisease(rs.getString("disease"));
@@ -137,7 +134,14 @@ public class DatabaseCommands_HGMD {
 		return allmutations;
 	}
 
-
+	private static Integer getIntegerOrNull(ResultSet rs, String columnLabel){
+		try{
+			String value = rs.getString(columnLabel);
+			return Integer.parseInt(value);
+		}catch(Exception e){
+			return null;
+		}
+	}
 }
 
 
