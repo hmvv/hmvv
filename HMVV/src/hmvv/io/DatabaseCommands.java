@@ -19,9 +19,10 @@ public class DatabaseCommands {
 
 	public static void connect() throws Exception{
 		String driver = "com.mysql.jdbc.Driver";
-		String url = "jdbc:mysql://" + SSHConnection.getForwardingHost() +":" + SSHConnection.getForwardingPort() + "/";
-		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
 
+		String url = "jdbc:mysql://"+SSHConnection.getForwardingHost()+"/";
+
+		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
 
 		try{
 			Class.forName(driver);

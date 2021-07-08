@@ -129,10 +129,10 @@ public class SSHConnection {
 		callerID = callerID.replaceAll(".*\\.", "");
 		if(!callerID.equals("None")){
 			//with a callerID
-			command = String.format("ls /home/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runID,callerID,sampleID);
+			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runID,callerID,sampleID);
 		}else{
 			//without a callerID
-			command = String.format("ls /home/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out/IonXpress_%s/IonXpress_%s_*PTRIM.bam", runID,sampleID, sampleID);
+			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out/IonXpress_%s/IonXpress_%s_*PTRIM.bam", runID,sampleID, sampleID);
 		}
 		return findSample(command, "proton", runID, sampleID, progressMonitor);
 	}
@@ -140,22 +140,22 @@ public class SSHConnection {
 	private static File loadProton_BAM(String runID, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
 		sampleID = sampleID.replaceAll(".*_", "");
 		callerID = callerID.replaceAll(".*\\.", "");
-		String command = String.format("ls /home/proton/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runID, callerID, sampleID);
+		String command = String.format("ls /storage/instruments/proton/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runID, callerID, sampleID);
 		return findSample(command, "proton", runID, sampleID, progressMonitor);
 	}
 
 	private static File loadIlluminaNextseqHeme_BAM(String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String command = String.format("ls /home/environments/%s/"+instrument+"Analysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
+		String command = String.format("ls /storage/analysis/environments/%s/"+instrument+"Analysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
 
 	private static File loadIllumina_BAM(String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String command = String.format("ls /home/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s*.bam", instrument, runID, sampleID);
+		String command = String.format("ls /storage/instruments/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s*.bam", instrument, runID, sampleID);
 		return findSample(command, instrument, runID, sampleID, progressMonitor);
 	}
 	
 	public static ArrayList<String> getCandidateCoverageIDs(String instrument, String runID) throws Exception {
-		String coverageCommand = String.format("ls /home/%s/*_%s/plugin_out/ | grep coverageAnalysis", instrument, runID);
+		String coverageCommand = String.format("ls /storage/instruments/%s/*_%s/plugin_out/ | grep coverageAnalysis", instrument, runID);
 		CommandResponse coverageResult = SSHConnection.executeCommandAndGetOutput(coverageCommand);
 		if(coverageResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runID));
@@ -164,7 +164,7 @@ public class SSHConnection {
 	}
 	
 	public static ArrayList<String> getCandidateVariantCallerIDs(String instrument, String runID) throws Exception {
-		String variantCallerCommand = String.format("ls /home/%s/*_%s/plugin_out/ | grep variantCaller_out", instrument, runID);
+		String variantCallerCommand = String.format("ls /storage/instruments/%s/*_%s/plugin_out/ | grep variantCaller_out", instrument, runID);
 		CommandResponse variantCallerResult = SSHConnection.executeCommandAndGetOutput(variantCallerCommand);
 		if(variantCallerResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runID));
@@ -173,7 +173,7 @@ public class SSHConnection {
 	}
 	
 	public static ArrayList<String> getSampleListIon(String instrument, String runID, String variantCallerID) throws Exception {
-		String sampleListCommand = String.format("ls /home/%s/*_%s/plugin_out/%s/ -F | grep / | grep Ion", instrument, runID, variantCallerID);
+		String sampleListCommand = String.format("ls /storage/instruments/%s/*_%s/plugin_out/%s/ -F | grep / | grep Ion", instrument, runID, variantCallerID);
 		CommandResponse sampleListResult = SSHConnection.executeCommandAndGetOutput(sampleListCommand);
 		if(sampleListResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding samples (%s, %s, %s)", instrument, runID, variantCallerID));
@@ -195,7 +195,7 @@ public class SSHConnection {
 	}
 	
 	public static ArrayList<String> getSampleListIllumina(String instrument, String runID) throws Exception {
-		String sampleListCommand = String.format("cat /home/%s/*_%s_*/SampleSheet.csv", instrument, runID);
+		String sampleListCommand = String.format("cat /storage/instruments/%s/*_%s_*/SampleSheet.csv", instrument, runID);
 		CommandResponse sampleListResult = SSHConnection.executeCommandAndGetOutput(sampleListCommand);
 		if(sampleListResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runID));
@@ -371,7 +371,7 @@ public class SSHConnection {
             channel = sshSession.openChannel("sftp");
             channel.connect();
             ChannelSftp channelSftp = (ChannelSftp) channel;
-            channelSftp.put(tempFile.getAbsolutePath(), "/home/scratch/hmvv3/igv/"+tempFile.getName());
+            channelSftp.put(tempFile.getAbsolutePath(), "/storage/scratch/hmvv3/igv/"+tempFile.getName());
 
         } catch (SftpException e) {
             e.printStackTrace();
@@ -399,7 +399,7 @@ public class SSHConnection {
 	}
 
 	private static void createTempBamFileONServer(String fileName) throws Exception {
-	    String command = "/home/pipelines/"+Configurations.getEnvironment()+"/shell/createLocalBam.sh -f "+ fileName;
+	    String command = "/storage/apps/pipelines/"+Configurations.getEnvironment()+"/shell/createLocalBam.sh -f "+ fileName;
         CommandResponse rs = executeCommandAndGetOutput(command);
         if(rs.exitStatus != 0) {
             throw new Exception("Error creating local BAM file on server.");
@@ -412,7 +412,7 @@ public class SSHConnection {
         new File(runIDFolder).mkdirs();
 
         String serverFileName = tempBamFileName+".bam";
-        String filePath = "/home/scratch/hmvv3/igv/";
+        String filePath = "/storage/scratch/hmvv3/igv/";
 
 //        File localBamFile = new File(runIDFolder + File.separator + serverFileName.split("-")[0]+".bam").getAbsoluteFile();
 		File localBamFile = new File(runIDFolder + File.separator + serverFileName);
@@ -434,7 +434,7 @@ public class SSHConnection {
 
 		if (fileType.equals("tmb_control")){
 			serverFileName = "TMB_ControlCOLO829_Scores.png";
-			serverFilePath = "/home/environments/" + Configurations.getEnvironment() + "/assayCommonFiles/tmbAssay/";
+			serverFilePath = "/storage/analysis/environments/" + Configurations.getEnvironment() + "/assayCommonFiles/tmbAssay/";
 		}
 
 		String fileFolder = temporaryHMVVDirectory + File.separator + fileType.split("_")[0]+"Assay"+File.separator;
@@ -452,7 +452,7 @@ public class SSHConnection {
 
     public static ArrayList<Database> getDatabaseInformation() throws Exception {
 
-		String command = "tail -n +2 /home/pipelines/"+Configurations.getEnvironment()+"/run_files/db_version.csv";
+		String command = "tail -n +2 /storage/apps/pipelines/"+Configurations.getEnvironment()+"/run_files/db_version.csv";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
 		if(rs.exitStatus != 0) {
@@ -473,7 +473,7 @@ public class SSHConnection {
 	}
     
     public static ArrayList<String> readConfigurationFile() throws Exception{
-    	String command = "cat /home/pipelines/" + Configurations.getEnvironment() + "/config/config_v2.ini";
+    	String command = "cat /storage/apps/pipelines/" + Configurations.getEnvironment() + "/config/config_v2.ini";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 		if(rs.exitStatus != 0) {
 			throw new Exception(String.format("Error finding or reading configuration file."));
@@ -490,7 +490,7 @@ public class SSHConnection {
     }
 
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
-		String command = "tail -n +2  /home/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
+		String command = "tail -n +2  /storage/analysis/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+".final_result.txt";
 		CommandResponse rs = executeCommandAndGetOutput(command);
