@@ -116,7 +116,7 @@ public class SSHConnection {
 			return SSHConnection.loadPGM_BAM(runID, sampleID, callerID, progressMonitor);
 		}else if(instrument.equals("proton")){
 			return SSHConnection.loadProton_BAM(runID, sampleID, callerID, progressMonitor);
-		}else if( ( instrument.equals("nextseq") || (instrument.equals("nextseq550"))) && sample.assay.equals("heme")){
+		}else if( ( instrument.equals("nextseq") || (instrument.equals("novaseq"))) && sample.assay.equals("heme")){
 			return SSHConnection.loadIlluminaNextseqHeme_BAM(instrument, runID, sampleID, progressMonitor);
 		}else{
 			return SSHConnection.loadIllumina_BAM(instrument, runID, sampleID, progressMonitor);

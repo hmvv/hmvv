@@ -392,7 +392,7 @@ public class EnterSample extends JDialog {
         }
 
 
-        if(instrument.equals("miseq") || instrument.equals("nextseq") || instrument.equals("nextseq550") ){
+        if(instrument.equals("miseq") || instrument.equals("nextseq") || instrument.equals("novaseq") ){
             findRunIllumina(instrument, runID, comboboxSample, isTMBNormal);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
             findRunIon(instrument, runID);
