@@ -17,7 +17,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.adminFrames.CreateAssay;
 import hmvv.gui.adminFrames.DatabaseInformation;
 import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.MonitorPipelines;
@@ -172,9 +171,6 @@ public class HMVVFrame extends JFrame{
 						handleMonitorPipelineClick();
 					}else if(e.getSource() == databaseInformationMenuItem){
 						handledatabaseInformationClick();
-					}else if(e.getSource() == newAssayMenuItem){
-						CreateAssay createAssay = new CreateAssay(HMVVFrame.this);
-						createAssay.setVisible(true);
 					}
 				} catch (Exception e1) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVFrame.this, e1);

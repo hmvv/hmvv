@@ -465,7 +465,7 @@ public class SSHConnection {
 
     public static ArrayList<Database> getDatabaseInformation() throws Exception {
 
-		String command = "tail -n +2 /storage/apps/pipelines/"+Configurations.getEnvironment()+"/run_files/db_version.csv";
+		String command = "tail -n +2 /storage/apps/pipelines/"+Configurations.getEnvironment()+"/config/db_version.csv";
 		CommandResponse rs = executeCommandAndGetOutput(command);
 
 		if(rs.exitStatus != 0) {

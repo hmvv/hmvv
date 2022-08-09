@@ -46,10 +46,6 @@ public class DatabaseCommands {
 		return DatabaseCommands_Assays.getAssaysForInstrument(instrument);
 	}
 
-	public static void createAssay(String instrument, String assay) throws Exception{
-		DatabaseCommands_Assays.createAssay(instrument, assay);
-	}
-
 	/* ************************************************************************
 	 * Mutation Queries
 	 *************************************************************************/

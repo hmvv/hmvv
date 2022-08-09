@@ -49,12 +49,4 @@ public class DatabaseCommands_Assays {
 		preparedStatement.close();
 		return assays;
 	}
-
-	static void createAssay(String instrument, String assay) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("insert into assays values (?, ?)");
-		preparedStatement.setString(1, assay);
-		preparedStatement.setString(2, instrument);
-		preparedStatement.executeUpdate();
-		preparedStatement.close();
-	}
 }
