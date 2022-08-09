@@ -1,11 +1,9 @@
 package hmvv.gui.sampleList;
-
 import java.awt.Component;
+import javax.swing.JDialog;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-import javax.swing.*;
-
-import hmvv.gui.mutationlist.MutationListFrame;
-import hmvv.main.HMVVFrame;
 
 public class ReportFrameText extends ReportFrame{
 	private static final long serialVersionUID = 1L;

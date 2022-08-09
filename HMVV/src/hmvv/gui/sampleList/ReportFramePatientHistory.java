@@ -14,10 +14,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.io.LIS.LISConnection;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 import hmvv.model.PatientHistory;
 import hmvv.model.Sample;
 public class ReportFramePatientHistory extends JPanel{

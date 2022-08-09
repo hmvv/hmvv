@@ -1,9 +1,5 @@
 package hmvv.io;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
 import hmvv.model.MutationGermline;

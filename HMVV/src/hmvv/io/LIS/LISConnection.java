@@ -13,7 +13,7 @@ public class LISConnection{
 	
 	public static void connect() throws Exception {
 		Class<?> c = Class.forName(Configurations.LIS_DRIVER);
-		Object o = c.newInstance();
+		Object o = c.getDeclaredConstructor().newInstance();
 		connection = ((LISCommands)o);
 	}
 

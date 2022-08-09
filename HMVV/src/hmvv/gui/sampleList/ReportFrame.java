@@ -20,9 +20,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 
 public abstract class ReportFrame extends JDialog {
 	private static final long serialVersionUID = 1L;

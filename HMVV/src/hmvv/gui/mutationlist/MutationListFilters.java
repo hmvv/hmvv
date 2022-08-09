@@ -7,7 +7,6 @@ import javax.swing.JComboBox;
 import javax.swing.JTextField;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.main.Configurations;
 import hmvv.model.MutationCommon;
 import hmvv.model.MutationGermline;
