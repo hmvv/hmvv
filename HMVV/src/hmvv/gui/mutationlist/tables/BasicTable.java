@@ -1,22 +1,22 @@
 package hmvv.gui.mutationlist.tables;
 
 import javax.swing.*;
-
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.io.IGVConnection;
-import hmvv.model.Mutation;
+import hmvv.main.HMVVFrame;
+import hmvv.model.MutationSomatic;
+
 public class BasicTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 	
-	public BasicTable(MutationListFrame parent, BasicTableModel model){
+	public BasicTable(HMVVFrame parent, BasicTableModel model){
 		super(parent, model);
 	}
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 1, 3, 6, 7, 11, 13);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 2, 3, 4, 7, 8, 12, 14);
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class BasicTable extends CommonTable{
 
 	@Override
 	protected void handleMousePressed(int column) throws Exception{
-		if(column == 1){
+		if(column == 2){
 			new Thread(new Runnable() {
 				public void run() {
 					try {
@@ -42,23 +42,23 @@ public class BasicTable extends CommonTable{
 					}
 				}
 			}).start();			
-		}else if (column == 2) {
-			handleLoadIGVCheckBoxClick();
 		}else if (column == 3) {
+			handleLoadIGVCheckBoxClick();
+		}else if (column == 4) {
 			searchGoogleForGene();
-		}else if(column == 6){
+		}else if(column == 7){
             searchGoogleForDNAChange();
-        }else if(column == 7){
+        }else if(column == 8){
              searchGoogleForProteinChange();
-        }else if (column == 11) {
+        }else if (column == 12) {
 			searchCosmic();
-		}else if(column == 13){
+		}else if(column == 14){
 			handleAnnotationClick();
 		}
 	}
 
 	private void handleIGVClick() throws Exception{
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
 		if(result.length() > 0) {
 			JOptionPane.showMessageDialog(this, result);
@@ -66,7 +66,7 @@ public class BasicTable extends CommonTable{
 	}
 
 	private void handleLoadIGVCheckBoxClick(){
-		Mutation mutation = getSelectedMutation();
+		MutationSomatic mutation = getSelectedMutation();
 		if (mutation.isSelected()){
 			mutation.setSelected(false);
 		}else{

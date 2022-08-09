@@ -35,10 +35,10 @@ public class SampleListTableModel extends AbstractTableModel{
 				String.class,
 				(Sample sample) -> sample.instrument));
 		
-		columns.add(new SampleTableModelColumn("The patient's MRN", 
-				"MRN", 
+		columns.add(new SampleTableModelColumn("The patient's MRN (and the number of samples for that patient)", 
+				"MRN (#)", 
 				String.class,
-				(Sample sample) -> sample.getMRN()));
+				(Sample sample) -> sample.getMRN() + sample.getLinkedPatientSampleSize()));
 		
 		columns.add(new SampleTableModelColumn("The patient's last name", 
 				"Last Name", 
@@ -80,15 +80,15 @@ public class SampleListTableModel extends AbstractTableModel{
 				String.class,
 				(Sample sample) -> sample.sampleName));
 		
-		columns.add(new SampleTableModelColumn("The instrument generated coverage ID (Life Technologies instruments only)", 
-				"Coverage ID", 
-				String.class,
-				(Sample sample) -> sample.coverageID));
-		
-		columns.add(new SampleTableModelColumn("The instrument generated caller ID (Life Technologies instruments only)", 
-				"Caller ID", 
-				String.class,
-				(Sample sample) -> sample.callerID));
+//		columns.add(new SampleTableModelColumn("The instrument generated coverage ID (Life Technologies instruments only)", 
+//				"Coverage ID", 
+//				String.class,
+//				(Sample sample) -> sample.coverageID));
+//		
+//		columns.add(new SampleTableModelColumn("The instrument generated caller ID (Life Technologies instruments only)", 
+//				"Caller ID", 
+//				String.class,
+//				(Sample sample) -> sample.callerID));
 		
 		columns.add(new SampleTableModelColumn("The date the sample was run", 
 				"Run Date", 
@@ -110,10 +110,10 @@ public class SampleListTableModel extends AbstractTableModel{
 				String.class,
 				(Sample sample) -> sample.getNote()));
 		
-		columns.add(new SampleTableModelColumn("User ID of the individual who entered this sample", 
-				"Entered By", 
-				String.class,
-				(Sample sample) -> sample.enteredBy));
+//		columns.add(new SampleTableModelColumn("User ID of the individual who entered this sample", 
+//				"Entered By", 
+//				String.class,
+//				(Sample sample) -> sample.enteredBy));
 		
 		columns.add(new SampleTableModelColumn("Quality control metrics of this assay.",
 				"AssayQC",

@@ -1,13 +1,13 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
+import hmvv.main.HMVVFrame;
 
 public class MutationTraceTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 
-	public MutationTraceTable(MutationListFrame parent, CommonTableModel model) {
+	public MutationTraceTable(HMVVFrame parent, CommonTableModel model) {
 		super(parent, model);
 	}
 

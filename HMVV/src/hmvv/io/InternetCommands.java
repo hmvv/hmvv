@@ -31,10 +31,17 @@ public class InternetCommands {
 	}
 
 	public static void searchGoogle(String term) throws Exception{
-		browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
+		browseToURL("https://www.google.com/#q=" + term );
 	}
+
+	public static void searchGoogleHGMD(String gene, String id) throws Exception{
+		browseToURL("http://www.hgmd.cf.ac.uk/ac/gene.php?gene=" + gene + "&accession=" + id );
+
+
+	}
+
 	public static void searchGene(String term) throws Exception{
-		browseToURL("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + term );
+		browseToURL("https://www.ncbi.nlm.nih.gov/omim/?term=" + term );
 	}
 	public static void searchSNP(String ID) throws Exception{
 		if(ID.contains(",")){
@@ -92,5 +99,29 @@ public class InternetCommands {
 	public static void hmvvBugsReport() throws Exception{
 		String search = "http://" + Configurations.SSH_SERVER_ADDRESS + "/hmvv3/bugs.html";
 		browseToURL(search);
+	}
+
+	public static void searchCardiacAtlas(String term) throws Exception{
+		browseToURL("https://www.cardiodb.org/acgv/acgv_gene.php?gene=" + term );
+	}
+
+	public static void searchClinvarID(String term) throws Exception{
+		browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term +"/");
+	}
+	public static void searchNCBIProtein(String term) throws Exception{
+		browseToURL("https://www.ncbi.nlm.nih.gov/protein/" + term+"/" );
+
+	}
+	public static void searchExpasyVariant(String term) throws Exception{
+		browseToURL("https://web.expasy.org/variant_pages/" + term +".html");
+	}
+
+	public static void searchUniprotProtein(String term) throws Exception{
+
+		if (term.contains("NP_")){
+			browseToURL("https://www.ncbi.nlm.nih.gov/protein/" + term);
+		} else{
+			browseToURL("https://www.uniprot.org/uniprot/" + term);}
+
 	}
 }

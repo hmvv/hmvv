@@ -12,7 +12,8 @@ import javax.swing.table.JTableHeader;
 
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
-import hmvv.model.Mutation;
+import hmvv.main.HMVVFrame;
+import hmvv.model.MutationSomatic;
 
 public class CosmicInfoPopup {
 	static class CosmicInfo{
@@ -39,7 +40,7 @@ public class CosmicInfoPopup {
 		}
 	}
 	
-	private static ArrayList<CosmicInfo> buildCosmicInfoList(Mutation mutation) throws Exception {
+	private static ArrayList<CosmicInfo> buildCosmicInfoList(MutationSomatic mutation) throws Exception {
 		String HGVSc = mutation.getHGVSc();
 		String transcript = "";
 		if(HGVSc.startsWith("ENST")) {
@@ -85,7 +86,7 @@ public class CosmicInfoPopup {
 		return comsicInfoList;
 	}
 	
-	public static void handleCosmicClick(MutationListFrame parent, Mutation mutation) throws Exception{
+	public static void handleCosmicClick(HMVVFrame parent, MutationSomatic mutation) throws Exception{
 		ArrayList<CosmicInfo> comsicInfoList = buildCosmicInfoList(mutation);
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;

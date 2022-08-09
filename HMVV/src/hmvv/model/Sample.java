@@ -1,5 +1,7 @@
 package hmvv.model;
 
+import java.util.ArrayList;
+
 public class Sample {
 	
 	public int sampleID;
@@ -21,6 +23,7 @@ public class Sample {
 	private String patientHistory;
 	private String diagnosis ;
 	private String note;
+	private ArrayList<Sample> patientSamples;
 
 	public Sample(int sampleID, String assay, String instrument, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
@@ -44,6 +47,22 @@ public class Sample {
 		this.diagnosis = notNull(bmDiagnosis);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
+		patientSamples = new ArrayList<Sample>();
+	}
+	
+	public void addLinkedPatientSample(Sample sample) {
+		patientSamples.add(sample);
+	}
+	
+	public ArrayList<Sample> getLinkedPatientSamples() {
+		return patientSamples;
+	}
+	
+	public String getLinkedPatientSampleSize() {
+		if(patientSamples.size() > 0) {
+			return " (" + (patientSamples.size() + 1) + ")";
+		}
+		return "";
 	}
 	
 	public int getSampleID(){

@@ -1,7 +1,7 @@
 package hmvv.gui.mutationlist.tablemodels;
 
 import hmvv.model.Annotation;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 import hmvv.model.VariantPredictionClass;
 
 public class MutationTableModelColumn extends HMVVTableModelColumn{
@@ -12,41 +12,46 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn chrColumn = new MutationTableModelColumn("The chromosome location of this mutation",
 			"chr",
 			String.class,
-			(Mutation mutation) -> mutation.getChr());
+			(MutationSomatic mutation) -> mutation.getChr());
 
 	public static final MutationTableModelColumn posColumn = new MutationTableModelColumn("Mutation position on the chromosome",
 			"pos",
 			String.class,
-			(Mutation mutation) -> mutation.getPos());
+			(MutationSomatic mutation) -> mutation.getPos());
 
 	public static final MutationTableModelColumn refColumn = new MutationTableModelColumn("Reference base call",
 			"ref",
 			String.class,
-			(Mutation mutation) -> mutation.getRef());
+			(MutationSomatic mutation) -> mutation.getRef());
 
 	public static final MutationTableModelColumn altColumn = new MutationTableModelColumn("Mutation base call",
 			"alt",
 			String.class,
-			(Mutation mutation) -> mutation.getAlt());
+			(MutationSomatic mutation) -> mutation.getAlt());
 
     // custom
 
 	public static final MutationTableModelColumn reportedColumn = new MutationTableModelColumn("Check to indicate this gene was included in the final report.",
 			"reported",
 			Boolean.class,
-			(Mutation mutation) -> mutation.isReported());
+			(MutationSomatic mutation) -> mutation.isReported());
 
+	public static final MutationTableModelColumn otherReportedColumn = new MutationTableModelColumn("List of sample ID's for this patient that had this variant (R = reported)",
+			"prev",
+			String.class,
+			(MutationSomatic mutation) -> mutation.getOtherMutationsString());
+	
 	public static final MutationTableModelColumn occurrenceColumn = new MutationTableModelColumn("Number of previous occurrences of the detected variant in our database (excluding control samples).",
 			"occurrence",
 			Integer.class,
-			(Mutation mutation) -> mutation.getOccurrence());
+			(MutationSomatic mutation) -> mutation.getOccurrence());
 
 	public static final MutationTableModelColumn annotationColumn = new MutationTableModelColumn("The text entered by the pathologist to generate the clinical laboratory report.",
 			"annotation",
 			String.class,
-			(Mutation mutation) -> getAnnotationDisplayText(mutation));
+			(MutationSomatic mutation) -> getAnnotationDisplayText(mutation));
 
-	public static String getAnnotationDisplayText(Mutation mutation) {
+	public static String getAnnotationDisplayText(MutationSomatic mutation) {
 		Annotation latestAnnotation = mutation.getLatestAnnotation();
 		if(latestAnnotation == null) {
 			return "Enter";
@@ -57,9 +62,9 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn somaticColumn = new MutationTableModelColumn("The somatic designation as entered by the pathologist in the annotation report.",
 			"somatic",
 			String.class,
-			(Mutation mutation) -> getSomaticDisplayText(mutation));
+			(MutationSomatic mutation) -> getSomaticDisplayText(mutation));
 
-	public static String getSomaticDisplayText(Mutation mutation) {
+	public static String getSomaticDisplayText(MutationSomatic mutation) {
 		Annotation latestAnnotation = mutation.getLatestAnnotation();
 		if(latestAnnotation == null) {
 			return "";
@@ -70,9 +75,9 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn classificationColumn = new MutationTableModelColumn("The classification designation as entered by the pathologist in the annotation report.",
 			"classification",
 			String.class,
-			(Mutation mutation) -> getClassificationDisplayText(mutation));
+			(MutationSomatic mutation) -> getClassificationDisplayText(mutation));
 
-	public static String getClassificationDisplayText(Mutation mutation) {
+	public static String getClassificationDisplayText(MutationSomatic mutation) {
 		Annotation latestAnnotation = mutation.getLatestAnnotation();
 		if(latestAnnotation == null) {
 			return "";
@@ -83,255 +88,255 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn gotoIGVColumn = new MutationTableModelColumn("Link to load the variant coordinate into IGV.",
 			"IGV",
 			String.class,
-			(Mutation mutation) -> mutation.getChr() + ":" + mutation.getPos());
+			(MutationSomatic mutation) -> mutation.getChr() + ":" + mutation.getPos());
 
 	public static final MutationTableModelColumn igvLoadColumn = new MutationTableModelColumn("Check to indicate this mutation is included for downloading BAM file.",
 			"Load IGV",
 			Boolean.class,
-			(Mutation mutation) -> mutation.isSelected());
+			(MutationSomatic mutation) -> mutation.isSelected());
 
 	//VEP
 
 	public static final MutationTableModelColumn geneColumn = new MutationTableModelColumn("The name of the gene this mutation is located on.",
 			"gene",
 			String.class,
-			(Mutation mutation) -> mutation.getGene());
+			(MutationSomatic mutation) -> mutation.getGene());
 	
 	public static final MutationTableModelColumn exonsColumn = new MutationTableModelColumn("The exon location of the detected variant.",
 			"exons",
 			String.class,
-			(Mutation mutation) -> mutation.getExons());
+			(MutationSomatic mutation) -> mutation.getExons());
 
 	public static final MutationTableModelColumn typeColumn = new MutationTableModelColumn("Variant type, including snv, deletion, insertion, indel.",
 			"type",
 			String.class,
-			(Mutation mutation) -> mutation.getType());
+			(MutationSomatic mutation) -> mutation.getType());
 
 	public static final MutationTableModelColumn variantClassificationColumn = new MutationTableModelColumn("Classifcation as predicted by Variant Effect Predictor.",
 			"vep-Prediction",
 			VariantPredictionClass.class,
-			(Mutation mutation) -> mutation.getVariantPredictionClass());
+			(MutationSomatic mutation) -> mutation.getVariantPredictionClass());
 
 	public static final MutationTableModelColumn altFreqColumn = new MutationTableModelColumn(
 			"Thermo Fisher: Allele frequency based on Flow Evaluator observation counts. Illumina: The percentage of reads supporting the alternate allele.",
 			"altFreq",
 			Double.class,
-			(Mutation mutation) -> mutation.getAltFreq());
+			(MutationSomatic mutation) -> mutation.getAltFreq());
 
 	public static final MutationTableModelColumn readDPColumn = new MutationTableModelColumn(
 			"Thermo Fisher: Flow Evaluator read depth at the locus to a position and used in variant calling. Illumina: Number of base calls aligned to a position and used in variant calling.",
 			"readDP",
 			Integer.class,
-			(Mutation mutation) -> mutation.getReadDP());
+			(MutationSomatic mutation) -> mutation.getReadDP());
 
 	public static final MutationTableModelColumn altReadDPColumn = new MutationTableModelColumn(
 			"Thermo Fisher: Flow Evaluator Alternate allele observations. Illumina: The number of alternate calls.",
 			"altReadDP",
 			Integer.class,
-			(Mutation mutation) -> mutation.getAltReadDP());
+			(MutationSomatic mutation) -> mutation.getAltReadDP());
 
 	public static final MutationTableModelColumn ConsequenceColumn = new MutationTableModelColumn("Consquence of mutation as predicted by Variant Effect Predictor(VEP)",
 			"vep-Consequence",
 			String.class,
-			(Mutation mutation) -> mutation.getConsequence());
+			(MutationSomatic mutation) -> mutation.getConsequence());
 
 	public static final MutationTableModelColumn SiftColumn = new MutationTableModelColumn("Consequence of mutation as predicted by Sift",
 			"vep-Sift",
 			String.class,
-			(Mutation mutation) -> mutation.getSift());
+			(MutationSomatic mutation) -> mutation.getSift());
 
 	public static final MutationTableModelColumn PolyPhenColumn = new MutationTableModelColumn("Consequence of mutation as predicted by PolyPhen",
 			"vep-PolyPhen",
 			String.class,
-			(Mutation mutation) -> mutation.getPolyPhen());
+			(MutationSomatic mutation) -> mutation.getPolyPhen());
 
 	public static final MutationTableModelColumn HGVScColumn = new MutationTableModelColumn("Human Genome Variation Society Coding DNA nomenclature.",
 			"HGVSc",
 			String.class,
-			(Mutation mutation) -> mutation.getHGVSc());
+			(MutationSomatic mutation) -> mutation.getHGVSc());
 	
 	public static final MutationTableModelColumn HGVSpColumn = new MutationTableModelColumn("Human Genome Variation Society Protein nomenclature.",
 			"HGVSp",
 			String.class,
-			(Mutation mutation) -> mutation.getHGVSp());
+			(MutationSomatic mutation) -> mutation.getHGVSp());
 	
 	public static final MutationTableModelColumn dbSNPIDColumn = new MutationTableModelColumn("Hyperlink to the variant in the dbSNP database.",
 			"dbSNPID",
 			String.class,
-			(Mutation mutation) -> mutation.getDbSNPID());
+			(MutationSomatic mutation) -> mutation.getDbSNPID());
 
 	public static final MutationTableModelColumn pubmedColumn = new MutationTableModelColumn("Link to relevant pubmed articles.",
 			"pubmed",
 			String.class,
-			(Mutation mutation) -> mutation.getPubmed());
+			(MutationSomatic mutation) -> mutation.getPubmed());
 
 	//cosmic
 
 	public static final MutationTableModelColumn cosmicIDColumn = new MutationTableModelColumn("Hyperlink to the variant in the COSMIC database.",
 			"cosmicID",
 			String.class,
-			(Mutation mutation) -> mutation.cosmicIDsToString(","));
+			(MutationSomatic mutation) -> mutation.cosmicIDsToString(","));
 
     //clinvar
 
 	public static final MutationTableModelColumn clinvarID = new MutationTableModelColumn("ClinVar Variation ID",
 			"clinVarID",
 			String.class,
-			(Mutation mutation) -> mutation.getClinvarID());
+			(MutationSomatic mutation) -> mutation.getClinvarID());
 	
 	public static final MutationTableModelColumn clinicalDisease = new MutationTableModelColumn("ClinVar's preferred disease name for the concept specified by disease identifiers in CLNDISDB",
 			"clinvar-Disease",
 			String.class,
-			(Mutation mutation) -> mutation.getClinicaldisease());
+			(MutationSomatic mutation) -> mutation.getClinicaldisease());
 	
 	public static final MutationTableModelColumn clinicalSignificance = new MutationTableModelColumn("Clinical significance for this single variant",
 			"clinvar-Significance",
 			String.class,
-			(Mutation mutation) -> mutation.getClinicalsignificance());
+			(MutationSomatic mutation) -> mutation.getClinicalsignificance());
 	
 	public static final MutationTableModelColumn clinicalConsequence = new MutationTableModelColumn("",//TODO Find this
 			"clinvar-Consequence",
 			String.class,
-			(Mutation mutation) -> mutation.getClinicalconsequence());
+			(MutationSomatic mutation) -> mutation.getClinicalconsequence());
 
 	public static final MutationTableModelColumn originColumn = new MutationTableModelColumn("Allele origin",
 			"clinvar-Origin",
 			String.class,
-			(Mutation mutation) -> mutation.getClinicalorigin());
+			(MutationSomatic mutation) -> mutation.getClinicalorigin());
 	
 	// g1000
 	public static final MutationTableModelColumn altCountColumn = new MutationTableModelColumn("",//TODO Find this
 			"g1000-AltCount",
 			Integer.class,
-			(Mutation mutation) -> mutation.getAltCount());
+			(MutationSomatic mutation) -> mutation.getAltCount());
 	
 	public static final MutationTableModelColumn totalCountColumn = new MutationTableModelColumn("",//TODO Find this
 			"g1000-TotalCount",
 			Integer.class,
-			(Mutation mutation) -> mutation.getTotalCount());
+			(MutationSomatic mutation) -> mutation.getTotalCount());
 	
 	public static final MutationTableModelColumn altGlobalFreqColumn = new MutationTableModelColumn("1000 Genomes Project: Global Freqency",
 			//"g1000-AltFreq",
 			"g1000",//This will shrink the column width
 			Double.class,
-			(Mutation mutation) -> mutation.getAltGlobalFreq());
+			(MutationSomatic mutation) -> mutation.getAltGlobalFreq());
 	
 	public static final MutationTableModelColumn americanFreqColumn = new MutationTableModelColumn("1000 Genomes Project: American Freqency",
 			"g1000-AmericanFreq",
 			Double.class,
-			(Mutation mutation) -> mutation.getAmericanFreq());
+			(MutationSomatic mutation) -> mutation.getAmericanFreq());
 	
 	public static final MutationTableModelColumn eastAsianFreqColumn = new MutationTableModelColumn("1000 Genomes Project:  East Asian Freqency",
 			"g1000-EastAsianFreq",
 			Double.class,
-			(Mutation mutation) -> mutation.getEastAsianFreq());
+			(MutationSomatic mutation) -> mutation.getEastAsianFreq());
 
 	public static final MutationTableModelColumn southAsianFreqColumn = new MutationTableModelColumn("1000 Genomes Project: South Asian Freqency",
 			"g1000-SouthAsianFreq",
 			Double.class,
-			(Mutation mutation) -> mutation.getSouthAsianFreq());
+			(MutationSomatic mutation) -> mutation.getSouthAsianFreq());
 	
 	public static final MutationTableModelColumn afrFreqColumn = new MutationTableModelColumn("1000 Genomes Project: African Freqency",
 			"g1000-AfrFreq",
 			Double.class,
-			(Mutation mutation) -> mutation.getAfricanFreq());
+			(MutationSomatic mutation) -> mutation.getAfricanFreq());
 	
 	public static final MutationTableModelColumn eurFreqColumn = new MutationTableModelColumn("1000 Genomes Project: European Freqency",
 			"g1000-EurFreq",
 			Double.class,
-			(Mutation mutation) -> mutation.getEurFreq());
+			(MutationSomatic mutation) -> mutation.getEurFreq());
 
 	public static final MutationTableModelColumn lastNameColumn = new MutationTableModelColumn("The patient's last name.",
 			"lastName",
 			String.class,
-			(Mutation mutation) -> mutation.getLastName());
+			(MutationSomatic mutation) -> mutation.getLastName());
 	
 	public static final MutationTableModelColumn firstNameColumn = new MutationTableModelColumn("The patient's first name.",
 			"firstName",
 			String.class,
-			(Mutation mutation) -> mutation.getFirstName());
+			(MutationSomatic mutation) -> mutation.getFirstName());
 	
 	public static final MutationTableModelColumn orderNumberColumn = new MutationTableModelColumn("The lab order number.",
 			"orderNumber",
 			String.class,
-			(Mutation mutation) -> mutation.getOrderNumber());
+			(MutationSomatic mutation) -> mutation.getOrderNumber());
 	
 	public static final MutationTableModelColumn assayColumn = new MutationTableModelColumn("The assay used",
 			"assay",
 			String.class,
-			(Mutation mutation) -> mutation.getAssay());
+			(MutationSomatic mutation) -> mutation.getAssay());
 	
 	public static final MutationTableModelColumn IDColumn = new MutationTableModelColumn("The unique ID for the sample",
 			"sampleID",
 			Integer.class,
-			(Mutation mutation) -> mutation.getSampleID());
+			(MutationSomatic mutation) -> mutation.getSampleID());
 	
 	public static final MutationTableModelColumn tumorSourceColumn = new MutationTableModelColumn("The source organ/tissue of the tumor",
 			"Tumor Source",
 			Integer.class,
-			(Mutation mutation) -> mutation.getTumorSource());
+			(MutationSomatic mutation) -> mutation.getTumorSource());
 	
 	public static final MutationTableModelColumn tumorPercentColumn = new MutationTableModelColumn("The percent of tumor in the sample",
 			"Tumor Percent",
 			String.class,
-			(Mutation mutation) -> mutation.getTumorPercent());
+			(MutationSomatic mutation) -> mutation.getTumorPercent());
 
 	// gnomad
 
 	public static final MutationTableModelColumn gnomadID = new MutationTableModelColumn("Identifier for gnomad db",
 			"gnomadID",
 			String.class,
-			(Mutation mutation) -> mutation.getGnomadID());
+			(MutationSomatic mutation) -> mutation.getGnomadID());
 
 	public static final MutationTableModelColumn gnomadAltFreqColumn = new MutationTableModelColumn("The global allele frequency",
 			//"gnomad-AltFreq",
 			"gnomad",//This will shrink the column width
 			Double.class,
-			(Mutation mutation) -> mutation.getGnomad_allfreq());
+			(MutationSomatic mutation) -> mutation.getGnomad_allfreq());
 
 	//oncokb
 
 	public static final MutationTableModelColumn oncokbID = new MutationTableModelColumn("Identifier for Oncokb db",
 			"oncokbID",
 			String.class,
-			(Mutation mutation) -> mutation.getOncokbID());
+			(MutationSomatic mutation) -> mutation.getOncokbID());
 
 	public static final MutationTableModelColumn oncogenicityColumn = new MutationTableModelColumn("The oncogenicity",
 			"oncokb-Oncogenicity",
 			String.class,
-			(Mutation mutation) -> mutation.getOncogenicity());
+			(MutationSomatic mutation) -> mutation.getOncogenicity());
 
 	public static final MutationTableModelColumn oncoMutationEffectColumn = new MutationTableModelColumn("The mutation effect",
 			"oncokb-MutationEffect",
 			String.class,
-			(Mutation mutation) -> mutation.getOnco_MutationEffect());
+			(MutationSomatic mutation) -> mutation.getOnco_MutationEffect());
 
 	//civic
 
 	public static final MutationTableModelColumn civicID = new MutationTableModelColumn("Identifier for Civic db",
 			"civicID",
 			String.class,
-			(Mutation mutation) -> mutation.getCivicID());
+			(MutationSomatic mutation) -> mutation.getCivicID());
 
 	public static final MutationTableModelColumn civicOriginColumn = new MutationTableModelColumn("The variant origin",
 			"civic-VariantOrigin",
 			String.class,
-			(Mutation mutation) -> mutation.getCivic_variant_origin());
+			(MutationSomatic mutation) -> mutation.getCivic_variant_origin());
 
 	//pmkb
 
 	public static final MutationTableModelColumn pmkbID = new MutationTableModelColumn("Identifier for pmkb db",
 			"pmkbID",
 			String.class,
-			(Mutation mutation) -> mutation.getPmkbID());
+			(MutationSomatic mutation) -> mutation.getPmkbID());
 	public static final MutationTableModelColumn pmkbTumorTypeColumn = new MutationTableModelColumn("Identifier for pmkb db",
 			"pmkb-TumorType",
 			String.class,
-			(Mutation mutation) -> mutation.getPmkb_tumor_type());
+			(MutationSomatic mutation) -> mutation.getPmkb_tumor_type());
 	public static final MutationTableModelColumn pmkbTissueTypeColumn = new MutationTableModelColumn("Identifier for pmkb db",
 			"pmkb-TissueType",
 			String.class,
-			(Mutation mutation) -> mutation.getPmkb_tissue_type());
+			(MutationSomatic mutation) -> mutation.getPmkb_tissue_type());
 
 	/**
 	 * The Lambda interface object
@@ -346,7 +351,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	/**
 	 * Lambda expression function
 	 */
-	public Object getValue(Mutation mutation){
+	public Object getValue(MutationSomatic mutation){
 		return operation.getValue(mutation);
 	}
 	
@@ -355,6 +360,6 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	 *
 	 */
 	public interface MutationGetValueAtOperation{
-		Object getValue(Mutation mutation);
+		Object getValue(MutationSomatic mutation);
 	}
 }

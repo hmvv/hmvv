@@ -16,7 +16,7 @@ import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
@@ -311,7 +311,7 @@ public class MutationFilterPanel extends JPanel {
 
     private void handleSelectAllClick(boolean choice) {
 		for (int i = 0; i < mutationList.getMutationCount(); i++) {
-			Mutation mutation = mutationList.getMutation(i);
+			MutationSomatic mutation = (MutationSomatic)mutationList.getMutation(i);
 			if (choice){mutation.setSelected(true);}
 			else {mutation.setSelected(false);}
 		}
@@ -352,9 +352,9 @@ public class MutationFilterPanel extends JPanel {
     
     private void loadIGVAsynchronous_Filtered() throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		ServerTask serverTask = new ServerTask(0);
-		loadIGVButtonTimerLabel(serverTask);
-		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverTask);
+		ServerWorker serverWorker = new ServerWorker(0);
+		loadIGVButtonTimerLabel(serverWorker);
+		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverWorker);
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		loadIGVButton.setText("Finding BAM File...");
@@ -370,7 +370,7 @@ public class MutationFilterPanel extends JPanel {
 		}
 	}
     
-    private void loadIGVButtonTimerLabel(ServerTask task) {
+    private void loadIGVButtonTimerLabel(ServerWorker task) {
 		int seconds = 3 * mutationList.getSelectedMutationCount();
 		final long duration = seconds * 1000;   // calculate to milliseconds
 		final Timer timer = new Timer(1, new ActionListener() {
@@ -396,21 +396,5 @@ public class MutationFilterPanel extends JPanel {
 		});
 		timer.start();
 	}
-    
-    public class ServerTask {
 
-		int status;
-
-		public ServerTask(int s) {
-			this.status = s;
-		}
-
-		public int getStatus() {
-			return status;
-		}
-
-		public void setStatus(int s) {
-			this.status = s;
-		}
-	}
 }

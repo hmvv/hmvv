@@ -6,18 +6,72 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
-import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
-import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
-import hmvv.gui.mutationlist.tablemodels.G1000TableModel;
-import hmvv.gui.mutationlist.tablemodels.MutationList;
+import hmvv.gui.mutationlist.tablemodels.*;
+import hmvv.main.Configurations;
 import hmvv.model.*;
 
 public class MutationReportGenerator{
+
+	public static String generateShortReport(MutationList mutationList) throws Exception{
+
+		StringBuilder report = new StringBuilder(500);
+
+		for(int i = 0; i < mutationList.getMutationCount(); i++) {
+			MutationCommon mutation = mutationList.getMutation(i);
+			if (!mutation.isReported()) {
+				continue;
+			}
+
+			String cDNA = mutation.getHGVSc();
+			String codon = mutation.getHGVSp();
+			String gene = mutation.getGene();
+			String mutationText = gene + ":" + cDNA + ";" + codon;
+			report.append(mutationText + "\n");
+		}
+
+		report.append("\n");
+
+		for(int i = 0; i < mutationList.getMutationCount(); i++) {
+			MutationCommon mutation = mutationList.getMutation(i);
+			if (!mutation.isReported()) {
+				continue;
+			}
+			Annotation annotation = mutation.getLatestAnnotation();
+			if(annotation != null) {
+				String curation = annotation.curation;
+				if(curation.length() > 0) {
+					report.append(curation + "\n");
+				}
+			}
+
+//			ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
+//			if(geneAnnotationHistory.size() > 0) {
+//				GeneAnnotation geneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
+//				if(geneAnnotation.curation.length() > 0) {
+//					report.append("Gene Note: " + geneAnnotation.curation + "\n");
+//				}
+//			}
+
+			report.append("\n");
+		}
+
+		return report.toString();
+	}
+
 	public static String generateLongReport(MutationList mutationList) throws Exception{
+		String report = "";
+		if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.SOMATIC){
+			report =  generateLongReportSomatic(mutationList);
+		} else if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.GERMLINE){
+			report =  generateLongReportGermline(mutationList);
+		}
+		return report;
+	}
+
+	public static String generateLongReportSomatic(MutationList mutationList) throws Exception{
 		StringBuilder report = new StringBuilder(500);
 		for(int i = 0; i < mutationList.getMutationCount(); i++){
-			Mutation mutation = mutationList.getMutation(i);
+			MutationSomatic mutation = (MutationSomatic)mutationList.getMutation(i);
 			if(!mutation.isReported()){
 				continue;
 			}
@@ -33,7 +87,7 @@ public class MutationReportGenerator{
 			VariantPredictionClass variantPredictionClass = mutation.getVariantPredictionClass();
 			String cosmicIDs = mutation.cosmicIDsToString(",");
 			int occurrence = mutation.getOccurrence();
-			
+
 			report.append("Name: " + name + "\n");
 			report.append("OrderNumber: " + orderNumber + "\n");
 			report.append("Mutation Info: " + mutationText + "\n");
@@ -42,7 +96,7 @@ public class MutationReportGenerator{
 			report.append("dbSNP ID: " + dbSNP + "\n");
 			report.append("Cosmic IDs: " + cosmicIDs + "\n");
 			report.append("Occurence: " + occurrence + "\n");
-			
+
 			Annotation annotation = mutation.getLatestAnnotation();
 			if(annotation != null) {
 				String somatic = annotation.somatic;
@@ -52,7 +106,7 @@ public class MutationReportGenerator{
 				report.append("Classification: " + classification + "\n");
 				report.append("Curation Note: " + curation + "\n" + "\n");
 			}
-			
+
 			report.append("\n");
 		}
 		report.append("Database Information: \n");
@@ -64,54 +118,56 @@ public class MutationReportGenerator{
 
 		return report.toString();
 	}
-	
-	public static String generateShortReport(MutationList mutationList) throws Exception{
 
+	public static String generateLongReportGermline(MutationList mutationList) throws Exception{
 		StringBuilder report = new StringBuilder(500);
-
-		for(int i = 0; i < mutationList.getMutationCount(); i++) {
-			Mutation mutation = mutationList.getMutation(i);
-			if (!mutation.isReported()) {
+		for(int i = 0; i < mutationList.getMutationCount(); i++){
+			MutationGermline mutation = (MutationGermline) mutationList.getMutation(i);
+			if(!mutation.isReported()){
 				continue;
 			}
 
+			String name = mutation.getLastName() + ", " + mutation.getFirstName();
 			String cDNA = mutation.getHGVSc();
 			String codon = mutation.getHGVSp();
 			String gene = mutation.getGene();
 			String mutationText = gene + ":" + cDNA + ";" + codon;
-			report.append(mutationText + "\n");
-		}
+			Coordinate coordinate = mutation.getCoordinate();
+			String orderNumber = mutation.getOrderNumber();
+			VariantPredictionClass variantPredictionClass = mutation.getVariantPredictionClass();
+			int occurrence = mutation.getOccurrence();
 
-		report.append("\n");
+			report.append("Name: " + name + "\n");
+			report.append("OrderNumber: " + orderNumber + "\n");
+			report.append("Mutation Info: " + mutationText + "\n");
+			report.append("Coordinate: " + coordinate.getCoordinateAsString() + "\n");
+			report.append("VariantPredictionClass: " + variantPredictionClass + "\n");
+			report.append("Occurence: " + occurrence + "\n");
 
-		for(int i = 0; i < mutationList.getMutationCount(); i++) {
-			Mutation mutation = mutationList.getMutation(i);
-			if (!mutation.isReported()) {
-				continue;
-			}
 			Annotation annotation = mutation.getLatestAnnotation();
 			if(annotation != null) {
+				String somatic = annotation.somatic;
+				String classification = annotation.classification;
 				String curation = annotation.curation;
-				if(curation.length() > 0) {
-					report.append(curation + "\n");
-				}
+				report.append("Origin: " + somatic + "\n");
+				report.append("Classification: " + classification + "\n");
+				report.append("Curation Note: " + curation + "\n" + "\n");
 			}
-			
-//			ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-//			if(geneAnnotationHistory.size() > 0) {
-//				GeneAnnotation geneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
-//				if(geneAnnotation.curation.length() > 0) {
-//					report.append("Gene Note: " + geneAnnotation.curation + "\n");
-//				}
-//			}
-			
+
 			report.append("\n");
+		}
+		report.append("Database Information: \n");
+
+		ArrayList<Database>  databases = SSHConnection.getDatabaseInformation();
+		for (Database d: databases){
+			report.append( d.getName() +"(" + d.getVersion() + ")" + "\n");
 		}
 
 		return report.toString();
 	}
-	
-	public static void exportReport(File outputFile, BasicTableModel basicTable, ClinVarTableModel clinvarTable, CosmicTableModel coordinatesTable,
+
+
+	public static void exportReportSomatic(File outputFile, BasicTableModel basicTable, ClinVarTableModel clinvarTable, CosmicTableModel coordinatesTable,
 			G1000TableModel g1000Table) throws IOException{
 		File fileName = outputFile;
 		if(!outputFile.getName().endsWith(".txt")){
@@ -161,6 +217,22 @@ public class MutationReportGenerator{
 				outFile.write(output + "\t");
 			}
 		}
+
+		outFile.close();
+	}
+
+	public static void exportReportGermline(File outputFile, GermlineClinVarTableModel clinvarTable) throws IOException{
+		File fileName = outputFile;
+		if(!outputFile.getName().endsWith(".txt")){
+			fileName = new File(outputFile.toString() + ".txt");
+		}
+		BufferedWriter outFile = new BufferedWriter(new FileWriter(fileName));
+
+
+		for (int col = 5; col < clinvarTable.getColumnCount(); col++){
+			outFile.write(clinvarTable.getColumnName(col) + "\t");
+		}
+		outFile.write("\r\n");
 
 		outFile.close();
 	}

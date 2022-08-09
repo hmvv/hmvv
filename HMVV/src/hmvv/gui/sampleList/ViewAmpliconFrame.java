@@ -10,6 +10,7 @@ import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
 import hmvv.model.Sample;
@@ -35,7 +36,7 @@ public class ViewAmpliconFrame extends JDialog {
     private TableRowSorter<ViewAmpliconFrameTableModel> sorter;
 
 
-	public ViewAmpliconFrame(SampleListFrame parent,Sample sample) throws Exception{
+	public ViewAmpliconFrame(HMVVFrame parent, Sample sample) throws Exception{
         super(parent, "Sample Amplicons");
 		this.sample = sample;
 
