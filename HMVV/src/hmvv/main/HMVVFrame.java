@@ -42,7 +42,6 @@ public class HMVVFrame extends JFrame{
 	private JMenu adminMenu;
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
-	private JMenuItem newAssayMenuItem;
 	private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
 	private volatile JMenuItem refreshLabel;
@@ -104,15 +103,12 @@ public class HMVVFrame extends JFrame{
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
-		newAssayMenuItem = new JMenuItem("Create New Assay");
-		newAssayMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
-		adminMenu.add(newAssayMenuItem);
 
 		adminMenu.addSeparator();
 		adminMenu.add(qualityControlMenuItem);
@@ -179,7 +175,6 @@ public class HMVVFrame extends JFrame{
 		};
 
 		enterSampleMenuItem.addActionListener(listener);
-		newAssayMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);
 		databaseInformationMenuItem.addActionListener(listener);
