@@ -213,7 +213,7 @@ public class MonitorPipelines extends JDialog {
 		if(currentPipeline == null) {
 			return;
 		}
-		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(currentPipeline.queueID);
+		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(currentPipeline);
 
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
@@ -270,8 +270,8 @@ public class MonitorPipelines extends JDialog {
 		table.setRowSorter(sorter);
 
 		JOptionPane.showMessageDialog(this, tableSP,
-				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
-						currentPipeline.instrumentName, currentPipeline.assayName, currentPipeline.runID, currentPipeline.sampleName),
+				String.format("Pipeline Status (%s %s/%s/%s)",
+				currentPipeline.assay.assayName, currentPipeline.instrument, currentPipeline.runFolderName, currentPipeline.sampleName),
 				JOptionPane.INFORMATION_MESSAGE);
 	}
 	

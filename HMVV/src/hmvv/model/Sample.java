@@ -5,8 +5,9 @@ import java.util.ArrayList;
 public class Sample {
 	
 	public int sampleID;
-	public final String assay;
-	public final String instrument;
+	public final Assay assay;
+	public final Instrument instrument;
+	public final RunFolder runFolder;
 	public final String runID;
 	public final String sampleName;
 	public final String coverageID;
@@ -25,12 +26,13 @@ public class Sample {
 	private String note;
 	private ArrayList<Sample> patientSamples;
 
-	public Sample(int sampleID, String assay, String instrument, String mrn, String lastName, String firstName, String orderNumber,
+	public Sample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
 			String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
 		this.sampleID = sampleID;
-		this.assay = notNull(assay);
-		this.instrument = notNull(instrument);
+		this.assay = assay;
+		this.instrument = instrument;
+		this.runFolder = runFolder;
 		this.mrn = notNull(mrn);
 		this.lastName = notNull(lastName);
 		this.firstName = notNull(firstName);

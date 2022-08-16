@@ -74,8 +74,8 @@ public class SSHConnection {
         }
 	}
 	
-	private static File copyFile(String instrument, String runID, String runFile, SftpProgressMonitor progressMonitor) throws Exception{
-		String runIDFolder = temporaryHMVVDirectory + File.separator + instrument + File.separator + runID;
+	private static File copyFile(Instrument instrument, RunFolder runFolder, String runFile, SftpProgressMonitor progressMonitor) throws Exception{
+		String runIDFolder = temporaryHMVVDirectory + File.separator + instrument.instrumentName + File.separator + runFolder.runFolderName;
 		new File(runIDFolder).mkdirs();
 		
 		String fileName = new File(runFile).getName().trim();
@@ -98,79 +98,79 @@ public class SSHConnection {
 		return newSubPath;
 	}
 	
-	private static File findSample(String command, String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception {
+	private static File findSample(String command, Instrument instrument, RunFolder runFolder, String sampleID, SftpProgressMonitor progressMonitor) throws Exception {
 		String runFile = SSHConnection.sendCommand(command);
-		return copyFile(instrument, runID, runFile, progressMonitor);
+		return copyFile(instrument, runFolder, runFile, progressMonitor);
 	}
 	
 	public static File loadBAMForIGV(Sample sample, SftpProgressMonitor progressMonitor) throws Exception {
-		String runID = sample.runID;
+		RunFolder runFolder = sample.runFolder;
 		String sampleID = sample.sampleName;
 		String callerID = sample.callerID;
-		String instrument =  sample.instrument;
+		Instrument instrument =  sample.instrument;
 
-		if(instrument.equals("pgm")){
-			return SSHConnection.loadPGM_BAM(runID, sampleID, callerID, progressMonitor);
-		}else if(instrument.equals("proton")){
-			return SSHConnection.loadProton_BAM(runID, sampleID, callerID, progressMonitor);
-		}else if( ( instrument.equals("nextseq") || (instrument.equals("novaseq"))) && sample.assay.equals("heme")){
-			return SSHConnection.loadIlluminaNextseqHeme_BAM(instrument, runID, sampleID, progressMonitor);
+		if(instrument.instrumentName.equals("pgm")){
+			return SSHConnection.loadPGM_BAM(runFolder, sampleID, callerID, progressMonitor);
+		}else if(instrument.instrumentName.equals("proton")){
+			return SSHConnection.loadProton_BAM(runFolder, sampleID, callerID, progressMonitor);
+		}else if( ( instrument.instrumentName.equals("nextseq") || (instrument.instrumentName.equals("novaseq"))) && sample.assay.assayName.equals("heme")){
+			return SSHConnection.loadIlluminaNextseqHeme_BAM(instrument, runFolder, sampleID, progressMonitor);
 		}else{
-			return SSHConnection.loadIllumina_BAM(instrument, runID, sampleID, progressMonitor);
+			return SSHConnection.loadIllumina_BAM(instrument, runFolder, sampleID, progressMonitor);
 		}
 	}
 
-	private static File loadPGM_BAM(String runID, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
+	private static File loadPGM_BAM(RunFolder runFolder, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
 		String command = null;
 		sampleID = sampleID.replaceAll(".*_", "");
 		callerID = callerID.replaceAll(".*\\.", "");
 		if(!callerID.equals("None")){
 			//with a callerID
-			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runID,callerID,sampleID);
+			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runFolder, callerID,sampleID);
 		}else{
 			//without a callerID
-			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out/IonXpress_%s/IonXpress_%s_*PTRIM.bam", runID,sampleID, sampleID);
+			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out/IonXpress_%s/IonXpress_%s_*PTRIM.bam", runFolder, sampleID, sampleID);
 		}
-		return findSample(command, "proton", runID, sampleID, progressMonitor);
+		return findSample(command, Instrument.getInstrument("proton"), runFolder, sampleID, progressMonitor);
 	}
 
-	private static File loadProton_BAM(String runID, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
+	private static File loadProton_BAM(RunFolder runFolder, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
 		sampleID = sampleID.replaceAll(".*_", "");
 		callerID = callerID.replaceAll(".*\\.", "");
-		String command = String.format("ls /storage/instruments/proton/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runID, callerID, sampleID);
-		return findSample(command, "proton", runID, sampleID, progressMonitor);
+		String command = String.format("ls /storage/instruments/proton/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runFolder, callerID, sampleID);
+		return findSample(command, Instrument.getInstrument("proton"), runFolder, sampleID, progressMonitor);
 	}
 
-	private static File loadIlluminaNextseqHeme_BAM(String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String command = String.format("ls /storage/analysis/environments/%s/"+instrument+"Analysis/*_%s_*/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), runID, sampleID, sampleID);
-		return findSample(command, instrument, runID, sampleID, progressMonitor);
+	private static File loadIlluminaNextseqHeme_BAM(Instrument instrument, RunFolder runFolder, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
+		String command = String.format("ls /storage/analysis/environments/%s/%sAnalysis/%s/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), instrument, runFolder, sampleID, sampleID);
+		return findSample(command, instrument, runFolder, sampleID, progressMonitor);
 	}
 
-	private static File loadIllumina_BAM(String instrument, String runID, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String command = String.format("ls /storage/instruments/%s/*_%s_*/Data/Intensities/BaseCalls/Alignment/%s*.bam", instrument, runID, sampleID);
-		return findSample(command, instrument, runID, sampleID, progressMonitor);
+	private static File loadIllumina_BAM(Instrument instrument, RunFolder runFolder, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
+		String command = String.format("ls /storage/instruments/%s/%s/Data/Intensities/BaseCalls/Alignment/%s*.bam", instrument, runFolder, sampleID);
+		return findSample(command, instrument, runFolder, sampleID, progressMonitor);
 	}
 	
-	public static ArrayList<String> getCandidateCoverageIDs(String instrument, String runID) throws Exception {
-		String coverageCommand = String.format("ls /storage/instruments/%s/*_%s/plugin_out/ | grep coverageAnalysis", instrument, runID);
+	public static ArrayList<String> getCandidateCoverageIDs(Instrument instrument, RunFolder runFolder) throws Exception {
+		String coverageCommand = String.format("ls /storage/instruments/%s/%s/plugin_out/ | grep coverageAnalysis", instrument, runFolder);
 		CommandResponse coverageResult = SSHConnection.executeCommandAndGetOutput(coverageCommand);
 		if(coverageResult.exitStatus != 0) {
-			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runID));
+			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runFolder));
 		}
 		return coverageResult.responseLines;
 	}
 	
-	public static ArrayList<String> getCandidateVariantCallerIDs(String instrument, String runID) throws Exception {
-		String variantCallerCommand = String.format("ls /storage/instruments/%s/*_%s/plugin_out/ | grep variantCaller_out", instrument, runID);
+	public static ArrayList<String> getCandidateVariantCallerIDs(Instrument instrument, RunFolder runFolder) throws Exception {
+		String variantCallerCommand = String.format("ls /storage/instruments/%s/%s/plugin_out/ | grep variantCaller_out", instrument, runFolder);
 		CommandResponse variantCallerResult = SSHConnection.executeCommandAndGetOutput(variantCallerCommand);
 		if(variantCallerResult.exitStatus != 0) {
-			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runID));
+			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runFolder));
 		}
 		return variantCallerResult.responseLines;
 	}
 
-	public static boolean checkProtonCopyComplete(String instrument, String runID) throws Exception {
-		String checkCommand = String.format("ls /storage/instruments/%s/*_%s/CopyComplete.txt ", instrument, runID);
+	public static boolean checkProtonCopyComplete(Instrument instrument, RunFolder runFolder) throws Exception {
+		String checkCommand = String.format("ls /storage/instruments/%s/%s/CopyComplete.txt ", instrument, runFolder);
 		CommandResponse rs = SSHConnection.executeCommandAndGetOutput(checkCommand);
 
 		if (rs.exitStatus != 0) {
@@ -185,11 +185,11 @@ public class SSHConnection {
 		return status;
 	}
 	
-	public static ArrayList<String> getSampleListIon(String instrument, String runID, String variantCallerID) throws Exception {
-		String sampleListCommand = String.format("ls /storage/instruments/%s/*_%s/plugin_out/%s/ -F | grep / | grep Ion", instrument, runID, variantCallerID);
+	public static ArrayList<String> getSampleListIon(Instrument instrument, RunFolder runFolder, String variantCallerID) throws Exception {
+		String sampleListCommand = String.format("ls /storage/instruments/%s/%s/plugin_out/%s/ -F | grep / | grep Ion", instrument, runFolder, variantCallerID);
 		CommandResponse sampleListResult = SSHConnection.executeCommandAndGetOutput(sampleListCommand);
 		if(sampleListResult.exitStatus != 0) {
-			throw new Exception(String.format("Error finding samples (%s, %s, %s)", instrument, runID, variantCallerID));
+			throw new Exception(String.format("Error finding samples (%s, %s, %s)", instrument, runFolder, variantCallerID));
 		}
 		parseSampleListIon(sampleListResult.responseLines);
 		return sampleListResult.responseLines;
@@ -217,11 +217,11 @@ public class SSHConnection {
 	}
 
 	
-	public static ArrayList<String> getSampleListIllumina(String instrument, String runFolderName) throws Exception {
-		String sampleListCommand = String.format("cat /storage/instruments/%s/%s/SampleSheet.csv", instrument, runFolderName);
+	public static ArrayList<String> getSampleListIllumina(Instrument instrument, RunFolder runFolder) throws Exception {
+		String sampleListCommand = String.format("cat /storage/instruments/%s/%s/SampleSheet.csv", instrument, runFolder);
 		CommandResponse sampleListResult = SSHConnection.executeCommandAndGetOutput(sampleListCommand);
 		if(sampleListResult.exitStatus != 0) {
-			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runFolderName));
+			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runFolder));
 		}
 		parseSampleListIllumnina(sampleListResult.responseLines);
 		return sampleListResult.responseLines;
@@ -342,7 +342,6 @@ public class SSHConnection {
 	}
 
 	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerWorker serverWorker) throws Exception {
-
 	    //create a local temp file
 		int bamCoverage = 25;
         File tempFile = File.createTempFile(sample.sampleName+"_"+sample.runID+"_",".params");
@@ -408,17 +407,11 @@ public class SSHConnection {
         
         //delete local temp file
         deleteFile(tempFile);
-
 		loadIGVButton.setText("Server started.");
-
         createTempBamFileONServer(tempFile.getName());
-
 		loadIGVButton.setText("Finished server work.");
-
 		serverWorker.setStatus(1);
-
         return tempFile.getName();
-
 	}
 
 	private static void createTempBamFileONServer(String fileName) throws Exception {
@@ -431,7 +424,7 @@ public class SSHConnection {
 
     public static File copyTempBamFileONLocal(Sample sample, SftpProgressMonitor progressMonitor, String tempBamFileName ) throws Exception{
 
-        String runIDFolder = temporaryHMVVDirectory + File.separator + sample.instrument + File.separator + sample.runID + "_filtered";
+        String runIDFolder = temporaryHMVVDirectory + File.separator + sample.instrument + File.separator + sample.runFolder.runFolderName + "_filtered";
         new File(runIDFolder).mkdirs();
 
         String serverFileName = tempBamFileName+".bam";
@@ -513,7 +506,7 @@ public class SSHConnection {
     }
 
 	public static ArrayList<String> readTMBSeqStatsFile(TMBSample sample) throws Exception{
-		String command = "tail -n +2  /storage/analysis/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/*_"+sample.runID+"_*/"+sample.sampleName+"/Paired/"+
+		String command = "tail -n +2  /storage/analysis/environments/" + Configurations.getEnvironment() + "/"+sample.instrument+ "Analysis/tmbAssay/"+sample.runFolder.runFolderName+"/"+sample.sampleName+"/Paired/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+"/"+
 				sample.sampleName+"_"+sample.getNormalSampleName()+".final_result.txt";
 		CommandResponse rs = executeCommandAndGetOutput(command);

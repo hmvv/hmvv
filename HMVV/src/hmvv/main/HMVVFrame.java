@@ -27,6 +27,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.gui.sampleList.TumorMutationBurdenFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.model.Assay;
 import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
@@ -118,8 +119,8 @@ public class HMVVFrame extends JFrame{
 		adminMenu.addSeparator();
 		adminMenu.add(qualityControlMenuItem);
 		try{
-			for(String assay : DatabaseCommands.getAllAssays()){
-				if(assay.equals("tmb")) {
+			for(Assay assay : DatabaseCommands.getAllAssays()){
+				if(assay.assayName.equals("tmb")) {
 					JMenuItem tmbDashboard = new JMenuItem(assay + "_Assay");
 					qualityControlMenuItem.add(tmbDashboard);
 					tmbDashboard.addActionListener(new ActionListener(){
@@ -141,7 +142,7 @@ public class HMVVFrame extends JFrame{
 						public void actionPerformed(ActionEvent e) {
 							try {
 								TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
-								QualityControlFrame qcFrame = new QualityControlFrame(HMVVFrame.this, ampliconTrends, assay, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+								QualityControlFrame qcFrame = new QualityControlFrame(HMVVFrame.this, ampliconTrends, assay.assayName, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
 								qcFrame.setVisible(true);
 							} catch (Exception e1) {
 								HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVFrame.this, e1);

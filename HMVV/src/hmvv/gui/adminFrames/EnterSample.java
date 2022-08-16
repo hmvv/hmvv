@@ -7,7 +7,10 @@ import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
+import hmvv.model.Assay;
+import hmvv.model.Instrument;
 import hmvv.model.Patient;
+import hmvv.model.RunFolder;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
 
@@ -35,8 +38,8 @@ public class EnterSample extends JDialog {
     private JTextArea textNote;
     private JTextField textBarcode;
 
-    private JComboBox<String> comboBoxInstrument;
-    private JComboBox<String> comboBoxAssay;
+    private JComboBox<Instrument> comboBoxInstrument;
+    private JComboBox<Assay> comboBoxAssay;
     private JComboBox<String> comboBoxCoverageIDList;
     private JComboBox<String> comboBoxVariantCallerIDList;
     private JComboBox<String> comboBoxSample;
@@ -76,12 +79,12 @@ public class EnterSample extends JDialog {
     }
     
     private void createComponents(){
-        comboBoxInstrument = new JComboBox<String>();
+        comboBoxInstrument = new JComboBox<Instrument>();
         try{
-            for(String instrument : DatabaseCommands.getAllInstruments()){
+            for(Instrument instrument : DatabaseCommands.getAllInstruments()){
                 // remove instruments during sample entry, these cannot be deleted in the database
                 // as we want all the samples displayed on the samplelist
-                if(instrument.equals("pgm") || instrument.equals("miseq") || instrument.equals("nextseq550")){continue;}
+                if(instrument.instrumentName.equals("pgm") || instrument.instrumentName.equals("miseq")){continue;}
                 comboBoxInstrument.addItem(instrument);
             }
         }catch(Exception e){
@@ -100,7 +103,7 @@ public class EnterSample extends JDialog {
         comboBoxSample = new JComboBox<String>();
 
         comboBoxTMBNormalSample= new JComboBox<String>();
-        comboBoxAssay = new JComboBox<String>();
+        comboBoxAssay = new JComboBox<Assay>();
         try {
 			findAssays();
 		} catch (Exception e) {
@@ -222,7 +225,7 @@ public class EnterSample extends JDialog {
                     @Override
                     public void run() {
                         try {
-                            findRun(textRunID.getText(), comboBoxSample,false);
+                            findRun(textRunID.getText(), comboBoxSample, false);
                         } catch (Exception e) {
                             JOptionPane.showMessageDialog(EnterSample.this, "Error finding run: " + e.getMessage());
                         }
@@ -366,16 +369,16 @@ public class EnterSample extends JDialog {
     }
 
     private void findAssays() throws Exception{
-        String instrument = comboBoxInstrument.getSelectedItem().toString();
+        Instrument instrument = (Instrument) comboBoxInstrument.getSelectedItem();
         comboBoxAssay.removeAllItems();
-        for(String assay : DatabaseCommands.getAssaysForInstrument(instrument)){
+        for(Assay assay : DatabaseCommands.getAssaysForInstrument(instrument)){
             comboBoxAssay.addItem(assay);
         }
     }
 
     private void findRun(String runID, JComboBox<String> comboboxSample, boolean isTMBNormal) throws Exception{
 
-        String instrument = comboBoxInstrument.getSelectedItem().toString();
+        Instrument instrument = (Instrument) comboBoxInstrument.getSelectedItem();
         try{
             Integer.parseInt(runID);
         }catch(Exception e){
@@ -389,11 +392,11 @@ public class EnterSample extends JDialog {
             clearAndDisableSampleRecords();
         }
 
-
-        if(instrument.equals("miseq") || instrument.equals("nextseq") || instrument.equals("novaseq") ){
-            findRunIllumina(instrument, runID, comboboxSample, isTMBNormal);
-        }else if(instrument.equals("pgm") || instrument.equals("proton")){
-            findRunIon(instrument, runID);
+        RunFolder runFolder = new RunFolder("TODO");//TODO get the run folder name
+        if(instrument.instrumentName.equals("miseq") || instrument.instrumentName.equals("nextseq") || instrument.instrumentName.equals("novaseq") ){
+            findRunIllumina(instrument, runFolder, comboboxSample, isTMBNormal);
+        }else if(instrument.instrumentName.equals("pgm") || instrument.instrumentName.equals("proton")){
+            findRunIon(instrument, runFolder);
         }else {
             throw new Exception(String.format("Unsupported instrument (%s)", instrument));
         }
@@ -405,15 +408,15 @@ public class EnterSample extends JDialog {
 
     }
 
-    private void findRunIllumina(String instrument, String runID,JComboBox<String> combobox,boolean isTMBNormal) throws Exception {
-        ArrayList<String> sampeIDList = SSHConnection.getSampleListIllumina(instrument, runID);
+    private void findRunIllumina(Instrument instrument, RunFolder runFolder, JComboBox<String> combobox, boolean isTMBNormal) throws Exception {
+        ArrayList<String> sampeIDList = SSHConnection.getSampleListIllumina(instrument, runFolder);
         fillSample(sampeIDList,combobox,isTMBNormal);
     }
 
-    private void findRunIon(String instrument, String runID) throws Exception {
-        if (SSHConnection.checkProtonCopyComplete(instrument,runID)) {
-            ArrayList<String> coverageIDList = SSHConnection.getCandidateCoverageIDs(instrument, runID);
-            ArrayList<String> variantCallerIDList = SSHConnection.getCandidateVariantCallerIDs(instrument, runID);
+    private void findRunIon(Instrument instrument, RunFolder runFolder) throws Exception {
+        if (SSHConnection.checkProtonCopyComplete(instrument,runFolder)) {
+            ArrayList<String> coverageIDList = SSHConnection.getCandidateCoverageIDs(instrument, runFolder);
+            ArrayList<String> variantCallerIDList = SSHConnection.getCandidateVariantCallerIDs(instrument, runFolder);
             fillComboBoxes(coverageIDList, variantCallerIDList);
         }else{
             JOptionPane.showMessageDialog(EnterSample.this, "Please try again when the run is complete.");
@@ -422,8 +425,9 @@ public class EnterSample extends JDialog {
     }
 
     private void fillSampleIon() throws Exception{
-        String instrument = comboBoxInstrument.getSelectedItem().toString();
+        Instrument instrument = (Instrument)comboBoxInstrument.getSelectedItem();
         String runID = textRunID.getText();
+        RunFolder runFolder = new RunFolder("TODO");//TODO get the run folder name
         String variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
 
         try{
@@ -431,8 +435,7 @@ public class EnterSample extends JDialog {
         }catch(Exception e){
             throw new Exception("Run ID must be an integer.");
         }
-
-        ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runID, variantCallerID);
+        ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runFolder, variantCallerID);
         fillSample(sampleIDList,comboBoxSample,false);
     }
 
@@ -648,8 +651,8 @@ public class EnterSample extends JDialog {
         }
 
         int sampleID = -1;//This will be computed by the database when the sample is inserted
-        String assay = comboBoxAssay.getSelectedItem().toString();
-        String instrument = comboBoxInstrument.getSelectedItem().toString();
+        Assay assay = (Assay) comboBoxAssay.getSelectedItem();
+        Instrument instrument = (Instrument) comboBoxInstrument.getSelectedItem();
         String mrn = textMRN.getText();
         String lastName = textlastName.getText();
         String firstName = textFirstName.getText();
@@ -675,7 +678,8 @@ public class EnterSample extends JDialog {
         String note = textNote.getText();
         String enteredBy = SSHConnection.getUserName();
 
-        if (assay.equals("tmb")){
+        RunFolder runFolder = new RunFolder("TODO");
+        if (assay.assayName.equals("tmb")){
 
             if(comboBoxTMBNormalSample.getSelectedItem().toString().equals(comboBoxSample.getSelectedItem().toString()) &&
                 textRunID.getText().equals(textTMBNormalRunID.getText())) {
@@ -683,13 +687,14 @@ public class EnterSample extends JDialog {
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
              // TODO  replace comboBoxInstrument with normal sample instrument in future
-            return new TMBSample(sampleID, assay, instrument, mrn, lastName, firstName, orderNumber,
+             //TODO run folder
+            return new TMBSample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
                     textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{
-            return new Sample(sampleID, assay, instrument, mrn, lastName, firstName, orderNumber,
+            return new Sample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
         }
     }

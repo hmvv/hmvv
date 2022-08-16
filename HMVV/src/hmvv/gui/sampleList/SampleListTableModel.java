@@ -132,7 +132,7 @@ public class SampleListTableModel extends AbstractTableModel{
 			if(s.runID.equals("") || s.sampleName.equals("")){
 				continue;
 			}
-			if(s.instrument.equals(instrument) && s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
+			if(s.instrument.instrumentName.equals(instrument) && s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
 				return s;
 			}
 		}

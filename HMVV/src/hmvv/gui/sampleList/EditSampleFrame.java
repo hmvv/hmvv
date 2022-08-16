@@ -142,13 +142,13 @@ public class EditSampleFrame extends JDialog {
 		labelPanel.add(createPair("Sample ID", createJLabel(sample.sampleID+"")));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
-		labelPanel.add(createPair("Instrument", createJLabel(sample.instrument)));
+		labelPanel.add(createPair("Instrument", createJLabel(sample.instrument.instrumentName)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Run ID", createJLabel(sample.runID)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
-		labelPanel.add(createPair("Assay", createJLabel(sample.assay)));
+		labelPanel.add(createPair("Assay", createJLabel(sample.assay.assayName)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Sample Name", createJLabel(sample.sampleName)));
