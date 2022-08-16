@@ -206,12 +206,22 @@ public class SSHConnection {
 			responseLines.set(i, responseLines.get(i).replaceAll("/", ""));
 		}
 	}
+
+	public static String getRunFolderIllumina(String instrument, String runID) throws Exception {
+		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s_*", instrument, runID);
+		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
+		if(runFolderResult.exitStatus != 0) {
+			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
+		}
+		return runFolderResult.responseLines.get(0);
+	}
+
 	
-	public static ArrayList<String> getSampleListIllumina(String instrument, String runID) throws Exception {
-		String sampleListCommand = String.format("cat /storage/instruments/%s/*_%s_*/SampleSheet.csv", instrument, runID);
+	public static ArrayList<String> getSampleListIllumina(String instrument, String runFolderName) throws Exception {
+		String sampleListCommand = String.format("cat /storage/instruments/%s/%s/SampleSheet.csv", instrument, runFolderName);
 		CommandResponse sampleListResult = SSHConnection.executeCommandAndGetOutput(sampleListCommand);
 		if(sampleListResult.exitStatus != 0) {
-			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runID));
+			throw new Exception(String.format("Error finding samples (%s, %s)", instrument, runFolderName));
 		}
 		parseSampleListIllumnina(sampleListResult.responseLines);
 		return sampleListResult.responseLines;

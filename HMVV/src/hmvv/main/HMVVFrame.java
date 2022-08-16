@@ -19,6 +19,7 @@ import javax.swing.JTabbedPane;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.adminFrames.DatabaseInformation;
 import hmvv.gui.adminFrames.EnterSample;
+import hmvv.gui.adminFrames.EnterHEMESample;
 import hmvv.gui.adminFrames.MonitorPipelines;
 import hmvv.gui.adminFrames.QualityControlFrame;
 import hmvv.gui.adminFrames.QualityControlTumorMutationBurden;
@@ -41,6 +42,7 @@ public class HMVVFrame extends JFrame{
 	private JMenuBar menuBar;
 	private JMenu adminMenu;
 	private JMenuItem enterSampleMenuItem;
+	private JMenuItem enterHEMESampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
@@ -97,7 +99,9 @@ public class HMVVFrame extends JFrame{
 		menuBar = new JMenuBar();
 		adminMenu = new JMenu("Admin");
 		adminMenu.setFont(GUICommonTools.TAHOMA_BOLD_17);
-		
+
+		enterHEMESampleMenuItem = new JMenuItem("Enter HEME Samples");
+		enterHEMESampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		enterSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
@@ -108,6 +112,7 @@ public class HMVVFrame extends JFrame{
 
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
+		adminMenu.add(enterHEMESampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
 
 		adminMenu.addSeparator();
@@ -163,6 +168,9 @@ public class HMVVFrame extends JFrame{
 					if(e.getSource() == enterSampleMenuItem){
 						EnterSample sampleEnter = new EnterSample(HMVVFrame.this, samplePanel);
 						sampleEnter.setVisible(true);
+					}else if(e.getSource() == enterHEMESampleMenuItem){
+						EnterHEMESample sampleHEMEEnter = new EnterHEMESample(HMVVFrame.this, samplePanel);
+						sampleHEMEEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem) {
 						handleMonitorPipelineClick();
 					}else if(e.getSource() == databaseInformationMenuItem){
@@ -175,6 +183,7 @@ public class HMVVFrame extends JFrame{
 		};
 
 		enterSampleMenuItem.addActionListener(listener);
+		enterHEMESampleMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);
 		databaseInformationMenuItem.addActionListener(listener);
