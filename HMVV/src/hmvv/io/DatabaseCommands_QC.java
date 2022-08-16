@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
 import hmvv.model.AmpliconCount;
+import hmvv.model.Assay;
 import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.QCDataElement;
 
@@ -54,18 +55,18 @@ public class DatabaseCommands_QC {
 	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
 	 * @throws Exception
 	 */
-	static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(String assay) throws Exception{
+	static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(Assay assay) throws Exception{
 		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.readDepth from sampleAmplicons"
 				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " where samples.lastName like 'Horizon%' ";
 
 		String geneFilter;
-		if(assay.equals("heme")) {
-			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS') and assayName = 'heme'";
-		}else if(assay.equals("gene50")) {
-			geneFilter = " and (sampleAmplicons.gene like '%EGFR%' or sampleAmplicons.gene like '%KRAS%' or sampleAmplicons.gene like '%NRAS%') and assayName = 'gene50'";
-		}else if(assay.equals("neuro")) {
+		if(assay.assayName.equals("heme")) {
+			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS') and assay = 'heme'";
+		}else if(assay.assayName.equals("gene50")) {
+			geneFilter = " and (sampleAmplicons.gene like '%EGFR%' or sampleAmplicons.gene like '%KRAS%' or sampleAmplicons.gene like '%NRAS%') and assay = 'gene50'";
+		}else if(assay.assayName.equals("neuro")) {
 			//TODO the sampleAmplicons table currently does not properly store gene name
 			//geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS') and assayName = 'neuro'";
 			throw new Exception("Unsupported Assay: " + assay);
@@ -83,7 +84,7 @@ public class DatabaseCommands_QC {
 
 		while(rs.next()){
 			String gene = rs.getString("gene");
-			if(assay.equals("gene50")) {
+			if(assay.assayName.equals("gene50")) {
 				String[] splitGene = gene.split("_");
 				if(splitGene.length == 3) {//the expected value
 					gene = splitGene[1];
@@ -109,30 +110,29 @@ public class DatabaseCommands_QC {
 	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
 	 * @throws Exception
 	 */
-	static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(String assay) throws Exception{
+	static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(Assay assay) throws Exception{
 		String query = "select sampleVariants.sampleID, sampleVariants.gene, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.altFreq, cosmicID"
 				+ " from samples"
-				+ " join assays on assays.assayID = samples.assayID"
 				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
 				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
 				+ " where samples.lastName like 'Horizon%' "
 				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
 
 		String geneFilter;
-		if(assay.equals("heme")) {
+		if(assay.assayName.equals("heme")) {
 			geneFilter =
 					//COSM1140132 and COSM532 have the same coordinates and track together
 					//COSM1135366 and COSM521 have the same coordinates and track together
 					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM521' or cosmicID = 'COSM532')"
-					+ " and assays.assayName = 'heme' ";
-		}else if(assay.equals("gene50")) {
+					+ " and samples.assay = 'heme' ";
+		}else if(assay.assayName.equals("gene50")) {
 			geneFilter =
 					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
-							+ " and assays.assayName = 'gene50' ";
-		}else if(assay.equals("neuro")) {
+							+ " and samples.assay = 'gene50' ";
+		}else if(assay.assayName.equals("neuro")) {
 			geneFilter =
 					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM97131' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
-							+ " and assays.assayName = 'neuro' ";
+							+ " and samples.samples = 'neuro' ";
 		}else {
 			throw new Exception("Unsupported Assay: " + assay);
 		}

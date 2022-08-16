@@ -34,15 +34,15 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Assay Queries
 	 *************************************************************************/
-	public static ArrayList<String> getAllInstruments() throws Exception{
+	public static ArrayList<Instrument> getAllInstruments() throws Exception{
 		return DatabaseCommands_Assays.getAllInstruments();
 	}
 	
-	public static ArrayList<String> getAllAssays() throws Exception{
+	public static ArrayList<Assay> getAllAssays() throws Exception{
 		return DatabaseCommands_Assays.getAllAssays();
 	}
 
-	public static ArrayList<String> getAssaysForInstrument(String instrument) throws Exception{
+	public static ArrayList<Assay> getAssaysForInstrument(Instrument instrument) throws Exception{
 		return DatabaseCommands_Assays.getAssaysForInstrument(instrument);
 	}
 
@@ -155,8 +155,8 @@ public class DatabaseCommands {
 		return DatabaseCommands_Pipelines.getAllPipelines();
 	}
 	
-	public static ArrayList<PipelineStatus> getPipelineDetail(int queueID) throws Exception{
-		return DatabaseCommands_Pipelines.getPipelineDetail(queueID);
+	public static ArrayList<PipelineStatus> getPipelineDetail(Pipeline pipeline) throws Exception{
+		return DatabaseCommands_Pipelines.getPipelineDetail(pipeline);
 	}
 	
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
@@ -174,11 +174,11 @@ public class DatabaseCommands {
 		return DatabaseCommands_QC.getFailedAmplicon(sampleID);
 	}
 	
-	public static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(String assay) throws Exception{
+	public static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(Assay assay) throws Exception{
 		return DatabaseCommands_QC.getAmpliconQCData(assay);
 	}
 	
-	public static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(String assay) throws Exception{
+	public static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(Assay assay) throws Exception{
 		return DatabaseCommands_QC.getSampleQCData(assay);
 	}
 

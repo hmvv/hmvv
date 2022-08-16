@@ -24,6 +24,7 @@ import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.model.Assay;
 import hmvv.model.Sample;
 
 
@@ -36,7 +37,7 @@ public class SampleSearchFrame extends JFrame {
 	private JTextField textfirstName;
 	private DatePicker datePickerFrom;
 	private DatePicker datePickerTo;
-	private JComboBox<String> assayComboBox;
+	private JComboBox<Assay> assayComboBox;
 	
 	private JButton okButton;
 	private JButton cancelButton;
@@ -131,12 +132,12 @@ public class SampleSearchFrame extends JFrame {
 			contentPanel.add(lblTo);
 		}
 
-		assayComboBox = new JComboBox<String>();
+		assayComboBox = new JComboBox<Assay>();
 		assayComboBox.setBounds(140, 39, 183, 20);
-		assayComboBox.addItem("All");
+		assayComboBox.addItem(Assay.getAssay("All"));
 		
 		try {
-			for(String assay : DatabaseCommands.getAllAssays()){
+			for(Assay assay : DatabaseCommands.getAllAssays()){
 				assayComboBox.addItem(assay);
 			}
 		} catch (Exception e) {
@@ -213,8 +214,8 @@ public class SampleSearchFrame extends JFrame {
 	
 	
 	public boolean include(Sample sample){
-		String assay = assayComboBox.getSelectedItem().toString();
-		if(!assay.equals("All") && !assay.equals(sample.assay)){
+		Assay assay = (Assay)assayComboBox.getSelectedItem();
+		if(!assay.assayName.equals("All") && !assay.equals(sample.assay)){
 			return false;
 		}
 		

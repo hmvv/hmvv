@@ -68,10 +68,10 @@ public class SampleListFrame extends JPanel {
 
 	//Filters
 	private JLabel assayLabel;
-	private JComboBox<String> assayComboBox;
+	private JComboBox<Assay> assayComboBox;
 	
 	private JLabel instrumentLabel;
-	private JComboBox<String> instrumentComboBox;
+	private JComboBox<Instrument> instrumentComboBox;
 	
 	private JLabel mrnLabel;
 	private JTextField mrnTextField;
@@ -184,20 +184,20 @@ public class SampleListFrame extends JPanel {
 		tableScrollPane = new JScrollPane();
 		tableScrollPane.setViewportView(table);
 
-		assayComboBox = new JComboBox<String>();
+		assayComboBox = new JComboBox<Assay>();
 		try {
-			assayComboBox.addItem("All");
-			for(String item : DatabaseCommands.getAllAssays()){
+			assayComboBox.addItem(Assay.getAssay("All"));
+			for(Assay item : DatabaseCommands.getAllAssays()){
 				assayComboBox.addItem(item);	
 			}
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 		}
 		
-		instrumentComboBox = new JComboBox<String>();
+		instrumentComboBox = new JComboBox<Instrument>();
 		try {
-			instrumentComboBox.addItem("All");
-			for(String item : DatabaseCommands.getAllInstruments()){
+			instrumentComboBox.addItem(Instrument.getInstrument("All"));
+			for(Instrument item : DatabaseCommands.getAllInstruments()){
 				instrumentComboBox.addItem(item);	
 			}
 		} catch (Exception e) {
@@ -411,7 +411,7 @@ public class SampleListFrame extends JPanel {
 		Sample currentSample = getCurrentlySelectedSample();
 	    if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
 		    parent.createTumorMutationBurdenFrame((TMBSample) currentSample);
-		} else if (currentSample.assay.equals("cardiac_exome")){
+		} else if (currentSample.assay.assayName.equals("cardiac_exome")){
 			MutationListLoaderGermline loader = new MutationListLoaderGermline(parent, currentSample);
 			loader.execute();
 		}else{
@@ -508,7 +508,7 @@ public class SampleListFrame extends JPanel {
 				}
 				int row = entry.getIdentifier();
 				Sample sample = tableModel.getSample(row);
-				if(assayComboBox.getSelectedItem().toString().equals(sample.assay)){
+				if(assayComboBox.getSelectedItem().toString().equals(sample.assay.assayName)){
 					return true;
 				}else{
 					return false;
@@ -521,7 +521,7 @@ public class SampleListFrame extends JPanel {
 				}
 				int row = entry.getIdentifier();
 				Sample sample = tableModel.getSample(row);
-				if(instrumentComboBox.getSelectedItem().toString().equals(sample.instrument)){
+				if(instrumentComboBox.getSelectedItem().toString().equals(sample.instrument.instrumentName)){
 					return true;
 				}else{
 					return false;

@@ -31,13 +31,12 @@ public class DatabaseCommands_Mutations {
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
 				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID,t2.pubmed,"
-				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, t1.tumorSource, t1.tumorPercent,"
+				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
 				+ " t8.AF "
 				+ " from sampleVariants as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
-				+ " join assays as t6 on t1.assayID = t6.assayID"
 				+ " left join db_g1000_phase3v1 as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
 				+ " left join db_clinvar_42019 as t5"
@@ -69,12 +68,11 @@ public class DatabaseCommands_Mutations {
 				+ " t2.revel,t2.cadd_phred, t2.canonical, t2.sift,t2.polyphen,"
 				+ " t2.phastCons100, t2.phyloP100, t2.phastCons20, t2.phyloP20, t2.GERP_RS,"
 		        + "  t2.hgmd_ID, t2.hgmd_Variant, t2.hgmd_AAchange, t2.hgmd_Disease, t2.hgmd_Category, t2.hgmd_PMID,t2.hgmd_Citation,t2.hgmd_ExtraCitations,"
-				+ " t1.lastName, t1.firstName, t1.orderNumber, t6.assayName, "
+				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, "
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
 				+ " t8.AF, t8.AF_afr, t8.AF_amr, t8.AF_asj, t8.AF_eas, t8.AF_fin, t8.AF_nfe, t8.AF_sas, t8.AF_oth, t8.AF_male, t8.AF_female "
 				+ " from sampleVariantsGermline as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
-				+ " join assays as t6 on t1.assayID = t6.assayID"
 				+ " left join db_clinvar_42019 as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				+ " left join db_gnomad_r211_lf as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
@@ -241,10 +239,7 @@ public class DatabaseCommands_Mutations {
 	 * Acquires the number of occurrences of this mutation from the database.
 	 */
 	static int getOccurrenceCount(MutationCommon mutation) throws Exception{
-
         Coordinate coordinate = mutation.getCoordinate();
-		String assay = mutation.getAssay();
-
 		String query = "select count as occurrence "
 					+ " from occurrenceCount"
 					+ " where chr = ? and pos = ? and ref = ? and alt = ? and assay = ?";
@@ -254,7 +249,7 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.setString(2, coordinate.getPos());
 		preparedStatement.setString(3, coordinate.getRef());
 		preparedStatement.setString(4, coordinate.getAlt());
-		preparedStatement.setString(5, assay);
+		preparedStatement.setString(5, mutation.getAssay().assayName);
 
 		ResultSet rs = preparedStatement.executeQuery();
 		if(rs.next()){
@@ -315,7 +310,7 @@ public class DatabaseCommands_Mutations {
 			mutation.setLastName(getStringOrBlank(rs, "lastName"));
 			mutation.setFirstName(getStringOrBlank(rs, "firstName"));
 			mutation.setOrderNumber(getStringOrBlank(rs, "orderNumber"));
-			mutation.setAssay(getStringOrBlank(rs, "assayName"));
+			mutation.setAssay(Assay.getAssay(getStringOrBlank(rs, "assay")));
 			mutation.setSampleID(getIntegerOrNull(rs, "sampleID"));
 			mutation.setTumorSource(getStringOrBlank(rs, "tumorSource"));
 			mutation.setTumorPercent(getStringOrBlank(rs, "tumorPercent"));
@@ -421,7 +416,7 @@ public class DatabaseCommands_Mutations {
 			mutation.setLastName(getStringOrBlank(rs, "lastName"));
 			mutation.setFirstName(getStringOrBlank(rs, "firstName"));
 			mutation.setOrderNumber(getStringOrBlank(rs, "orderNumber"));
-			mutation.setAssay(getStringOrBlank(rs, "assayName"));
+			mutation.setAssay(Assay.getAssay(getStringOrBlank(rs, "assay")));
 			mutation.setSampleID(getIntegerOrNull(rs, "sampleID"));
 
 

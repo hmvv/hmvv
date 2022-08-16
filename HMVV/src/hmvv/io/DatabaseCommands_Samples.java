@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import hmvv.main.Configurations;
+import hmvv.model.Assay;
 import hmvv.model.ExomeTumorMutationBurden;
+import hmvv.model.Instrument;
+import hmvv.model.RunFolder;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
 
@@ -21,8 +24,8 @@ public class DatabaseCommands_Samples {
 	}
 	
 	static void insertDataIntoDatabase(Sample sample) throws Exception{
-		String assay = sample.assay;
-		String instrument = sample.instrument;
+		Assay assay = sample.assay;
+		Instrument instrument = sample.instrument;
 		String lastName = sample.getLastName();
 		String firstName = sample.getFirstName();
 		String mrn = sample.getMRN();
@@ -41,13 +44,12 @@ public class DatabaseCommands_Samples {
 		String enteredBy = sample.enteredBy;
 
 		//check if sample is already present in data
-		String checkSample = "select samples.runID, samples.sampleName, assays.assayName, instruments.instrumentName from samples " +
+		String checkSample = "select samples.runID, samples.sampleName, samples.assay, instruments.instrumentName from samples " +
 				"join instruments on instruments.instrumentID = samples.instrumentID " +
-				"join assays on assays.assayID = samples.assayID " +
-				"where instruments.instrumentName = ? and assays.assayName = ? and samples.runID = ? and samples.sampleName = ? ";
+				"where instruments.instrumentName = ? and samples.assay = ? and samples.runID = ? and samples.sampleName = ? ";
 		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
-		pstCheckSample.setString(1, instrument);
-		pstCheckSample.setString(2, assay);
+		pstCheckSample.setString(1, instrument.instrumentName);
+		pstCheckSample.setString(2, assay.assayName);
 		pstCheckSample.setString(3, runID);
 		pstCheckSample.setString(4, sampleName);
 		ResultSet rsCheckSample = pstCheckSample.executeQuery();
@@ -64,14 +66,11 @@ public class DatabaseCommands_Samples {
 		}
 
 		String enterSample = "insert into samples "
-				+ "(assayID, instrumentID, runID, sampleName, coverageID, callerID, lastName, firstName, mrn,orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis) "
-				+ "values ("
-				+ "	(select assayID from assays where assayName = ?),"
-				+ "	(select instrumentID from instruments where instrumentName = ? ),"
-				+ "	?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+				+ "(assay, instrument, runID, sampleName, coverageID, callerID, lastName, firstName, mrn,orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis) "
+				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
-		pstEnterSample.setString(1, assay);
-		pstEnterSample.setString(2, instrument);
+		pstEnterSample.setString(1, assay.assayName);
+		pstEnterSample.setString(2, instrument.instrumentName);
 		pstEnterSample.setString(3, runID);
 		pstEnterSample.setString(4, sampleName);
 		pstEnterSample.setString(5, coverageID);
@@ -94,12 +93,10 @@ public class DatabaseCommands_Samples {
 
 		//get ID
 		String findID = "select samples.sampleID from samples " +
-				"join instruments on instruments.instrumentID = samples.instrumentID " +
-				"join assays on assays.assayID = samples.assayID " +
-				"where instruments.instrumentName = ? and assays.assayName = ? and samples.runID = ? and samples.sampleName = ?";
+				"where instruments.instrumentName = ? and samples.assay = ? and samples.runID = ? and samples.sampleName = ?";
 		PreparedStatement pstFindID = databaseConnection.prepareStatement(findID);
-		pstFindID.setString(1, instrument);
-		pstFindID.setString(2, assay);
+		pstFindID.setString(1, instrument.instrumentName);
+		pstFindID.setString(2, assay.assayName);
 		pstFindID.setString(3, runID);
 		pstFindID.setString(4, sampleName);
 		
@@ -130,9 +127,11 @@ public class DatabaseCommands_Samples {
 	private static void queueSampleForRunningPipeline(Sample sample) throws Exception{
 		String queueSample = 
 				"INSERT INTO pipelineQueue "
-				+ "(sampleID, timeSubmitted) VALUES (?, now() )";
+				+ "(instrumentName, runFolderName, sampleName) VALUES (?, ?, ? )";
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
-		pstQueueSample.setInt(1, sample.getSampleID());
+		pstQueueSample.setString(1, sample.instrument.instrumentName);
+		pstQueueSample.setString(2, sample.runFolder.runFolderName);
+		pstQueueSample.setString(3, sample.sampleName);
 		
 		pstQueueSample.executeUpdate();
 		pstQueueSample.close();
@@ -158,17 +157,12 @@ public class DatabaseCommands_Samples {
 		// TODO: watch out for delay due to subquery as sample number increases.
 		// Tested on test env with 2806 samples copied from ngs_live, minor difference
 
-		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.mrn as mrn, s.lastName, s.firstName, s.orderNumber, " +
+		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
-				" t2.instrumentName as normalInstrument , t2.normalPairRunID, t2.normalSampleName " +
+				" t2.normalInstrument, t2.normalPairRunID, t2.normalSampleName " +
 				" from samples as s " +
-				" left join " +
-				" ( select  sampleID,instrumentName, normalPairRunID,normalSampleName from sampleNormalPair " +
-				" join instruments on instruments.instrumentID=normalPairInstrumentID ) as t2 " +
-				" on s.sampleID = t2.sampleID " +
-				" join instruments  as i on i.instrumentID = s.instrumentID " +
-				" join assays as a on a.assayID = s.assayID " ;
+				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalInstrument " ;
 
 		if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)){
 			query = query + "  where s.runDate >= DATE_SUB(NOW(), INTERVAL ? day) ";
@@ -229,17 +223,12 @@ public class DatabaseCommands_Samples {
 	}
 
 	private static ArrayList<Sample> getExceptionSamples(int sampleID , String sampleMRN ) throws Exception{
-		String query = "select s.sampleID, a.assayName as assay, i.instrumentName as instrument, s.mrn as mrn, s.lastName, s.firstName, s.orderNumber, " +
+		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
-				" t2.instrumentName as normalInstrument , t2.normalPairRunID, t2.normalSampleName " +
+				" t2.normalInstrument, t2.normalPairRunID, t2.normalSampleName " +
 				" from samples as s " +
-				" left join " +
-				" ( select  sampleID,instrumentName, normalPairRunID,normalSampleName from sampleNormalPair " +
-				" join instruments on instruments.instrumentID=normalPairInstrumentID ) as t2 " +
-				" on s.sampleID = t2.sampleID " +
-				" join instruments  as i on i.instrumentID = s.instrumentID " +
-				" join assays as a on a.assayID = s.assayID " +
+				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalInstrument " +
 				" where s.mrn = ? and s.sampleID != ? and " +
                 " s.runDate < DATE_SUB(NOW(), INTERVAL ? day)";
 
@@ -262,8 +251,9 @@ public class DatabaseCommands_Samples {
 		if (assay.equals("tmb")){
 			TMBSample sample = new TMBSample(
 					Integer.parseInt(row.getString("sampleID")),
-					row.getString("assay"),
-					row.getString("instrument"),
+					Assay.getAssay(row.getString("assay")),
+					Instrument.getInstrument(row.getString("instrument")),
+					new RunFolder(row.getString("runFolderName")),
 					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),
@@ -288,8 +278,9 @@ public class DatabaseCommands_Samples {
 		}else {
 			Sample sample = new Sample(
 					Integer.parseInt(row.getString("sampleID")),
-					row.getString("assay"),
-					row.getString("instrument"),
+					Assay.getAssay(row.getString("assay")),
+					Instrument.getInstrument(row.getString("instrument")),
+					new RunFolder(row.getString("runFolderName")),
 					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),

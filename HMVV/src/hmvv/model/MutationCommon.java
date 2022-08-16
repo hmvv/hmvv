@@ -23,7 +23,7 @@ public class MutationCommon {
     private String lastName;
     private String firstName;
     private String orderNumber;
-    private String assay;
+    private Assay assay;
     private Integer sampleID;
 
     //annotation basic
@@ -276,11 +276,11 @@ public class MutationCommon {
         this.orderNumber = orderNumber;
     }
 
-    public String getAssay() {
+    public Assay getAssay() {
         return assay;
     }
 
-    public void setAssay(String assay) {
+    public void setAssay(Assay assay) {
         this.assay = assay;
     }
 
