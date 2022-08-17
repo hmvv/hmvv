@@ -26,6 +26,7 @@ public class DatabaseCommands_Samples {
 	static void insertDataIntoDatabase(Sample sample) throws Exception{
 		Assay assay = sample.assay;
 		Instrument instrument = sample.instrument;
+		RunFolder runFolder = sample.runFolder;
 		String lastName = sample.getLastName();
 		String firstName = sample.getFirstName();
 		String mrn = sample.getMRN();
@@ -44,14 +45,12 @@ public class DatabaseCommands_Samples {
 		String enteredBy = sample.enteredBy;
 
 		//check if sample is already present in data
-		String checkSample = "select samples.runID, samples.sampleName, samples.assay, instruments.instrumentName from samples " +
-				"join instruments on instruments.instrumentID = samples.instrumentID " +
-				"where instruments.instrumentName = ? and samples.assay = ? and samples.runID = ? and samples.sampleName = ? ";
+		String checkSample = "select samples.instrument, samples.runFolderName, samples.sampleName from samples " +
+				"where samples.instrument = ? and samples.runFolderName = ? and samples.sampleName = ? ";
 		PreparedStatement pstCheckSample = databaseConnection.prepareStatement(checkSample);
 		pstCheckSample.setString(1, instrument.instrumentName);
-		pstCheckSample.setString(2, assay.assayName);
-		pstCheckSample.setString(3, runID);
-		pstCheckSample.setString(4, sampleName);
+		pstCheckSample.setString(2, runFolder.runFolderName);
+		pstCheckSample.setString(3, sampleName);
 		ResultSet rsCheckSample = pstCheckSample.executeQuery();
 		Integer sampleCount = 0;
 		while(rsCheckSample.next()){
@@ -66,8 +65,8 @@ public class DatabaseCommands_Samples {
 		}
 
 		String enterSample = "insert into samples "
-				+ "(assay, instrument, runID, sampleName, coverageID, callerID, lastName, firstName, mrn,orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis) "
-				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+				+ "(assay, instrument, runID, sampleName, coverageID, callerID, lastName, firstName, mrn,orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis, runFolderName) "
+				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
 		pstEnterSample.setString(1, assay.assayName);
 		pstEnterSample.setString(2, instrument.instrumentName);
@@ -87,18 +86,18 @@ public class DatabaseCommands_Samples {
 		pstEnterSample.setString(16, enteredBy);
 		pstEnterSample.setString(17, patientHistory);
 		pstEnterSample.setString(18, diagnosis);
+		pstEnterSample.setString(19, runFolder.runFolderName);
 		
 		pstEnterSample.executeUpdate();
 		pstEnterSample.close();
 
 		//get ID
 		String findID = "select samples.sampleID from samples " +
-				"where instruments.instrumentName = ? and samples.assay = ? and samples.runID = ? and samples.sampleName = ?";
+				"where samples.instrument = ? and samples.runFolderName = ? and samples.sampleName = ?";
 		PreparedStatement pstFindID = databaseConnection.prepareStatement(findID);
 		pstFindID.setString(1, instrument.instrumentName);
-		pstFindID.setString(2, assay.assayName);
-		pstFindID.setString(3, runID);
-		pstFindID.setString(4, sampleName);
+		pstFindID.setString(2, runFolder.runFolderName);
+		pstFindID.setString(3, sampleName);
 		
 		ResultSet rsFindID = pstFindID.executeQuery();
 		Integer count = 0;
@@ -124,14 +123,16 @@ public class DatabaseCommands_Samples {
 		queueSampleForRunningPipeline(sample);
 	}
 
+
 	private static void queueSampleForRunningPipeline(Sample sample) throws Exception{
 		String queueSample = 
 				"INSERT INTO pipelineQueue "
-				+ "(instrumentName, runFolderName, sampleName) VALUES (?, ?, ? )";
+				+ "( instrument, runFolderName, sampleName, assay) VALUES (?, ?, ?, ? )";
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.setString(1, sample.instrument.instrumentName);
 		pstQueueSample.setString(2, sample.runFolder.runFolderName);
 		pstQueueSample.setString(3, sample.sampleName);
+		pstQueueSample.setString(4, sample.assay.assayName);
 		
 		pstQueueSample.executeUpdate();
 		pstQueueSample.close();
@@ -157,7 +158,7 @@ public class DatabaseCommands_Samples {
 		// TODO: watch out for delay due to subquery as sample number increases.
 		// Tested on test env with 2806 samples copied from ngs_live, minor difference
 
-		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.lastName, s.firstName, s.orderNumber, " +
+		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
 				" t2.normalInstrument, t2.normalPairRunID, t2.normalSampleName " +
@@ -253,7 +254,7 @@ public class DatabaseCommands_Samples {
 					Integer.parseInt(row.getString("sampleID")),
 					Assay.getAssay(row.getString("assay")),
 					Instrument.getInstrument(row.getString("instrument")),
-					new RunFolder(row.getString("runFolderName")),
+					new RunFolder (row.getString("runFolderName")),
 					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),
@@ -280,7 +281,7 @@ public class DatabaseCommands_Samples {
 					Integer.parseInt(row.getString("sampleID")),
 					Assay.getAssay(row.getString("assay")),
 					Instrument.getInstrument(row.getString("instrument")),
-					new RunFolder(row.getString("runFolderName")),
+					new RunFolder (row.getString("runFolderName")),
 					row.getString("mrn"),
 					row.getString("lastName"),
 					row.getString("firstName"),

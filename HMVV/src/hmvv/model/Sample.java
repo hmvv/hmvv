@@ -26,13 +26,13 @@ public class Sample {
 	private String note;
 	private ArrayList<Sample> patientSamples;
 
-	public Sample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder, String mrn, String lastName, String firstName, String orderNumber,
+	public Sample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder2, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
 			String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
 		this.sampleID = sampleID;
 		this.assay = assay;
 		this.instrument = instrument;
-		this.runFolder = runFolder;
+		this.runFolder = runFolder2;
 		this.mrn = notNull(mrn);
 		this.lastName = notNull(lastName);
 		this.firstName = notNull(firstName);

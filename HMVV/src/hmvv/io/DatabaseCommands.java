@@ -104,7 +104,7 @@ public class DatabaseCommands {
 	public static void insertDataIntoDatabase(Sample sample) throws Exception{
 		DatabaseCommands_Samples.insertDataIntoDatabase(sample);
 	}
-	
+
 	public static ArrayList<Sample> getAllSamples() throws Exception{
 		return DatabaseCommands_Samples.getAllSamples();
 	}

@@ -28,7 +28,7 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 		columns.add(new PipelineTableModelColumn("The runID",
 				"RunID",
 				Integer.class,
-				(Pipeline pipeline) -> pipeline.getRunID()));
+				(Pipeline pipeline) -> pipeline.runFolderName));
 
 		columns.add(new PipelineTableModelColumn("The sample used",
 				"sampleName",

@@ -207,13 +207,22 @@ public class SSHConnection {
 		}
 	}
 
-	public static String getRunFolderIllumina(String instrument, String runID) throws Exception {
+	public static RunFolder getRunFolderIllumina(Instrument instrument, String runID) throws Exception {
 		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s_*", instrument, runID);
 		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
 		if(runFolderResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
 		}
-		return runFolderResult.responseLines.get(0);
+		return new RunFolder(runFolderResult.responseLines.get(0));
+	}
+
+	public static RunFolder getRunFolderIon(Instrument instrument, String runID) throws Exception {
+		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s*", instrument, runID);
+		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
+		if(runFolderResult.exitStatus != 0) {
+			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
+		}
+		return new RunFolder(runFolderResult.responseLines.get(0));
 	}
 
 	

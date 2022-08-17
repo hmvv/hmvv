@@ -8,7 +8,7 @@ import hmvv.io.DatabaseCommands;
 public class Pipeline {
 	
 	public final int sampleID;
-	public final String runFolderName;
+	public final RunFolder runFolderName;
 	public final String sampleName;
 	public final Assay assay;
 	public final Instrument instrument;
@@ -18,7 +18,7 @@ public class Pipeline {
 	public final PipelineProgram pipelineProgram;
 	private int progress;
 	
-	public Pipeline (Integer sampleTableID, String runFolderName, String sampleName, Assay assay, Instrument instrumentName, String status, Timestamp timeStatusUpdated) {
+	public Pipeline (Integer sampleTableID, RunFolder runFolderName, String sampleName, Assay assay, Instrument instrumentName, String status, Timestamp timeStatusUpdated) {
         this.sampleID = sampleTableID;
         this.runFolderName = runFolderName;
         this.sampleName = sampleName;
@@ -35,7 +35,7 @@ public class Pipeline {
 		}
 	}
 
-	public String getRunID() {
+	public RunFolder getRunFolder() {
 		return runFolderName;
 	}
 

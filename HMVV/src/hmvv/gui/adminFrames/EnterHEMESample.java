@@ -1,5 +1,6 @@
 package hmvv.gui.adminFrames;
 
+import java.util.Collections;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
@@ -7,9 +8,13 @@ import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
+import hmvv.model.Assay;
+import hmvv.model.Instrument;
 import hmvv.model.Patient;
+import hmvv.model.RunFolder;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
+import oracle.net.aso.l;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,8 +31,8 @@ public class EnterHEMESample extends JDialog {
     private JTextArea textNote;
     private JTextField textRunFolder;
 
-    private JComboBox<String> comboBoxInstrument;
-    private JComboBox<String> comboBoxAssay;
+    private JComboBox<Instrument> comboBoxInstrument;
+    private JComboBox<Assay> comboBoxAssay;
     private JComboBox<String> comboBoxCoverageIDList;
     private JComboBox<String> comboBoxVariantCallerIDList;
     private JComboBox<String> comboBoxSample;
@@ -42,8 +47,6 @@ public class EnterHEMESample extends JDialog {
     private JPanel samplePanel;
 
     private SampleListFrame sampleListFrame;
-
-    private static String defaultCoverageAndCallerID = "-";
 
     private Thread findRunThread;
     private Thread enterSampleThread;
@@ -69,12 +72,12 @@ public class EnterHEMESample extends JDialog {
     }
     
     private void createComponents(){
-        comboBoxInstrument = new JComboBox<String>();
+        comboBoxInstrument = new JComboBox<Instrument>();
         try{
-            for(String instrument : DatabaseCommands.getAllInstruments()){
+            for(Instrument instrument : DatabaseCommands.getAllInstruments()){
                 // remove instruments during sample entry, these cannot be deleted in the database
                 // as we want all the samples displayed on the samplelist
-                if(instrument.equals("pgm") || instrument.equals("miseq") || instrument.equals("nextseq550")){continue;}
+                if(instrument.instrumentName.equals("pgm") || instrument.instrumentName.equals("miseq")){continue;}
                 comboBoxInstrument.addItem(instrument);
             }
         }catch(Exception e){
@@ -95,7 +98,7 @@ public class EnterHEMESample extends JDialog {
         comboBoxSample = new JComboBox<String>();
 
         comboBoxTMBNormalSample= new JComboBox<String>();
-        comboBoxAssay = new JComboBox<String>();
+        comboBoxAssay = new JComboBox<Assay>();
         try {
 			findAssays();
 		} catch (Exception e) {
@@ -222,11 +225,20 @@ public class EnterHEMESample extends JDialog {
                     enterSampleThread = new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            if(textRunFolder.getText().equals("")){
+                                JOptionPane.showMessageDialog(EnterHEMESample.this, "Please select a run before entering samples.");
+                                return;
+                            }
+                            if(textNote.getText().equals("")){
+                                JOptionPane.showMessageDialog(EnterHEMESample.this, "No samples found. Please select a valid run before entering samples.");
+                                return;
+                            }
+
                             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                             btnEnterSample.setText("Processing...");
                             btnEnterSample.setEnabled(false);
                             try {
-                                //enterData();
+                                enterData();
                                 btnEnterSample.setText("Completed");
                             } catch (Exception e) {
                                 HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterHEMESample.this, e, "Error entering sample data");
@@ -309,17 +321,62 @@ public class EnterHEMESample extends JDialog {
 
     }
 
+    private void enterData() throws Exception{
+        setEnabled(false);
+        try {
+
+            String sampleName = textNote.getText();
+            ArrayList<String> sampleNames = new ArrayList<>();
+            Collections.addAll(sampleNames,sampleName.split("\n"));
+
+
+            // if the list is not empty
+            if(sampleNames.size() != 0){
+            for(int i =0; i < sampleNames.size(); i++){
+                try{
+                    String currentSample =sampleNames.get(i);
+                    Sample sample = constructSampleFromTextFields(currentSample);
+                    DatabaseCommands.insertDataIntoDatabase(sample);
+                    sampleListFrame.addSample(sample);
+
+                }catch(Exception e){
+                    HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterHEMESample.this, e);
+                }
+            
+            }
+        }      
+
+            //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
+            //updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
+            updateSamplePanel(false,comboBoxAssay.getSelectedItem().toString());
+        }finally {
+            setEnabled(true);
+        }
+    }
+
+    private Sample constructSampleFromTextFields(String currentSample) throws Exception{
+        int sampleID = -1;//This will be computed by the database when the sample is inserted
+        Assay assay = (Assay) comboBoxAssay.getSelectedItem();
+        Instrument instrument = (Instrument) comboBoxInstrument.getSelectedItem();
+        String runID = textRunID.getText();
+        RunFolder runFolder = new RunFolder(textRunFolder.getText());
+        String sampleName = currentSample;
+        String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
+        String enteredBy = SSHConnection.getUserName();
+        return new Sample(sampleID, assay, instrument, runFolder, "", "", "", "", "", "", "", runID, sampleName, "", "", runDate, "", "", "", enteredBy);
+    }
+
     private void findAssays() throws Exception{
-        String instrument = comboBoxInstrument.getSelectedItem().toString();
+        Instrument instrument = (Instrument)comboBoxInstrument.getSelectedItem();
         comboBoxAssay.removeAllItems();
-        for(String assay : DatabaseCommands.getAssaysForInstrument(instrument)){
+        for(Assay assay : DatabaseCommands.getAssaysForInstrument(instrument)){
             comboBoxAssay.addItem(assay);
         }
     }
 
     private void findRun(String runID, JComboBox<String> comboboxSample, boolean isTMBNormal) throws Exception{
 
-        String instrument = comboBoxInstrument.getSelectedItem().toString();
+        Instrument instrument = (Instrument)comboBoxInstrument.getSelectedItem();
         try{
             Integer.parseInt(runID);
         }catch(Exception e){
@@ -333,11 +390,11 @@ public class EnterHEMESample extends JDialog {
             //clearAndDisableSampleRecords();
         }
 
-
-        if(instrument.equals("miseq") || instrument.equals("nextseq") || instrument.equals("novaseq") ){
-            findRunIllumina(instrument, runID, comboboxSample, isTMBNormal);
+        RunFolder runFolder = SSHConnection.getRunFolderIllumina(instrument, runID); 
+        if(instrument.instrumentName.equals("miseq") || instrument.instrumentName.equals("nextseq") || instrument.instrumentName.equals("novaseq") ){
+            findRunIllumina(instrument, runFolder, comboboxSample, isTMBNormal);
         }else if(instrument.equals("pgm") || instrument.equals("proton")){
-            findRunIon(instrument, runID);
+            findRunIon(instrument, runFolder);
         }else {
             throw new Exception(String.format("Unsupported instrument (%s)", instrument));
         }
@@ -349,16 +406,15 @@ public class EnterHEMESample extends JDialog {
 
     }
 
-    private void findRunIllumina(String instrument, String runID, JComboBox<String> combobox,boolean isTMBNormal) throws Exception {
-        String runFolderName = SSHConnection.getRunFolderIllumina(instrument, runID); 
-        ArrayList<String> sampeIDList = SSHConnection.getSampleListIllumina(instrument, runFolderName);
-        fillSample(sampeIDList,runFolderName,textNote,isTMBNormal);
+    private void findRunIllumina(Instrument instrument, RunFolder runFolder, JComboBox<String> combobox,boolean isTMBNormal) throws Exception {
+        ArrayList<String> sampeIDList = SSHConnection.getSampleListIllumina(instrument, runFolder);
+        fillSample(sampeIDList,runFolder,textNote,isTMBNormal);
     }
 
-    private void findRunIon(String instrument, String runID) throws Exception {
-        if (SSHConnection.checkProtonCopyComplete(instrument,runID)) {
-            ArrayList<String> coverageIDList = SSHConnection.getCandidateCoverageIDs(instrument, runID);
-            ArrayList<String> variantCallerIDList = SSHConnection.getCandidateVariantCallerIDs(instrument, runID);
+    private void findRunIon(Instrument instrument, RunFolder runFolder) throws Exception {
+        if (SSHConnection.checkProtonCopyComplete(instrument, runFolder)) {
+            ArrayList<String> coverageIDList = SSHConnection.getCandidateCoverageIDs(instrument, runFolder);
+            ArrayList<String> variantCallerIDList = SSHConnection.getCandidateVariantCallerIDs(instrument, runFolder);
             fillComboBoxes(coverageIDList, variantCallerIDList);
         }else{
             JOptionPane.showMessageDialog(EnterHEMESample.this, "Please try again when the run is complete.");
@@ -367,9 +423,10 @@ public class EnterHEMESample extends JDialog {
     }
 
     private void fillSampleIon() throws Exception{
-        String instrument = comboBoxInstrument.getSelectedItem().toString();
+        Instrument instrument = (Instrument)comboBoxInstrument.getSelectedItem();
         String runID = textRunID.getText();
         String variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
+        RunFolder runFolder = SSHConnection.getRunFolderIon(instrument, runID); 
 
         try{
             Integer.parseInt(runID);
@@ -377,25 +434,24 @@ public class EnterHEMESample extends JDialog {
             throw new Exception("Run ID must be an integer.");
         }
 
-        ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runID, variantCallerID);
-        String RunFolderName = SSHConnection.getRunFolderIllumina(instrument, runID); 
-        fillSample(sampleIDList,RunFolderName,textNote,false);
+        ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runFolder, variantCallerID);
+        fillSample(sampleIDList,runFolder,textNote,false);
     }
 
-    private void fillSample(ArrayList<String> samples, String runFolderName,JTextArea textNote,boolean isTMBNormal){
+    private void fillSample(ArrayList<String> samples, RunFolder runFolder,JTextArea textNote,boolean isTMBNormal){
         
-
-        textRunFolder.setText(runFolderName);
-        int j = 1;
-        for(int i =0; i < samples.size(); i++){
-            String currentSample =samples.get(i);
+        textNote.setText("");
+        StringBuilder builder = new StringBuilder();
+        textRunFolder.setText(runFolder.runFolderName);
+        for(String sample : samples){
             if (!isTMBNormal){
-                textNote.insert(currentSample + "\r\n",i);
-            } else if(isTMBNormal && currentSample.endsWith("-N") ){
-                textNote.insert(currentSample + "\r\n",i);
+                builder.append(sample);
+            } else if(isTMBNormal && sample.endsWith("-N") ){
+                builder.append(sample);
             }
-            j = j + currentSample.length();
+            builder.append("\n");
         }
+        textNote.setText(builder.toString());
     }
 
     private void fillComboBoxes(ArrayList<String> coverageID, ArrayList<String> variantCallerID){

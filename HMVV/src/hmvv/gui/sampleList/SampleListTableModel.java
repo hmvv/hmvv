@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
+import hmvv.model.Instrument;
+import hmvv.model.RunFolder;
 import hmvv.model.Sample;
 
 public class SampleListTableModel extends AbstractTableModel{
@@ -126,13 +128,13 @@ public class SampleListTableModel extends AbstractTableModel{
 				(Sample sample) -> "edit"));
 	}
 	
-	public Sample getSample(String instrument, String runID, String coverageID, String variantCallerID, String sampleName){
+	public Sample getSample(Instrument instrument, RunFolder runFolder, String coverageID, String variantCallerID, String sampleName){
 		for(Sample s : samples){
 			//only check sampleID because the coverageID and variantCallerID can be blank depending on the instrument
-			if(s.runID.equals("") || s.sampleName.equals("")){
+			if(s.runFolder.runFolderName.equals("") || s.sampleName.equals("")){
 				continue;
 			}
-			if(s.instrument.instrumentName.equals(instrument) && s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
+			if(s.instrument.equals(instrument) && s.runFolder.equals(runFolder) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
 				return s;
 			}
 		}

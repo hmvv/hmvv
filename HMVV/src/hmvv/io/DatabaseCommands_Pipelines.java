@@ -10,6 +10,7 @@ import hmvv.model.Assay;
 import hmvv.model.Instrument;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineStatus;
+import hmvv.model.RunFolder;
 
 public class DatabaseCommands_Pipelines {
 	
@@ -21,10 +22,10 @@ public class DatabaseCommands_Pipelines {
 	private static Pipeline getPipeline(ResultSet row) throws Exception{
 		Pipeline pipeline = new Pipeline(
 				row.getInt("sampleID"),
-				row.getString("runFolderName"),
+				new RunFolder(row.getString("runFolderName")),
 				row.getString("sampleName"),
-				Assay.getAssay(row.getString("assayName")),
-				Instrument.getInstrument(row.getString("instrumentName")),
+				Assay.getAssay(row.getString("assay")),
+				Instrument.getInstrument(row.getString("instrument")),
 				row.getString("plstatus"),
 				row.getTimestamp("timeUpdated")
 				);
@@ -33,7 +34,7 @@ public class DatabaseCommands_Pipelines {
 
 	static ArrayList<Pipeline> getAllPipelines() throws Exception{
 		String query = "select" + 
-				" queueTable.instrument, queueTable.runFolderName, queueTable.sampleName, queueTable.assay, " + 
+				" queueTable.sampleID, queueTable.instrument, queueTable.runFolderName, queueTable.sampleName, queueTable.assay, " + 
 				" statusTable.plStatus, statusTable.timeUpdated" + 
 				" from" + 
 				" (" + 
@@ -78,7 +79,7 @@ public class DatabaseCommands_Pipelines {
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select pipelineStatusID, plStatus, timeUpdated from pipelineStatus " + 
 		" where instrument = ? and runFolderName = ? and sampleName = ? order by timeupdated asc");
 		preparedStatement.setString(1, pipeline.instrument.instrumentName);
-		preparedStatement.setString(2, pipeline.runFolderName);
+		preparedStatement.setString(2, pipeline.runFolderName.runFolderName);
 		preparedStatement.setString(3, pipeline.sampleName);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();

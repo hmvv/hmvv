@@ -25,6 +25,7 @@ public class EnterSample extends JDialog {
     private static final long serialVersionUID = 1L;
     
     private JTextField textRunID;
+    private JTextField textRunFolder;
     private JTextField textTMBNormalRunID;
     private JTextField textMRN;
     private JTextField textlastName;
@@ -95,6 +96,8 @@ public class EnterSample extends JDialog {
 
         textRunID = new JTextField();
         textTMBNormalRunID = new JTextField();
+        textRunFolder = new JTextField();
+        textRunFolder.setEditable(false);
 
         btnFindRun = new JButton("Find Run");
         btnFindTMBNormalRun = new JButton("Find Normal");
@@ -153,7 +156,7 @@ public class EnterSample extends JDialog {
         leftPanel.add(new RowPanel("Instrument", comboBoxInstrument));
         leftPanel.add(new RowPanel("Assay", comboBoxAssay));
         leftPanel.add(new RowPanel("RunID", runIDPanel));
-        leftPanel.add(new RowPanel("--", new Label("--")));
+        leftPanel.add(new RowPanel("RunFolder",textRunFolder ));
         leftPanel.add(new RowPanel("SampleName", comboBoxSample));
         comboBoxSample.setEnabled(false);
         samplePanel.setPreferredSize(new Dimension(475, 150));
@@ -259,6 +262,12 @@ public class EnterSample extends JDialog {
                     enterSampleThread = new Thread(new Runnable() {
                         @Override
                         public void run() {
+
+                            if(textRunFolder.getText().equals("")){
+                                JOptionPane.showMessageDialog(EnterSample.this, "Please select a run before entering samples.");
+                                return;
+                            }
+
                             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                             btnEnterSample.setText("Processing...");
                             btnEnterSample.setEnabled(false);
@@ -278,6 +287,7 @@ public class EnterSample extends JDialog {
                     updateMainPanel(true);
                     comboBoxSample.removeAllItems();
                     comboBoxSample.setEnabled(false);
+                    textRunFolder.setText(null);
                     clearAndDisableSamplePanel();
                     clearAndDisableSampleRecords();
                 }
@@ -392,7 +402,7 @@ public class EnterSample extends JDialog {
             clearAndDisableSampleRecords();
         }
 
-        RunFolder runFolder = new RunFolder("TODO");//TODO get the run folder name
+        RunFolder runFolder = SSHConnection.getRunFolderIon(instrument, runID);
         if(instrument.instrumentName.equals("miseq") || instrument.instrumentName.equals("nextseq") || instrument.instrumentName.equals("novaseq") ){
             findRunIllumina(instrument, runFolder, comboboxSample, isTMBNormal);
         }else if(instrument.instrumentName.equals("pgm") || instrument.instrumentName.equals("proton")){
@@ -410,7 +420,7 @@ public class EnterSample extends JDialog {
 
     private void findRunIllumina(Instrument instrument, RunFolder runFolder, JComboBox<String> combobox, boolean isTMBNormal) throws Exception {
         ArrayList<String> sampeIDList = SSHConnection.getSampleListIllumina(instrument, runFolder);
-        fillSample(sampeIDList,combobox,isTMBNormal);
+        fillSample(sampeIDList,runFolder,combobox,isTMBNormal);
     }
 
     private void findRunIon(Instrument instrument, RunFolder runFolder) throws Exception {
@@ -427,7 +437,6 @@ public class EnterSample extends JDialog {
     private void fillSampleIon() throws Exception{
         Instrument instrument = (Instrument)comboBoxInstrument.getSelectedItem();
         String runID = textRunID.getText();
-        RunFolder runFolder = new RunFolder("TODO");//TODO get the run folder name
         String variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
 
         try{
@@ -435,12 +444,14 @@ public class EnterSample extends JDialog {
         }catch(Exception e){
             throw new Exception("Run ID must be an integer.");
         }
+        RunFolder runFolder = SSHConnection.getRunFolderIon(instrument, runID);
         ArrayList<String> sampleIDList = SSHConnection.getSampleListIon(instrument, runFolder, variantCallerID);
-        fillSample(sampleIDList,comboBoxSample,false);
+        fillSample(sampleIDList,runFolder, comboBoxSample,false);
     }
 
-    private void fillSample(ArrayList<String> samples,JComboBox<String> combobox,boolean isTMBNormal){
+    private void fillSample(ArrayList<String> samples,  RunFolder runFolder,JComboBox<String> combobox,boolean isTMBNormal){
         combobox.removeAllItems();
+        textRunFolder.setText(runFolder.runFolderName);
         for(int i =0; i < samples.size(); i++){
 
             String currentSample =samples.get(i);
@@ -466,13 +477,13 @@ public class EnterSample extends JDialog {
     private void sampleIDSelectionChanged(){
         updateSamplePanel(true,comboBoxAssay.getSelectedItem().toString());
         btnEnterSample.setText("Enter Sample");
-        String runID = textRunID.getText();
-        String instrument = (String)comboBoxInstrument.getSelectedItem();
+        Instrument instrument = (Instrument)comboBoxInstrument.getSelectedItem();
+        RunFolder runFolder = new RunFolder(textRunFolder.getText());
         String coverageID = (String)comboBoxCoverageIDList.getSelectedItem();
         String variantCallerID = (String)comboBoxVariantCallerIDList.getSelectedItem();
         String sampleName = (String)comboBoxSample.getSelectedItem();
 
-        if(runID.equals("") || sampleName == null){
+        if(textRunFolder.getText().equals("") || sampleName == null){
             updateFields("", "", "", "", "", "", "", "", "", "", true);
             return;
         }
@@ -482,7 +493,7 @@ public class EnterSample extends JDialog {
         if(variantCallerID == null)
             variantCallerID = defaultCoverageAndCallerID;
 
-        Sample sample = sampleListFrame.getSampleTabelModel().getSample(instrument, runID, coverageID, variantCallerID, sampleName);
+        Sample sample = sampleListFrame.getSampleTabelModel().getSample(instrument, runFolder, coverageID, variantCallerID, sampleName);
         if(sample != null){
             updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
         }else{
@@ -493,19 +504,19 @@ public class EnterSample extends JDialog {
     }
 
     private void runLISIntegration(String barcodeText) {
-        String assay = (String)comboBoxAssay.getSelectedItem();
+        Assay assay = (Assay)comboBoxAssay.getSelectedItem();
         String sampleName = (String)comboBoxSample.getSelectedItem();
         comboBoxSample.hidePopup();
 
         try {
             //fill order number
-            String labOrderNumber = LISConnection.getLabOrderNumber(assay, barcodeText, sampleName);
+            String labOrderNumber = LISConnection.getLabOrderNumber(assay.assayName, barcodeText, sampleName);
             textOrderNumber.setText(labOrderNumber);
             if(labOrderNumber.equals("")) {
                 return;
             }
             //fill pathology number
-            ArrayList<String> pathOrderNumbers = LISConnection.getPathOrderNumbers(assay, labOrderNumber);
+            ArrayList<String> pathOrderNumbers = LISConnection.getPathOrderNumbers(assay.assayName, labOrderNumber);
             if(pathOrderNumbers.size() == 0) {
                 //No pathology orders found for this sample
             }else if(pathOrderNumbers.size() == 1) {
@@ -678,7 +689,7 @@ public class EnterSample extends JDialog {
         String note = textNote.getText();
         String enteredBy = SSHConnection.getUserName();
 
-        RunFolder runFolder = new RunFolder("TODO");
+        RunFolder runFolder = new RunFolder(textRunFolder.getText());
         if (assay.assayName.equals("tmb")){
 
             if(comboBoxTMBNormalSample.getSelectedItem().toString().equals(comboBoxSample.getSelectedItem().toString()) &&
