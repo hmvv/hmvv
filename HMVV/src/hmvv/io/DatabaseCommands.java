@@ -46,6 +46,10 @@ public class DatabaseCommands {
 		return DatabaseCommands_Assays.getAssaysForInstrument(instrument);
 	}
 
+	public static ArrayList<Instrument> getInstrumentsForAssay(Assay assay) throws Exception{
+		return DatabaseCommands_Assays.getInstrumentsForAssay(assay);
+	}
+
 	/* ************************************************************************
 	 * Mutation Queries
 	 *************************************************************************/

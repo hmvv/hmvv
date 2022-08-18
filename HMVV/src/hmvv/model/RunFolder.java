@@ -10,4 +10,11 @@ public class RunFolder {
     public String toString(){
         return runFolderName;
     }
+
+    public boolean equals(Object o){
+        if (o instanceof RunFolder){
+            return ((RunFolder)o).runFolderName.equals(runFolderName);
+        }
+        return false;
+    }
 }

@@ -41,7 +41,7 @@ public class DatabaseCommands_Assays {
 	static ArrayList<Assay> getAssaysForInstrument(Instrument instrument) throws Exception{
 		ArrayList<Assay> assays = new ArrayList<Assay>();
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(
-			"select assay from assayInstrument where instrument = ?"
+			"select distinct assay from assayInstrument where instrument = ?"
 		);
 		preparedStatement.setString(1, instrument.instrumentName);
 		ResultSet rs = preparedStatement.executeQuery();
@@ -50,5 +50,19 @@ public class DatabaseCommands_Assays {
 		}
 		preparedStatement.close();
 		return assays;
+	}
+
+	static ArrayList<Instrument> getInstrumentsForAssay(Assay assay) throws Exception{
+		ArrayList<Instrument> instruments = new ArrayList<Instrument>();
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(
+			"select distinct instrument from assayInstrument where assay = ?"
+		);
+		preparedStatement.setString(1, assay.assayName);
+		ResultSet rs = preparedStatement.executeQuery();
+		while(rs.next()){
+			instruments.add(Instrument.getInstrument(rs.getString(1)));
+		}
+		preparedStatement.close();
+		return instruments;
 	}
 }
