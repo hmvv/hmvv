@@ -1,6 +1,5 @@
 package hmvv.gui.adminFrames;
 
-import java.util.Collections;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;

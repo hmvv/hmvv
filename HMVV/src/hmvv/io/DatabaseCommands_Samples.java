@@ -156,15 +156,13 @@ public class DatabaseCommands_Samples {
 
 	private static void insertTumorNormalPair(TMBSample sampleTMB)throws Exception{
 		String enterSampleNormalPair = " insert into sampleNormalPair "
-		        + " (sampleID, normalPairInstrumentID, normalPairRunID, normalSampleName, enterDate)  "
-		        + " values ( ? , "
-		        + " ( select instrumentID from instruments where instrumentName=?), "
-		        + " ?, ?, now() )";
+		        + " (sampleID, normalPairInstrument, normalPairRunfolder, normalSampleName, enterDate)  "
+		        + " values ( ? , ? , ? , ? , now() )";
 
 		PreparedStatement pstEnterSampleNormalPair = databaseConnection.prepareStatement(enterSampleNormalPair);
 		pstEnterSampleNormalPair.setInt(1, sampleTMB.sampleID);
 		pstEnterSampleNormalPair.setString(2, sampleTMB.getNormalInstrumentName());
-		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalRunID());
+		pstEnterSampleNormalPair.setString(3, sampleTMB.getNormalRunFolder().runFolderName);
 		pstEnterSampleNormalPair.setString(4, sampleTMB.getNormalSampleName());
 		pstEnterSampleNormalPair.executeUpdate();
 		pstEnterSampleNormalPair.close();
@@ -177,9 +175,9 @@ public class DatabaseCommands_Samples {
 		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
-				" t2.normalInstrument, t2.normalPairRunID, t2.normalSampleName " +
+				" t2.normalPairInstrument, t2.normalPairRunFolder, t2.normalSampleName " +
 				" from samples as s " +
-				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalInstrument " ;
+				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalPairInstrument " ;
 
 		if(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.RESTRICT_SAMPLE_ACCESS)){
 			query = query + "  where s.runDate >= DATE_SUB(NOW(), INTERVAL ? day) ";
@@ -243,9 +241,9 @@ public class DatabaseCommands_Samples {
 		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
 				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
-				" t2.normalInstrument, t2.normalPairRunID, t2.normalSampleName " +
+				" t2.normalPairInstrument, t2.normalPairRunFolder, t2.normalSampleName " +
 				" from samples as s " +
-				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalInstrument " +
+				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalPairInstrument " +
 				" where s.mrn = ? and s.sampleID != ? and " +
                 " s.runDate < DATE_SUB(NOW(), INTERVAL ? day)";
 
@@ -287,8 +285,8 @@ public class DatabaseCommands_Samples {
 					row.getString("bmDiagnosis"),
 					row.getString("note"),
 					row.getString("enteredBy"),
-					row.getString("normalInstrument"),
-					row.getString("normalPairRunID"),
+					row.getString("normalPairInstrument"),
+					new RunFolder(row.getString("normalPairRunFolder")),
 					row.getString("normalSampleName")
 					);
 			return sample;

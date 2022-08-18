@@ -3,17 +3,17 @@ package hmvv.model;
 public class TMBSample extends Sample{
 
 	private String normalInstrumentName;
-	private String normalRunID;
+	private RunFolder normalRunFolder;
 	private String normalSampleName;
 	
 	public TMBSample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
 			String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy,
-			String normalInstrumentName, String normalRunID, String normalSampleName) {
+			String normalInstrumentName, RunFolder normalRunFolder, String normalSampleName) {
 		super(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber, pathNumber, tumorSource, tumorPercent, runID,
 				sampleName, coverageID, callerID, runDate, patientHistory, bmDiagnosis, note, enteredBy);
 		this.normalInstrumentName = normalInstrumentName;
-		this.normalRunID = normalRunID;
+		this.normalRunFolder = normalRunFolder;
 		this.normalSampleName = normalSampleName;
 	}
 
@@ -25,12 +25,12 @@ public class TMBSample extends Sample{
         this.normalInstrumentName = normalInstrumentName;
     }
 
-    public String getNormalRunID() {
-		return normalRunID;
+    public RunFolder getNormalRunFolder() {
+		return normalRunFolder;
 	}
 
-	public void setNormalRunID(String normalRunID) {
-		this.normalRunID = normalRunID;
+	public void setNormalRunFolder(RunFolder normalRunFolder) {
+		this.normalRunFolder = normalRunFolder;
 	}
 
 	public String getNormalSampleName() {

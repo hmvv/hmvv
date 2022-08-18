@@ -26,6 +26,7 @@ public class EnterSample extends JDialog {
     private JTextField textRunID;
     private JTextField textRunFolder;
     private JTextField textTMBNormalRunID;
+    private JTextField textTMBNormalRunFolder;
     private JTextField textMRN;
     private JTextField textlastName;
     private JTextField textFirstName;
@@ -97,6 +98,8 @@ public class EnterSample extends JDialog {
         textTMBNormalRunID = new JTextField();
         textRunFolder = new JTextField();
         textRunFolder.setEditable(false);
+        textTMBNormalRunFolder = new JTextField();
+        textTMBNormalRunFolder.setEditable(false);
 
         btnFindRun = new JButton("Find Run");
         btnFindTMBNormalRun = new JButton("Find Normal");
@@ -286,7 +289,8 @@ public class EnterSample extends JDialog {
                     updateMainPanel(true);
                     comboBoxSample.removeAllItems();
                     comboBoxSample.setEnabled(false);
-                    textRunFolder.setText(null);
+                    textRunFolder.setText("");
+                    textTMBNormalRunFolder.setText("");
                     clearAndDisableSamplePanel();
                     clearAndDisableSampleRecords();
                 }
@@ -381,6 +385,9 @@ public class EnterSample extends JDialog {
         Instrument instrument = (Instrument) comboBoxInstrument.getSelectedItem();
         comboBoxAssay.removeAllItems();
         for(Assay assay : DatabaseCommands.getAssaysForInstrument(instrument)){
+            if(assay.assayName.equals("heme")){
+                continue;
+            }
             comboBoxAssay.addItem(assay);
         }
     }
@@ -450,13 +457,14 @@ public class EnterSample extends JDialog {
 
     private void fillSample(ArrayList<String> samples,  RunFolder runFolder,JComboBox<String> combobox,boolean isTMBNormal){
         combobox.removeAllItems();
-        textRunFolder.setText(runFolder.runFolderName);
         for(int i =0; i < samples.size(); i++){
-
+            
             String currentSample =samples.get(i);
             if (!isTMBNormal){
+                textRunFolder.setText(runFolder.runFolderName);
                 combobox.addItem(currentSample);
             } else if(isTMBNormal && currentSample.endsWith("-N") ){
+                textTMBNormalRunFolder.setText(runFolder.runFolderName);
                 combobox.addItem(currentSample);
             }
         }
@@ -684,12 +692,13 @@ public class EnterSample extends JDialog {
 
                 throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
             }
-             // TODO  replace comboBoxInstrument with normal sample instrument in future
-             //TODO run folder
+
+            // TODO  replace comboBoxInstrument with normal sample instrument in future
+            RunFolder tmbNormalRunFolder = new RunFolder(textTMBNormalRunFolder.getText());
             return new TMBSample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
-                    textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
+                    tmbNormalRunFolder,comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{
             return new Sample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
