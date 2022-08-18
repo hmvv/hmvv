@@ -119,18 +119,26 @@ public class EditSampleFrame extends JDialog {
 		setResizable(false);
 	}
 	
-	private Dimension labelDimension = new Dimension(150,20);
-	private JLabel createJLabel(String text) {
+	private Dimension labelDimension = new Dimension(120,20);
+	private JLabel createJLabel(String text, Font font) {
 		JLabel label = new JLabel(text);
 		label.setPreferredSize(labelDimension);
-		label.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		label.setFont(font);
 		return label;
+	}
+
+	private JLabel createJLabelBold(String text) {
+		return createJLabel(text, GUICommonTools.TAHOMA_BOLD_12);
+	}
+
+	private JLabel createJLabel(String text) {
+		return createJLabel(text, GUICommonTools.TAHOMA_PLAIN_10);
 	}
 	
 	private JPanel createPair(String text, Component component) {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		panel.add(createJLabel(text), BorderLayout.WEST);
+		panel.add(createJLabelBold(text), BorderLayout.WEST);
 		panel.add(component, BorderLayout.CENTER);
 		return panel;
 	}
@@ -156,6 +164,9 @@ public class EditSampleFrame extends JDialog {
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Run ID", createJLabel(sample.runID)));
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+
+		labelPanel.add(createPair("Run Folder", createJLabel(sample.runFolder.runFolderName)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Assay", createJLabel(sample.assay.assayName)));
