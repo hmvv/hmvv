@@ -105,6 +105,10 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Sample Queries
 	 *************************************************************************/
+	public static void insertbcl2fastqIntoDatabase(Instrument instrument, RunFolder runFolder) throws Exception{
+		DatabaseCommands_Samples.insertbcl2fastqIntoDatabase(instrument, runFolder);
+	}
+
 	public static void insertDataIntoDatabase(Sample sample) throws Exception{
 		DatabaseCommands_Samples.insertDataIntoDatabase(sample);
 	}

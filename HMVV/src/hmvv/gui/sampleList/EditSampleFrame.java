@@ -3,19 +3,25 @@ package hmvv.gui.sampleList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 
 import javax.swing.*;
+import java.awt.event.*;
 import javax.swing.border.EmptyBorder;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.SSHConnection;
+import hmvv.io.LIS.LISConnection;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
+import hmvv.model.Assay;
 import hmvv.model.Sample;
 
 public class EditSampleFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
+	private JTextField textBarcode;
 	private JTextField textMRN;
 	private JTextField textLast;
 	private JTextField textFirst;
@@ -44,10 +50,13 @@ public class EditSampleFrame extends JDialog {
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
 		setMinimumSize(new Dimension(700, getHeight()/3));
 		
+		textBarcode = new JTextField("");
+		textBarcode.setColumns(10);
+        textBarcode.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+
 		textMRN = new JTextField(sample.getMRN());
 		textMRN.setColumns(10);
         textMRN.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
-
 
 		textLast = new JTextField(sample.getLastName());
 		textLast.setColumns(10);
@@ -104,6 +113,7 @@ public class EditSampleFrame extends JDialog {
         btnDelete.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
 
 		layoutComponents();
+		activateComponents();
 		pack();
 		setLocationRelativeTo(parent);
 		setResizable(false);
@@ -166,6 +176,10 @@ public class EditSampleFrame extends JDialog {
 		labelPanel.add(createPair("Run Date", createJLabel(sample.runDate)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
+		labelPanel.add(createPair("Barcode", textBarcode));
+		textBarcode.setPreferredSize(textFieldDimension);
+		labelPanel.add(Box.createVerticalStrut(strutHeight));
+
 		labelPanel.add(createPair("MRN", textMRN));
 		textMRN.setPreferredSize(textFieldDimension);
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
@@ -236,6 +250,35 @@ public class EditSampleFrame extends JDialog {
 		add(southPanel, BorderLayout.SOUTH);
 	}
 
+	private void activateComponents(){
+		textBarcode.addKeyListener(new KeyListener() {
+            volatile boolean isEntered = false;
+            @Override
+            public void keyPressed(KeyEvent arg0) {
+                if(isEntered) {
+                    textBarcode.setText("");
+                    isEntered = false;
+                }
+                if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String barcodeText = textBarcode.getText();
+                    updateFields("", "", "", "", "", "", "", "", "", "");
+                    textBarcode.setText(barcodeText);
+                    runLISIntegration();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent arg0) {
+                if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+                    isEntered = true;
+                }
+            }
+
+            @Override
+            public void keyTyped(KeyEvent arg0) {}
+        });
+	}
+
 	public Sample getUpdatedSample(){
 		sample.setMRN(textMRN.getText());
 		sample.setLastName(textLast.getText());
@@ -256,5 +299,49 @@ public class EditSampleFrame extends JDialog {
 
 	public void addDeleteListener(ActionListener listener) {
 		btnDelete.addActionListener(listener);
+	}
+
+	private void updateFields(String mrn, String lastName, String firstName, String orderNumber, String pathologyNumber, String tumorSource, String tumorPercent, String patientHistory, String diagnosis, String note){
+        textBarcode.setText("");
+        textMRN.setText(mrn);
+        textLast.setText(lastName);
+        textFirst.setText(firstName);
+        textOrder.setText(orderNumber);
+        textPathology.setText(pathologyNumber);
+        textSource.setText(tumorSource);
+        textPercent.setText(tumorPercent);
+        textPatientHistory.setText(patientHistory);
+        textDiagnosis.setText(diagnosis);
+        textNote.setText(note);
+	}
+
+	private void runLISIntegration(){
+		try {
+            //{labOrderNumber, pathologyNumber, patient.mrn, patient.firstName, patient.lastName};
+			String barcodeText = textBarcode.getText();
+			Assay assay = sample.assay;
+			String sampleName = sample.sampleName;
+            String[] lisValues = LISConnection.runLISIntegration(assay, barcodeText, sampleName);
+            String labOrderNumber = lisValues[0];
+            String pathologyNumber = lisValues[1];
+            String mrn = lisValues[2];
+            String firstName = lisValues[3];
+            String lastName = lisValues[4];
+
+            //fill order number
+            textOrder.setText(labOrderNumber);
+            if(labOrderNumber.equals("")) {
+                return;
+            }
+            //fill pathology number
+            textPathology.setText(pathologyNumber);
+
+            //fill patient name
+            textMRN.setText(mrn);
+            textFirst.setText(firstName);
+            textLast.setText(lastName);
+        }catch(Exception e) {
+            HMVVDefectReportFrame.showHMVVDefectReportFrame(EditSampleFrame.this, e, "LIS Integration Error");
+        }
 	}
 }

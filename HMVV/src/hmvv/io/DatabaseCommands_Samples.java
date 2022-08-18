@@ -2,6 +2,7 @@ package hmvv.io;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +24,21 @@ public class DatabaseCommands_Samples {
 		DatabaseCommands_Samples.databaseConnection = databaseConnection;
 	}
 	
+	public static void insertbcl2fastqIntoDatabase(Instrument instrument, RunFolder runFolder) throws Exception{
+		String url = "jdbc:mysql://"+SSHConnection.getForwardingHost()+"/";
+		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
+		Connection temp_databaseConnection = DriverManager.getConnection(url+Configurations.BCL2FASTQ_DATABASE_NAME+"?noAccessToProcedureBodies=true", credentials[0], credentials[1]);
+
+		String enterBcl2fastq = "insert into pipelineStatusBcl2Fastq (instrument, runFolder) values (?, ?) on duplicate key update runFolder = ? ";
+		PreparedStatement pstEnterSample = temp_databaseConnection.prepareStatement(enterBcl2fastq);
+		pstEnterSample.setString(1, instrument.instrumentName);
+		pstEnterSample.setString(2, runFolder.runFolderName);
+		pstEnterSample.setString(3, runFolder.runFolderName);
+		pstEnterSample.executeUpdate();
+		pstEnterSample.close();
+		temp_databaseConnection.close();
+	}
+
 	static void insertDataIntoDatabase(Sample sample) throws Exception{
 		Assay assay = sample.assay;
 		Instrument instrument = sample.instrument;

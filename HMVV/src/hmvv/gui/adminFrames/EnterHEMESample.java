@@ -218,6 +218,7 @@ public class EnterHEMESample extends JDialog {
             Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
             
             if(samples.size() != 0){
+                DatabaseCommands.insertbcl2fastqIntoDatabase(instrument, runFolder);
                 for(String currentSample : samples){
                     try{
                         Sample sampleObject = sampleListFrame.getSampleTabelModel().getSample(instrument, runFolder, "", "", currentSample);

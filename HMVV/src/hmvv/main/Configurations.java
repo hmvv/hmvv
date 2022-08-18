@@ -164,6 +164,7 @@ public class Configurations {
 	public static String[] READ_WRITE_CREDENTIALS;
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
+	public static String BCL2FASTQ_DATABASE_NAME = "bcl2fastq";
 	
 	public static String LIS_DRIVER;
 	public static String LIS_CONNECTION_DRIVER;

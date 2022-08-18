@@ -9,7 +9,6 @@ import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.Assay;
 import hmvv.model.Instrument;
-import hmvv.model.Patient;
 import hmvv.model.RunFolder;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
@@ -509,38 +508,26 @@ public class EnterSample extends JDialog {
         comboBoxSample.hidePopup();
 
         try {
+            //{labOrderNumber, pathologyNumber, patient.mrn, patient.firstName, patient.lastName};
+            String[] lisValues = LISConnection.runLISIntegration(assay, barcodeText, sampleName);
+            String labOrderNumber = lisValues[0];
+            String pathologyNumber = lisValues[1];
+            String mrn = lisValues[2];
+            String firstName = lisValues[3];
+            String lastName = lisValues[4];
+
             //fill order number
-            String labOrderNumber = LISConnection.getLabOrderNumber(assay.assayName, barcodeText, sampleName);
             textOrderNumber.setText(labOrderNumber);
             if(labOrderNumber.equals("")) {
                 return;
             }
             //fill pathology number
-            ArrayList<String> pathOrderNumbers = LISConnection.getPathOrderNumbers(assay.assayName, labOrderNumber);
-            if(pathOrderNumbers.size() == 0) {
-                //No pathology orders found for this sample
-            }else if(pathOrderNumbers.size() == 1) {
-                textPathologyNumber.setText(pathOrderNumbers.get(0));
-            }else {
-//                String[] choices = pathOrderNumbers.toArray(new String[pathOrderNumbers.size() + 20]);//add 20 to force JOptionPane into JList
-//                String choice = (String) JOptionPane.showInputDialog(this, "Choose the Path Number:",
-//                        "Choose the Path Number", JOptionPane.QUESTION_MESSAGE, null,
-//                        choices, // Array of choices
-//                        choices[0]); // Initial choice
-//                if(choice != null) {
-//                    textPathologyNumber.setText(choice);
-//                }
-            }
+            textPathologyNumber.setText(pathologyNumber);
 
             //fill patient name
-            if(labOrderNumber != null) {
-                Patient patient = LISConnection.getPatient(labOrderNumber);
-                if(patient != null) {
-	                textMRN.setText(patient.mrn);
-	                textFirstName.setText(patient.firstName);
-	                textlastName.setText(patient.lastName);
-                }
-            }
+            textMRN.setText(mrn);
+            textFirstName.setText(firstName);
+            textlastName.setText(lastName);
         }catch(Exception e) {
             HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "LIS Integration Error");
         }

@@ -76,7 +76,7 @@ public class DatabaseCommands_Pipelines {
 	}
 
 	static ArrayList<PipelineStatus> getPipelineDetail(Pipeline pipeline) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select pipelineStatusID, plStatus, timeUpdated from pipelineStatus " + 
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select plStatus, timeUpdated from pipelineStatus " + 
 		" where instrument = ? and runFolderName = ? and sampleName = ? order by timeupdated asc");
 		preparedStatement.setString(1, pipeline.instrument.instrumentName);
 		preparedStatement.setString(2, pipeline.runFolderName.runFolderName);
@@ -85,11 +85,10 @@ public class DatabaseCommands_Pipelines {
 		ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
 
 		while(rs.next()){
-			int pipelineStatusID = rs.getInt("pipelineStatusID");
 			String plStatusString = rs.getString("plStatus");
 			Timestamp timeUpdated = rs.getTimestamp("timeUpdated");
 
-			PipelineStatus pipelineStatus = new PipelineStatus(pipelineStatusID, pipeline, plStatusString, timeUpdated);
+			PipelineStatus pipelineStatus = new PipelineStatus(pipeline, plStatusString, timeUpdated);
 			rows.add(pipelineStatus);
 		}
 		preparedStatement.close();
@@ -102,12 +101,11 @@ public class DatabaseCommands_Pipelines {
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(
 				" select AVG(runtime) as averageMinutes from " +
 				"  ( " +
-				"  select samples.runID, instruments.instrumentName, samples.assay, ps1.queueID, pipelineStatus.timeUpdated as startTime, ps1.timeUpdated as completedTime, TIMESTAMPDIFF(MINUTE, pipelineStatus.timeUpdated, ps1.timeUpdated) as runtime " +
+				"  select samples.runFolderName, samples.instrument, samples.assay, pipelineStatus.timeUpdated as startTime, ps1.timeUpdated as completedTime, TIMESTAMPDIFF(MINUTE, pipelineStatus.timeUpdated, ps1.timeUpdated) as runtime " +
 				 
 				"  from pipelineStatus " +
-				"  join pipelineStatus ps1 on pipelineStatus.queueID = ps1.queueID " +
-				"  join pipelineQueue on ps1.queueID = pipelineQueue.queueID " +
-				"  join samples on samples.sampleID = pipelineQueue.sampleID " +
+				"  join pipelineStatus ps1 on pipelineStatus.instrument = ps1.instrument and pipelineStatus.runFolderName = ps1.runFolderName and pipelineStatus.sampleName = ps1.sampleName " +
+				"  join samples on pipelineStatus.instrument = samples.instrument and pipelineStatus.runFolderName = samples.runFolderName and pipelineStatus.sampleName = samples.sampleName " +
 
 				"  where pipelineStatus.plStatus = \"started\" " +
 				"  and ps1.plStatus = \"pipelineCompleted\" " +

@@ -330,7 +330,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		try {
 				String labOrderNumber = sample.getOrderNumber();
 					if (labOrderNumber.length() == 0) {
-						labOrderNumber = LISConnection.getLabOrderNumber(sample.assay.assayName, sample.getPathNumber(), sample.sampleName);
+						labOrderNumber = LISConnection.getLabOrderNumber(sample.assay, sample.getPathNumber(), sample.sampleName);
 					}
 					ArrayList<PatientHistory> history = LISConnection.getPatientHistory(labOrderNumber);
 					reportFrame = new ReportFramePatientHistory(this, sample, labOrderNumber, history);
