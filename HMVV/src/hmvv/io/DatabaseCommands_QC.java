@@ -20,25 +20,43 @@ public class DatabaseCommands_QC {
 	}
 	
 	static AmpliconCount getAmpliconCount(int sampleID) throws Exception{
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("CALL calcAmpliconCount(?);");
-		updateStatement.setString(1, ""+sampleID);
+		int total = -1;
+		int failed = -1;
+
+		//total
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("select count(*) as totalAmplicon from sampleAmplicons where sampleID = ?");
+		updateStatement.setInt(1, sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		if(getSampleResult.next()){
-			AmpliconCount ampliconCount = new AmpliconCount(sampleID, getSampleResult.getString(1), getSampleResult.getString(2));
+			total = getSampleResult.getInt(1);
 			if(getSampleResult.next()){
 				throw new Exception("Error: more than one amplicon count result located for the sample");
 			}
 			updateStatement.close();
 			getSampleResult.close();
-			return ampliconCount;
 		}
-		updateStatement.close();
-		throw new Exception("No amplicon data found in the database");
+
+		//failed
+		updateStatement = databaseConnection.prepareStatement("select count(*) as totalAmplicon from sampleAmplicons where sampleID = ?  and readDepth < ? ");
+		updateStatement.setInt(1, sampleID);
+		updateStatement.setInt(2, Configurations.READ_DEPTH_FILTER);
+
+		getSampleResult = updateStatement.executeQuery();
+		if(getSampleResult.next()){
+			failed = getSampleResult.getInt(1);
+			if(getSampleResult.next()){
+				throw new Exception("Error: more than one amplicon count result located for the sample");
+			}
+			updateStatement.close();
+			getSampleResult.close();
+		}
+
+		return new AmpliconCount(sampleID, total, failed);
 	}
 
 	static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, gene, readDepth from sampleAmplicons where sampleID = ? and readDepth<100");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, gene, readDepth from sampleAmplicons where sampleID = ? and readDepth < 100");
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		while(getSampleResult.next()){

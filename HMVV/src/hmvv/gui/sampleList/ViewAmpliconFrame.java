@@ -21,11 +21,11 @@ import java.util.ArrayList;
 public class ViewAmpliconFrame extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private JLabel lblSample;
-	private JLabel lblNumber;
-	private JLabel lblTotal;
-	private JLabel lblAmpliconsBelowCutoff;
-	private JLabel lblTotalAmplicons;
+	private JLabel patientNameLabel;
+	private JLabel ampliconsReportLabel;
+	private JLabel totalAmpliconsCountLabel;
+	private JLabel failedAmpliconsLabel;
+	private JLabel totalAmpliconsLabel;
 
 	private Sample sample;
 
@@ -76,35 +76,35 @@ public class ViewAmpliconFrame extends JDialog {
         tableScrollPane = new JScrollPane();
         tableScrollPane.setViewportView(table);
 
-		lblAmpliconsBelowCutoff = new JLabel("Amplicons below cutoff");
-		lblAmpliconsBelowCutoff.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		failedAmpliconsLabel = new JLabel("Amplicons below cutoff");
+		failedAmpliconsLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblTotalAmplicons = new JLabel("Total amplicons");
-		lblTotalAmplicons.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		totalAmpliconsLabel = new JLabel("Total amplicons");
+		totalAmpliconsLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblSample = new JLabel("sample");
-		lblSample.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		patientNameLabel = new JLabel("sample");
+		patientNameLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblNumber = new JLabel("below");
-		lblNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		ampliconsReportLabel = new JLabel("below");
+		ampliconsReportLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblTotal = new JLabel("total");
-		lblTotal.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		totalAmpliconsCountLabel = new JLabel("total");
+		totalAmpliconsCountLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
     }
 
     private void layoutComponents(){
         GroupLayout gl_contentPane = new GroupLayout(getContentPane());
         gl_contentPane.setHorizontalGroup(gl_contentPane.createSequentialGroup()
                         .addGroup(gl_contentPane.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(lblSample, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(patientNameLabel, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
 						    .addGroup(gl_contentPane.createSequentialGroup()
-							    .addComponent(lblAmpliconsBelowCutoff, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
+							    .addComponent(failedAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
 							    .addGap(18)
-							    .addComponent(lblNumber))
+							    .addComponent(ampliconsReportLabel))
 						    .addGroup(gl_contentPane.createSequentialGroup()
-							    .addComponent(lblTotalAmplicons, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
+							    .addComponent(totalAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
 							    .addGap(18)
-							    .addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)))
+							    .addComponent(totalAmpliconsCountLabel, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)))
                         .addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE)
         );
 
@@ -113,14 +113,14 @@ public class ViewAmpliconFrame extends JDialog {
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addGap(6)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblAmpliconsBelowCutoff, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblNumber))
+						.addComponent(failedAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+						.addComponent(ampliconsReportLabel))
 					.addGap(4)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblTotalAmplicons, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE))
+						.addComponent(totalAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+						.addComponent(totalAmpliconsCountLabel, GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE))
 					.addGap(18)
-					.addComponent(lblSample, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+					.addComponent(patientNameLabel, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
                     .addGap(25))
                         .addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE))
                 );
@@ -163,9 +163,13 @@ public class ViewAmpliconFrame extends JDialog {
             tableModel.addAmplicon(a);
         }
 
-		lblSample.setText(String.format("%s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
+		patientNameLabel.setText(String.format("%s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
 		AmpliconCount ampliconCount = DatabaseCommands.getAmpliconCount(sample.sampleID);
-		lblNumber.setText(String.format("%s  [ %.2f %%] ", ampliconCount.failedAmplicon, (Float.parseFloat(ampliconCount.failedAmplicon)/Float.parseFloat(ampliconCount.totalAmplicon))*100));
-		lblTotal.setText(ampliconCount.totalAmplicon);
+        if(ampliconCount.totalAmplicon == 0){
+            ampliconsReportLabel.setText("No amplicon data found.");
+        }else{
+            ampliconsReportLabel.setText(String.format("%s  [ %.2f %%] ", ampliconCount.failedAmplicon,  ampliconCount.getPercentage()));
+        }
+        totalAmpliconsCountLabel.setText(""+ampliconCount.totalAmplicon);
 	}
 }
