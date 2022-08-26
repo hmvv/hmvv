@@ -107,8 +107,8 @@ public class DatabaseCommands_Pipelines {
 				"  join pipelineStatus ps1 on pipelineStatus.instrument = ps1.instrument and pipelineStatus.runFolderName = ps1.runFolderName and pipelineStatus.sampleName = ps1.sampleName " +
 				"  join samples on pipelineStatus.instrument = samples.instrument and pipelineStatus.runFolderName = samples.runFolderName and pipelineStatus.sampleName = samples.sampleName " +
 
-				"  where pipelineStatus.plStatus = \"started\" " +
-				"  and ps1.plStatus = \"pipelineCompleted\" " +
+				"  where pipelineStatus.plStatus = \"queued\" " +
+				"  and ps1.plStatus = \"PipelineCompleted\" " +
 				"  and samples.instrument = ? and samples.assay = ?) temp "
 		);
 		

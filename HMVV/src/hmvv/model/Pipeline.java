@@ -71,45 +71,14 @@ public class Pipeline {
 		//default to RUNNING
 		PipelineProgram program = PipelineProgram.runningProgram();
 		
-		if (status.toLowerCase().equals("pipelinecompleted")){
+		if (status.equals("PipelineCompleted")){
 			return PipelineProgram.completeProgram();
-		}else if ( instrument.instrumentName.equals("proton")) {
-			if (status.equals("started") || status.equals("queued") ) {
-				program.setDisplayString("0/3");
-			}else if (status.equals("RunningVEP")) {
-				program.setDisplayString("1/3");
-			}else if (status.equals("CompletedVEP")) {
-				program.setDisplayString("2/3");
-			}else if (status.equals("UpdatingDatabase")) {
-				program.setDisplayString("3/3");
-			}else if (status.startsWith("ERROR")) {
-				return PipelineProgram.errorProgram();
-			}
-		}else if  ( assay.assayName.equals("heme") || assay.assayName.equals("tmb")) {
-			if (status.equals("started") || status.equals("queued")) {
-				program.setDisplayString("0/6");
-			}else if (status.equals("bcl2fastq_running_now")) {
-				program.setDisplayString("1/6");
-			}else if ( status.equals("bcl2fastq_completed_now")) {
-				program.setDisplayString("1/6");
-			}else if ( status.equals("bcl2fastq_completed_past")) {
-				program.setDisplayString("1/6");
-			}else if (status.equals("bcl2fastq_wait") ) {
-				program.setDisplayString("1/6");
-			}else if (status.equals("Alignment") || status.equals("Trimming")) {
-				program.setDisplayString("2/6");
-			}else if (status.equals("VariantCaller")) {
-				program.setDisplayString("3/6");
-			}else if (status.equals("RunningVEP")) {
-				program.setDisplayString("4/6");
-			}else if (status.equals("CompletedVEP")){
-				program.setDisplayString("5/6");
-			}else if (status.equals("UpdatingDatabase")) {
-				program.setDisplayString("6/6");
-			}else if (status.startsWith("ERROR")) {
-				return PipelineProgram.errorProgram();
-			}
 		}
+		if (status.startsWith("ERROR")) {
+			return PipelineProgram.errorProgram();
+		}
+		program.setDisplayString(status);
+		
 		return program;
 	}
 
@@ -125,7 +94,7 @@ public class Pipeline {
 			ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
 			rows = DatabaseCommands.getPipelineDetail(this);
 			for (PipelineStatus ps : rows) {
-				if (ps.pipelineStatus.equals("started")){
+				if (ps.pipelineStatus.equals("queued")){
 					pipelineStartTime = ps.dateUpdated;
 				}
 			}

@@ -30,7 +30,6 @@ public class EnterHEMESample extends JDialog {
 
     private JButton findRunButton;
     private JButton enterSampleButton;
-    private JButton clearButton;
 
     private SampleListFrame sampleListFrame;
 
@@ -86,8 +85,6 @@ public class EnterHEMESample extends JDialog {
 
         enterSampleButton = new JButton("Enter HEME Samples");
         enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
-        clearButton = new JButton("Clear");
-        clearButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
     }
 
     private void layoutComponents(){
@@ -109,7 +106,7 @@ public class EnterHEMESample extends JDialog {
         leftPanel.add(new RowPanel("Instrument", instrumentComboBox));
         leftPanel.add(new RowPanel("RunID", runIDPanel));
         leftPanel.add(new RowPanel("RunFolder",runFolderTextField ));
-        leftPanel.add(new RowPanel("SampleName", sampleListTextArea));
+        leftPanel.add(new RowPanel("SampleNames", sampleListTextArea));
         sampleListTextArea.setEnabled(false);
 
         JLabel sampleListLabel = new JLabel();
@@ -129,7 +126,6 @@ public class EnterHEMESample extends JDialog {
         southGridLayout.setHgap(30);
         southPanel.setLayout(southGridLayout);
         southPanel.add(enterSampleButton);
-        southPanel.add(clearButton);
         bottomPanel.add(southPanel);
 
         add(leftPanel, BorderLayout.LINE_START);
@@ -185,16 +181,11 @@ public class EnterHEMESample extends JDialog {
                         }
                     });
                     enterSampleThread.start();
-                }else if (e.getSource() == clearButton){
-                    updateMainPanel(true);
-                    sampleListTextArea.setText(null);
-                    runFolderTextField.setText(null);
                 }
             }
         };
 
         enterSampleButton.addActionListener(actionListener);
-        clearButton.addActionListener(actionListener);
         runIDTextField.addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent arg0) {
@@ -282,7 +273,10 @@ public class EnterHEMESample extends JDialog {
         instrumentComboBox.setEnabled(mode);
         assayTextField.setEnabled(mode);
         runIDTextField.setEnabled(mode);
-        if(mode){runIDTextField.setText("");}
+        if(mode){
+            runIDTextField.setText("");
+            runFolderTextField.setText("");
+        }
         findRunButton.setEnabled(mode);
     }
 
