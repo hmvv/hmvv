@@ -37,7 +37,7 @@ public class DatabaseCommands_QC {
 		}
 
 		//failed
-		updateStatement = databaseConnection.prepareStatement("select count(*) as totalAmplicon from sampleAmplicons where sampleID = ?  and readDepth < ? ");
+		updateStatement = databaseConnection.prepareStatement("select count(*) as totalAmplicon from sampleAmplicons where sampleID = ?  and averageReadDepth < ? ");
 		updateStatement.setInt(1, sampleID);
 		updateStatement.setInt(2, Configurations.READ_DEPTH_FILTER);
 
@@ -56,11 +56,11 @@ public class DatabaseCommands_QC {
 
 	static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, gene, readDepth from sampleAmplicons where sampleID = ? and readDepth < 100");
+		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, gene, averageReadDepth from sampleAmplicons where sampleID = ? and averageReadDepth < 100");
 		updateStatement.setString(1, ""+sampleID);
 		ResultSet getSampleResult = updateStatement.executeQuery();
 		while(getSampleResult.next()){
-			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString("gene"), getSampleResult.getString("ampliconName"), getSampleResult.getInt("readDepth"));
+			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString("gene"), getSampleResult.getString("ampliconName"), getSampleResult.getInt("averageReadDepth"));
 			amplicons.add(amplicon);
 		}
 		updateStatement.close();
@@ -70,11 +70,11 @@ public class DatabaseCommands_QC {
 	/**
 	 *
 	 * @param assay
-	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
+	 * @return list of amplicons ordered by gene, ampliconName, then averageReadDepth
 	 * @throws Exception
 	 */
 	static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(Assay assay) throws Exception{
-		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.readDepth from sampleAmplicons"
+		String query = "select sampleAmplicons.sampleID, sampleAmplicons.gene, sampleAmplicons.ampliconName, sampleAmplicons.averageReadDepth from sampleAmplicons"
 				+ " join samples on sampleAmplicons.sampleID = samples.sampleID"
 				+ " join assays on assays.assayID = samples.assayID"
 				+ " where samples.lastName like 'Horizon%' ";
@@ -108,7 +108,7 @@ public class DatabaseCommands_QC {
 					gene = splitGene[1];
 				}
 			}
-			QCDataElement amplicon = new QCDataElement(rs.getInt("sampleID"), gene, rs.getString("ampliconName"), rs.getInt("readDepth"));
+			QCDataElement amplicon = new QCDataElement(rs.getInt("sampleID"), gene, rs.getString("ampliconName"), rs.getInt("averageReadDepth"));
 			GeneQCDataElementTrend geneAmpliconTrend = geneAmpliconTrends.get(amplicon.gene);
 			if(geneAmpliconTrend == null) {
 				geneAmpliconTrend = new GeneQCDataElementTrend(amplicon.gene);
@@ -125,7 +125,7 @@ public class DatabaseCommands_QC {
 	/**
 	 *
 	 * @param assay
-	 * @return list of amplicons ordered by gene, ampliconName, then readDepth
+	 * @return list of amplicons ordered by gene, ampliconName, then averageReadDepth
 	 * @throws Exception
 	 */
 	static TreeMap<String, GeneQCDataElementTrend> getSampleQCData(Assay assay) throws Exception{
