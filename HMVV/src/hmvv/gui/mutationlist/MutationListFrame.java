@@ -110,7 +110,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 
 		for(int i = 0; i < mutationList.getMutationCount(); i++){
 			MutationSomatic current_mutation = (MutationSomatic)mutationList.getMutation(i);
-			current_mutation.setCosmicID("LOADING...");
+			current_mutation.addCosmicIDLoading();
 		}
 
 		isWindowClosed = false;

@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import hmvv.main.Configurations;
 import hmvv.model.*;
@@ -61,7 +62,7 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getExtraMutationsBySample(sample);
 	}
 	
-	public static ArrayList<String> getCosmicIDs(MutationSomatic mutation) throws Exception{
+	public static TreeSet<String> getCosmicIDs(MutationSomatic mutation) throws Exception{
 		return DatabaseCommands_Mutations.getCosmicIDs(mutation);
 	}
 

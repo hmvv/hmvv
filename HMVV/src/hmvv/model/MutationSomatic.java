@@ -1,7 +1,7 @@
 package hmvv.model;
 
 import hmvv.main.Configurations;
-import java.util.ArrayList;
+import java.util.TreeSet;
 
 public class MutationSomatic extends MutationCommon {
 
@@ -17,7 +17,7 @@ public class MutationSomatic extends MutationCommon {
 
 
     //cosmic
-    private ArrayList<String> cosmicIDs;
+    private TreeSet<String> cosmicIDs;
 
     //G1000
     private Integer altCount;
@@ -50,6 +50,10 @@ public class MutationSomatic extends MutationCommon {
     private String pmkb_tumor_type;
     private String pmkb_tissue_type;
 
+    public MutationSomatic(){
+        this.cosmicIDs = new TreeSet<String>();
+    }
+
     public String getDbSNPID() {
         return dbSNPID;
     }
@@ -58,28 +62,43 @@ public class MutationSomatic extends MutationCommon {
         this.dbSNPID = dbSNPID;
     }
 
-    public ArrayList<String> getCosmicID() {
+    public TreeSet<String> getCosmicID() {
         return cosmicIDs;
     }
 
     public String cosmicIDsToString(String separator) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < cosmicIDs.size(); i++) {
-            sb.append(cosmicIDs.get(i));
+        int i = 0;
+        for (String cosmicID : cosmicIDs) {
+            sb.append(cosmicID);
             if (i + 1 < cosmicIDs.size()) {
                 sb.append(separator);
             }
+            i++;
         }
         return sb.toString();
     }
 
-    public void setCosmicID(ArrayList<String> cosmicID) {
-        this.cosmicIDs = cosmicID;
+    public void addCosmicIDsFromDelimiter(String cosmicIDList, String separator) {
+        String[] cosmicIDs = cosmicIDList.split(separator);
+        for(String cosmicID : cosmicIDs){
+            if(cosmicID.equals("")){
+                continue;
+            }
+            this.cosmicIDs.add(cosmicID);
+        }
     }
 
-    public void setCosmicID(String cosmicID) {
-        this.cosmicIDs = new ArrayList<String>();
-        this.cosmicIDs.add(cosmicID);
+    public void addCosmicIDLoading() {
+        this.cosmicIDs.add("LOADING...");
+    }
+
+    public void removeCosmicIDLoading() {
+        this.cosmicIDs.remove("LOADING...");
+    }
+
+    public void addCosmicIDs(TreeSet<String> cosmicID) {
+        this.cosmicIDs.addAll(cosmicID);
     }
 
     public String getPubmed() {

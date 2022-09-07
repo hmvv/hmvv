@@ -3,6 +3,7 @@ package hmvv.gui.mutationlist;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -10,9 +11,9 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
+import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
 import hmvv.model.MutationSomatic;
 
 public class CosmicInfoPopup {
@@ -47,14 +48,18 @@ public class CosmicInfoPopup {
 			transcript = HGVSc.split("\\.")[0];
 		}
 		
-		ArrayList<String> cosmicIDList = mutation.getCosmicID();
+		TreeSet<String> cosmicIDList = mutation.getCosmicID();
 		ArrayList<CosmicInfo> comsicInfoList = new ArrayList<CosmicInfo>();
 		boolean transcriptFound = false;
 		for(String cosmicID : cosmicIDList) {
-			String cosmicIDInfo = DatabaseCommands.getCosmicInfo(cosmicID);
-			String[] infoArray = cosmicIDInfo.split(";");
 			CosmicInfo thisInfo = new CosmicInfo(cosmicID);
 			comsicInfoList.add(thisInfo);
+
+			String cosmicIDInfo = DatabaseCommands.getCosmicInfo(cosmicID);
+			if(cosmicIDInfo == null){
+				cosmicIDInfo="GENE=Unknown;STRAND=Unknown;CDS=Unknown;AA=Unknown;CNT=Unknown";
+			}
+			String[] infoArray = cosmicIDInfo.split(";");
 			for(String infoField : infoArray) {
 				String[] pair = infoField.split("=");
 				switch(pair[0]) {
@@ -86,7 +91,7 @@ public class CosmicInfoPopup {
 		return comsicInfoList;
 	}
 	
-	public static void handleCosmicClick(HMVVFrame parent, MutationSomatic mutation) throws Exception{
+	public static void handleCosmicClick(CommonTable parent, MutationSomatic mutation) throws Exception{
 		ArrayList<CosmicInfo> comsicInfoList = buildCosmicInfoList(mutation);
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;

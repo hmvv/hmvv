@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.TreeSet;
+
 import hmvv.main.Configurations;
 import hmvv.model.*;
 
@@ -30,7 +32,7 @@ public class DatabaseCommands_Mutations {
 	private static ArrayList<MutationSomatic> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
-				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID,t2.pubmed,"
+				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID, t2.COSMIC, t2.OncoKB, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
@@ -115,7 +117,7 @@ public class DatabaseCommands_Mutations {
 	/**
 	 * Acquires the cosmicID from the database. If it isn't found, an empty array is returned
 	 */
-	static ArrayList<String> getCosmicIDs(MutationSomatic mutation) throws Exception{
+	static TreeSet<String> getCosmicIDs(MutationSomatic mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
 		String query = "select cosmicID from db_cosmic_grch37v86 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -124,7 +126,7 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.setString(3, coordinate.getRef());
 		preparedStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<String> cosmicIDs = new ArrayList<String>();
+		TreeSet<String> cosmicIDs = new TreeSet<String>();
 		while(rs.next()){
 			String result = rs.getString(1);
 			cosmicIDs.add(result);
@@ -334,8 +336,9 @@ public class DatabaseCommands_Mutations {
 
 
 			//temp holder fields - filled later separately
-			mutation.setCosmicID(getStringOrBlank(rs, "cosmicID"));
-			mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
+			mutation.addCosmicIDLoading();
+			mutation.addCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC"), "&");
+			//mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
 
 
 			//annotation history

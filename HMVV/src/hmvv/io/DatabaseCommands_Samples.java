@@ -34,6 +34,7 @@ public class DatabaseCommands_Samples {
 		pstEnterSample.setString(1, instrument.instrumentName);
 		pstEnterSample.setString(2, runFolder.runFolderName);
 		pstEnterSample.setString(3, SSHConnection.getUserName());
+		pstEnterSample.setString(4, runFolder.runFolderName);
 		
 		pstEnterSample.executeUpdate();
 		pstEnterSample.close();

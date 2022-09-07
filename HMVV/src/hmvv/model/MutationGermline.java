@@ -11,7 +11,6 @@ public class MutationGermline extends MutationCommon {
     private String alt_transcript_position;
 
     //gnomad
-    private String gnomad_id;
     private Double gnomad_allfreq;
     private Double gnomad_allfreq_afr;
     private Double gnomad_allfreq_amr;
@@ -192,12 +191,9 @@ public class MutationGermline extends MutationCommon {
     }
 
     public String getGnomad_id() {
-        return gnomad_id;
+        return getChr().substring(3, getChr().length()) + "-" + getPos() + "-" + getRef() + "-" + getAlt();
     }
 
-    public void setGnomadID() {
-        this.gnomad_id = this.getChr().substring(3, this.getChr().length()) + "-" + this.getPos() + "-" + this.getRef() + "-" + this.getAlt();
-    }
     public String getCardiacAtlasId() {
         return cardiacAtlasId;
     }

@@ -64,7 +64,9 @@ public class InternetCommands {
 
 	public static void searchCosmic(String cosmicID) throws Exception{
 		String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
-		browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
+		//browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
+		browseToURL("https://cancer.sanger.ac.uk/cosmic/search?q=" + cosmicID);
+		
 	}
 
 	public static void searchClinvar(String term) throws Exception{
