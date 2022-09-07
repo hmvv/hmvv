@@ -1,5 +1,4 @@
 package hmvv.io;
-import java.util.ArrayList;
 import java.util.TreeSet;
 
 import hmvv.gui.mutationlist.tablemodels.MutationList;
