@@ -12,10 +12,6 @@ import hmvv.model.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,8 +34,6 @@ public class AnnotationFrame extends JFrame {
 
 	private JTextArea geneAnnotationTextArea;
 	private JTextArea annotationTextArea;
-	private int maxCharacters = 5000;
-	private DefaultStyledDocument defaultStyledDocument;
 
 	private JLabel historyLabelGeneAnnotation;
 	private JLabel historyLabelAnnotation;
@@ -140,8 +134,6 @@ public class AnnotationFrame extends JFrame {
 
 		cancelButton = new JButton("Cancel");
 		cancelButton.setActionCommand("Cancel");
-
-		defaultStyledDocument = new DefaultStyledDocument();
 		
 		setDefaultComponentValues();
 	}
@@ -210,7 +202,7 @@ public class AnnotationFrame extends JFrame {
 		annotationPanel.setLayout(new BoxLayout(annotationPanel, BoxLayout.Y_AXIS));
 		JScrollPane annotationScrollPane = new JScrollPane(annotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		annotationScrollPane.setPreferredSize(textAreaDimension);
-		TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation (5000 characters max)");
+		TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation");
 		annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
 		annotationPanel.setBorder(annotationBorder);
 		annotationPanel.add(annotationScrollPane);
@@ -227,7 +219,7 @@ public class AnnotationFrame extends JFrame {
 		geneAnnotationPanel.setLayout(new BoxLayout(geneAnnotationPanel, BoxLayout.Y_AXIS));
 		JScrollPane geneScrollPane = new JScrollPane(geneAnnotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		geneScrollPane.setPreferredSize(textAreaDimension);
-		TitledBorder geneAnnotationBorder = BorderFactory.createTitledBorder("" + mutation.getGene() + " Annotation (5000 characters max)");
+		TitledBorder geneAnnotationBorder = BorderFactory.createTitledBorder("" + mutation.getGene() + " Annotation");
 		geneAnnotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
 		geneAnnotationPanel.setBorder(geneAnnotationBorder);
 		geneAnnotationPanel.add(geneScrollPane);
@@ -306,8 +298,6 @@ public class AnnotationFrame extends JFrame {
 		nextGeneAnnotationButton.addActionListener(historyActionListener);
 		previousAnnotationButton.addActionListener(historyActionListener);
 		nextAnnotationButton.addActionListener(historyActionListener);
-
-		defaultStyledDocument.setDocumentFilter(new DocumentSizeFilter());
 		annotationTextArea.addMouseListener(new ContextMenuMouseListener());
 	}
 
@@ -433,36 +423,6 @@ public class AnnotationFrame extends JFrame {
 			}
 		}else if(historySize != 1) {
 			nextButton.setEnabled(true);
-		}
-	}
-
-	private class DocumentSizeFilter extends DocumentFilter {
-
-		public DocumentSizeFilter() {
-			super();
-		}
-
-		public void insertString(FilterBypass fb, int offs, String str, AttributeSet a) throws BadLocationException {
-			//This rejects the entire insertion if it would make
-			//the contents too long. Another option would be
-			//to truncate the inserted string so the contents
-			//would be exactly maxCharacters in length.
-			if ((fb.getDocument().getLength() + str.length()) <= maxCharacters)
-				super.insertString(fb, offs, str, a);
-			else
-				Toolkit.getDefaultToolkit().beep();
-		}
-
-		public void replace(FilterBypass fb, int offs, int length, String str, AttributeSet a) throws BadLocationException {
-			//This rejects the entire replacement if it would make
-			//the contents too long. Another option would be
-			//to truncate the replacement string so the contents
-			//would be exactly maxCharacters in length.
-			if ((fb.getDocument().getLength() + str.length()
-			- length) <= maxCharacters)
-				super.replace(fb, offs, length, str, a);
-			else
-				Toolkit.getDefaultToolkit().beep();
 		}
 	}
 

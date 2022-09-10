@@ -70,7 +70,7 @@ public class AnnotationDraftFrame extends JFrame {
         annotationPanel.setLayout(new BoxLayout(annotationPanel, BoxLayout.Y_AXIS));
         JScrollPane annotationScrollPane = new JScrollPane(annotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         annotationScrollPane.setPreferredSize(textAreaDimension);
-        TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation Draft (5000 characters max)");
+        TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation Draft");
         annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
         annotationPanel.setBorder(annotationBorder);
         annotationPanel.add(annotationScrollPane);
