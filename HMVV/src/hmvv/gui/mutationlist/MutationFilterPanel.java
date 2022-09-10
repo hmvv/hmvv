@@ -12,6 +12,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.LoadFileButton;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
@@ -41,7 +42,7 @@ public class MutationFilterPanel extends JPanel {
 	private MutationListFilters mutationListFilters;
 
     private JButton resetButton;
-    private LoadIGVButton loadIGVButton;
+    private LoadFileButton loadIGVButton;
     
 	MutationFilterPanel(MutationListFrame parent,Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
 		this.parent = parent;
@@ -78,7 +79,7 @@ public class MutationFilterPanel extends JPanel {
 			}
 		});
 		
-		loadIGVButton = new LoadIGVButton();
+		loadIGVButton = new LoadFileButton("Load IGV");
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
 		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		loadIGVButton.addActionListener(new ActionListener() {

@@ -1,5 +1,8 @@
 package hmvv.gui.sampleList;
 
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -9,7 +12,10 @@ import javax.swing.JScrollPane;
 import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.LoadFileButton;
 import hmvv.io.DatabaseCommands;
+import hmvv.io.SSHConnection;
+import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.Amplicon;
 import hmvv.model.Sample;
@@ -20,12 +26,16 @@ import java.util.ArrayList;
 public class ViewAmpliconFrame extends JDialog {
 
 	private static final long serialVersionUID = 1L;
+
+    private HMVVFrame parent;
+
 	private JLabel patientNameLabel;
 	private JLabel ampliconsReportLabel;
 	private JLabel totalAmpliconsCountLabel;
 	private JLabel failedAmpliconsLabel;
 	private JLabel totalAmpliconsLabel;
     private JLabel qcMeasureDescriptionLabel;
+    private LoadFileButton ampliconDepthButton;
 
 	private Sample sample;
 
@@ -38,6 +48,7 @@ public class ViewAmpliconFrame extends JDialog {
 
 	public ViewAmpliconFrame(HMVVFrame parent, Sample sample) throws Exception{
         super(parent, "Sample Amplicons");
+        this.parent = parent;
 		this.sample = sample;
 
         tableModel = new ViewAmpliconFrameTableModel();
@@ -50,6 +61,7 @@ public class ViewAmpliconFrame extends JDialog {
 
         createComponents();
         layoutComponents();
+        activateComponents();
         setLocationRelativeTo(parent);
         buildModelFromDatabase();
 
@@ -93,6 +105,12 @@ public class ViewAmpliconFrame extends JDialog {
 
         qcMeasureDescriptionLabel = new JLabel("measure");
 		qcMeasureDescriptionLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+
+        ampliconDepthButton = new LoadFileButton("Load Depth Figure");
+        ampliconDepthButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        if(!sample.assay.assayName.equals("heme")){
+            ampliconDepthButton.setEnabled(false);
+        }
     }
 
     private void layoutComponents(){
@@ -100,6 +118,8 @@ public class ViewAmpliconFrame extends JDialog {
         gl_contentPane.setHorizontalGroup(gl_contentPane.createSequentialGroup()
                         .addGroup(gl_contentPane.createParallelGroup(GroupLayout.Alignment.LEADING)
                             .addComponent(patientNameLabel, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(qcMeasureDescriptionLabel, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ampliconDepthButton, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
 						    .addGroup(gl_contentPane.createSequentialGroup()
 							    .addComponent(failedAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
 							    .addGap(18)
@@ -124,8 +144,12 @@ public class ViewAmpliconFrame extends JDialog {
 						.addComponent(totalAmpliconsCountLabel, GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE))
 					.addGap(18)
 					.addComponent(patientNameLabel, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(qcMeasureDescriptionLabel, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(ampliconDepthButton, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
                     .addGap(25))
-                        .addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE))
+                    .addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE))
                 );
         getContentPane().setLayout(gl_contentPane);
 
@@ -137,6 +161,7 @@ public class ViewAmpliconFrame extends JDialog {
 
         resizeColumnWidths();
     }
+
     private void resizeColumnWidths() {
         TableColumnModel columnModel = table.getColumnModel();
 
@@ -159,6 +184,31 @@ public class ViewAmpliconFrame extends JDialog {
             columnModel.getColumn(column).setPreferredWidth(width);
         }
     }
+
+    private void activateComponents(){
+        ActionListener listener = new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ampliconDepthButton.setText("Copying File");
+                ampliconDepthButton.setEnabled(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            File qcFigureFile = SSHConnection.loadHemeQCFile(sample);
+                            ampliconDepthButton.setText("Load Depth Figure");
+                            Desktop.getDesktop().open(qcFigureFile);
+                        } catch (Exception e1) {
+                            HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e1);
+                        }
+                        ampliconDepthButton.setEnabled(true);
+                    }
+                });
+            }
+        };
+        ampliconDepthButton.addActionListener(listener);
+    }
+
     private void buildModelFromDatabase() throws Exception{
 
         ArrayList<Amplicon> amplicons = DatabaseCommands.getAmplicons(sample);
@@ -168,8 +218,7 @@ public class ViewAmpliconFrame extends JDialog {
         if(amplicons.size() > 0){
             qcMeasureDescription = amplicons.get(0).getQCMeasureDescription();
         }
-        qcMeasureDescriptionLabel.setText(qcMeasureDescription);
-        //TODO add this to the layout
+        qcMeasureDescriptionLabel.setText("QC Measure: " + qcMeasureDescription);
 
 		patientNameLabel.setText(String.format("%s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
         if(amplicons.size() == 0){

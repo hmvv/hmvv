@@ -74,16 +74,22 @@ public class SSHConnection {
         }
 	}
 	
-	private static File copyFile(Instrument instrument, RunFolder runFolder, String runFile, SftpProgressMonitor progressMonitor) throws Exception{
-		String runIDFolder = temporaryHMVVDirectory + File.separator + instrument.instrumentName + File.separator + runFolder.runFolderName;
-		new File(runIDFolder).mkdirs();
+	private static File copyFile(Sample sample, String file_location, SftpProgressMonitor progressMonitor) throws Exception{
+		String runFolderName = sample.runFolder.runFolderName;
+		String instrumentName =  sample.instrument.instrumentName;
+		String sampleName =  sample.sampleName;
+
+		String localSampleFolder = temporaryHMVVDirectory + File.separator + instrumentName + File.separator + runFolderName + File.separator + sampleName;
+		new File(localSampleFolder).mkdirs();
 		
-		String fileName = new File(runFile).getName().trim();
-		String filePath = new File(runFile).getParentFile().getPath().replace("\\", "/") + "/";
+		String fileName = new File(file_location).getName().trim();
+		String filePath = new File(file_location).getParentFile().getPath().replace("\\", "/") + "/";
 		
-		File newSubPath = new File(runIDFolder + File.separator + fileName).getAbsoluteFile();
+		File newSubPath = new File(localSampleFolder + File.separator + fileName).getAbsoluteFile();
 		if(newSubPath.exists()) {
-			progressMonitor.end();
+			if (progressMonitor != null){
+				progressMonitor.end();
+			}
 			//file already exists on local disk
 			return newSubPath;
 		}
@@ -92,63 +98,51 @@ public class SSHConnection {
 		channel.connect();
 		channel.cd(filePath);
 		channel.get(fileName, newSubPath.getAbsolutePath(), progressMonitor);
-		channel.get(fileName + ".bai", newSubPath.getAbsolutePath() + ".bai");
+		if(fileName.endsWith("bam")){
+			channel.get(fileName + ".bai", newSubPath.getAbsolutePath() + ".bai");
+		}
 		channel.exit();
 	    
 		return newSubPath;
 	}
-	
-	private static File findSample(String command, Instrument instrument, RunFolder runFolder, String sampleID, SftpProgressMonitor progressMonitor) throws Exception {
-		String runFile = SSHConnection.sendCommand(command);
-		return copyFile(instrument, runFolder, runFile, progressMonitor);
+
+	public static File loadHemeQCFile(Sample sample) throws Exception{
+		RunFolder runFolder = sample.runFolder;
+		String sampleName = sample.sampleName;
+		Instrument instrument =  sample.instrument;
+		String fileName = "trusight-myeloid-amplicon-track.all.strands_distribution.pdf";
+
+		String qcFile = String.format("/storage/analysis/environments/%s/%sAnalysis/hemeAssay/%s/%s/QualityControl/Figures/%s", Configurations.getEnvironment(), instrument, runFolder, sampleName, fileName);
+		return copyFile(sample, qcFile, null);
 	}
 	
 	public static File loadBAMForIGV(Sample sample, SftpProgressMonitor progressMonitor) throws Exception {
-		RunFolder runFolder = sample.runFolder;
-		String sampleID = sample.sampleName;
+		String instrumentName =  sample.instrument.instrumentName;
+
+		if(instrumentName.equals("proton")){
+			return SSHConnection.loadProton_BAM(sample, progressMonitor);
+		}else if( instrumentName.equals("nextseq") || instrumentName.equals("novaseq") ){
+			return SSHConnection.loadIllumina_BAM(sample, progressMonitor);
+		}else{
+			throw new IllegalArgumentException(instrumentName + " is not supported");
+		}
+	}
+
+	private static File loadProton_BAM(Sample sample, SftpProgressMonitor progressMonitor) throws Exception{
+		String runFolder = sample.runFolder.runFolderName;
+		String sampleName = sample.sampleName;
 		String callerID = sample.callerID;
-		Instrument instrument =  sample.instrument;
 
-		if(instrument.instrumentName.equals("pgm")){
-			return SSHConnection.loadPGM_BAM(runFolder, sampleID, callerID, progressMonitor);
-		}else if(instrument.instrumentName.equals("proton")){
-			return SSHConnection.loadProton_BAM(runFolder, sampleID, callerID, progressMonitor);
-		}else if( ( instrument.instrumentName.equals("nextseq") || (instrument.instrumentName.equals("novaseq"))) && sample.assay.assayName.equals("heme")){
-			return SSHConnection.loadIlluminaNextseqHeme_BAM(instrument, runFolder, sampleID, progressMonitor);
-		}else{
-			return SSHConnection.loadIllumina_BAM(instrument, runFolder, sampleID, progressMonitor);
-		}
+		String bamFile = String.format("ls /storage/instruments/proton/%s/plugin_out/%s/%s_rawlib.realigned.bam", runFolder, callerID, sampleName);
+		return copyFile(sample, bamFile, progressMonitor);
 	}
 
-	private static File loadPGM_BAM(RunFolder runFolder, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
-		String command = null;
-		sampleID = sampleID.replaceAll(".*_", "");
-		callerID = callerID.replaceAll(".*\\.", "");
-		if(!callerID.equals("None")){
-			//with a callerID
-			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runFolder, callerID,sampleID);
-		}else{
-			//without a callerID
-			command = String.format("ls /storage/instruments/ionadmin/archivedReports/*%s/plugin_out/variantCaller_out/IonXpress_%s/IonXpress_%s_*PTRIM.bam", runFolder, sampleID, sampleID);
-		}
-		return findSample(command, Instrument.getInstrument("proton"), runFolder, sampleID, progressMonitor);
-	}
-
-	private static File loadProton_BAM(RunFolder runFolder, String sampleID, String callerID, SftpProgressMonitor progressMonitor) throws Exception{
-		sampleID = sampleID.replaceAll(".*_", "");
-		callerID = callerID.replaceAll(".*\\.", "");
-		String command = String.format("ls /storage/instruments/proton/*%s/plugin_out/variantCaller_out.%s/IonXpress_%s_*.bam", runFolder, callerID, sampleID);
-		return findSample(command, Instrument.getInstrument("proton"), runFolder, sampleID, progressMonitor);
-	}
-
-	private static File loadIlluminaNextseqHeme_BAM(Instrument instrument, RunFolder runFolder, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String command = String.format("ls /storage/analysis/environments/%s/%sAnalysis/%s/%s/variantCaller/%s*.sort.bam", Configurations.getEnvironment(), instrument, runFolder, sampleID, sampleID);
-		return findSample(command, instrument, runFolder, sampleID, progressMonitor);
-	}
-
-	private static File loadIllumina_BAM(Instrument instrument, RunFolder runFolder, String sampleID, SftpProgressMonitor progressMonitor) throws Exception{
-		String command = String.format("ls /storage/instruments/%s/%s/Data/Intensities/BaseCalls/Alignment/%s*.bam", instrument, runFolder, sampleID);
-		return findSample(command, instrument, runFolder, sampleID, progressMonitor);
+	private static File loadIllumina_BAM(Sample sample, SftpProgressMonitor progressMonitor) throws Exception{
+		String instrument = sample.instrument.instrumentName;
+		String runFolder = sample.runFolder.runFolderName;
+		String sampleName = sample.sampleName;
+		String bamFile = String.format("ls /storage/analysis/environments/%s/%sAnalysis/%s/%s/bam/%s*.sort.bam", Configurations.getEnvironment(), instrument, runFolder, sampleName, sampleName);
+		return copyFile(sample, bamFile, progressMonitor);
 	}
 	
 	public static ArrayList<String> getCandidateCoverageIDs(Instrument instrument, RunFolder runFolder) throws Exception {
@@ -263,21 +257,6 @@ public class SSHConnection {
 		});
 		responseLines.clear();
 		responseLines.addAll(sampleList);
-	}
-	
-	private static String sendCommand(String command) throws Exception{
-		StringBuilder outputBuffer = new StringBuilder();
-		com.jcraft.jsch.Channel channel = sshSession.openChannel("exec");
-		((ChannelExec)channel).setCommand(command);
-		InputStream commandOutput = channel.getInputStream();
-		channel.connect();
-		int readByte = commandOutput.read();
-		while(readByte != 0xffffffff){
-			outputBuffer.append((char)readByte);
-			readByte = commandOutput.read();
-		}
-		channel.disconnect();		
-		return outputBuffer.toString();
 	}
 	
 	private static CommandResponse executeCommandAndGetOutput(String command) throws Exception{
