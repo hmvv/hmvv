@@ -22,22 +22,22 @@ public class ViewAmpliconFrameTableModel extends AbstractTableModel{
         columns.add(new ViewAmpliconFrameTableModelColumn("The sample ID",
                 "sampleID",
                 int.class,
-                (Amplicon amplicon) -> amplicon.sampleID));
+                (Amplicon amplicon) -> amplicon.sample.sampleID));
 
         columns.add(new ViewAmpliconFrameTableModelColumn("The amplicon Name",
                 "ampliconName",
                 String.class,
                 (Amplicon amplicon) -> amplicon.ampliconName));
 
-        columns.add(new ViewAmpliconFrameTableModelColumn("The amplicon read depth",
-                "readDepth",
+        columns.add(new ViewAmpliconFrameTableModelColumn("The amplicon QC measure",
+                "QC Measure",
                 Integer.class,
-                (Amplicon amplicon) -> amplicon.readDepth));
+                (Amplicon amplicon) -> amplicon.getQCMeasure()));
     }
 
-    public void addAmplicon(Amplicon amplicon){
-        amplicons.add(amplicon);
-        fireTableRowsInserted(amplicons.size()-1, amplicons.size()-1);
+    public void setAmplicons(ArrayList<Amplicon> amplicons){
+        this.amplicons = amplicons;
+        this.fireTableDataChanged();
     }
 
     @Override

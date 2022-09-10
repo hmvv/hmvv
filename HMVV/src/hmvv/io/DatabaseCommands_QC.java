@@ -8,10 +8,10 @@ import java.util.TreeMap;
 
 import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
-import hmvv.model.AmpliconCount;
 import hmvv.model.Assay;
 import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.QCDataElement;
+import hmvv.model.Sample;
 
 public class DatabaseCommands_QC {
 	private static Connection databaseConnection = null;
@@ -19,51 +19,35 @@ public class DatabaseCommands_QC {
 		DatabaseCommands_QC.databaseConnection = databaseConnection;
 	}
 	
-	static AmpliconCount getAmpliconCount(int sampleID) throws Exception{
-		int total = -1;
-		int failed = -1;
-
-		//total
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select count(*) as totalAmplicon from sampleAmplicons where sampleID = ?");
-		updateStatement.setInt(1, sampleID);
-		ResultSet getSampleResult = updateStatement.executeQuery();
-		if(getSampleResult.next()){
-			total = getSampleResult.getInt(1);
-			if(getSampleResult.next()){
-				throw new Exception("Error: more than one amplicon count result located for the sample");
-			}
-			updateStatement.close();
-			getSampleResult.close();
-		}
-
-		//failed
-		updateStatement = databaseConnection.prepareStatement("select count(*) as totalAmplicon from sampleAmplicons where sampleID = ?  and averageReadDepth < ? ");
-		updateStatement.setInt(1, sampleID);
-		updateStatement.setInt(2, Configurations.READ_DEPTH_FILTER);
-
-		getSampleResult = updateStatement.executeQuery();
-		if(getSampleResult.next()){
-			failed = getSampleResult.getInt(1);
-			if(getSampleResult.next()){
-				throw new Exception("Error: more than one amplicon count result located for the sample");
-			}
-			updateStatement.close();
-			getSampleResult.close();
-		}
-
-		return new AmpliconCount(sampleID, total, failed);
-	}
-
-	static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
+	static ArrayList<Amplicon> getAmplicons(Sample sample) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement updateStatement = databaseConnection.prepareStatement("select ampliconName, gene, averageReadDepth from sampleAmplicons where sampleID = ? and averageReadDepth < 100");
-		updateStatement.setString(1, ""+sampleID);
-		ResultSet getSampleResult = updateStatement.executeQuery();
-		while(getSampleResult.next()){
-			Amplicon amplicon = new Amplicon(sampleID, getSampleResult.getString("gene"), getSampleResult.getString("ampliconName"), getSampleResult.getInt("averageReadDepth"));
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select gene,ampliconName,chr,chr_start,chr_end,length,total_reads,average_depth,cumulative_depth,cov20x,cov100x,cov500x,cov100xPercent "+
+		" from sampleAmplicons where sampleID = ? ");
+		preparedStatement.setInt(1, sample.sampleID);
+		ResultSet resultSet = preparedStatement.executeQuery();
+		while(resultSet.next()){
+			
+			Amplicon amplicon = new Amplicon(
+				sample,
+				resultSet.getString("gene"),
+				resultSet.getString("ampliconName"),
+				resultSet.getString("chr"),
+				resultSet.getInt("chr_start"),
+				resultSet.getInt("chr_end"),
+				resultSet.getInt("length"),
+				resultSet.getInt("total_reads"),
+				resultSet.getInt("average_depth"),
+				resultSet.getInt("cumulative_depth"),
+				resultSet.getInt("cov20x"),
+				resultSet.getInt("cov100x"),
+				resultSet.getInt("cov500x"),
+				resultSet.getInt("cov100xPercent")
+			);
 			amplicons.add(amplicon);
 		}
-		updateStatement.close();
+		preparedStatement.close();
+		resultSet.close();
+
 		return amplicons;
 	}
 	

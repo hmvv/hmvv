@@ -12,7 +12,6 @@ import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVFrame;
 import hmvv.model.Amplicon;
-import hmvv.model.AmpliconCount;
 import hmvv.model.Sample;
 
 import java.awt.*;
@@ -26,6 +25,7 @@ public class ViewAmpliconFrame extends JDialog {
 	private JLabel totalAmpliconsCountLabel;
 	private JLabel failedAmpliconsLabel;
 	private JLabel totalAmpliconsLabel;
+    private JLabel qcMeasureDescriptionLabel;
 
 	private Sample sample;
 
@@ -90,6 +90,9 @@ public class ViewAmpliconFrame extends JDialog {
 
 		totalAmpliconsCountLabel = new JLabel("total");
 		totalAmpliconsCountLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+
+        qcMeasureDescriptionLabel = new JLabel("measure");
+		qcMeasureDescriptionLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
     }
 
     private void layoutComponents(){
@@ -158,18 +161,28 @@ public class ViewAmpliconFrame extends JDialog {
     }
     private void buildModelFromDatabase() throws Exception{
 
-        ArrayList<Amplicon> amplicons = DatabaseCommands.getFailedAmplicon(sample.sampleID);
-        for(Amplicon a : amplicons) {
-            tableModel.addAmplicon(a);
+        ArrayList<Amplicon> amplicons = DatabaseCommands.getAmplicons(sample);
+        tableModel.setAmplicons(amplicons);
+
+        String qcMeasureDescription = "";
+        if(amplicons.size() > 0){
+            qcMeasureDescription = amplicons.get(0).getQCMeasureDescription();
         }
+        qcMeasureDescriptionLabel.setText(qcMeasureDescription);
+        //TODO add this to the layout
 
 		patientNameLabel.setText(String.format("%s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
-		AmpliconCount ampliconCount = DatabaseCommands.getAmpliconCount(sample.sampleID);
-        if(ampliconCount.totalAmplicon == 0){
+        if(amplicons.size() == 0){
             ampliconsReportLabel.setText("No amplicon data found.");
         }else{
-            ampliconsReportLabel.setText(String.format("%s  [ %.2f %%] ", ampliconCount.failedAmplicon,  ampliconCount.getPercentage()));
+            int failed = 0;
+            for(Amplicon amplicon : amplicons){
+                if(amplicon.isFailedAmplicon()){
+                    failed++;
+                }
+            }
+            ampliconsReportLabel.setText(String.format("%s  [ %.2f %%] ", failed,  failed * 100.0 / amplicons.size()) );
         }
-        totalAmpliconsCountLabel.setText(""+ampliconCount.totalAmplicon);
+        totalAmpliconsCountLabel.setText(""+amplicons.size() );
 	}
 }

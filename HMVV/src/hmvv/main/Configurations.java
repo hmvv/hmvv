@@ -229,6 +229,7 @@ public class Configurations {
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
 	public static int READ_DEPTH_FILTER = 100;
+	public static int COVERAGE_PERCENTAGE_100X = 90;
 	public static int MAX_OCCURENCE_FILTER = 1000000;
 	public static int ALLELE_FREQ_FILTER = 10;
 	public static int HORIZON_ALLELE_FREQ_FILTER = 1;

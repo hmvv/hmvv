@@ -175,12 +175,8 @@ public class DatabaseCommands {
 	/* ************************************************************************
 	 * Amplicon and QC Plot queries
 	 *************************************************************************/
-	public static AmpliconCount getAmpliconCount(int sampleID) throws Exception{
-		return DatabaseCommands_QC.getAmpliconCount(sampleID);
-	}
-	
-	public static ArrayList<Amplicon> getFailedAmplicon(int sampleID) throws Exception{
-		return DatabaseCommands_QC.getFailedAmplicon(sampleID);
+	public static ArrayList<Amplicon> getAmplicons(Sample sample) throws Exception{
+		return DatabaseCommands_QC.getAmplicons(sample);
 	}
 	
 	public static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(Assay assay) throws Exception{
