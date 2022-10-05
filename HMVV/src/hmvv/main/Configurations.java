@@ -236,6 +236,7 @@ public class Configurations {
 	public static int GERMLINE_READ_DEPTH_FILTER = 10;
 	public static int GERMLINE_ALLELE_FREQ_FILTER = 15;
 	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
+	public static String COSMIC_TABLE = "db_cosmic_grch37v96";
 
 	public static int getAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){

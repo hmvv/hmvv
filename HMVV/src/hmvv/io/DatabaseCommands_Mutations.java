@@ -118,7 +118,7 @@ public class DatabaseCommands_Mutations {
 	 */
 	static ArrayList<CosmicID> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String query = "select cosmicID, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from db_cosmic_grch37v96 where chr = ? and pos = ? and ref = ? and alt = ?";
+		String query = "select cosmicID, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from " + Configurations.COSMIC_TABLE + " where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());

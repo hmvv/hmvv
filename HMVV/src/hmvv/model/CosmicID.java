@@ -31,7 +31,7 @@ public class CosmicID {
 
     public String getTranscript() {
         if(gene.contains("ENST")) {
-            String[] split = gene.split("_");
+            String[] split = gene.split(" ");
             if(split.length > 1) {
                 return split[1];
             }

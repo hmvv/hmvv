@@ -116,9 +116,9 @@ public class DatabaseCommands_QC {
 		String query = "select sampleVariants.sampleID, sampleVariants.gene, sampleVariants.HGVSc, sampleVariants.HGVSp, sampleVariants.altFreq, cosmicID"
 				+ " from samples"
 				+ " join sampleVariants on sampleVariants.sampleID = samples.sampleID"
-				+ " join db_cosmic_grch37v86 on sampleVariants.chr = db_cosmic_grch37v86.chr and sampleVariants.pos = db_cosmic_grch37v86.pos and sampleVariants.ref = db_cosmic_grch37v86.ref and sampleVariants.alt = db_cosmic_grch37v86.alt "
+				+ " join " + Configurations.COSMIC_TABLE + " on sampleVariants.chr = " + Configurations.COSMIC_TABLE + ".chr and sampleVariants.pos = " + Configurations.COSMIC_TABLE + ".pos and sampleVariants.ref = " + Configurations.COSMIC_TABLE + ".ref and sampleVariants.alt = " + Configurations.COSMIC_TABLE + ".alt "
 				+ " where samples.lastName like 'Horizon%' "
-				+ " and HGVSp IS NOT NULL";//have to do this because old data has null values
+				+ " and sampleVariants.HGVSp IS NOT NULL";//have to do this because old data has null values
 
 		String geneFilter;
 		if(assay.assayName.equals("heme")) {
@@ -134,7 +134,7 @@ public class DatabaseCommands_QC {
 		}else if(assay.assayName.equals("neuro")) {
 			geneFilter =
 					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM97131' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
-							+ " and samples.samples = 'neuro' ";
+							+ " and samples.assay = 'neuro' ";
 		}else {
 			throw new Exception("Unsupported Assay: " + assay);
 		}
