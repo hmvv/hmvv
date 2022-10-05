@@ -3,6 +3,7 @@ package hmvv.io;
 import java.awt.Desktop;
 import java.net.URI;
 import hmvv.main.Configurations;
+import hmvv.model.CosmicID;
 
 public class InternetCommands {
 	private static void browseToURL(String url) throws Exception{
@@ -62,10 +63,10 @@ public class InternetCommands {
 		}
 	}
 
-	public static void searchCosmic(String cosmicID) throws Exception{
+	public static void searchCosmic(CosmicID cosmicID) throws Exception{
 		//String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
 		//browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
-		browseToURL("https://cancer.sanger.ac.uk/cosmic/search?q=" + cosmicID);
+		browseToURL("https://cancer.sanger.ac.uk/cosmic/search?q=" + cosmicID.cosmicID);
 		
 	}
 

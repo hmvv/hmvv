@@ -3,7 +3,6 @@ package hmvv.gui.mutationlist;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -12,35 +11,19 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import hmvv.gui.mutationlist.tables.CommonTable;
-import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
+import hmvv.model.CosmicID;
 import hmvv.model.MutationSomatic;
 
 public class CosmicInfoPopup {
 	static class CosmicInfo{
 		public boolean openItem;
-		public String cosmicID;
-		public String geneName;
-		public String geneStrand;
-		public String cdsAnnotation;
-		public String peptideAnnotation;
-		public String count;
-		public String classifiedAsSnp;
-		CosmicInfo(String cosmicID){
+		public CosmicID cosmicID;
+		CosmicInfo(CosmicID cosmicID){
 			this.cosmicID = cosmicID;
 		}
-		
-		public String getTranscript() {
-			if(geneName.contains("ENST")) {
-				String[] split = geneName.split("_");
-				if(split.length > 1) {
-					return split[1];
-				}
-			}
-			return "";
-		}
 	}
-	
+
 	private static ArrayList<CosmicInfo> buildCosmicInfoList(MutationSomatic mutation) throws Exception {
 		String HGVSc = mutation.getHGVSc();
 		String transcript = "";
@@ -48,47 +31,29 @@ public class CosmicInfoPopup {
 			transcript = HGVSc.split("\\.")[0];
 		}
 		
-		TreeSet<String> cosmicIDList = mutation.getCosmicID();
-		ArrayList<CosmicInfo> comsicInfoList = new ArrayList<CosmicInfo>();
-		boolean transcriptFound = false;
-		for(String cosmicID : cosmicIDList) {
+		 ArrayList<CosmicID> cosmicIDList = mutation.getAllCosmicIDs();
+		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 boolean transcriptFound = false;
+		 for(CosmicID cosmicID : cosmicIDList) {
 			CosmicInfo thisInfo = new CosmicInfo(cosmicID);
-			comsicInfoList.add(thisInfo);
+			cosmicInfoList.add(thisInfo);
+		 	//looking for transcript that matches this mutation
+		 	if(cosmicID.getTranscript().equals(transcript)) {
+		 		thisInfo.openItem = true;
+		 		transcriptFound = true;
+		 	}
+		 }
 
-			String cosmicIDInfo = DatabaseCommands.getCosmicInfo(cosmicID);
-			if(cosmicIDInfo == null){
-				cosmicIDInfo="GENE=Unknown;STRAND=Unknown;CDS=Unknown;AA=Unknown;CNT=Unknown";
-			}
-			String[] infoArray = cosmicIDInfo.split(";");
-			for(String infoField : infoArray) {
-				String[] pair = infoField.split("=");
-				switch(pair[0]) {
-					case "GENE": thisInfo.geneName = pair[1];break;
-					case "STRAND": thisInfo.geneStrand = pair[1];break;
-					case "CDS": thisInfo.cdsAnnotation = pair[1];break;
-					case "AA": thisInfo.peptideAnnotation = pair[1];break;
-					case "CNT": thisInfo.count = pair[1];break;
-					case "SNP": thisInfo.classifiedAsSnp = "SNP";break;
-				}
-			}
-			
-			//looking for transcript that matches this mutation
-			if(thisInfo.getTranscript().equals(transcript)) {
-				thisInfo.openItem = true;
-				transcriptFound = true;
-			}
-		}
-		
-		//Find default cosmicID if no transcript found
-		if(!transcriptFound) {
-			for(CosmicInfo thisInfo : comsicInfoList) {
-				if(thisInfo.getTranscript().equals("")) {
-					thisInfo.openItem = true;
-				}
-			}
-		}
-		
-		return comsicInfoList;
+		 //Find default cosmicID if no transcript found
+		 if(!transcriptFound) {
+		 	for(CosmicInfo thisInfo : cosmicInfoList) {
+		 		if(thisInfo.cosmicID.getTranscript().equals("")) {
+		 			thisInfo.openItem = true;
+		 		}
+		 	}
+		 }
+
+		return cosmicInfoList;
 	}
 	
 	public static void handleCosmicClick(CommonTable parent, MutationSomatic mutation) throws Exception{
@@ -106,7 +71,7 @@ public class CosmicInfoPopup {
 			
 			@Override
 			public final int getColumnCount() {
-				return 8;
+				return 6;
 			}
 			
 			@Override
@@ -119,12 +84,10 @@ public class CosmicInfoPopup {
 				switch(column) {
 					case 0: return "Open?";
 					case 1: return "CosmicID";
-					case 2: return "GENE";
-					case 3: return "STRAND";
+					case 2: return "Gene";
+					case 3: return "LegacyID";
 					case 4: return "CDS";
 					case 5: return "AA";
-					case 6: return "CNT";
-					case 7: return "SNP";
 					default: return "";
 				}
 			}
@@ -140,13 +103,11 @@ public class CosmicInfoPopup {
 			public  final Object getValueAt(int row, int column) {
 				switch(column) {
 					case 0: return comsicInfoList.get(row).openItem;
-					case 1: return comsicInfoList.get(row).cosmicID;
-					case 2: return comsicInfoList.get(row).geneName;
-					case 3: return comsicInfoList.get(row).geneStrand;
-					case 4: return comsicInfoList.get(row).cdsAnnotation;
-					case 5: return comsicInfoList.get(row).peptideAnnotation;
-					case 6: return comsicInfoList.get(row).count;
-					case 7: return comsicInfoList.get(row).classifiedAsSnp;
+					case 1: return comsicInfoList.get(row).cosmicID.cosmicID;
+					case 2: return comsicInfoList.get(row).cosmicID.gene;
+					case 3: return comsicInfoList.get(row).cosmicID.legacyID;
+					case 4: return comsicInfoList.get(row).cosmicID.CDS;
+					case 5: return comsicInfoList.get(row).cosmicID.AA;
 					default: return "";
 				}
 			}
@@ -174,11 +135,9 @@ public class CosmicInfoPopup {
 							case 0: return "Open in browser?";
 							case 1: return "COSMIC ID";
 							case 2: return "Gene Name";
-							case 3: return "Strand (+ or -)";
+							case 3: return "Legacy ID";
 							case 4: return "CDS annotation";
 							case 5: return "Peptide annotation";
-							case 6: return "How many samples (in COSMIC?) have this mutation";
-							case 7: return "Classified as SNP";
 							default: return "";
 						}
 					}
@@ -190,10 +149,10 @@ public class CosmicInfoPopup {
 		tableScrollPane.setPreferredSize(new Dimension(1200,500));
 		int returnValue = JOptionPane.showConfirmDialog(parent, tableScrollPane, "Open CosmicID's in Web Browser?", JOptionPane.YES_NO_OPTION);
 		if(returnValue == JOptionPane.OK_OPTION) {
-			for(CosmicInfo cosmicID : comsicInfoList){
-				if(cosmicID.openItem) {
-					InternetCommands.searchCosmic(cosmicID.cosmicID);
-				}
+			for(CosmicInfo cosmicInfo : comsicInfoList){
+				 if(cosmicInfo.openItem) {
+				 	InternetCommands.searchCosmic(cosmicInfo.cosmicID);
+				 }
 			}
 		}
 	}

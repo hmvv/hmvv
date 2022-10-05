@@ -1,8 +1,9 @@
 package hmvv.io;
-import java.util.TreeSet;
+import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
+import hmvv.model.CosmicID;
 import hmvv.model.MutationGermline;
 import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
@@ -62,8 +63,8 @@ public class AsynchronousMutationDataIO {
 	
 	public static void getMutationData(MutationSomatic mutation) throws Exception {
 		//cosmic
-		TreeSet<String> cosmicIDs = DatabaseCommands.getCosmicIDs(mutation);
-		mutation.addCosmicIDs(cosmicIDs);
+		ArrayList<CosmicID> cosmicIDs = DatabaseCommands.getLinkedCosmicIDs(mutation);
+		mutation.addLinkedCosmicIDs(cosmicIDs);
 		mutation.removeCosmicIDLoading();
 		
 		int count = DatabaseCommands.getOccurrenceCount(mutation);

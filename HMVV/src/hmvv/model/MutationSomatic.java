@@ -1,7 +1,8 @@
 package hmvv.model;
 
 import hmvv.main.Configurations;
-import java.util.TreeSet;
+
+import java.util.ArrayList;
 
 public class MutationSomatic extends MutationCommon {
 
@@ -17,7 +18,9 @@ public class MutationSomatic extends MutationCommon {
 
 
     //cosmic
-    private TreeSet<String> cosmicIDs;
+    private ArrayList<CosmicID> pipeline_cosmicIDs;
+    private ArrayList<CosmicID> VEP_cosmicIDs;
+    private ArrayList<CosmicID> linked_cosmicIDs;
 
     //G1000
     private Integer altCount;
@@ -51,7 +54,9 @@ public class MutationSomatic extends MutationCommon {
     private String pmkb_tissue_type;
 
     public MutationSomatic(){
-        this.cosmicIDs = new TreeSet<String>();
+        this.pipeline_cosmicIDs = new ArrayList<CosmicID>();
+        this.VEP_cosmicIDs = new ArrayList<CosmicID>();
+        this.linked_cosmicIDs = new ArrayList<CosmicID>();
     }
 
     public String getDbSNPID() {
@@ -62,16 +67,25 @@ public class MutationSomatic extends MutationCommon {
         this.dbSNPID = dbSNPID;
     }
 
-    public TreeSet<String> getCosmicID() {
-        return cosmicIDs;
+    public void addLinkedCosmicIDs(ArrayList<CosmicID> linkedCosmicIDs){
+        this.linked_cosmicIDs.addAll(linkedCosmicIDs);
+    }
+
+    public ArrayList<CosmicID> getAllCosmicIDs(){
+        ArrayList<CosmicID> allIDs = new ArrayList<CosmicID>();
+        allIDs.addAll(linked_cosmicIDs);
+        allIDs.addAll(VEP_cosmicIDs);
+        allIDs.addAll(pipeline_cosmicIDs);
+        return allIDs;
     }
 
     public String cosmicIDsToString(String separator) {
         StringBuilder sb = new StringBuilder();
+        ArrayList<CosmicID> allIDs = getAllCosmicIDs();
         int i = 0;
-        for (String cosmicID : cosmicIDs) {
-            sb.append(cosmicID);
-            if (i + 1 < cosmicIDs.size()) {
+        for (CosmicID cosmicID : allIDs) {
+            sb.append(cosmicID.cosmicID);
+            if (i + 1 < allIDs.size()) {
                 sb.append(separator);
             }
             i++;
@@ -79,26 +93,31 @@ public class MutationSomatic extends MutationCommon {
         return sb.toString();
     }
 
-    public void addCosmicIDsFromDelimiter(String cosmicIDList, String separator) {
-        String[] cosmicIDs = cosmicIDList.split(separator);
+    private void addCosmicIDsFromDelimiter(ArrayList<CosmicID> cosmicIDList, String cosmicIDString, String separator) {
+        String[] cosmicIDs = cosmicIDString.split(separator);
         for(String cosmicID : cosmicIDs){
             if(cosmicID.equals("")){
                 continue;
             }
-            this.cosmicIDs.add(cosmicID);
+            CosmicID cosmicIDObject = new CosmicID(cosmicID, this.getCoordinate(), "", "", "", "", "", "", "", "", "", "");
+            cosmicIDList.add(cosmicIDObject);
         }
     }
 
+    public void addCosmicIDsPipelineFromDelimiter(String cosmicIDString, String separator) {
+        addCosmicIDsFromDelimiter(this.pipeline_cosmicIDs, cosmicIDString, separator);
+    }
+
+    public void addCosmicIDsVEPFromDelimiter(String cosmicIDString, String separator) {
+        addCosmicIDsFromDelimiter(this.VEP_cosmicIDs, cosmicIDString, separator);
+    }
+
     public void addCosmicIDLoading() {
-        this.cosmicIDs.add("LOADING...");
+        //this.linked_cosmicIDs.add("LOADING...");
     }
 
     public void removeCosmicIDLoading() {
-        this.cosmicIDs.remove("LOADING...");
-    }
-
-    public void addCosmicIDs(TreeSet<String> cosmicID) {
-        this.cosmicIDs.addAll(cosmicID);
+        //this.linked_cosmicIDs.remove("LOADING...");
     }
 
     public String getPubmed() {

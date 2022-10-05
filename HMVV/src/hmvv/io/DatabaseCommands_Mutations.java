@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 import hmvv.main.Configurations;
 import hmvv.model.*;
@@ -32,7 +31,7 @@ public class DatabaseCommands_Mutations {
 	private static ArrayList<MutationSomatic> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
-				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID, t2.COSMIC, t2.OncoKB, t2.pubmed,"
+				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID, t2.COSMIC_pipeline, t2.COSMIC_VEP, t2.OncoKB, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
@@ -117,35 +116,35 @@ public class DatabaseCommands_Mutations {
 	/**
 	 * Acquires the cosmicID from the database. If it isn't found, an empty array is returned
 	 */
-	static TreeSet<String> getCosmicIDs(MutationSomatic mutation) throws Exception{
+	static ArrayList<CosmicID> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
-		String query = "select cosmicID from db_cosmic_grch37v86 where chr = ? and pos = ? and ref = ? and alt = ?";
+		String query = "select cosmicID, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from db_cosmic_grch37v96 where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, coordinate.getChr());
 		preparedStatement.setString(2, coordinate.getPos());
 		preparedStatement.setString(3, coordinate.getRef());
 		preparedStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = preparedStatement.executeQuery();
-		TreeSet<String> cosmicIDs = new TreeSet<String>();
+		ArrayList<CosmicID> cosmicIDs = new ArrayList<CosmicID>();
 		while(rs.next()){
-			String result = rs.getString(1);
-			cosmicIDs.add(result);
+			CosmicID cosmicID = new CosmicID(
+				getStringOrBlank(rs, "cosmicID"),
+				coordinate,
+				getStringOrBlank(rs, "gene"),
+				getStringOrBlank(rs, "strand"),
+				getStringOrBlank(rs, "genomic_ID"),
+				getStringOrBlank(rs, "legacyID"),
+				getStringOrBlank(rs, "CDS"),
+				getStringOrBlank(rs, "AA"),
+				getStringOrBlank(rs, "HGVSc"),
+				getStringOrBlank(rs, "HGVSp"),
+				getStringOrBlank(rs, "HGVSg"),
+				getStringOrBlank(rs, "old_variant")
+			);
+			cosmicIDs.add(cosmicID);
 		}
 		preparedStatement.close();
 		return cosmicIDs;
-	}
-
-	static String getCosmicInfo(String cosmicID) throws Exception{
-		String query = "select info from db_cosmic_grch37v86 where cosmicID = ?";
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		preparedStatement.setString(1, cosmicID);
-		ResultSet rs = preparedStatement.executeQuery();
-		String info = null;
-		if(rs.next()){
-			info = rs.getString("info");
-		}
-		preparedStatement.close();
-		return info;
 	}
 
 	static void updateOncokbInfo(MutationSomatic mutation) throws Exception{
@@ -337,7 +336,8 @@ public class DatabaseCommands_Mutations {
 
 			//temp holder fields - filled later separately
 			mutation.addCosmicIDLoading();
-			mutation.addCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC"), "&");
+			mutation.addCosmicIDsPipelineFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&");
+			mutation.addCosmicIDsVEPFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&");
 			//mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
 
 

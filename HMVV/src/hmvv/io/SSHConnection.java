@@ -334,7 +334,7 @@ public class SSHConnection {
 		int bamCoverage = 25;
         File tempFile = File.createTempFile(sample.sampleName+"_"+sample.runID+"_",".params");
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile));
-        bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runID + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
+        bw.write(Configurations.getEnvironment()+';'+sample.instrument + ';' + sample.runFolder + ';' + sample.assay + ';' +sample.sampleName+';'+ sample.callerID + ';' + sample.coverageID);
         bw.newLine();
 
         ArrayList<MutationCommon> selectedMutations = mutationList.getSelectedMutations();
@@ -403,7 +403,8 @@ public class SSHConnection {
 	}
 
 	private static void createTempBamFileONServer(String fileName) throws Exception {
-	    String command = "/storage/apps/pipelines/"+Configurations.getEnvironment()+"/shell/createLocalBam.sh -f "+ fileName;
+	    String command = "/storage/apps/pipelines/"+Configurations.getEnvironment()+"/scripts/common/shell/createLocalBam.sh -f "+ fileName;
+		//System.out.printf(command);
         CommandResponse rs = executeCommandAndGetOutput(command);
         if(rs.exitStatus != 0) {
             throw new Exception("Error creating local BAM file on server.");

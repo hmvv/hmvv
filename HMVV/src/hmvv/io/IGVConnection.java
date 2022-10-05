@@ -64,7 +64,7 @@ public class IGVConnection {
 		try{
 			igvBusy.set(true);
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			return executeCommand("load " + file.getAbsolutePath() + "\n" + "genome hg19", 0);
+			return executeCommand("load \"" + file.getAbsolutePath() + "\"\n" + "genome hg19", 0);
 		}catch(ConnectException e){
 			throw new Exception("Sample not loaded. Please make sure IGV is running before trying load a sample.");
 		}finally {
