@@ -38,11 +38,11 @@ public class DatabaseCommands_Mutations {
 				+ " t8.AF "
 				+ " from sampleVariants as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
-				+ " left join db_g1000_phase3v1 as t4"
+				+ " left join " + Configurations.G1000_TABLE + " as t4"
 				+ " on t2.chr = t4.chr and t2.pos = t4.pos and t2.ref = t4.ref and t2.alt = t4.alt"
-				+ " left join db_clinvar_42019 as t5"
+				+ " left join " + Configurations.CLINVAR_TABLE + " as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
-				+ " left join db_gnomad_r211 as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
+				+ " left join " + Configurations.GNOMAD_TABLE + " as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
 		String where = " ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.READ_DEPTH_FILTER + ")";
@@ -74,9 +74,9 @@ public class DatabaseCommands_Mutations {
 				+ " t8.AF, t8.AF_afr, t8.AF_amr, t8.AF_asj, t8.AF_eas, t8.AF_fin, t8.AF_nfe, t8.AF_sas, t8.AF_oth, t8.AF_male, t8.AF_female "
 				+ " from sampleVariantsGermline as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
-				+ " left join db_clinvar_42019 as t5"
+				+ " left join " + Configurations.CLINVAR_TABLE + " as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
-				+ " left join db_gnomad_r211_lf as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
+				+ " left join " + Configurations.GNOMAD_LF_TABLE + " as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 				+ " where t2.sampleID = ? ";
 		String where = " ( t2.altFreq >= " + Configurations.GERMLINE_ALLELE_FREQ_FILTER +
 				" and t2.readDepth >= " + Configurations.GERMLINE_READ_DEPTH_FILTER +
@@ -158,7 +158,7 @@ public class DatabaseCommands_Mutations {
 			return;
 		}
 
-		String query = "select Protein_Change,Protein_Change_LF,Oncogenicity, Mutation_Effect from db_oncokb where Isoform = ? and  Gene = ? and Protein_Change_LF = ? limit 1";
+		String query = "select Protein_Change,Protein_Change_LF,Oncogenicity, Mutation_Effect from " + Configurations.ONCOKB_TABLE + " where Isoform = ? and  Gene = ? and Protein_Change_LF = ? limit 1";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, ENST_id);
 		preparedStatement.setString(2, mutation.getGene());
@@ -182,7 +182,7 @@ public class DatabaseCommands_Mutations {
 			//TODO What to do here?
 			return;
 		}
-		String query = "select tumor_type,tissue_type from db_pmkb_42019 where gene = ? and variant = ? limit 1";
+		String query = "select tumor_type,tissue_type from " + Configurations.PMKB_TABLE + " where gene = ? and variant = ? limit 1";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
 		preparedStatement.setString(2, ENSP);
@@ -204,7 +204,7 @@ public class DatabaseCommands_Mutations {
 			return;
 		}
 
-		String query = "select variant_origin,variant_civic_url from db_civic_42019 where gene = ? and variant_LF = ? limit 1 ";
+		String query = "select variant_origin,variant_civic_url from " + Configurations.CIVIC_TABLE + " where gene = ? and variant_LF = ? limit 1 ";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
 		preparedStatement.setString(2, ENSP);
@@ -221,7 +221,7 @@ public class DatabaseCommands_Mutations {
 		String[] getHGVScArray = mutation.getHGVSc().split("\\:");
 		String cds_variant = getHGVScArray[1];
 
-		String query = "select gene, cds_variant,protein_variant,variant_type from db_cardiac_72020 where gene = ? and cds_variant = ? limit 1";
+		String query = "select gene, cds_variant,protein_variant,variant_type from " + Configurations.CARDIAC_TABLE + " where gene = ? and cds_variant = ? limit 1";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, mutation.getGene());
 		preparedStatement.setString(2, cds_variant);
@@ -506,9 +506,9 @@ public class DatabaseCommands_Mutations {
 
 		String tablename = "";
 		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
-			tablename = "variantAnnotation";
+			tablename = Configurations.SOMATIC_VARIANT_ANNOTATION_TABLE;
 		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
-			tablename = "germlineVariantAnnotation";
+			tablename = Configurations.GERMLINE_VARIANT_ANNOTATION_TABLE;
 		}
 
 		final String query = String.format("select annotationID, classification, curation, somatic, enteredBy, enterDate from %s where chr = ? and pos = ? and ref = ? and alt = ? order by annotationID asc",tablename);

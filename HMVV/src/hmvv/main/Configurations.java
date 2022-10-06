@@ -165,7 +165,28 @@ public class Configurations {
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
 	public static String BCL2FASTQ_DATABASE_NAME = "bcl2fastq";
+	public static String REFERENCE_DATABASE_NAME = "ngs_reference";
 	
+	//Reference database tables
+	public static String CARDIAC_TABLE = REFERENCE_DATABASE_NAME + ".db_cardiac_72020";
+	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v96_test";
+	public static String CIVIC_TABLE = REFERENCE_DATABASE_NAME + ".db_civic_42019";
+	public static String CLINVAR_TABLE = REFERENCE_DATABASE_NAME + ".db_clinvar_42019";
+	public static String G1000_TABLE = REFERENCE_DATABASE_NAME + ".db_g1000_phase3v1";
+	public static String GNOMAD_TABLE = REFERENCE_DATABASE_NAME + ".db_gnomad_r211";
+	public static String GNOMAD_LF_TABLE = REFERENCE_DATABASE_NAME + ".db_gnomad_r211_lf";
+	public static String ONCOKB_TABLE = REFERENCE_DATABASE_NAME + ".db_oncokb";
+	public static String PMKB_TABLE = REFERENCE_DATABASE_NAME + ".db_pmkb_42019";
+
+	//Annotation tables
+	public static String SOMATIC_GENE_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".geneAnnotation";
+	public static String SOMATIC_VARIANT_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".variantAnnotation";
+	public static String SOMATIC_VARIANT_ANNOTATION_DRAFT_TABLE = REFERENCE_DATABASE_NAME + ".variantAnnotationDraft";
+	public static String GERMLINE_GENE_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".germlineGeneAnnotation";
+	public static String GERMLINE_VARIANT_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".germlineVariantAnnotation";
+	public static String GERMLINE_VARIANT_ANNOTATION_DRAFT_TABLE = REFERENCE_DATABASE_NAME + ".germlineVariantAnnotationDraft";
+	
+	//LIS Connection
 	public static String LIS_DRIVER;
 	public static String LIS_CONNECTION_DRIVER;
 	public static String LIS_CONNECTION;
@@ -236,7 +257,6 @@ public class Configurations {
 	public static int GERMLINE_READ_DEPTH_FILTER = 10;
 	public static int GERMLINE_ALLELE_FREQ_FILTER = 15;
 	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
-	public static String COSMIC_TABLE = "db_cosmic_grch37v96";
 
 	public static int getAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){

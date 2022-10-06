@@ -21,12 +21,12 @@ public class DatabaseCommands_Annotations {
 
 		String tablename = "";
 		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
-			tablename = "geneAnnotation";
+			tablename = Configurations.SOMATIC_GENE_ANNOTATION_TABLE;
 		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
-			tablename = "germlineGeneAnnotation";
+			tablename = Configurations.GERMLINE_GENE_ANNOTATION_TABLE;
 		}
 
-		final String query = String.format("select geneAnnotationID, gene, curation, enteredBy, enterDate from %s where gene = ? order by geneAnnotationID asc",tablename);
+		final String query = String.format("select geneAnnotationID, gene, curation, enteredBy, enterDate from %s where gene = ? order by geneAnnotationID asc", tablename);
 		PreparedStatement selectStatement = databaseConnection.prepareStatement(query);
 		selectStatement.setString(1, gene);
 		ResultSet rs = selectStatement.executeQuery();
@@ -41,9 +41,9 @@ public class DatabaseCommands_Annotations {
 
 		String tablename = "";
 		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
-			tablename = "variantAnnotationDraft";
+			tablename = Configurations.SOMATIC_VARIANT_ANNOTATION_DRAFT_TABLE;
 		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
-			tablename = "germlineVariantAnnotationDraft";
+			tablename = Configurations.GERMLINE_VARIANT_ANNOTATION_DRAFT_TABLE;
 		}
 
 		String draft="";
@@ -68,9 +68,9 @@ public class DatabaseCommands_Annotations {
 
 		String tablename = "";
 		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
-			tablename = "geneAnnotation";
+			tablename = Configurations.SOMATIC_GENE_ANNOTATION_TABLE;
 		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
-			tablename = "germlineGeneAnnotation";
+			tablename = Configurations.GERMLINE_GENE_ANNOTATION_TABLE;
 		}
 
 		final String query = String.format("insert into %s (gene, curation, enteredBy, enterDate) values (?, ?, ?, ?)",tablename);
@@ -96,9 +96,9 @@ public class DatabaseCommands_Annotations {
 
 		String tablename = "";
 		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
-			tablename = "variantAnnotation";
+			tablename = Configurations.SOMATIC_VARIANT_ANNOTATION_TABLE;
 		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
-			tablename = "germlineVariantAnnotation";
+			tablename = Configurations.GERMLINE_VARIANT_ANNOTATION_TABLE;
 		}
 
 		final String query = String.format("insert into %s ( chr, pos, ref, alt, classification, curation, somatic, enteredBy, enterDate) "
@@ -125,9 +125,9 @@ public class DatabaseCommands_Annotations {
 
 		String tablename = "";
 		if (mutation_type == Configurations.MUTATION_TYPE.SOMATIC) {
-			tablename = "variantAnnotationDraft";
+			tablename = Configurations.SOMATIC_VARIANT_ANNOTATION_DRAFT_TABLE;
 		} else if (mutation_type == Configurations.MUTATION_TYPE.GERMLINE) {
-			tablename = "germlineVariantAnnotationDraft";
+			tablename = Configurations.GERMLINE_VARIANT_ANNOTATION_DRAFT_TABLE;
 		}
 
 		final String query = String.format("select draft from %s where chr = ? and pos = ? and ref = ? and alt = ?",tablename);
