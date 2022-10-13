@@ -3,6 +3,8 @@ package hmvv.model;
 import hmvv.main.Configurations;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 
 public class MutationSomatic extends MutationCommon {
 
@@ -21,7 +23,9 @@ public class MutationSomatic extends MutationCommon {
     private ArrayList<CosmicID> pipeline_cosmicIDs;
     private ArrayList<CosmicID> VEP_cosmicIDs;
     private ArrayList<CosmicID> linked_cosmicIDs;
-
+    private String uniqueCosmicIDString;
+    private boolean cosmicLoadComplete = false;
+    
     //G1000
     private Integer altCount;
     private Integer totalCount;
@@ -57,6 +61,7 @@ public class MutationSomatic extends MutationCommon {
         this.pipeline_cosmicIDs = new ArrayList<CosmicID>();
         this.VEP_cosmicIDs = new ArrayList<CosmicID>();
         this.linked_cosmicIDs = new ArrayList<CosmicID>();
+        buildUniqueCosmicIDString();
     }
 
     public String getDbSNPID() {
@@ -69,6 +74,17 @@ public class MutationSomatic extends MutationCommon {
 
     public void addLinkedCosmicIDs(ArrayList<CosmicID> linkedCosmicIDs){
         this.linked_cosmicIDs.addAll(linkedCosmicIDs);
+        buildUniqueCosmicIDString();
+    }
+
+    public void addCosmicIDsPipeline(ArrayList<CosmicID> pipelineCosmicIDs) {
+        this.pipeline_cosmicIDs.addAll(pipelineCosmicIDs);
+        buildUniqueCosmicIDString();
+    }
+
+    public void addVEPCosmicIDs(ArrayList<CosmicID> vepCosmicIDs) {
+        this.VEP_cosmicIDs.addAll(vepCosmicIDs);
+        buildUniqueCosmicIDString();
     }
 
     public ArrayList<CosmicID> getAllCosmicIDs(){
@@ -76,48 +92,49 @@ public class MutationSomatic extends MutationCommon {
         allIDs.addAll(linked_cosmicIDs);
         allIDs.addAll(VEP_cosmicIDs);
         allIDs.addAll(pipeline_cosmicIDs);
-        return allIDs;
+        
+        ArrayList<CosmicID> all_IDs = new ArrayList<CosmicID>(new HashSet<CosmicID>(allIDs));
+        all_IDs.sort(new Comparator<CosmicID>(){
+            public int compare(CosmicID left, CosmicID right){
+                return (left.cosmicID + " " + left.gene).compareTo(right.cosmicID + " " + right.gene);
+            }
+        });
+
+        return all_IDs;
     }
 
-    public String cosmicIDsToString(String separator) {
-        StringBuilder sb = new StringBuilder();
+    private void buildUniqueCosmicIDString(){
         ArrayList<CosmicID> allIDs = getAllCosmicIDs();
-        int i = 0;
+        HashSet<String> uniqueCosmicIDs = new HashSet<String>();
         for (CosmicID cosmicID : allIDs) {
-            sb.append(cosmicID.cosmicID);
-            if (i + 1 < allIDs.size()) {
-                sb.append(separator);
+            uniqueCosmicIDs.add(cosmicID.cosmicID);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        for (String cosmicID : uniqueCosmicIDs) {
+            sb.append(cosmicID);
+            if (i + 1 < uniqueCosmicIDs.size()) {
+                sb.append(",");
             }
             i++;
         }
-        return sb.toString();
+        uniqueCosmicIDString = sb.toString();
     }
 
-    private void addCosmicIDsFromDelimiter(ArrayList<CosmicID> cosmicIDList, String cosmicIDString, String separator) {
-        String[] cosmicIDs = cosmicIDString.split(separator);
-        for(String cosmicID : cosmicIDs){
-            if(cosmicID.equals("")){
-                continue;
-            }
-            CosmicID cosmicIDObject = new CosmicID(cosmicID, this.getCoordinate(), "", "", "", "", "", "", "", "", "", "");
-            cosmicIDList.add(cosmicIDObject);
+    public String cosmicIDsToString() {
+        if (cosmicLoadComplete == false){
+            return "Loading...";
         }
-    }
-
-    public void addCosmicIDsPipelineFromDelimiter(String cosmicIDString, String separator) {
-        addCosmicIDsFromDelimiter(this.pipeline_cosmicIDs, cosmicIDString, separator);
-    }
-
-    public void addCosmicIDsVEPFromDelimiter(String cosmicIDString, String separator) {
-        addCosmicIDsFromDelimiter(this.VEP_cosmicIDs, cosmicIDString, separator);
+        return uniqueCosmicIDString;
     }
 
     public void addCosmicIDLoading() {
-        //this.linked_cosmicIDs.add("LOADING...");
+        cosmicLoadComplete = false;
     }
 
     public void removeCosmicIDLoading() {
-        //this.linked_cosmicIDs.remove("LOADING...");
+        cosmicLoadComplete = true;
     }
 
     public String getPubmed() {

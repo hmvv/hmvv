@@ -252,7 +252,7 @@ class CosmicIDFilter implements Filter{
 			return false;
 		}
 		
-		return current_mutation.cosmicIDsToString(",").equals("");
+		return current_mutation.cosmicIDsToString().equals("");
 	}
 }
 

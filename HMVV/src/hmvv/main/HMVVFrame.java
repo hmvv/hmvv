@@ -142,7 +142,7 @@ public class HMVVFrame extends JFrame{
 						public void actionPerformed(ActionEvent e) {
 							try {
 								TreeMap<String, GeneQCDataElementTrend> ampliconTrends = DatabaseCommands.getSampleQCData(assay);
-								QualityControlFrame qcFrame = new QualityControlFrame(HMVVFrame.this, ampliconTrends, assay.assayName, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
+ 								QualityControlFrame qcFrame = new QualityControlFrame(HMVVFrame.this, ampliconTrends, assay.assayName, "Variant allele freqency over time", "Sample ID", "Variant allele freqency");
 								qcFrame.setVisible(true);
 							} catch (Exception e1) {
 								HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVFrame.this, e1);

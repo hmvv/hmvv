@@ -71,7 +71,7 @@ public class CosmicInfoPopup {
 			
 			@Override
 			public final int getColumnCount() {
-				return 6;
+				return 10;
 			}
 			
 			@Override
@@ -88,6 +88,10 @@ public class CosmicInfoPopup {
 					case 3: return "LegacyID";
 					case 4: return "CDS";
 					case 5: return "AA";
+					case 6: return "HGVSc";
+					case 7: return "HGVSp";
+					case 8: return "coordinate";
+					case 9: return "strand";
 					default: return "";
 				}
 			}
@@ -108,6 +112,10 @@ public class CosmicInfoPopup {
 					case 3: return comsicInfoList.get(row).cosmicID.legacyID;
 					case 4: return comsicInfoList.get(row).cosmicID.CDS;
 					case 5: return comsicInfoList.get(row).cosmicID.AA;
+					case 6: return comsicInfoList.get(row).cosmicID.HGVSc;
+					case 7: return comsicInfoList.get(row).cosmicID.HGVSp;
+					case 8: return comsicInfoList.get(row).cosmicID.coordinate.getCoordinateAsString();
+					case 9: return comsicInfoList.get(row).cosmicID.strand;
 					default: return "";
 				}
 			}
@@ -144,6 +152,7 @@ public class CosmicInfoPopup {
 				};
 			}
 		};
+		table.setAutoCreateRowSorter(true);
 		
 		JScrollPane tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setPreferredSize(new Dimension(1200,500));

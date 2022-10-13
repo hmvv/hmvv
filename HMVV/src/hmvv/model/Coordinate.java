@@ -41,5 +41,9 @@ public class Coordinate {
 		}
 		return false;
 	}
+
+	public String toString(){
+		return getCoordinateAsString();
+	}
 	
 }

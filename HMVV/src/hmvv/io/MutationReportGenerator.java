@@ -85,7 +85,7 @@ public class MutationReportGenerator{
 			Coordinate coordinate = mutation.getCoordinate();
 			String orderNumber = mutation.getOrderNumber();
 			VariantPredictionClass variantPredictionClass = mutation.getVariantPredictionClass();
-			String cosmicIDs = mutation.cosmicIDsToString(",");
+			String cosmicIDs = mutation.cosmicIDsToString();
 			int occurrence = mutation.getOccurrence();
 
 			report.append("Name: " + name + "\n");

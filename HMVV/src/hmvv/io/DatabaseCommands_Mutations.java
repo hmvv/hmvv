@@ -333,11 +333,14 @@ public class DatabaseCommands_Mutations {
 			mutation.setClinicalconsequence(getStringOrBlank(rs, "cln_consequence"));
 			mutation.setClinicalorigin(getStringOrBlank(rs, "cln_origin"));
 
-
+			//COSMIC
+			ArrayList<CosmicID> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&");
+			mutation.addCosmicIDsPipeline(pipelineCosmicIDList);
+			ArrayList<CosmicID> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&");
+			mutation.addVEPCosmicIDs(vepCosmicIDList);
+					
 			//temp holder fields - filled later separately
 			mutation.addCosmicIDLoading();
-			mutation.addCosmicIDsPipelineFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&");
-			mutation.addCosmicIDsVEPFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&");
 			//mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
 
 
@@ -354,6 +357,57 @@ public class DatabaseCommands_Mutations {
 			mutations.add(mutation);
 		}
 		return mutations;
+	}
+
+	
+    private static ArrayList<CosmicID> parseCosmicIDsFromDelimiter(String cosmicIDString, String separator) throws Exception{
+		ArrayList<CosmicID> cosmicIDList = new ArrayList<CosmicID>();
+        String[] cosmicIDs = cosmicIDString.split(separator);
+        for(String cosmicID : cosmicIDs){
+            if(cosmicID.equals("")){
+                continue;
+            }
+
+			ArrayList<CosmicID> cosmicIDObject = getCosmicIDInfo(cosmicID);
+            cosmicIDList.addAll(cosmicIDObject);
+        }
+		return cosmicIDList;
+    }
+
+	private static ArrayList<CosmicID> getCosmicIDInfo(String cosmicID) throws Exception{
+		String query = "select cosmicID, chr, pos, ref, alt, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from " + Configurations.COSMIC_TABLE + " where cosmicID = ? or legacyID = ?";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, cosmicID);
+		preparedStatement.setString(2, cosmicID);
+		ResultSet rs = preparedStatement.executeQuery();
+		ArrayList<CosmicID> cosmicIDs = new ArrayList<CosmicID>();
+		while(rs.next()){
+			Coordinate coordinate = new Coordinate(
+			getStringOrBlank(rs, "chr"),
+			getStringOrBlank(rs, "pos"),
+			getStringOrBlank(rs, "ref"),
+			getStringOrBlank(rs, "alt")
+			);
+
+
+			CosmicID cosmicIDObj = new CosmicID(
+				getStringOrBlank(rs, "cosmicID"),
+				coordinate,
+				getStringOrBlank(rs, "gene"),
+				getStringOrBlank(rs, "strand"),
+				getStringOrBlank(rs, "genomic_ID"),
+				getStringOrBlank(rs, "legacyID"),
+				getStringOrBlank(rs, "CDS"),
+				getStringOrBlank(rs, "AA"),
+				getStringOrBlank(rs, "HGVSc"),
+				getStringOrBlank(rs, "HGVSp"),
+				getStringOrBlank(rs, "HGVSg"),
+				getStringOrBlank(rs, "old_variant")
+			);
+			cosmicIDs.add(cosmicIDObj);
+		}
+		preparedStatement.close();
+		return cosmicIDs;
 	}
 
 	private static ArrayList<MutationGermline> makeGermlineModel(ResultSet rs) throws Exception{

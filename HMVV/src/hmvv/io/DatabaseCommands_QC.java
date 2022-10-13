@@ -125,16 +125,22 @@ public class DatabaseCommands_QC {
 			geneFilter =
 					//COSM1140132 and COSM532 have the same coordinates and track together
 					//COSM1135366 and COSM521 have the same coordinates and track together
-					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM521' or cosmicID = 'COSM532')"
-					+ " and samples.assay = 'heme' ";
+					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM521' or cosmicID = 'COSM532' "
+					+ "or  cosmicID = 'COSV56056643' or cosmicID = 'COSV55386424' or cosmicID = 'COSV55497369' or cosmicID = 'COSV55497388')"
+					+ " and samples.assay = 'heme' "
+					+ "GROUP BY sampleVariants.sampleID,cosmicID";
 		}else if(assay.assayName.equals("gene50")) {
 			geneFilter =
-					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
-							+ " and samples.assay = 'gene50' ";
+					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM532' or cosmicID = 'COSM580' "
+					+ " or cosmicID = 'COSV51767289' or cosmicID = 'COSV55497388' or cosmicID = 'COSV54736310')"
+							+ " and samples.assay = 'gene50' "
+							+ "GROUP BY sampleVariants.sampleID,cosmicID";
 		}else if(assay.assayName.equals("neuro")) {
 			geneFilter =
-					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM97131' or cosmicID = 'COSM532' or cosmicID = 'COSM580')"
-							+ " and samples.assay = 'neuro' ";
+					"   and ( cosmicID = 'COSM6252' or cosmicID = 'COSM97131' or cosmicID = 'COSM532' or cosmicID = 'COSM580' "
+					+ " or cosmicID = 'COSV51767289' or cosmicID = 'COSV61616229' or cosmicID = 'COSV55497388' or cosmicID = 'COSV54736310')"
+							+ " and samples.assay = 'neuro' "
+							+ "GROUP BY sampleVariants.sampleID,cosmicID";
 		}else {
 			throw new Exception("Unsupported Assay: " + assay);
 		}

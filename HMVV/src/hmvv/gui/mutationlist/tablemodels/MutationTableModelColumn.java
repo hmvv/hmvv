@@ -175,7 +175,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn cosmicIDColumn = new MutationTableModelColumn("Hyperlink to the variant in the COSMIC database.",
 			"cosmicID",
 			String.class,
-			(MutationSomatic mutation) -> mutation.cosmicIDsToString(","));
+			(MutationSomatic mutation) -> mutation.cosmicIDsToString());
 
     //clinvar
 

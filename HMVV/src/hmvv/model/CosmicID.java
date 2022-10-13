@@ -1,6 +1,6 @@
 package hmvv.model;
 
-public class CosmicID {
+public class CosmicID{
     public final String cosmicID;
     public final Coordinate coordinate;
     public final String gene;
@@ -37,5 +37,29 @@ public class CosmicID {
             }
         }
         return "";
+    }
+
+    public String toString(){
+        return cosmicID + "(" + gene + ")";
+    }
+
+    public boolean equals(Object o){
+        if (o instanceof CosmicID){
+            CosmicID other = (CosmicID) o;
+            return cosmicID.equals(other.cosmicID)
+                && coordinate.equals(other.coordinate)
+                && gene.equals(other.gene)
+                && strand.equals(other.strand)
+                && legacyID.equals(other.legacyID)
+                && gene.equals(other.gene)
+                && HGVSc.equals(other.HGVSc)
+                && HGVSp.equals(other.HGVSp)
+                ;
+        }
+        return false;
+    }
+
+    public int hashCode(){
+        return new String(cosmicID + coordinate.getCoordinateAsString() + gene + strand + legacyID + gene + HGVSc + HGVSp).hashCode();
     }
 }
