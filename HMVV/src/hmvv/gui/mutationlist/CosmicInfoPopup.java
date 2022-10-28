@@ -2,6 +2,7 @@ package hmvv.gui.mutationlist;
 
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
+
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -11,6 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import hmvv.gui.mutationlist.tables.CommonTable;
+import hmvv.io.DatabaseCommands_Mutations;
 import hmvv.io.InternetCommands;
 import hmvv.model.CosmicID;
 import hmvv.model.MutationSomatic;
@@ -19,8 +21,10 @@ public class CosmicInfoPopup {
 	static class CosmicInfo{
 		public boolean openItem;
 		public CosmicID cosmicID;
-		CosmicInfo(CosmicID cosmicID){
+		public String HGVSc;
+		CosmicInfo(CosmicID cosmicID, String HGVSc){
 			this.cosmicID = cosmicID;
+			this.HGVSc = HGVSc;
 		}
 	}
 
@@ -35,7 +39,7 @@ public class CosmicInfoPopup {
 		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
 		 boolean transcriptFound = false;
 		 for(CosmicID cosmicID : cosmicIDList) {
-			CosmicInfo thisInfo = new CosmicInfo(cosmicID);
+			CosmicInfo thisInfo = new CosmicInfo(cosmicID,HGVSc);
 			cosmicInfoList.add(thisInfo);
 		 	//looking for transcript that matches this mutation
 		 	if(cosmicID.getTranscript().equals(transcript)) {
@@ -71,7 +75,7 @@ public class CosmicInfoPopup {
 			
 			@Override
 			public final int getColumnCount() {
-				return 10;
+				return 11;
 			}
 			
 			@Override
@@ -92,6 +96,7 @@ public class CosmicInfoPopup {
 					case 7: return "HGVSp";
 					case 8: return "coordinate";
 					case 9: return "strand";
+					case 10: return "source";
 					default: return "";
 				}
 			}
@@ -116,6 +121,7 @@ public class CosmicInfoPopup {
 					case 7: return comsicInfoList.get(row).cosmicID.HGVSp;
 					case 8: return comsicInfoList.get(row).cosmicID.coordinate.getCoordinateAsString();
 					case 9: return comsicInfoList.get(row).cosmicID.strand;
+					case 10: return comsicInfoList.get(row).cosmicID.source;
 					default: return "";
 				}
 			}
@@ -156,11 +162,13 @@ public class CosmicInfoPopup {
 		
 		JScrollPane tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setPreferredSize(new Dimension(1200,500));
-		int returnValue = JOptionPane.showConfirmDialog(parent, tableScrollPane, "Open CosmicID's in Web Browser?", JOptionPane.YES_NO_OPTION);
+		int returnValue = JOptionPane.showConfirmDialog(parent, tableScrollPane, "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.", JOptionPane.YES_NO_OPTION);
 		if(returnValue == JOptionPane.OK_OPTION) {
 			for(CosmicInfo cosmicInfo : comsicInfoList){
+				
 				 if(cosmicInfo.openItem) {
-				 	InternetCommands.searchCosmic(cosmicInfo.cosmicID);
+					String MutationURL = DatabaseCommands_Mutations.getMutationURL(cosmicInfo.cosmicID,cosmicInfo.HGVSc);
+				 	InternetCommands.searchCosmic(MutationURL);
 				 }
 			}
 		}

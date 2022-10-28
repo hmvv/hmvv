@@ -30,7 +30,7 @@ public class DatabaseCommands_Mutations {
 
 	private static ArrayList<MutationSomatic> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
-				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
+				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, t2.occurrenceCount, "
 				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID, t2.COSMIC_pipeline, t2.COSMIC_VEP, t2.OncoKB, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
@@ -62,7 +62,7 @@ public class DatabaseCommands_Mutations {
 
 	public static ArrayList<MutationGermline> getGermlineMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
-				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, "
+				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, t2.occurrenceCount, "
 				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.STRAND, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
 				+ " t2.protein_id, t2.protein_type, t2.protein_feature, t2.protein_note, t2.protein_start, t2.protein_end ,"
 				+ " t2.nextprot,t2.uniprot_id, t2.pfam, t2.scoop, t2.uniprot_variant,t2.expasy_id,"
@@ -139,13 +139,17 @@ public class DatabaseCommands_Mutations {
 				getStringOrBlank(rs, "HGVSc"),
 				getStringOrBlank(rs, "HGVSp"),
 				getStringOrBlank(rs, "HGVSg"),
-				getStringOrBlank(rs, "old_variant")
+				getStringOrBlank(rs, "old_variant"),
+				"Linked"
 			);
 			cosmicIDs.add(cosmicID);
 		}
 		preparedStatement.close();
 		return cosmicIDs;
 	}
+
+
+
 
 	static void updateOncokbInfo(MutationSomatic mutation) throws Exception{
 		String ENST_id = mutation.getHGVSc().split("\\.")[0];
@@ -263,7 +267,6 @@ public class DatabaseCommands_Mutations {
 			return 0;
 		}
 	}
-
 	static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		String reported = (setToReported) ? "1" : "0";
 		PreparedStatement updateStatement = databaseConnection.prepareStatement(
@@ -332,16 +335,16 @@ public class DatabaseCommands_Mutations {
 			mutation.setClinicalsignificance(getStringOrBlank(rs, "cln_significance"));
 			mutation.setClinicalconsequence(getStringOrBlank(rs, "cln_consequence"));
 			mutation.setClinicalorigin(getStringOrBlank(rs, "cln_origin"));
-
+			
 			//COSMIC
-			ArrayList<CosmicID> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&");
+			ArrayList<CosmicID> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&", "Pipeline");
 			mutation.addCosmicIDsPipeline(pipelineCosmicIDList);
-			ArrayList<CosmicID> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&");
+			ArrayList<CosmicID> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&", "VEP");
 			mutation.addVEPCosmicIDs(vepCosmicIDList);
 					
 			//temp holder fields - filled later separately
 			mutation.addCosmicIDLoading();
-			//mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
+			mutation.setOccurrence(getIntegerOrNull(rs, "occurrenceCount"));
 
 
 			//annotation history
@@ -360,7 +363,7 @@ public class DatabaseCommands_Mutations {
 	}
 
 	
-    private static ArrayList<CosmicID> parseCosmicIDsFromDelimiter(String cosmicIDString, String separator) throws Exception{
+    private static ArrayList<CosmicID> parseCosmicIDsFromDelimiter(String cosmicIDString, String separator, String source) throws Exception{
 		ArrayList<CosmicID> cosmicIDList = new ArrayList<CosmicID>();
         String[] cosmicIDs = cosmicIDString.split(separator);
         for(String cosmicID : cosmicIDs){
@@ -368,13 +371,13 @@ public class DatabaseCommands_Mutations {
                 continue;
             }
 
-			ArrayList<CosmicID> cosmicIDObject = getCosmicIDInfo(cosmicID);
+			ArrayList<CosmicID> cosmicIDObject = getCosmicIDInfo(cosmicID, source);
             cosmicIDList.addAll(cosmicIDObject);
         }
 		return cosmicIDList;
     }
 
-	private static ArrayList<CosmicID> getCosmicIDInfo(String cosmicID) throws Exception{
+	private static ArrayList<CosmicID> getCosmicIDInfo(String cosmicID, String source) throws Exception{
 		String query = "select cosmicID, chr, pos, ref, alt, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from " + Configurations.COSMIC_TABLE + " where cosmicID = ? or legacyID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmicID);
@@ -402,7 +405,8 @@ public class DatabaseCommands_Mutations {
 				getStringOrBlank(rs, "HGVSc"),
 				getStringOrBlank(rs, "HGVSp"),
 				getStringOrBlank(rs, "HGVSg"),
-				getStringOrBlank(rs, "old_variant")
+				getStringOrBlank(rs, "old_variant"),
+				source
 			);
 			cosmicIDs.add(cosmicIDObj);
 		}
@@ -497,7 +501,7 @@ public class DatabaseCommands_Mutations {
 
 
 			//temp holder fields - filled later separately
-			mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
+			//mutation.setOccurrence(getIntegerOrNull(rs, "occurrence"));
 
 
 			//annotation history
@@ -577,5 +581,34 @@ public class DatabaseCommands_Mutations {
 		}
 		selectStatement.close();
 		return annotations;
+	}
+
+
+	public static String getMutationURL(CosmicID cosmicID,String hGVSc) throws SQLException {
+
+
+		ArrayList<String> urls = new ArrayList<String>();
+		String cosmic_id = cosmicID.toString();
+		cosmic_id = cosmic_id.split("\\(")[0];
+		String query = "select MUTATION_URL from " + Configurations.COSMIC_CMC_TABLE + " where (LEGACY_MUTATION_ID = ? or GENOMIC_MUTATION_ID = ?) and ACCESSION_NUMBER = ? ";
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
+		preparedStatement.setString(1, cosmic_id);
+		preparedStatement.setString(2, cosmic_id);
+		preparedStatement.setString(3, hGVSc.split(":")[0]);
+		ResultSet rs = preparedStatement.executeQuery();
+		
+
+		while(rs.next()){
+			urls.add(rs.getString("MUTATION_URL"));
+		}
+
+		preparedStatement.close();
+
+		if(urls.size() == 0){
+			return "https://cancer.sanger.ac.uk/cosmic/search?q=" + cosmicID.cosmicID;
+		}else{
+			return urls.get(0);
+		}
+		
 	}
 }

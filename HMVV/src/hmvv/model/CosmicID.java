@@ -13,8 +13,9 @@ public class CosmicID{
     public final String HGVSp;
     public final String HGVSg;
     public final String old_variant;
+    public final String source;
 
-    public CosmicID(String cosmicID, Coordinate coordinate, String gene, String strand, String genomic_ID, String legacyID, String CDS, String AA, String HGVSc, String HGVSp, String HGVSg, String old_variant){
+    public CosmicID(String cosmicID, Coordinate coordinate, String gene, String strand, String genomic_ID, String legacyID, String CDS, String AA, String HGVSc, String HGVSp, String HGVSg, String old_variant, String source){
         this.cosmicID = cosmicID;
         this.coordinate = coordinate;
         this.gene = gene;
@@ -27,6 +28,7 @@ public class CosmicID{
         this.HGVSp = HGVSp;
         this.HGVSg = HGVSg;
         this.old_variant = old_variant;
+        this.source = source;
     }
 
     public String getTranscript() {

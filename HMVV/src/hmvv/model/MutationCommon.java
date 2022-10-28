@@ -16,7 +16,7 @@ public class MutationCommon {
 
     // custom
     private boolean selected;
-    private Integer occurrence;
+    public Integer occurrence;
     private ArrayList<Annotation> annotationHistory;
 
     //Sample
@@ -24,7 +24,7 @@ public class MutationCommon {
     private String firstName;
     private String orderNumber;
     private Assay assay;
-    private Integer sampleID;
+    public Integer sampleID;
 
     //annotation basic
     private String type;
@@ -42,6 +42,7 @@ public class MutationCommon {
     private String clinicalsignificance;
     private String clinicalconsequence;
     private String clinicalorigin;
+   
 
 
     public String getClinvarID() {

@@ -67,9 +67,6 @@ public class AsynchronousMutationDataIO {
 		mutation.addLinkedCosmicIDs(cosmicIDs);
 		mutation.removeCosmicIDLoading();
 		
-		int count = DatabaseCommands.getOccurrenceCount(mutation);
-		mutation.setOccurrence(count);
-		
 		//gnomad
 		mutation.setGnomadID();
 
