@@ -105,8 +105,8 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
 		setMinimumSize(new Dimension(700, getHeight()/3));
 
-		setLocationRelativeTo(parent);
-		setAlwaysOnTop(true);
+		setLocationRelativeTo(parent);		
+		//setAlwaysOnTop(true);
 
 		for(int i = 0; i < mutationList.getMutationCount(); i++){
 			MutationSomatic current_mutation = (MutationSomatic)mutationList.getMutation(i);

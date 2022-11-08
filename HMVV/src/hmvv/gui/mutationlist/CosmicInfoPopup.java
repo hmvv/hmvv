@@ -2,6 +2,7 @@ package hmvv.gui.mutationlist;
 
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
+import java.awt.Component;
 
 import java.util.ArrayList;
 
@@ -10,10 +11,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
 import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.io.DatabaseCommands_Mutations;
 import hmvv.io.InternetCommands;
+import hmvv.main.Configurations;
 import hmvv.model.CosmicID;
 import hmvv.model.MutationSomatic;
 
@@ -22,9 +25,12 @@ public class CosmicInfoPopup {
 		public boolean openItem;
 		public CosmicID cosmicID;
 		public String HGVSc;
-		CosmicInfo(CosmicID cosmicID, String HGVSc){
+		public Boolean shade;
+		CosmicInfo(Boolean openItem, CosmicID cosmicID, String HGVSc, Boolean shade){
+			this.openItem = openItem;
 			this.cosmicID = cosmicID;
 			this.HGVSc = HGVSc;
+			this.shade = shade;
 		}
 	}
 
@@ -39,24 +45,44 @@ public class CosmicInfoPopup {
 		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
 		 boolean transcriptFound = false;
 		 for(CosmicID cosmicID : cosmicIDList) {
-			CosmicInfo thisInfo = new CosmicInfo(cosmicID,HGVSc);
+			Boolean shade = true;
+			Boolean openItem = false;
+			CosmicInfo thisInfo = new CosmicInfo(openItem,cosmicID,cosmicID.HGVSc,shade);
+
+			String mut_transcript = HGVSc.split(":")[0];
+			String cos_transcript = cosmicID.HGVSc.split(":")[0];	
+			String cos_dna_change = cosmicID.HGVSc.split(":")[1];
+			String mut_dna_change = HGVSc.split(":")[1];
+
+			if (cos_dna_change.equals(mut_dna_change)){
+				thisInfo.shade = false;
+				if (cos_transcript.equals(mut_transcript)){
+					thisInfo.openItem = true;
+				}
+			}
+			// calc color
 			cosmicInfoList.add(thisInfo);
 		 	//looking for transcript that matches this mutation
-		 	if(cosmicID.getTranscript().equals(transcript)) {
-		 		thisInfo.openItem = true;
-		 		transcriptFound = true;
-		 	}
+
+
+			 //if(cosmicID.getTranscript().equals(transcript)) {
+				//thisInfo.openItem = true;
+				//transcriptFound = true;
+			
+			//}	
+
 		 }
 
 		 //Find default cosmicID if no transcript found
-		 if(!transcriptFound) {
-		 	for(CosmicInfo thisInfo : cosmicInfoList) {
-		 		if(thisInfo.cosmicID.getTranscript().equals("")) {
-		 			thisInfo.openItem = true;
-		 		}
-		 	}
-		 }
-
+		 //if(!transcriptFound) {
+		 //	for(CosmicInfo thisInfo : cosmicInfoList) {
+		 //		if(thisInfo.cosmicID.getTranscript().equals("") ) {
+		 //			thisInfo.openItem = true;
+		 //		}
+		 //	}
+		 //}
+		 	//sort the list to have white rows on top
+			
 		return cosmicInfoList;
 	}
 	
@@ -156,6 +182,29 @@ public class CosmicInfoPopup {
 						}
 					}
 				};
+			}
+
+			
+			@Override
+			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
+				Component c = super.prepareRenderer(renderer, row, column);
+				if (isCellSelected(row, column)){
+					c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+					c.setBackground(Configurations.TABLE_SELECTION_COLOR);
+				}else {
+					c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+
+					CosmicInfo thisCosmicInfo = comsicInfoList.get(this.convertRowIndexToModel(row));
+					//mutation.getHGVSc()
+
+					if(thisCosmicInfo.shade){
+						c.setBackground(Configurations.TABLE_UNMATCHED_COSMIC_COLOR); //gray
+					}else{
+						c.setBackground(Configurations.TABLE_MATCHED_COSMIC_COLOR); //white
+					}
+
+				}
+				return c;
 			}
 		};
 		table.setAutoCreateRowSorter(true);

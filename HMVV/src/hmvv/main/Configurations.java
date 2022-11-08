@@ -282,6 +282,10 @@ public class Configurations {
 	public static Color TABLE_SELECTION_COLOR = new Color(51,204,255);
 	public static Color TABLE_SELECTION_FONT_COLOR = Color.black;
 	public static Color TABLE_REPORTED_COLOR = new Color(51,255,102);
+	
+	public static Color TABLE_UNMATCHED_COSMIC_COLOR = Color.LIGHT_GRAY;
+	public static Color TABLE_MATCHED_COSMIC_COLOR = Color.WHITE;
+
 	public static boolean isTestEnvironment() {
 		return !getEnvironment().equals("ngs_live");
 	}

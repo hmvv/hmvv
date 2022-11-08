@@ -2,8 +2,10 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
+import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.MutationCommon;
+import hmvv.main.Configurations;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -22,10 +24,12 @@ public class AnnotationDraftFrame extends JFrame {
     
     private MutationCommon mutation;
     private JFrame parent;
+    public JButton draftButton;
     
-    public AnnotationDraftFrame( JFrame parent, MutationCommon mutation) throws HeadlessException {
+    public AnnotationDraftFrame( JFrame parent, MutationCommon mutation, JButton draftButton) throws HeadlessException {
         this.parent = parent;
         this.mutation = mutation;
+        this.draftButton = draftButton;
         
         createComponents();
         layoutComponents();
@@ -35,6 +39,7 @@ public class AnnotationDraftFrame extends JFrame {
         setResizable(false);
         setLocationRelativeTo(parent);
         setAlwaysOnTop(true);
+        
     }
     
     private void createComponents(){
@@ -83,6 +88,7 @@ public class AnnotationDraftFrame extends JFrame {
 
         contentPanel.add(textAreaPanel, BorderLayout.CENTER);
         contentPanel.add(buttonPane, BorderLayout.SOUTH);
+        
     }
 
     private void activateComponents() {
@@ -103,6 +109,9 @@ public class AnnotationDraftFrame extends JFrame {
                 try {
                     DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText(),mutation.getMutationType());
                     AnnotationDraftFrame.this.dispose();
+                    AnnotationDraftFrame.this.draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
+                    
+
                 } catch (Exception e) {
                 	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
                 }

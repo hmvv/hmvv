@@ -56,7 +56,8 @@ public class DatabaseCommands_Pipelines {
 				"     group by runFolderName, sampleName" + 
 				"    ) as maxPipelineStatusTimeUpdated" + 
 				"   join pipelineStatus on pipelineStatus.timeUpdated = maxPipelineStatusTimeUpdated.timeUpdated " + 
-				"   " + 
+				"   AND pipelineStatus.runFolderName = maxPipelineStatusTimeUpdated.runFolderName AND" +
+				"	pipelineStatus.sampleName = maxPipelineStatusTimeUpdated.sampleName	" + 
 				" ) as statusTable" + 
 				 
 				" on queueTable.instrument = statusTable.instrument and queueTable.runFolderName = statusTable.runFolderName and queueTable.sampleName = statusTable.sampleName" + 

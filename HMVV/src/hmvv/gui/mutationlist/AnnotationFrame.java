@@ -266,15 +266,24 @@ public class AnnotationFrame extends JFrame {
 		});
 
 		draftButton.addActionListener(new ActionListener(){
+			
 			@Override
+			
 			public void actionPerformed(ActionEvent arg0) {
+				draftButton.setEnabled(false);
 				try{
+					
 					showAnnotationDraftFrame();
+					//draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
+					
 				}catch(Exception e){
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
 				}
 			}
+			
 		});
+
+		
 
 		ActionListener historyActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -299,6 +308,8 @@ public class AnnotationFrame extends JFrame {
 		previousAnnotationButton.addActionListener(historyActionListener);
 		nextAnnotationButton.addActionListener(historyActionListener);
 		annotationTextArea.addMouseListener(new ContextMenuMouseListener());
+
+		
 	}
 
 	private void saveRecord() throws Exception{
@@ -314,6 +325,7 @@ public class AnnotationFrame extends JFrame {
 		
 		saveAnnotationRecord();
 		saveGeneAnnotationRecord();
+		//draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
 	}
 	
 	private void saveAnnotationRecord() throws Exception {
@@ -427,7 +439,8 @@ public class AnnotationFrame extends JFrame {
 	}
 
 	private void showAnnotationDraftFrame(){
-		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);
+		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation, draftButton);
 		annotationdraftframe.setVisible(true);
+		
 	}
 }
