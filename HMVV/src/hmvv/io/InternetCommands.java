@@ -55,10 +55,10 @@ public class InternetCommands {
 				}
 				n += 1;
 			}
-			browseToURL("http://www.ncbi.nlm.nih.gov/snp?term=" + searchTerm);
+			browseToURL("https://www.ncbi.nlm.nih.gov/snp/" + searchTerm);
 		}
 		else{
-			browseToURL("http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=" + ID);
+			browseToURL("https://www.ncbi.nlm.nih.gov/snp/" + ID);
 		}
 	}
 

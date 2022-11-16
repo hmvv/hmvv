@@ -77,8 +77,12 @@ public class AnnotationFrame extends JFrame {
 		
 		pack();
 		setResizable(true);
+		Rectangle bounds = GUICommonTools.getBounds(mutationListFrame);
+		setSize((int)(bounds.width*.85), (int)(bounds.height*.70));
 		setLocationRelativeTo(mutationListFrame);
 		setAlwaysOnTop(true);
+
+
 	}
 
 	private void createComponents(){
@@ -236,6 +240,7 @@ public class AnnotationFrame extends JFrame {
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		buttonPane.add(draftButton);
+		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
         buttonPane.add(Box.createRigidArea(new Dimension(550,0)));
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);

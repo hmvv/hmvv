@@ -54,7 +54,7 @@ public class ViewAmpliconFrame extends JDialog {
         tableModel = new ViewAmpliconFrameTableModel();
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.5), (int)(bounds.height*.90));
+        setSize((int)(bounds.width*.90), (int)(bounds.height*.90));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setModalityType(Dialog.ModalityType.APPLICATION_MODAL);

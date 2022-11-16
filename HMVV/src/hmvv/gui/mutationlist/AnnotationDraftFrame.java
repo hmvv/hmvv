@@ -36,6 +36,8 @@ public class AnnotationDraftFrame extends JFrame {
         activateComponents();
 
         pack();
+        Rectangle bounds = GUICommonTools.getBounds(parent);
+		setSize((int)(bounds.width*.70), (int)(bounds.height*.70));
         setResizable(false);
         setLocationRelativeTo(parent);
         setAlwaysOnTop(true);
@@ -44,10 +46,14 @@ public class AnnotationDraftFrame extends JFrame {
     
     private void createComponents(){
         annotationTextArea = new JTextArea();
+        
         annotationTextArea.setWrapStyleWord(true);
         annotationTextArea.setLineWrap(true);
         try {
+            Rectangle bounds = GUICommonTools.getBounds(parent);
+            annotationTextArea.setSize((int)(bounds.width*.50), (int)(bounds.height*.60));
         	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate(),mutation.getMutationType()));
+            
         } catch (Exception e) {
         	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
         }
