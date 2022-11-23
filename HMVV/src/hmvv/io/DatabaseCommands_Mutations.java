@@ -584,7 +584,7 @@ public class DatabaseCommands_Mutations {
 	}
 
 
-	public static String getMutationURL(CosmicID cosmicID,String hGVSc) throws SQLException {
+	public static String getMutationURL(CosmicID cosmicID) throws SQLException {
 
 
 		ArrayList<String> urls = new ArrayList<String>();
@@ -594,7 +594,7 @@ public class DatabaseCommands_Mutations {
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		preparedStatement.setString(1, cosmic_id);
 		preparedStatement.setString(2, cosmic_id);
-		preparedStatement.setString(3, hGVSc.split(":")[0]);
+		preparedStatement.setString(3, cosmicID.HGVSc.split(":")[0]);
 		ResultSet rs = preparedStatement.executeQuery();
 		
 
