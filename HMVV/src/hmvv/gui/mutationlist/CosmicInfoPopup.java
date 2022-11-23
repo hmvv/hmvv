@@ -35,15 +35,11 @@ public class CosmicInfoPopup {
 	}
 
 	private static ArrayList<CosmicInfo> buildCosmicInfoList(MutationSomatic mutation) throws Exception {
-		String HGVSc = mutation.getHGVSc();
-		String transcript = "";
-		if(HGVSc.startsWith("ENST")) {
-			transcript = HGVSc.split("\\.")[0];
-		}
-		
+		String HGVSc = mutation.getHGVSc();	
 		 ArrayList<CosmicID> cosmicIDList = mutation.getAllCosmicIDs();
 		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
-		 boolean transcriptFound = false;
+		 ArrayList<CosmicInfo> cosmicInfoListUnshaded = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 int white_count = 0;
 		 for(CosmicID cosmicID : cosmicIDList) {
 			Boolean shade = true;
 			Boolean openItem = false;
@@ -60,30 +56,26 @@ public class CosmicInfoPopup {
 					thisInfo.openItem = true;
 				}
 			}
-			// calc color
 			cosmicInfoList.add(thisInfo);
-		 	//looking for transcript that matches this mutation
-
-
-			 //if(cosmicID.getTranscript().equals(transcript)) {
-				//thisInfo.openItem = true;
-				//transcriptFound = true;
-			
-			//}	
 
 		 }
 
-		 //Find default cosmicID if no transcript found
-		 //if(!transcriptFound) {
-		 //	for(CosmicInfo thisInfo : cosmicInfoList) {
-		 //		if(thisInfo.cosmicID.getTranscript().equals("") ) {
-		 //			thisInfo.openItem = true;
-		 //		}
-		 //	}
-		 //}
-		 	//sort the list to have white rows on top
+		
+		 for(CosmicInfo thisInfo : cosmicInfoList) {
 			
-		return cosmicInfoList;
+			if (thisInfo.shade == false){
+				white_count++;
+				cosmicInfoListUnshaded.add(thisInfo);
+			}
+		 }
+
+		if(white_count == 0){
+			return cosmicInfoList;
+		}
+		else{
+			return cosmicInfoListUnshaded;
+		}
+		
 	}
 	
 	public static void handleCosmicClick(CommonTable parent, MutationSomatic mutation) throws Exception{
