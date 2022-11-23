@@ -24,12 +24,11 @@ public class CosmicInfoPopup {
 	static class CosmicInfo{
 		public boolean openItem;
 		public CosmicID cosmicID;
-		public String HGVSc;
 		public Boolean shade;
-		CosmicInfo(Boolean openItem, CosmicID cosmicID, String HGVSc, Boolean shade){
+
+		CosmicInfo(Boolean openItem, CosmicID cosmicID, Boolean shade){
 			this.openItem = openItem;
 			this.cosmicID = cosmicID;
-			this.HGVSc = HGVSc;
 			this.shade = shade;
 		}
 	}
@@ -43,7 +42,7 @@ public class CosmicInfoPopup {
 		 for(CosmicID cosmicID : cosmicIDList) {
 			Boolean shade = true;
 			Boolean openItem = false;
-			CosmicInfo thisInfo = new CosmicInfo(openItem,cosmicID,cosmicID.HGVSc,shade);
+			CosmicInfo thisInfo = new CosmicInfo(openItem,cosmicID, shade);
 
 			String mut_transcript = HGVSc.split(":")[0];
 			String cos_transcript = cosmicID.HGVSc.split(":")[0];	
@@ -208,7 +207,7 @@ public class CosmicInfoPopup {
 			for(CosmicInfo cosmicInfo : comsicInfoList){
 				
 				 if(cosmicInfo.openItem) {
-					String MutationURL = DatabaseCommands_Mutations.getMutationURL(cosmicInfo.cosmicID,cosmicInfo.HGVSc);
+					String MutationURL = DatabaseCommands_Mutations.getMutationURL(cosmicInfo.cosmicID);
 				 	InternetCommands.searchCosmic(MutationURL);
 				 }
 			}
