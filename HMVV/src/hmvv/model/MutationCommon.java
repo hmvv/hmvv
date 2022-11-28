@@ -42,8 +42,7 @@ public class MutationCommon {
     private String clinicalsignificance;
     private String clinicalconsequence;
     private String clinicalorigin;
-   
-
+    
 
     public String getClinvarID() {
         return clinvarID;
@@ -327,6 +326,6 @@ public class MutationCommon {
 
     public Configurations.MUTATION_TYPE getMutationType(){
         return Configurations.MUTATION_TYPE.COMMON;
-    }
+    }    
 
 }

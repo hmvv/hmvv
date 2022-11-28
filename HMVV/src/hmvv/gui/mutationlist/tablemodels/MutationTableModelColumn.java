@@ -338,6 +338,23 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(MutationSomatic mutation) -> mutation.getPmkb_tissue_type());
 
+
+	public static final MutationTableModelColumn VarScanVAF = new MutationTableModelColumn("TBD",
+			"VarScanVAF",
+			String.class,
+			(MutationSomatic mutation) -> mutation.getVarScanVAF());
+
+	public static final MutationTableModelColumn Mutect2VAF = new MutationTableModelColumn("TBD",
+			"Mutect2VAF",
+			String.class,
+			(MutationSomatic mutation) -> mutation.getMutect2VAF());
+
+	public static final MutationTableModelColumn freebayesVAF = new MutationTableModelColumn("TBD",
+			"freebayesVAF",
+			String.class,
+			(MutationSomatic mutation) -> mutation.getfreebayesVAF());
+//
+
 	/**
 	 * The Lambda interface object
 	 */

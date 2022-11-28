@@ -38,6 +38,9 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private VEPTable vepTabTable;
 	private VEPTableModel vepTabTableModel;
 
+	private VCallersTable VCallersTabTable;
+	private VCallersTableModel VCallersTabTableModel;
+
 	private CosmicTable cosmicTabTable;
 	private CosmicTableModel cosmicTabTableModel;
 
@@ -63,6 +66,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 
 	private JScrollPane basicTabScrollPane;
 	private JScrollPane vepTabScrollPane;
+	private JScrollPane VCallersTabScrollPane;
 	private JScrollPane cosmicTabScrollPane;
 	private JScrollPane g1000TabScrollPane;
 	private JScrollPane clinVarTabScrollPane;
@@ -143,6 +147,10 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		vepTabTableModel = new VEPTableModel(mutationList);
 		vepTabTable = new VEPTable(parent, vepTabTableModel);
 		vepTabTable.setAutoCreateRowSorter(true);
+
+		VCallersTabTableModel = new VCallersTableModel(mutationList);
+		VCallersTabTable = new VCallersTable(parent, VCallersTabTableModel);
+		VCallersTabTable.setAutoCreateRowSorter(true);
 		
 		cosmicTabTableModel = new CosmicTableModel(mutationList);
 		cosmicTabTable = new CosmicTable(parent, cosmicTabTableModel);
@@ -179,6 +187,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		basicTabTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 		
 		vepTabScrollPane = new JScrollPane(vepTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		VCallersTabScrollPane = new JScrollPane(VCallersTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		cosmicTabScrollPane = new JScrollPane(cosmicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		g1000TabScrollPane = new JScrollPane(g1000TabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		clinVarTabScrollPane = new JScrollPane(clinVarTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -190,6 +199,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Basic", null, basicTabScrollPane, null);
 		tabbedPane.addTab("VEP", null, vepTabScrollPane, null);
+		tabbedPane.addTab("VCallers", null, VCallersTabScrollPane, null);
 		tabbedPane.addTab("Cosmic", null, cosmicTabScrollPane, null);
 		tabbedPane.addTab("G1000", null, g1000TabScrollPane, null);
 		tabbedPane.addTab("ClinVar", null, clinVarTabScrollPane, null);
@@ -247,27 +257,30 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 					selectedTable = vepTabTable;
 					selectedScrollPane = vepTabScrollPane;
 	        	}else if(selectedIndex == 2){
+	        		selectedTable = VCallersTabTable;
+	        		selectedScrollPane = VCallersTabScrollPane;
+				}else if(selectedIndex == 3){
 	        		selectedTable = cosmicTabTable;
 	        		selectedScrollPane = cosmicTabScrollPane;
-	        	}else if(selectedIndex == 3){
+	        	}else if(selectedIndex == 4){
 	        		selectedTable = g1000TabTable;
 	        		selectedScrollPane = g1000TabScrollPane;
-				}else if(selectedIndex == 4){
+				}else if(selectedIndex == 5){
 					selectedTable = clinVarTabTable;
 					selectedScrollPane = clinVarTabScrollPane;
-				}else if(selectedIndex == 5){
+				}else if(selectedIndex == 6){
 					selectedTable = gnomadTabTable;
 					selectedScrollPane = gnomadTabScrollPane;
-				}else if(selectedIndex == 6){
+				}else if(selectedIndex == 7){
 					selectedTable = oncokbTabTable;
 					selectedScrollPane = oncokbTabScrollPane;
-				}else if(selectedIndex == 7){
+				}else if(selectedIndex == 8){
 					selectedTable = civicTabTable;
 					selectedScrollPane = civicTabScrollPane;
-	        	}else if(selectedIndex == 8){
+	        	}else if(selectedIndex == 9){
 					selectedTable = pmkbTabTable;
 					selectedScrollPane = pmkbTabScrollPane;
-				}else if(selectedIndex == 9){
+				}else if(selectedIndex == 10){
 					selectedScrollPane = pmkbTabScrollPane;
 	        	}else{
 	        		//undefined

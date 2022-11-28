@@ -54,6 +54,9 @@ public class MutationSomatic extends MutationCommon {
 
     //pmkb
     private String pmkbID;
+    private Double VarScanVAF;
+    private Double Mutect2VAF;
+    private Double freebayesVAF;
     private String pmkb_tumor_type;
     private String pmkb_tissue_type;
 
@@ -345,6 +348,30 @@ public class MutationSomatic extends MutationCommon {
 
     public void setPmkbID() {
         this.pmkbID = this.getOncokbID();
+    }
+    
+    public Double getVarScanVAF() {
+        return VarScanVAF;
+    }
+
+    public void setVarScanVAF(Double VarScanVAF) {
+        this.VarScanVAF = VarScanVAF;
+    }
+
+    public Double getMutect2VAF() {
+        return Mutect2VAF;
+    }
+
+    public void setMutect2VAF(Double Mutect2VAF) {
+        this.Mutect2VAF = Mutect2VAF;
+    }
+    
+    public Double getfreebayesVAF() {
+        return freebayesVAF;
+    }
+
+    public void setfreebayesVAF(Double freebayesVAF) {
+        this.freebayesVAF = freebayesVAF;
     }
 
     public void setPmkb_tumor_type(String pmkb_tumor_type) {
