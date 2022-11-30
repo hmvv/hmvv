@@ -54,6 +54,7 @@ public class BasicTable extends CommonTable{
 			searchCosmic();
 		}else if(column == 14){
 			handleAnnotationClick();
+			
 		}
 	}
 

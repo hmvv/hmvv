@@ -251,7 +251,8 @@ public abstract class CommonTable extends JTable{
 		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, parent);
 		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
-	}
+		
+		}
 	
 	public void notifyAnnotationUpdated(Annotation annotation) {
 		int viewRow = getSelectedRow();

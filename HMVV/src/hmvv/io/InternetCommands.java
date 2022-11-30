@@ -44,21 +44,8 @@ public class InternetCommands {
 		browseToURL("https://www.ncbi.nlm.nih.gov/omim/?term=" + term );
 	}
 	public static void searchSNP(String ID) throws Exception{
-		if(ID.contains(",")){
-			String searchTerm = "";
-			Integer n = 0;
-			for (String oneID: ID.split(",")){
-				if(n == 0){
-					searchTerm += oneID;
-				}else{
-					searchTerm += String.format("%%20OR%%20%s", oneID);
-				}
-				n += 1;
-			}
-			browseToURL("https://www.ncbi.nlm.nih.gov/snp/" + searchTerm);
-		}
-		else{
-			browseToURL("https://www.ncbi.nlm.nih.gov/snp/" + ID);
+			for (String oneID: ID.split("&")){
+			browseToURL("https://www.ncbi.nlm.nih.gov/snp/" + oneID);
 		}
 	}
 

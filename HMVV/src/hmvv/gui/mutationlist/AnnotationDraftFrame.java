@@ -2,10 +2,8 @@ package hmvv.gui.mutationlist;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
-import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.MutationCommon;
-import hmvv.main.Configurations;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -24,12 +22,10 @@ public class AnnotationDraftFrame extends JFrame {
     
     private MutationCommon mutation;
     private JFrame parent;
-    public JButton draftButton;
     
-    public AnnotationDraftFrame( JFrame parent, MutationCommon mutation, JButton draftButton) throws HeadlessException {
+    public AnnotationDraftFrame( JFrame parent, MutationCommon mutation) throws HeadlessException {
         this.parent = parent;
         this.mutation = mutation;
-        this.draftButton = draftButton;
         
         createComponents();
         layoutComponents();
@@ -37,10 +33,10 @@ public class AnnotationDraftFrame extends JFrame {
 
         pack();
         Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.70), (int)(bounds.height*.70));
+		setSize((int)(bounds.width*.60), (int)(bounds.height*.60));
         setResizable(false);
         setLocationRelativeTo(parent);
-        setAlwaysOnTop(true);
+        //setAlwaysOnTop(true);
         
     }
     
@@ -50,8 +46,7 @@ public class AnnotationDraftFrame extends JFrame {
         annotationTextArea.setWrapStyleWord(true);
         annotationTextArea.setLineWrap(true);
         try {
-            Rectangle bounds = GUICommonTools.getBounds(parent);
-            annotationTextArea.setSize((int)(bounds.width*.50), (int)(bounds.height*.60));
+
         	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate(),mutation.getMutationType()));
             
         } catch (Exception e) {
@@ -73,9 +68,10 @@ public class AnnotationDraftFrame extends JFrame {
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPanel.setLayout(new BorderLayout());
 
-        Dimension textAreaDimension = new Dimension(400,400);
+        Dimension textAreaDimension = new Dimension(700,400);
 
         JPanel textAreaPanel = new JPanel();
+        
         //Annotation
         JPanel annotationPanel = new JPanel();
         annotationPanel.setLayout(new BoxLayout(annotationPanel, BoxLayout.Y_AXIS));
@@ -85,6 +81,7 @@ public class AnnotationDraftFrame extends JFrame {
         annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
         annotationPanel.setBorder(annotationBorder);
         annotationPanel.add(annotationScrollPane);
+        
         textAreaPanel.add(annotationPanel);
 
         JPanel buttonPane = new JPanel();
@@ -115,7 +112,7 @@ public class AnnotationDraftFrame extends JFrame {
                 try {
                     DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText(),mutation.getMutationType());
                     AnnotationDraftFrame.this.dispose();
-                    AnnotationDraftFrame.this.draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
+                    
                     
 
                 } catch (Exception e) {

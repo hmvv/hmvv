@@ -51,7 +51,7 @@ public class ViewAmpliconFrame extends JDialog {
         this.parent = parent;
 		this.sample = sample;
 
-        tableModel = new ViewAmpliconFrameTableModel();
+        tableModel = new ViewAmpliconFrameTableModel(sample);
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
         setSize((int)(bounds.width*.90), (int)(bounds.height*.90));
@@ -64,10 +64,12 @@ public class ViewAmpliconFrame extends JDialog {
         activateComponents();
         setLocationRelativeTo(parent);
         buildModelFromDatabase();
+        
 
         String title = "Sample Amplicons List - " + sample.getLastName() + "," + sample.getFirstName() +
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
+
 	}
 
 	private void createComponents(){
@@ -91,7 +93,7 @@ public class ViewAmpliconFrame extends JDialog {
 		failedAmpliconsLabel = new JLabel("Amplicons below cutoff");
 		failedAmpliconsLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		totalAmpliconsLabel = new JLabel("Total amplicons");
+		totalAmpliconsLabel = new JLabel(" Total amplicons");
 		totalAmpliconsLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
 		patientNameLabel = new JLabel("sample");
@@ -212,15 +214,18 @@ public class ViewAmpliconFrame extends JDialog {
     private void buildModelFromDatabase() throws Exception{
 
         ArrayList<Amplicon> amplicons = DatabaseCommands.getAmplicons(sample);
-        tableModel.setAmplicons(amplicons);
+        ArrayList<Amplicon> failedAmplicons = new ArrayList<Amplicon>();
 
+        
+        //Assign QC Measure Description Label
         String qcMeasureDescription = "";
         if(amplicons.size() > 0){
             qcMeasureDescription = amplicons.get(0).getQCMeasureDescription();
         }
-        qcMeasureDescriptionLabel.setText("QC Measure: " + qcMeasureDescription);
+        qcMeasureDescriptionLabel.setText(" QC Measure: " + qcMeasureDescription);
 
-		patientNameLabel.setText(String.format("%s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
+
+		patientNameLabel.setText(String.format(" %s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
         if(amplicons.size() == 0){
             ampliconsReportLabel.setText("No amplicon data found.");
         }else{
@@ -228,10 +233,12 @@ public class ViewAmpliconFrame extends JDialog {
             for(Amplicon amplicon : amplicons){
                 if(amplicon.isFailedAmplicon()){
                     failed++;
+                    failedAmplicons.add(amplicon);
                 }
             }
             ampliconsReportLabel.setText(String.format("%s  [ %.2f %%] ", failed,  failed * 100.0 / amplicons.size()) );
         }
         totalAmpliconsCountLabel.setText(""+amplicons.size() );
+        tableModel.setAmplicons(failedAmplicons);
 	}
 }

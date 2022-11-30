@@ -22,7 +22,9 @@ public class Amplicon {
 	private boolean failed;
 	private Integer qcMeasure;
 	private String qcMeasureDescription;
-	
+	private String failed_amplicons;
+	private Boolean failed_check; 
+
 	public Amplicon(
 		Sample sample,
 		String gene,
@@ -36,8 +38,10 @@ public class Amplicon {
 		Integer cumulative_depth,
 		Integer cov20x,
 		Integer cov100x,
+		Integer cov250x, 
 		Integer cov500x,
-		Integer cov100xPercent
+		Integer cov100xPercent,
+		Integer cov250xPercent
 	) {
 		this.sample = sample;
 		this.gene = gene;
@@ -58,22 +62,42 @@ public class Amplicon {
 		String assay = sample.assay.assayName;
 		
 		if(instrument.equals("proton") && total_reads != null){
-			failed = total_reads < Configurations.READ_DEPTH_FILTER;
-			qcMeasure = total_reads;
+			failed_check = total_reads < Configurations.READ_DEPTH_FILTER;
 			qcMeasureDescription = "Total Reads < " + Configurations.READ_DEPTH_FILTER;
+			if(failed_check == true){
+				failed = true;
+				failed_amplicons = ampliconName;
+				qcMeasure = total_reads;
+			}
+			
 		}else if(assay.equals("heme")){
 			if(instrument.equals("miseq")){
-				failed = cumulative_depth < Configurations.READ_DEPTH_FILTER;
-				qcMeasure = cumulative_depth;
+				failed_check = cumulative_depth < Configurations.READ_DEPTH_FILTER;
 				qcMeasureDescription = "Cumulative Read Depth < " + Configurations.READ_DEPTH_FILTER;
+				if(failed_check == true){
+					failed = true;
+					failed_amplicons = ampliconName;
+					qcMeasure = cumulative_depth;
+
+				}
 			}else if(instrument.equals("nextseq") && cov100xPercent != null){
-				failed = cov100xPercent < Configurations.COVERAGE_PERCENTAGE_100X;
-				qcMeasure = cov100xPercent;
-				qcMeasureDescription = "100x Coverage > " +( 100 - Configurations.COVERAGE_PERCENTAGE_100X) + "% of positions";
+				failed_check = cov250xPercent < Configurations.COVERAGE_PERCENTAGE_250X;
+				qcMeasureDescription = "250x Coverage < " +(Configurations.COVERAGE_PERCENTAGE_250X) + "% of positions";
+				if(failed_check == true){
+					failed = true;
+					failed_amplicons = ampliconName;
+					qcMeasure = cov250xPercent;
+				}
 			}else if(instrument.equals("nextseq") && average_depth != null){
-				failed = average_depth < Configurations.READ_DEPTH_FILTER;
+				failed_check = average_depth < Configurations.READ_DEPTH_FILTER;
 				qcMeasure = average_depth;
 				qcMeasureDescription = "Average depth < " + Configurations.READ_DEPTH_FILTER;
+				if(failed_check == true){
+					failed = true;
+					failed_amplicons = ampliconName;
+					qcMeasure = average_depth;
+				}
+				
 			}else{
 				new IllegalArgumentException("Unable to determine amplicon failure.");
 			}
@@ -81,6 +105,24 @@ public class Amplicon {
 			new IllegalArgumentException("Unable to determine amplicon failure.");
 		}
 	}
+
+	
+
+	public static String getQCColumnName(Sample sample){
+        if(sample.instrument.instrumentName.equals("proton")){
+            return "Total Reads";
+        }
+        else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("nextseq"))){
+            return "% Positions";
+        }
+        else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("miseq"))){
+            return "Cumulative Depth";
+        }
+
+        else{
+            return "QC Measure";
+        }
+    }
 
 	public boolean isFailedAmplicon(){
 		return failed;
@@ -93,4 +135,9 @@ public class Amplicon {
 	public String getQCMeasureDescription(){
 		return qcMeasureDescription;
 	}
+
+	public String getAmpliconName(){
+		return failed_amplicons;
+	}
+
 }

@@ -21,7 +21,7 @@ public class DatabaseCommands_QC {
 	
 	static ArrayList<Amplicon> getAmplicons(Sample sample) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select gene,ampliconName,chr,chr_start,chr_end,length,total_reads,average_depth,cumulative_depth,cov20x,cov100x,cov500x,cov100xPercent "+
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select gene,ampliconName,chr,chr_start,chr_end,length,total_reads,average_depth,cumulative_depth,cov20x,cov100x,cov250x,cov500x,cov100xPercent,cov250xPercent "+
 		" from sampleAmplicons where sampleID = ? ");
 		preparedStatement.setInt(1, sample.sampleID);
 		ResultSet resultSet = preparedStatement.executeQuery();
@@ -40,8 +40,10 @@ public class DatabaseCommands_QC {
 				resultSet.getInt("cumulative_depth"),
 				resultSet.getInt("cov20x"),
 				resultSet.getInt("cov100x"),
+				resultSet.getInt("cov250x"),
 				resultSet.getInt("cov500x"),
-				resultSet.getInt("cov100xPercent")
+				resultSet.getInt("cov100xPercent"),
+				resultSet.getInt("cov250xPercent")
 			);
 			amplicons.add(amplicon);
 		}

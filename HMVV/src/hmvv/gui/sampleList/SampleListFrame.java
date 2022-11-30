@@ -39,6 +39,10 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
 
+import java.awt.event.WindowListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
+
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.MutationGermlineListFrame;
@@ -110,6 +114,19 @@ public class SampleListFrame extends JPanel {
 		return this.tableModel;
 	}
 	
+	public WindowListener getListener(){
+		WindowListener listener = new WindowAdapter() {
+			public void windowClosed(WindowEvent evt) {
+				parent.setEnabled(true);
+				}
+			
+			public void windowClosing(WindowEvent evt) {
+				parent.setEnabled(true);
+				}
+			};
+		return listener;
+	}
+
 	public void addSample(Sample sample){
 		tableModel.addSample(sample);
 		updatePipelinesASynch();
@@ -464,6 +481,9 @@ public class SampleListFrame extends JPanel {
 
 		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
 		editSample.setVisible(true);
+		parent.setEnabled(false);
+		WindowListener listener = getListener();
+		editSample.addWindowListener(listener); 
 		editSample.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -621,6 +641,10 @@ public class SampleListFrame extends JPanel {
 			try {
 				MutationListFrame mutationListFrame = new MutationListFrame(parent, sample, get());
 				mutationListFrame.setVisible(true);
+				parent.setEnabled(false);
+				WindowListener listener = getListener();
+				mutationListFrame.addWindowListener(listener); 
+
 			} catch (Exception e) {
 				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error loading mutation data.");
 			}

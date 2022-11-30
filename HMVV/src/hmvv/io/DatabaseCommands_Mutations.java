@@ -30,7 +30,7 @@ public class DatabaseCommands_Mutations {
 
 	private static ArrayList<MutationSomatic> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
 		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
-				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, t2.occurrenceCount, "
+				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, t2.occurrenceCount, t2.VarScanVAF, t2.Mutect2VAF, t2.freebayesVAF, "
 				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID, t2.COSMIC_pipeline, t2.COSMIC_VEP, t2.OncoKB, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
@@ -345,7 +345,9 @@ public class DatabaseCommands_Mutations {
 			//temp holder fields - filled later separately
 			mutation.addCosmicIDLoading();
 			mutation.setOccurrence(getIntegerOrNull(rs, "occurrenceCount"));
-
+			mutation.setVarScanVAF(getDoubleOrNull(rs, "VarScanVAF"));
+			mutation.setMutect2VAF(getDoubleOrNull(rs, "Mutect2VAF"));
+			mutation.setfreebayesVAF(getDoubleOrNull(rs, "freebayesVAF"));
 
 			//annotation history
 			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.SOMATIC);

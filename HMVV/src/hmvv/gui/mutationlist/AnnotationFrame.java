@@ -15,6 +15,9 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -80,7 +83,7 @@ public class AnnotationFrame extends JFrame {
 		Rectangle bounds = GUICommonTools.getBounds(mutationListFrame);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.70));
 		setLocationRelativeTo(mutationListFrame);
-		setAlwaysOnTop(true);
+		//setAlwaysOnTop(true);
 
 
 	}
@@ -241,7 +244,7 @@ public class AnnotationFrame extends JFrame {
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		buttonPane.add(draftButton);
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-        buttonPane.add(Box.createRigidArea(new Dimension(550,0)));
+        buttonPane.add(Box.createRigidArea(new Dimension(1240,0)));
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);
 		
@@ -279,7 +282,7 @@ public class AnnotationFrame extends JFrame {
 				try{
 					
 					showAnnotationDraftFrame();
-					//draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
+					setEnabled(false);
 					
 				}catch(Exception e){
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
@@ -330,7 +333,6 @@ public class AnnotationFrame extends JFrame {
 		
 		saveAnnotationRecord();
 		saveGeneAnnotationRecord();
-		//draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
 	}
 	
 	private void saveAnnotationRecord() throws Exception {
@@ -444,8 +446,24 @@ public class AnnotationFrame extends JFrame {
 	}
 
 	private void showAnnotationDraftFrame(){
-		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation, draftButton);
+		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);	
 		annotationdraftframe.setVisible(true);
+		WindowListener listener = new WindowAdapter() {
+			public void windowClosed(WindowEvent evt) {
+				enableDraftButton();
+				}
+			
+			public void windowClosing(WindowEvent evt) {
+					enableDraftButton();
+				}
+			};
 		
-	}
+		annotationdraftframe.addWindowListener(listener); 
+
+		}
+		
+		private void enableDraftButton(){
+			draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
+			setEnabled(true);
+		}
 }
