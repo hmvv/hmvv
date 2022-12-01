@@ -214,7 +214,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 			tabbedPane.addTab("Patient History", null, patientHistoryTabScrollPane, null);
 		}else{
 			tabbedPane.addTab("Patient History", null, null);
-			tabbedPane.setEnabledAt(9, false);
+			tabbedPane.setEnabledAt(10, false);
 		}
 
 		selectedTable = basicTabTable;
