@@ -18,7 +18,6 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
 import hmvv.gui.mutationlist.CosmicInfoPopup;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;

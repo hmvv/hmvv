@@ -42,7 +42,6 @@ import javax.swing.table.TableRowSorter;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
-import java.awt.event.WindowFocusListener;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
@@ -488,9 +487,6 @@ public class SampleListFrame extends JPanel {
 		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
 		editSample.setVisible(true);
 		editSample.toFront();
-		parent.setEnabled(false);
-		WindowListener listener = getListener();
-		editSample.addWindowListener(listener); 
 		editSample.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {

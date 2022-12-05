@@ -6,7 +6,6 @@ import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.io.IGVConnection;
 import hmvv.main.HMVVFrame;
 import hmvv.model.MutationSomatic;
-import hmvv.gui.mutationlist.MutationListFrame;
 
 
 public class BasicTable extends CommonTable{
