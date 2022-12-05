@@ -83,6 +83,9 @@ public class AnnotationFrame extends JFrame {
 		Rectangle bounds = GUICommonTools.getBounds(mutationListFrame);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.70));
 		setLocationRelativeTo(mutationListFrame);
+		//mutationListFrame.setModal(false);
+		//mutationListFrame.setVisible(false);
+		//toFront();
 		//setAlwaysOnTop(true);
 
 
@@ -282,7 +285,7 @@ public class AnnotationFrame extends JFrame {
 				try{
 					
 					showAnnotationDraftFrame();
-					setEnabled(false);
+					//setEnabled(false);
 					
 				}catch(Exception e){
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
@@ -451,6 +454,7 @@ public class AnnotationFrame extends JFrame {
 		WindowListener listener = new WindowAdapter() {
 			public void windowClosed(WindowEvent evt) {
 				enableDraftButton();
+				
 				}
 			
 			public void windowClosing(WindowEvent evt) {

@@ -42,6 +42,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
+import java.awt.event.WindowFocusListener;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
@@ -105,6 +106,7 @@ public class SampleListFrame extends JPanel {
 		customColumns = HMVVTableColumn.getCustomColumnArray(tableModel.getColumnCount(), loadSampleResultsColumn, qcColumn, mrnColumn, runIDColumn, sampleEditColumn);
 		pipelines = new ArrayList<Pipeline>();//initialize as blank so that if setupPipelineRefreshThread() fails, the object is still instantiated
 		
+
 		createComponents();
 		layoutComponents();
 		activateComponents();
@@ -123,6 +125,7 @@ public class SampleListFrame extends JPanel {
 			public void windowClosing(WindowEvent evt) {
 				parent.setEnabled(true);
 				}
+
 			};
 		return listener;
 	}
@@ -425,7 +428,9 @@ public class SampleListFrame extends JPanel {
 	}
 
 	private void handleMutationClick() throws Exception{
+		
 		Sample currentSample = getCurrentlySelectedSample();
+		
 	    if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
 		    parent.createTumorMutationBurdenFrame((TMBSample) currentSample);
 		} else if (currentSample.assay.assayName.equals("cardiac_exome")){
@@ -475,12 +480,14 @@ public class SampleListFrame extends JPanel {
 	
 	private void handleEditSampleClick() throws Exception{
 		//Edit sample
+		
 		int viewRow = table.getSelectedRow();
 		final int modelRow = table.convertRowIndexToModel(viewRow);
 		Sample sample = getCurrentlySelectedSample();
 
 		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
 		editSample.setVisible(true);
+		editSample.toFront();
 		parent.setEnabled(false);
 		WindowListener listener = getListener();
 		editSample.addWindowListener(listener); 
@@ -640,9 +647,9 @@ public class SampleListFrame extends JPanel {
 			mutationListLoading = false;
 			try {
 				MutationListFrame mutationListFrame = new MutationListFrame(parent, sample, get());
+				//mutationListFrame.setModal(true);
 				mutationListFrame.setVisible(true);
-				parent.setEnabled(false);
-				WindowListener listener = getListener();
+				WindowListener listener = getListener();									
 				mutationListFrame.addWindowListener(listener); 
 
 			} catch (Exception e) {

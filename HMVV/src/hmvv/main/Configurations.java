@@ -256,14 +256,20 @@ public class Configurations {
 	public static int MAX_OCCURENCE_FILTER = 1000000;
 	public static int ALLELE_FREQ_FILTER = 10;
 	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
+	public static double HEME_ALLELE_FREQ_FILTER = 0;
+	public static double MAX_HEME_ALLELE_FREQ_FILTER = 0;
 	public static int GERMLINE_READ_DEPTH_FILTER = 10;
 	public static int GERMLINE_ALLELE_FREQ_FILTER = 15;
 	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
 
-	public static int getAlleleFrequencyFilter(Sample sample) {
+	public static double getAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){
 			return HORIZON_ALLELE_FREQ_FILTER;
-		}else {
+		}
+			else if (sample.assay.toString().contains("heme")){
+			return HEME_ALLELE_FREQ_FILTER;
+		}
+		else {
 			return ALLELE_FREQ_FILTER;
 		}
 	}

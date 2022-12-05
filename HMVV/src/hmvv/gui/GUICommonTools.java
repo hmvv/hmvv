@@ -87,4 +87,20 @@ public class GUICommonTools {
 		}
 		return valueInt;
 	}
+
+
+	public static double getHemeNumber(JTextField field, double defaultdouble){
+		String value = field.getText();
+		double valuedouble = 0.0;
+		if(value.equals("")){
+			valuedouble = defaultdouble;
+		}else{
+			try{
+				valuedouble = Double.parseDouble(value);
+			}catch(Exception e){
+				return defaultdouble;
+			}
+		}
+		return valuedouble;
+	}
 }

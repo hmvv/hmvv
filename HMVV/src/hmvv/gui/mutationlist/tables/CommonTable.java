@@ -18,6 +18,7 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.AnnotationFrame;
 import hmvv.gui.mutationlist.CosmicInfoPopup;
 import hmvv.gui.mutationlist.tablemodels.CommonTableModel;
+import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
@@ -249,7 +250,11 @@ public abstract class CommonTable extends JTable{
 
 
 		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, parent);
+		//parent.setVisible(false);
+		//parent.setEnabled(false);
+		
 		editAnnotation.setVisible(true);
+		editAnnotation.toFront();
 		this.setCursor(Cursor.getDefaultCursor());
 		
 		}

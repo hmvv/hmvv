@@ -6,6 +6,8 @@ import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.io.IGVConnection;
 import hmvv.main.HMVVFrame;
 import hmvv.model.MutationSomatic;
+import hmvv.gui.mutationlist.MutationListFrame;
+
 
 public class BasicTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
@@ -54,6 +56,7 @@ public class BasicTable extends CommonTable{
 			searchCosmic();
 		}else if(column == 14){
 			handleAnnotationClick();
+			//parent.setVisible(false);
 			
 		}
 	}

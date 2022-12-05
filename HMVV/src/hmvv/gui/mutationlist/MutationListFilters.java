@@ -217,8 +217,8 @@ class VariantAlleleFrequencyFilter implements Filter{
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		int frequencyFrom =  GUICommonTools.getNumber(frequencyFromTextField, Configurations.ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
-		int frequencyTo = GUICommonTools.getNumber(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
+		double frequencyFrom =  GUICommonTools.getHemeNumber(frequencyFromTextField, Configurations.HEME_ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
+		double frequencyTo = GUICommonTools.getHemeNumber(frequencyToTextField, Configurations.MAX_HEME_ALLELE_FREQ_FILTER);
 
 		double variantFrequency = mutation.getAltFreq();
 		if(frequencyFrom > variantFrequency){
