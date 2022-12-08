@@ -250,6 +250,4 @@ public class HMVVFrame extends JFrame{
 		monitorPipelineThread.start();
 	}
 
-	public void setModal(boolean b) {
-	}
 }
