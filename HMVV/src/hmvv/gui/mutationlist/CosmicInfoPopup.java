@@ -76,9 +76,56 @@ public class CosmicInfoPopup {
 		}
 		
 	}
+
+
+	private static boolean getMatchedCosmicIdflag(MutationSomatic mutation) throws Exception {
+		String HGVSc = mutation.getHGVSc();	
+		 ArrayList<CosmicID> cosmicIDList = mutation.getAllCosmicIDs();
+		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 ArrayList<CosmicInfo> cosmicInfoListUnshaded = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 int white_count = 0;
+		 for(CosmicID cosmicID : cosmicIDList) {
+			Boolean shade = true;
+			Boolean openItem = false;
+			CosmicInfo thisInfo = new CosmicInfo(openItem,cosmicID, shade);
+
+			String mut_transcript = HGVSc.split(":")[0];
+			String cos_transcript = cosmicID.HGVSc.split(":")[0];	
+			String cos_dna_change = cosmicID.HGVSc.split(":")[1];
+			String mut_dna_change = HGVSc.split(":")[1];
+
+			if (cos_dna_change.equals(mut_dna_change)){
+				thisInfo.shade = false;
+				if (cos_transcript.equals(mut_transcript)){
+					thisInfo.openItem = true;
+				}
+			}
+			cosmicInfoList.add(thisInfo);
+
+		 }
+
+		
+		 for(CosmicInfo thisInfo : cosmicInfoList) {
+			
+			if (thisInfo.shade == false){
+				white_count++;
+				cosmicInfoListUnshaded.add(thisInfo);
+			}
+		 }
+
+		if(white_count == 0){
+			
+			return false;
+		}
+		else{
+			return true;
+		}
+		
+	}
 	
 	public static void handleCosmicClick(CommonTable parent, MutationSomatic mutation) throws Exception{
 		ArrayList<CosmicInfo> comsicInfoList = buildCosmicInfoList(mutation);
+		boolean cosmicIdMatch = getMatchedCosmicIdflag(mutation);
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
 			
@@ -202,16 +249,33 @@ public class CosmicInfoPopup {
 		
 		JScrollPane tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setPreferredSize(new Dimension(1200,500));
-		int returnValue = JOptionPane.showConfirmDialog(parent, tableScrollPane, "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.", JOptionPane.YES_NO_OPTION);
-		if(returnValue == JOptionPane.OK_OPTION) {
-			for(CosmicInfo cosmicInfo : comsicInfoList){
-				
-				 if(cosmicInfo.openItem) {
-					String MutationURL = DatabaseCommands_Mutations.getMutationURL(cosmicInfo.cosmicID);
-				 	InternetCommands.searchCosmic(MutationURL);
-				 }
-			}
+
+		String titleSelected;
+
+		if(cosmicIdMatch){
+			titleSelected = "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.";
 		}
+		else{
+			titleSelected =  "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.There were no matches for the COSMIC ID chosen";
+		}
+
+
+		CosmicInfoFrame CosmicInfoFrame = new CosmicInfoFrame(parent, tableScrollPane);
+		CosmicInfoFrame.setVisible(true);
+
+
+
+//		int returnValue = JOptionPane.showConfirmDialog(parent, tableScrollPane,titleSelected, JOptionPane.YES_NO_OPTION);
+		
+		//if(returnValue == JOptionPane.OK_OPTION) {
+		//	for(CosmicInfo cosmicInfo : comsicInfoList){
+				
+		//		 if(cosmicInfo.openItem) {
+		//			String MutationURL = DatabaseCommands_Mutations.getMutationURL(cosmicInfo.cosmicID);
+		//		 	InternetCommands.searchCosmic(MutationURL);
+		//		 }
+		//	}
+		//}
 	}
 }
 
