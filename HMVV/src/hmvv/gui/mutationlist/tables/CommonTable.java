@@ -249,8 +249,6 @@ public abstract class CommonTable extends JTable{
 
 
 		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, parent);
-		//parent.setVisible(false);
-		//parent.setEnabled(false);
 		
 		editAnnotation.setVisible(true);
 		editAnnotation.toFront();
