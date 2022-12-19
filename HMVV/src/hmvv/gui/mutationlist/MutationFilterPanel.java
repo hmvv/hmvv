@@ -159,7 +159,7 @@ public class MutationFilterPanel extends JPanel {
 		mutationListFilters.addMaxOccurrenceFilter(occurenceFromTextField);
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
-		mutationListFilters.addVariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo);
+		mutationListFilters.addVariantAlleleFrequencyFilter(sample, textFreqFrom, textVarFreqTo);
 		mutationListFilters.addVariantPredicationClassFilter(predictionFilterComboBox);
 	}
 
@@ -265,7 +265,7 @@ public class MutationFilterPanel extends JPanel {
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);
 		selectAllCheckbox.setSelected(false);
-		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
+		textFreqFrom.setText(Configurations.getDefaultAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
 		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
 		occurenceFromTextField.setText(Configurations.MAX_OCCURENCE_FILTER+"");

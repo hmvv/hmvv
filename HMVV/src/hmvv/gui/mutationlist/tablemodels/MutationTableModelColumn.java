@@ -339,17 +339,17 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			(MutationSomatic mutation) -> mutation.getPmkb_tissue_type());
 
 
-	public static final MutationTableModelColumn VarScanVAF = new MutationTableModelColumn("TBD",
+	public static final MutationTableModelColumn VarScanVAF = new MutationTableModelColumn("Variant Allele Frequency reported by VarScan",
 			"VarScanVAF",
 			String.class,
 			(MutationSomatic mutation) -> mutation.getVarScanVAF());
 
-	public static final MutationTableModelColumn Mutect2VAF = new MutationTableModelColumn("TBD",
+	public static final MutationTableModelColumn Mutect2VAF = new MutationTableModelColumn("Variant Allele Frequency reported by Mutect2",
 			"Mutect2VAF",
 			String.class,
 			(MutationSomatic mutation) -> mutation.getMutect2VAF());
 
-	public static final MutationTableModelColumn freebayesVAF = new MutationTableModelColumn("TBD",
+	public static final MutationTableModelColumn freebayesVAF = new MutationTableModelColumn("Variant Allele Frequency reported by FreeBayes",
 			"freebayesVAF",
 			String.class,
 			(MutationSomatic mutation) -> mutation.getfreebayesVAF());

@@ -38,8 +38,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
-
-import java.awt.event.WindowListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 
@@ -113,20 +111,6 @@ public class SampleListFrame extends JPanel {
 	
 	public SampleListTableModel getSampleTabelModel() {
 		return this.tableModel;
-	}
-	
-	public WindowListener getListener(){
-		WindowListener listener = new WindowAdapter() {
-			public void windowClosed(WindowEvent evt) {
-				parent.setEnabled(true);
-				}
-			
-			public void windowClosing(WindowEvent evt) {
-				parent.setEnabled(true);
-				}
-
-			};
-		return listener;
 	}
 
 	public void addSample(Sample sample){
@@ -645,8 +629,15 @@ public class SampleListFrame extends JPanel {
 				MutationListFrame mutationListFrame = new MutationListFrame(parent, sample, get());
 				//mutationListFrame.setModal(true);
 				mutationListFrame.setVisible(true);
-				WindowListener listener = getListener();									
-				mutationListFrame.addWindowListener(listener); 
+				mutationListFrame.addWindowListener(new WindowAdapter() {
+					public void windowClosed(WindowEvent evt) {
+						parent.setEnabled(true);
+					}
+						
+					public void windowClosing(WindowEvent evt) {
+						parent.setEnabled(true);
+					}
+				}); 
 
 			} catch (Exception e) {
 				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error loading mutation data.");

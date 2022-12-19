@@ -11,6 +11,7 @@ import hmvv.main.Configurations;
 import hmvv.model.MutationCommon;
 import hmvv.model.MutationGermline;
 import hmvv.model.MutationSomatic;
+import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
 public class MutationListFilters {
@@ -89,8 +90,8 @@ public class MutationListFilters {
 		addFilter(new MinReadDepthFilter(minReadDepthTextField));
 	}
 	
-	public void addVariantAlleleFrequencyFilter(JTextField textFreqFrom, JTextField textVarFreqTo) {
-		addFilter(new VariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo));
+	public void addVariantAlleleFrequencyFilter(Sample sample, JTextField textFreqFrom, JTextField textVarFreqTo) {
+		addFilter(new VariantAlleleFrequencyFilter(sample, textFreqFrom, textVarFreqTo));
 	}
 
 
@@ -170,7 +171,7 @@ class MaxOccurrenceFilter implements Filter{
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		int maxOccurence = GUICommonTools.getNumber(maxOccurrenceTextField, Configurations.MAX_OCCURENCE_FILTER);
+		int maxOccurence = GUICommonTools.parseIntegerFromTextField(maxOccurrenceTextField, Configurations.MAX_OCCURENCE_FILTER);
 		if(mutation.getOccurrence() != null){
 			int occurrence = mutation.getOccurrence();
 			if(maxOccurence < occurrence){
@@ -194,7 +195,7 @@ class MinReadDepthFilter implements Filter{
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		int minReadDepth = GUICommonTools.getNumber(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
+		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
 		if(mutation.getReadDP() != null){
 			int readDepth = mutation.getReadDP();
 			if(minReadDepth > readDepth){
@@ -207,18 +208,20 @@ class MinReadDepthFilter implements Filter{
 
 class VariantAlleleFrequencyFilter implements Filter{
 
+	private Sample sample;
 	private JTextField frequencyFromTextField;
 	private JTextField frequencyToTextField;
 
-	public VariantAlleleFrequencyFilter(JTextField frequencyFromTextField, JTextField frequencyToTextField) {
+	public VariantAlleleFrequencyFilter(Sample sample, JTextField frequencyFromTextField, JTextField frequencyToTextField) {
+		this.sample = sample;
 		this.frequencyFromTextField = frequencyFromTextField;
 		this.frequencyToTextField = frequencyToTextField;
 	}
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		double frequencyFrom =  GUICommonTools.getHemeNumber(frequencyFromTextField, Configurations.HEME_ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
-		double frequencyTo = GUICommonTools.getHemeNumber(frequencyToTextField, Configurations.MAX_HEME_ALLELE_FREQ_FILTER);
+		double frequencyFrom =  GUICommonTools.parseDoubleFromTextField(frequencyFromTextField, Configurations.getDefaultAlleleFrequencyFilter(sample));
+		double frequencyTo = GUICommonTools.parseDoubleFromTextField(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
 
 		double variantFrequency = mutation.getAltFreq();
 		if(frequencyFrom > variantFrequency){
@@ -269,7 +272,7 @@ class MaxG1000FrequencyFilter implements Filter{
 
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
 
-		int maxPopulationFrequency = GUICommonTools.getNumber(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
 		if(current_mutation.getAltGlobalFreq() != null){
 			double populationFrequency = ((MutationSomatic)mutation).getAltGlobalFreq();
 			if(maxPopulationFrequency < populationFrequency){
@@ -293,7 +296,7 @@ class MaxGnomadFrequencyFilter implements Filter{
 
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
 
-		int maxPopulationFrequency = GUICommonTools.getNumber(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
 		if(current_mutation.getGnomad_allfreq() != null){
 			double populationFrequency = current_mutation.getGnomad_allfreq();
 			if(maxPopulationFrequency < populationFrequency){
@@ -317,7 +320,7 @@ class MinReadDepthGermlineFilter implements Filter{
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		int minReadDepth = GUICommonTools.getNumber(minReadDepthTextField, Configurations.GERMLINE_READ_DEPTH_FILTER);
+		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, Configurations.GERMLINE_READ_DEPTH_FILTER);
 		if(mutation.getReadDP() != null){
 			int readDepth = mutation.getReadDP();
 			if(minReadDepth > readDepth){
@@ -340,8 +343,8 @@ class VariantAlleleFrequencyGermlineFilter implements Filter{
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		int frequencyFrom =  GUICommonTools.getNumber(frequencyFromTextField, Configurations.GERMLINE_ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
-		int frequencyTo = GUICommonTools.getNumber(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
+		int frequencyFrom =  GUICommonTools.parseIntegerFromTextField(frequencyFromTextField, Configurations.GERMLINE_ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
+		int frequencyTo = GUICommonTools.parseIntegerFromTextField(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
 
 		double variantFrequency = mutation.getAltFreq();
 		if(frequencyFrom > variantFrequency){
@@ -369,7 +372,7 @@ class MaxGnomadFrequencyGermlineFilter implements Filter{
 
 		MutationGermline current_mutation = (MutationGermline)mutation;
 
-		int maxPopulationFrequency = GUICommonTools.getNumber(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
 		if(current_mutation.getGnomad_allfreq() != null){
 			double populationFrequency = current_mutation.getGnomad_allfreq();
 			if(maxPopulationFrequency < populationFrequency){

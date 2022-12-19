@@ -248,30 +248,42 @@ public class Configurations {
 	 */
 	public static String GENOME_VERSION = "37";
 	public static int RESTRICT_SAMPLE_DAYS = 60;
-	public static int MAX_ALLELE_FREQ_FILTER = 100;
-	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
 	public static int READ_DEPTH_FILTER = 100;
 	public static int COVERAGE_PERCENTAGE_100X = 90;
 	public static int COVERAGE_PERCENTAGE_250X = 90;
 	public static int MAX_OCCURENCE_FILTER = 1000000;
-	public static int ALLELE_FREQ_FILTER = 10;
-	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
-	public static double HEME_ALLELE_FREQ_FILTER = 0;
-	public static double MAX_HEME_ALLELE_FREQ_FILTER = 0;
+	public static int MAX_ALLELE_FREQ_FILTER = 100;
+	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
 	public static int GERMLINE_READ_DEPTH_FILTER = 10;
 	public static int GERMLINE_ALLELE_FREQ_FILTER = 15;
 	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
 
-	public static double getAlleleFrequencyFilter(Sample sample) {
+
+	/**
+	 * 
+	 * Somatic Panel Allele Frequency Setups
+	 * 
+	 */
+	public static double getDefaultAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){
+			double HORIZON_ALLELE_FREQ_FILTER = 1;
 			return HORIZON_ALLELE_FREQ_FILTER;
-		}
-			else if (sample.assay.toString().contains("heme")){
+
+		}else if (sample.assay.assayName.equals("heme")){
+			double HEME_ALLELE_FREQ_FILTER = 0;
 			return HEME_ALLELE_FREQ_FILTER;
+
+		}else if (sample.instrument.instrumentName.equals("proton")){
+			double PROTON_ALLELE_FREQ_FILTER = 10;
+			return PROTON_ALLELE_FREQ_FILTER;
+
+		}else if (sample.instrument.instrumentName.equals("pgm")){
+			double PGM_ALLELE_FREQ_FILTER = 10;
+			return PGM_ALLELE_FREQ_FILTER;
+
 		}
-		else {
-			return ALLELE_FREQ_FILTER;
-		}
+		double GLOBAL_ALLELE_FREQ_FILTER = 10;
+		return GLOBAL_ALLELE_FREQ_FILTER;
 	}
 	
 	/*

@@ -73,7 +73,7 @@ public class GUICommonTools {
 	    return bounds;
 	}	
 
-	public static int getNumber(JTextField field, Integer defaultInt){
+	public static int parseIntegerFromTextField(JTextField field, Integer defaultInt){
 		String value = field.getText();
 		Integer valueInt = null;
 		if(value.equals("")){
@@ -89,7 +89,7 @@ public class GUICommonTools {
 	}
 
 
-	public static double getHemeNumber(JTextField field, double defaultdouble){
+	public static double parseDoubleFromTextField(JTextField field, double defaultdouble){
 		String value = field.getText();
 		double valuedouble = 0.0;
 		if(value.equals("")){
