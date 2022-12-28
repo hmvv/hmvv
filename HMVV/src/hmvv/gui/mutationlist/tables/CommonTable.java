@@ -233,7 +233,7 @@ public abstract class CommonTable extends JTable{
 		MutationSomatic mutation = getSelectedMutation();
 		if(!mutation.cosmicIDsToString().equals("")){
 			try {
-				CosmicInfoPopup.handleCosmicClick(CommonTable.this, mutation);
+				CosmicInfoPopup.handleCosmicClick(parent, mutation);
 			} catch (Exception e) {
 				HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, "Error locating Cosmic Info.");
 			}

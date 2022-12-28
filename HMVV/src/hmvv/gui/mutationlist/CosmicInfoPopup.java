@@ -1,22 +1,16 @@
 package hmvv.gui.mutationlist;
-
-import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.Component;
 
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 
-import hmvv.gui.mutationlist.tables.CommonTable;
-import hmvv.io.DatabaseCommands_Mutations;
-import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
+import hmvv.main.HMVVFrame;
 import hmvv.model.CosmicID;
 import hmvv.model.MutationSomatic;
 
@@ -123,7 +117,7 @@ public class CosmicInfoPopup {
 		
 	}
 	
-	public static void handleCosmicClick(CommonTable parent, MutationSomatic mutation) throws Exception{
+	public static void handleCosmicClick(HMVVFrame parent, MutationSomatic mutation) throws Exception{
 		ArrayList<CosmicInfo> comsicInfoList = buildCosmicInfoList(mutation);
 		boolean cosmicIdMatch = getMatchedCosmicIdflag(mutation);
 		DefaultTableModel tableModel = new DefaultTableModel(){
@@ -246,36 +240,10 @@ public class CosmicInfoPopup {
 			}
 		};
 		table.setAutoCreateRowSorter(true);
-		
-		JScrollPane tableScrollPane = new JScrollPane(table);
-		tableScrollPane.setPreferredSize(new Dimension(1200,500));
 
-		String titleSelected;
-
-		if(cosmicIdMatch){
-			titleSelected = "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.";
-		}
-		else{
-			titleSelected =  "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.There were no matches for the COSMIC ID chosen";
-		}
-
-
-		CosmicInfoFrame CosmicInfoFrame = new CosmicInfoFrame(parent, tableScrollPane);
+		CosmicInfoFrame CosmicInfoFrame = new CosmicInfoFrame(parent, table, comsicInfoList, cosmicIdMatch);
 		CosmicInfoFrame.setVisible(true);
 
-
-
-//		int returnValue = JOptionPane.showConfirmDialog(parent, tableScrollPane,titleSelected, JOptionPane.YES_NO_OPTION);
-		
-		//if(returnValue == JOptionPane.OK_OPTION) {
-		//	for(CosmicInfo cosmicInfo : comsicInfoList){
-				
-		//		 if(cosmicInfo.openItem) {
-		//			String MutationURL = DatabaseCommands_Mutations.getMutationURL(cosmicInfo.cosmicID);
-		//		 	InternetCommands.searchCosmic(MutationURL);
-		//		 }
-		//	}
-		//}
 	}
 }
 
