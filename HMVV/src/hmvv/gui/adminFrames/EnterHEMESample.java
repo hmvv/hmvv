@@ -111,7 +111,7 @@ public class EnterHEMESample extends JDialog {
 
         JLabel sampleListLabel = new JLabel();
         sampleListLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-        Dimension textAreaDimension = new Dimension(270, 150);
+        Dimension textAreaDimension = new Dimension(260, 250);
         JScrollPane textNoteScroll = new JScrollPane(sampleListTextArea);
         textNoteScroll.setPreferredSize(textAreaDimension);
         leftPanel.add(sampleListLabel);
