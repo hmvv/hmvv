@@ -29,7 +29,7 @@ public class DatabaseCommands_Samples {
 		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
 		Connection temp_databaseConnection = DriverManager.getConnection(url+Configurations.BCL2FASTQ_DATABASE_NAME+"?noAccessToProcedureBodies=true", credentials[0], credentials[1]);
 
-		String enterBcl2fastq = "insert into pipelineStatusBcl2Fastq (instrument, runFolder, enteredBy) values (?, ?, ?) on duplicate key update runFolder = ? ";
+		String enterBcl2fastq = "insert into bcl_convert_status (instrument, runFolder, enteredBy) values (?, ?, ?) on duplicate key update runFolder = ? ";
 		PreparedStatement pstEnterSample = temp_databaseConnection.prepareStatement(enterBcl2fastq);
 		pstEnterSample.setString(1, instrument.instrumentName);
 		pstEnterSample.setString(2, runFolder.runFolderName);
