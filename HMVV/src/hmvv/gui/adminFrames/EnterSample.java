@@ -708,7 +708,8 @@ public class EnterSample extends JDialog {
                 String result = JOptionPane.showInputDialog(this, "<html><br>The Medical Record Numbers (MRN) for the selected samples do not match.<br><br>To proceed type CONFIRM and click OK<br><br></html>", "MRN Mismatch", JOptionPane.QUESTION_MESSAGE);
                 if(result == null) {
                     return null;
-                }else if((!result.equals("CONFIRM"))) {
+                }else if((!result.toUpperCase().equals("CONFIRM"))) {
+                    JOptionPane.showMessageDialog(this, "<html><br>CONFIRM keyword was not entered correctly.<br>The sample was not added.</html>");
                     return null;
                 }
             }
