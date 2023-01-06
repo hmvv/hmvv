@@ -276,6 +276,10 @@ public class EnterSample extends JDialog {
                             try {
                                 enterData();
                                 btnEnterSample.setText("Completed");
+                            } catch (IllegalArgumentException e) {
+                                JOptionPane.showMessageDialog(EnterSample.this, e.getMessage());
+                                btnEnterSample.setText("Enter Sample");
+                                btnEnterSample.setEnabled(true);
                             } catch (Exception e) {
                                 HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error entering sample data");
                                 btnEnterSample.setText("Enter Sample");
@@ -466,6 +470,7 @@ public class EnterSample extends JDialog {
             } else if(isTMBNormal && currentSample.endsWith("-N") ){
                 textTMBNormalRunFolder.setText(runFolder.runFolderName);
                 combobox.addItem(currentSample);
+                combobox.setSelectedItem(null);
             }
         }
     }
@@ -687,11 +692,30 @@ public class EnterSample extends JDialog {
 
         RunFolder runFolder = new RunFolder(textRunFolder.getText());
         if (assay.assayName.equals("tmb")){
+            if(comboBoxSample.getSelectedItem() == null){
+                throw new IllegalArgumentException("Tumor sample cannot be null.");
+            }
+            if(comboBoxTMBNormalSample.getSelectedItem() == null){
+                throw new IllegalArgumentException("Normal sample cannot be null.");
+            }
 
             if(comboBoxTMBNormalSample.getSelectedItem().toString().equals(comboBoxSample.getSelectedItem().toString()) &&
                 textRunID.getText().equals(textTMBNormalRunID.getText())) {
+                throw new IllegalArgumentException("Tumor and Normal sample CANNOT be the same sample.");
+            }
+            
+            String tumor = sampleName.replaceAll("-T$", "");
+            String normal = comboBoxTMBNormalSample.getSelectedItem().toString().replaceAll("-N$", "");
 
-                throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
+            String[] tumor_lisValues = LISConnection.runLISIntegration(assay, tumor, sampleName);
+            String tumor_mrn = tumor_lisValues[2];
+
+            String[] normal_lisValues = LISConnection.runLISIntegration(assay, normal, sampleName);
+            String normal_mrn = normal_lisValues[2];
+
+            if(!mrn.equals(tumor_mrn) || !mrn.equals(normal_mrn)){
+                throw new IllegalArgumentException("The Medical Record Numbers (MRN) for the selected samples do not match.");
+                //TODO ask user if they wish to proceed
             }
 
             // TODO  replace comboBoxInstrument with normal sample instrument in future
