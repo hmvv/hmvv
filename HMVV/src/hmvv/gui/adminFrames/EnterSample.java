@@ -646,6 +646,7 @@ public class EnterSample extends JDialog {
         try {
             Sample sample = constructSampleFromTextFields();
             DatabaseCommands.insertDataIntoDatabase(sample);
+            DatabaseCommands.insertbcl2fastqIntoDatabase(sample.instrument, sample.runFolder);
             sampleListFrame.addSample(sample);
 
             //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
