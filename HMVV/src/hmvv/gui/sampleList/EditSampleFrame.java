@@ -116,7 +116,7 @@ public class EditSampleFrame extends JDialog {
 		activateComponents();
 		pack();
 		setLocationRelativeTo(parent);
-		setResizable(false);
+		setResizable(true);
 	}
 	
 	private Dimension labelDimension = new Dimension(120,20);

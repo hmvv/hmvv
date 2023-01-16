@@ -645,13 +645,18 @@ public class EnterSample extends JDialog {
         setEnabled(false);
         try {
             Sample sample = constructSampleFromTextFields();
-            DatabaseCommands.insertDataIntoDatabase(sample);
-            //DatabaseCommands.insertbcl2fastqIntoDatabase(sample.instrument, sample.runFolder);
-            sampleListFrame.addSample(sample);
-
-            //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
-            updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
-            updateSamplePanel(false,comboBoxAssay.getSelectedItem().toString());
+            
+            if(sample == null){
+                btnEnterSample.setText("Enter Sample");
+                btnEnterSample.setEnabled(true); 
+            }else{
+                DatabaseCommands.insertDataIntoDatabase(sample);
+                //DatabaseCommands.insertbcl2fastqIntoDatabase(sample.instrument, sample.runFolder);
+                sampleListFrame.addSample(sample);
+                //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
+                updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
+                updateSamplePanel(false,comboBoxAssay.getSelectedItem().toString());
+            }
         }finally {
             setEnabled(true);
         }
@@ -659,7 +664,7 @@ public class EnterSample extends JDialog {
 
     private Sample constructSampleFromTextFields() throws Exception{
         if ( textlastName.getText().equals("") || textFirstName.getText().equals("") ){
-            throw new Exception("First Name and Last Name are required");
+            throw new IllegalArgumentException("First Name and Last Name are required");
         }
 
         int sampleID = -1;//This will be computed by the database when the sample is inserted
@@ -691,6 +696,8 @@ public class EnterSample extends JDialog {
         String enteredBy = SSHConnection.getUserName();
 
         RunFolder runFolder = new RunFolder(textRunFolder.getText());
+        RunFolder tmbNormalRunFolder = new RunFolder(textTMBNormalRunFolder.getText());
+
         if (assay.assayName.equals("tmb")){
             if(comboBoxSample.getSelectedItem() == null){
                 throw new IllegalArgumentException("Tumor sample cannot be null.");
@@ -703,7 +710,9 @@ public class EnterSample extends JDialog {
                 textRunID.getText().equals(textTMBNormalRunID.getText())) {
                 throw new IllegalArgumentException("Tumor and Normal sample CANNOT be the same sample.");
             }
+
             
+
             String tumor = sampleName.replaceAll("-T$", "");
             String normal = comboBoxTMBNormalSample.getSelectedItem().toString().replaceAll("-N$", "");
 
@@ -714,12 +723,16 @@ public class EnterSample extends JDialog {
             String normal_mrn = normal_lisValues[2];
 
             if(!mrn.equals(tumor_mrn) || !mrn.equals(normal_mrn)){
-                throw new IllegalArgumentException("The Medical Record Numbers (MRN) for the selected samples do not match.");
-                //TODO ask user if they wish to proceed
+                //throw new IllegalArgumentException("The Medical Record Numbers (MRN) for the selected samples do not match.");
+                String result = JOptionPane.showInputDialog(this, "<html><br>The Medical Record Numbers (MRN) for the selected samples do not match.<br><br>To proceed type CONFIRM and click OK<br><br></html>", "MRN Mismatch", JOptionPane.QUESTION_MESSAGE);
+                if(result == null) {
+                    return null;
+                }else if((!result.toUpperCase().equals("CONFIRM"))) {
+                    JOptionPane.showMessageDialog(this, "<html><br>CONFIRM keyword was not entered correctly.<br>The sample was not added.</html>");
+                    return null;
+                }
             }
-
             // TODO  replace comboBoxInstrument with normal sample instrument in future
-            RunFolder tmbNormalRunFolder = new RunFolder(textTMBNormalRunFolder.getText());
             return new TMBSample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
                     runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
