@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.Configurations;
 
 public class Pipeline {
 	
@@ -94,7 +95,7 @@ public class Pipeline {
 			ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
 			rows = DatabaseCommands.getPipelineDetail(this);
 			for (PipelineStatus ps : rows) {
-				if (ps.pipelineStatus.equals("queued")){
+				if (ps.pipelineStatus.equals(Configurations.getPipelineFirstStep(ps.instrument))){
 					pipelineStartTime = ps.dateUpdated;
 				}
 			}

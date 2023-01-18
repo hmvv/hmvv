@@ -286,6 +286,17 @@ public class Configurations {
 		return GLOBAL_ALLELE_FREQ_FILTER;
 	}
 	
+
+	public static String getPipelineFirstStep(String pipeline_instrument){
+		if(pipeline_instrument.equals("proton")){
+			return "queue";
+		}
+		else{
+			return "trimming started";
+		}
+	}
+
+
 	/*
 	 * SSH server configurations
 	 */
