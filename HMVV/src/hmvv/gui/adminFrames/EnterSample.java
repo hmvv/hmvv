@@ -263,8 +263,11 @@ public class EnterSample extends JDialog {
                             btnEnterSample.setEnabled(false);
                             try {
                                 enterData();
-                                btnEnterSample.setText("Completed");
-                            } catch (Exception e) {
+                            }catch (IllegalArgumentException e) {
+                                JOptionPane.showMessageDialog(EnterSample.this, e.getMessage());
+                                btnEnterSample.setText("Enter Sample");
+                                btnEnterSample.setEnabled(true); 
+                            }catch (Exception e) {
                                 HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterSample.this, e, "Error entering sample data");
                                 btnEnterSample.setText("Enter Sample");
                                 btnEnterSample.setEnabled(true);
@@ -447,6 +450,7 @@ public class EnterSample extends JDialog {
                 combobox.addItem(currentSample);
             } else if(isTMBNormal && currentSample.endsWith("-N") ){
                 combobox.addItem(currentSample);
+                combobox.setSelectedItem(null);
             }
         }
     }
@@ -633,12 +637,18 @@ public class EnterSample extends JDialog {
         setEnabled(false);
         try {
             Sample sample = constructSampleFromTextFields();
-            DatabaseCommands.insertDataIntoDatabase(sample);
-            parent.addSample(sample);
-
-            //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
-            updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
-            updateSamplePanel(false,comboBoxAssay.getSelectedItem().toString());
+            if(sample == null){
+                btnEnterSample.setText("Enter Sample");
+                btnEnterSample.setEnabled(true); 
+            }else{
+                DatabaseCommands.insertDataIntoDatabase(sample);
+                parent.addSample(sample);
+                //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
+                updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
+                updateSamplePanel(false,comboBoxAssay.getSelectedItem().toString());
+                btnEnterSample.setText("Completed");
+                btnEnterSample.setEnabled(false); 
+            }
         }finally {
             setEnabled(true);
         }
@@ -646,7 +656,7 @@ public class EnterSample extends JDialog {
 
     private Sample constructSampleFromTextFields() throws Exception{
         if ( textlastName.getText().equals("") || textFirstName.getText().equals("") ){
-            throw new Exception("First Name and Last Name are required");
+            throw new IllegalArgumentException("First Name and Last Name are required");
         }
 
         int sampleID = -1;//This will be computed by the database when the sample is inserted
@@ -678,17 +688,39 @@ public class EnterSample extends JDialog {
         String enteredBy = SSHConnection.getUserName();
 
         if (assay.equals("tmb")){
-
+            if(comboBoxSample.getSelectedItem() == null){
+                throw new IllegalArgumentException("Tumor sample cannot be null.");
+            }
+            if(comboBoxTMBNormalSample.getSelectedItem() == null){
+                throw new IllegalArgumentException("Normal sample cannot be null.");
+            }
             if(comboBoxTMBNormalSample.getSelectedItem().toString().equals(comboBoxSample.getSelectedItem().toString()) &&
                 textRunID.getText().equals(textTMBNormalRunID.getText())) {
-
-                throw new Exception("Tumor and Normal sample CANNOT be the same sample.");
+                throw new IllegalArgumentException("Tumor and Normal sample CANNOT be the same sample.");
             }
-             // TODO  replace comboBoxInstrument with normal sample instrument in future
+            
+            String tumor = sampleName.replaceAll("-T$", "");
+            String normal = comboBoxTMBNormalSample.getSelectedItem().toString().replaceAll("-N$", "");
+
+            String[] tumor_lisValues = LISConnection.runLISIntegration(assay, tumor, sampleName);
+            String tumor_mrn = tumor_lisValues[2];
+
+            String[] normal_lisValues = LISConnection.runLISIntegration(assay, normal, sampleName);
+            String normal_mrn = normal_lisValues[2];
+
+            if(!mrn.equals(tumor_mrn) || !mrn.equals(normal_mrn)){
+                String result = JOptionPane.showInputDialog(this, "<html><br>The Medical Record Numbers (MRN) for the selected samples do not match.<br><br>To proceed type CONFIRM and click OK<br><br></html>", "MRN Mismatch", JOptionPane.QUESTION_MESSAGE);
+                if(result == null) {
+                    return null;
+                }else if((!result.toUpperCase().equals("CONFIRM"))) {
+                    JOptionPane.showMessageDialog(this, "<html><br>CONFIRM keyword was not entered correctly.<br>The sample was not added.</html>");
+                    return null;
+                }
+            }
             return new TMBSample(sampleID, assay, instrument, mrn, lastName, firstName, orderNumber,
-                    pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
-                    runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
-                    textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
+                pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
+                runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
+                textTMBNormalRunID.getText(),comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{
             return new Sample(sampleID, assay, instrument, mrn, lastName, firstName, orderNumber,
