@@ -171,6 +171,22 @@ public class SSHConnection {
 		}
 		return variantCallerResult.responseLines;
 	}
+
+	public static boolean checkProtonCopyComplete(String instrument, String runID) throws Exception {
+		String checkCommand = String.format("ls /storage/instruments/%s/*_%s/CopyComplete.txt ", instrument, runID);
+		CommandResponse rs = SSHConnection.executeCommandAndGetOutput(checkCommand);
+
+		if (rs.exitStatus != 0) {
+			throw new Exception(String.format("Data transfer is in progress. Please try again later."));
+		}
+		boolean status = false;
+		for (String line : rs.responseLines) {
+			if (line.contains("CopyComplete")) {
+				status = true;
+			}
+		}
+		return status;
+	}
 	
 	public static ArrayList<String> getSampleListIon(String instrument, String runID, String variantCallerID) throws Exception {
 		String sampleListCommand = String.format("ls /storage/instruments/%s/*_%s/plugin_out/%s/ -F | grep / | grep Ion", instrument, runID, variantCallerID);

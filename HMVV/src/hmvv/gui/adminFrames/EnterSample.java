@@ -416,9 +416,13 @@ public class EnterSample extends JDialog {
     }
 
     private void findRunIon(String instrument, String runID) throws Exception {
-        ArrayList<String> coverageIDList = SSHConnection.getCandidateCoverageIDs(instrument, runID);
-        ArrayList<String> variantCallerIDList = SSHConnection.getCandidateVariantCallerIDs(instrument, runID);
-        fillComboBoxes(coverageIDList, variantCallerIDList);
+        if (SSHConnection.checkProtonCopyComplete(instrument,runID)) {
+            ArrayList<String> coverageIDList = SSHConnection.getCandidateCoverageIDs(instrument, runID);
+            ArrayList<String> variantCallerIDList = SSHConnection.getCandidateVariantCallerIDs(instrument, runID);
+            fillComboBoxes(coverageIDList, variantCallerIDList);
+        }else{
+            JOptionPane.showMessageDialog(EnterSample.this, "Please try again when the run is complete.");
+        }
 
     }
 
