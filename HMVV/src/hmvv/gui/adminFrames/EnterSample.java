@@ -275,7 +275,7 @@ public class EnterSample extends JDialog {
                             btnEnterSample.setEnabled(false);
                             try {
                                 enterData();
-                                btnEnterSample.setText("Completed");
+                                
                             } catch (IllegalArgumentException e) {
                                 JOptionPane.showMessageDialog(EnterSample.this, e.getMessage());
                                 btnEnterSample.setText("Enter Sample");
@@ -656,6 +656,7 @@ public class EnterSample extends JDialog {
                 //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
                 updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
                 updateSamplePanel(false,comboBoxAssay.getSelectedItem().toString());
+                btnEnterSample.setText("Completed");
             }
         }finally {
             setEnabled(true);
