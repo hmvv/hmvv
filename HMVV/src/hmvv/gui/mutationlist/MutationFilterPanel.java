@@ -34,8 +34,12 @@ public class MutationFilterPanel extends JPanel {
 	private JTextField occurenceFromTextField;
 	private JTextField maxPopulationFrequencyG1000TextField;
 	private JTextField maxPopulationFrequencyGnomadTextField;
+	private JTextField variantCallerTextField;
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
-	
+
+	private JButton variantCallerButton1;
+	private JButton variantCallerButton2;
+
 	private Sample sample;
     private MutationListFrame parent;
 	private MutationList mutationList;
@@ -78,6 +82,7 @@ public class MutationFilterPanel extends JPanel {
 				handleSelectAllClick(selectAllCheckbox.isSelected());
 			}
 		});
+
 		
 		loadIGVButton = new LoadFileButton("Load IGV");
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
@@ -105,8 +110,36 @@ public class MutationFilterPanel extends JPanel {
         resetButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 resetFilters();
-            }
+            }			
         });
+
+
+		variantCallerButton1 = new JButton("3");
+        variantCallerButton1.setToolTipText("Choose only 3 Variant calls");
+        variantCallerButton1.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		variantCallerButton2 = new JButton("2+");
+        variantCallerButton2.setToolTipText("Choose only 2 Variant calls");
+        variantCallerButton2.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		variantCallerButton2.setEnabled(false);
+		variantCallerButton1.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				variantCallerTextField.setText(Configurations.MAX_VARIANT_CALLERS_COUNT);
+				variantCallerButton2.setEnabled(true);
+				variantCallerButton1.setEnabled(false);
+				
+			}
+		});
+
+		variantCallerButton2.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				variantCallerTextField.setText(Configurations.MIN_VARIANT_CALLERS_COUNT);
+				variantCallerButton1.setEnabled(true);
+				variantCallerButton2.setEnabled(false);
+				
+			}
+		});
+
+
 
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
@@ -145,6 +178,10 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyGnomadTextField.getDocument().addDocumentListener(documentListener);
 		maxPopulationFrequencyGnomadTextField.setColumns(textFieldColumnWidth);
 
+		variantCallerTextField = new JTextField();
+		variantCallerTextField.getDocument().addDocumentListener(documentListener);
+		variantCallerTextField.setColumns(textFieldColumnWidth);
+
 		predictionFilterComboBox = new JComboBox<VariantPredictionClass>(VariantPredictionClass.getAllClassifications());
 		predictionFilterComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -161,6 +198,7 @@ public class MutationFilterPanel extends JPanel {
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
 		mutationListFilters.addVariantAlleleFrequencyFilter(sample, textFreqFrom, textVarFreqTo);
 		mutationListFilters.addVariantPredicationClassFilter(predictionFilterComboBox);
+		mutationListFilters.addvariantCallerFilter(variantCallerTextField);
 	}
 
 	private void layoutComponents() {
@@ -248,6 +286,16 @@ public class MutationFilterPanel extends JPanel {
         predictionFilterPanel.add(predictionFilterComponentsPanel);
         vepPanel.add(predictionFilterPanel);
 
+
+		JLabel variantCallerLabel = new JLabel("Variant Callers: ");
+        variantCallerLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		JPanel variantCallerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        variantCallerPanel.add(variantCallerLabel);
+        variantCallerPanel.add(variantCallerLabel);
+		variantCallerPanel.add(variantCallerButton1);
+		variantCallerPanel.add(variantCallerButton2);
+        vepPanel.add(variantCallerPanel);
+
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
 		
@@ -272,6 +320,7 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
+		variantCallerTextField.setText(Configurations.MIN_VARIANT_CALLERS_COUNT);
 		applyRowFilters();
 		handleSelectAllClick(false);
 	}
@@ -288,6 +337,7 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.setEditable(false);
 		maxPopulationFrequencyGnomadTextField.setEditable(false);
 		predictionFilterComboBox.setEnabled(false);
+		variantCallerTextField.setEditable(false);
         resetButton.setEnabled(false);
 	}
 
@@ -303,6 +353,8 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.setEditable(true);
 		maxPopulationFrequencyGnomadTextField.setEditable(true);
 		predictionFilterComboBox.setEnabled(true);
+		variantCallerTextField.setEditable(true);
+
         resetButton.setEnabled(true);
 	}
 	

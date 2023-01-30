@@ -14,6 +14,7 @@ import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
+
 public class MutationListFilters {
 	
 	private ArrayList<Filter> filters;
@@ -82,6 +83,10 @@ public class MutationListFilters {
 		addFilter(new MaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField));
 	}
 	
+	public void addvariantCallerFilter(JTextField variantCallerTextField) {
+		addFilter(new VariantCallerFilter(variantCallerTextField));
+	}
+
 	public void addMaxGnomadFrequencyFilter(JTextField maxPopulationFrequencyGnomadTextField) {
 		addFilter(new MaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField));
 	}
@@ -422,5 +427,32 @@ class SynonymousFlagGermlineFilter implements Filter{
 			return true;
 		}
 		return false;
+	}
+}
+
+class VariantCallerFilter implements Filter{
+
+	private JTextField variantCallerTextField;
+	
+	public VariantCallerFilter(JTextField variantCallerTextField) {
+		this.variantCallerTextField = variantCallerTextField;
+	}
+	
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+		int variantCaller = GUICommonTools.parseIntegerFromTextField(variantCallerTextField, Integer.parseInt(Configurations.MIN_VARIANT_CALLERS_COUNT));
+
+		int VarScanVAF = current_mutation.getVarScanVAF() != null ? 1 : 0;
+		int Mutect2VAF = current_mutation.getMutect2VAF() != null ? 1 : 0;
+		int freebayesVAF = current_mutation.getfreebayesVAF() != null ? 1 : 0;
+
+  		if (VarScanVAF+freebayesVAF+Mutect2VAF < variantCaller){
+			return true;
+		}
+		return false;
+		//false is added
+		
 	}
 }
