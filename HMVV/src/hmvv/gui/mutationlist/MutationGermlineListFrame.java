@@ -78,7 +78,7 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 	private volatile boolean isWindowClosed;
 
 	public MutationGermlineListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
-		super();
+		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
 		setTitle(title);
@@ -99,7 +99,6 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 		setMinimumSize(new Dimension(700, getHeight()/3));
 
 		setLocationRelativeTo(parent);
-		setAlwaysOnTop(false);
 
 		isWindowClosed = false;
 		addWindowListener(new WindowAdapter(){

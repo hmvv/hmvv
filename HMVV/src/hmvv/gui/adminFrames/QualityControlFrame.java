@@ -42,7 +42,7 @@ public class QualityControlFrame extends JDialog{
 	private HashMap<String, Color> seriesColors;
 	
 	public QualityControlFrame(HMVVFrame parent, TreeMap<String, GeneQCDataElementTrend> qualityControlTrends, String jframeTitle, String chartTitle, String xAxis, String yAxis) {
-		super(parent, "HMVV QC Chart - " + jframeTitle);
+		super(parent, "HMVV QC Chart - " + jframeTitle, ModalityType.APPLICATION_MODAL);
 		this.qualityControlTrends = qualityControlTrends;
 		this.chartTitle = chartTitle;
 		this.xAxis = xAxis;
@@ -53,7 +53,6 @@ public class QualityControlFrame extends JDialog{
 		setSize((int)(bounds.width*.6), (int)(bounds.height*.5));
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setModalityType(ModalityType.APPLICATION_MODAL);
 
 		createComponents();
 		layoutComponents();

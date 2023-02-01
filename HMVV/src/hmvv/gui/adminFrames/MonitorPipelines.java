@@ -37,7 +37,7 @@ public class MonitorPipelines extends JDialog {
 	 * @throws Exception 
 	 */
 	public MonitorPipelines(HMVVFrame parent) throws Exception {
-		super(parent, "Monitor Pipelines");
+		super(parent, "Monitor Pipelines", ModalityType.APPLICATION_MODAL);
 
 		tableModel = new MonitorPipelinesTableModel();
 
@@ -45,7 +45,6 @@ public class MonitorPipelines extends JDialog {
 		setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setModalityType(ModalityType.APPLICATION_MODAL);
 
 		createComponents();
 		layoutComponents();

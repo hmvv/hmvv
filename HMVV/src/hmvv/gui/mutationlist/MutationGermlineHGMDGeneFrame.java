@@ -35,7 +35,7 @@ public class MutationGermlineHGMDGeneFrame extends JDialog {
 	private TableRowSorter<GermlineHGMDGeneLevelMutationsTableModel> mutationsSorter;
 
 	public MutationGermlineHGMDGeneFrame(JDialog parent, MutationGermline mutation) throws Exception {
-		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Annotation Draft";
 		setTitle(title);
 
@@ -51,8 +51,6 @@ public class MutationGermlineHGMDGeneFrame extends JDialog {
 		setMinimumSize(new Dimension(500, getHeight()/2));
 
 		setLocationRelativeTo(parent);
-		setAlwaysOnTop(false);
-
 	}
 
 	

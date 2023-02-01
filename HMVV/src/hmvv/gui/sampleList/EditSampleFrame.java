@@ -42,7 +42,7 @@ public class EditSampleFrame extends JDialog {
 	 * Create the frame.
 	 */
 	public EditSampleFrame(HMVVFrame parent, Sample sample) {
-		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Edit Sample";
 		setTitle(title);
 		this.sample = sample;

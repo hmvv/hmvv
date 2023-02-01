@@ -24,7 +24,7 @@ public class AnnotationDraftFrame extends JDialog {
     private AnnotationFrame parent;
     
     public AnnotationDraftFrame(AnnotationFrame parent, MutationCommon mutation) throws HeadlessException {
-        super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+        super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Annotation Draft";
 		setTitle(title);
         

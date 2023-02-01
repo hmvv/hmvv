@@ -55,7 +55,7 @@ public class AnnotationFrame extends JDialog {
 	 * @throws Exception
 	 */
 	public AnnotationFrame(JDialog parent, MutationCommon mutation, ArrayList<GeneAnnotation> geneAnnotationHistory) throws Exception {
-		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString();
 		setTitle(title);
 		this.mutation = mutation;

@@ -7,8 +7,6 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Date;
 
-import java.awt.*;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -49,7 +47,7 @@ public class SampleSearchFrame extends JDialog {
 	 * Create the dialog.
 	 */
 	public SampleSearchFrame(HMVVFrame parent) {
-		super(parent, "Sample Search", Dialog.ModalityType.APPLICATION_MODAL);
+		super(parent, "Sample Search", ModalityType.APPLICATION_MODAL);
 		JPanel contentPanel = new JPanel();
 		
 		setBounds(100, 100, 438, 348);

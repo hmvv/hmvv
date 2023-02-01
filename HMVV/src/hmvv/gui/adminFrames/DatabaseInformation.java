@@ -23,7 +23,7 @@ public class DatabaseInformation extends JDialog {
     private ArrayList<Database> databases;
 
     public DatabaseInformation(HMVVFrame parent) throws Exception {
-        super(parent, "Database Information");
+        super(parent, "Database Information", ModalityType.APPLICATION_MODAL);
 
         tableModel = new DatabaseInformationTableModel();
         databases = new ArrayList<Database>();
@@ -32,7 +32,6 @@ public class DatabaseInformation extends JDialog {
         setSize((int)(bounds.width*.80), (int)(bounds.height*.30));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setModalityType(ModalityType.APPLICATION_MODAL);
 
         createComponents();
         layoutComponents();

@@ -22,7 +22,7 @@ public class TumorMutationBurdenQCFrame extends JDialog {
     private Rectangle bounds;
 
     public TumorMutationBurdenQCFrame(HMVVFrame parent, TMBSample sample) throws Exception{
-        super(parent, "Title Set Later");
+        super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
         String title = "TMB Quality Control - " + sample.getLastName() + "," + sample.getFirstName() +
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
@@ -31,7 +31,6 @@ public class TumorMutationBurdenQCFrame extends JDialog {
         this.bounds = GUICommonTools.getBounds(parent);
         setSize((int)(bounds.width*.6), (int)(bounds.height*.6));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         setResizable(false);
 
         createComponents();

@@ -47,7 +47,7 @@ public class ViewAmpliconFrame extends JDialog {
 
 
 	public ViewAmpliconFrame(HMVVFrame parent, Sample sample) throws Exception{
-        super(parent, "Sample Amplicons");
+        super(parent, "Sample Amplicons", ModalityType.APPLICATION_MODAL);
         this.parent = parent;
 		this.sample = sample;
 
@@ -57,7 +57,6 @@ public class ViewAmpliconFrame extends JDialog {
         setSize((int)(bounds.width*.90), (int)(bounds.height*.90));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 
         createComponents();
         layoutComponents();

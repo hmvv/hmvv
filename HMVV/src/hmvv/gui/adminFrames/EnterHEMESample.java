@@ -41,7 +41,7 @@ public class EnterHEMESample extends JDialog {
     private ArrayList<String> samples = new ArrayList<String>();
 
     public EnterHEMESample(HMVVFrame parent, SampleListFrame sampleListFrame) {
-        super(parent, "Enter HEME Sample");
+        super(parent, "Enter HEME Sample", ModalityType.APPLICATION_MODAL);
         this.sampleListFrame = sampleListFrame;
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -51,8 +51,6 @@ public class EnterHEMESample extends JDialog {
         activateComponents();
 
         pack();
-        setModalityType(ModalityType.APPLICATION_MODAL);
-        setAlwaysOnTop(true);
         setResizable(false);
         setLocationRelativeTo(parent);
     }

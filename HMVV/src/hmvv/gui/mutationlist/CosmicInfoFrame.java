@@ -26,7 +26,7 @@ public class CosmicInfoFrame extends JDialog {
     private Boolean cosmicIdMatch;
     
     public CosmicInfoFrame(JDialog parent, JTable table, ArrayList<CosmicInfo> comsicInfoList, Boolean cosmicIdMatch) throws HeadlessException {
-        super(parent, "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.", Dialog.ModalityType.APPLICATION_MODAL);
+        super(parent, "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.", ModalityType.APPLICATION_MODAL);
         this.table = table;
         this.comsicInfoList = comsicInfoList;
         this.cosmicIdMatch = cosmicIdMatch;

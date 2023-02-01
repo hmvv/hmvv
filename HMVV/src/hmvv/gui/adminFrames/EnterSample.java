@@ -61,7 +61,7 @@ public class EnterSample extends JDialog {
     private Thread enterSampleThread;
 
     public EnterSample(HMVVFrame parent, SampleListFrame sampleListFrame) {
-        super(parent, "Enter Sample");
+        super(parent, "Enter Sample", ModalityType.APPLICATION_MODAL);
         this.sampleListFrame = sampleListFrame;
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -73,8 +73,6 @@ public class EnterSample extends JDialog {
         clearAndDisableSampleRecords();
 
         pack();
-        setModalityType(ModalityType.APPLICATION_MODAL);
-        setAlwaysOnTop(true);
         setResizable(false);
         setLocationRelativeTo(parent);
     }

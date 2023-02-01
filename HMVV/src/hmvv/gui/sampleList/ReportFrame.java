@@ -33,7 +33,7 @@ public abstract class ReportFrame extends JDialog {
 	 * Create the frame.
 	 */
 	public ReportFrame(JDialog parent, String title) {
-		super(parent, title);
+		super(parent, title, ModalityType.APPLICATION_MODAL);
 		this.parent = parent;
 	}
 	
@@ -43,7 +43,6 @@ public abstract class ReportFrame extends JDialog {
 		
 		setLocationRelativeTo(parent);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setAlwaysOnTop(true);	
 		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(15, 15, 15, 15));

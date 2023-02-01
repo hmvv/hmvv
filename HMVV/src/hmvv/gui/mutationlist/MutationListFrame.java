@@ -89,7 +89,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private volatile boolean isWindowClosed;
 		
 	public MutationListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
-		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
 		setTitle(title);

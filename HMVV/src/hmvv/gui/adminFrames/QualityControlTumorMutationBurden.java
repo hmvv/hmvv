@@ -21,7 +21,7 @@ public class QualityControlTumorMutationBurden extends JDialog {
 
 
     public QualityControlTumorMutationBurden(HMVVFrame parent) throws Exception {
-        super (parent,"TumorMutationBurden Dashboard");
+        super (parent,"TumorMutationBurden Dashboard", ModalityType.APPLICATION_MODAL);
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
         setSize((int)(bounds.width*.6), (int)(bounds.height*.6));
@@ -30,7 +30,6 @@ public class QualityControlTumorMutationBurden extends JDialog {
         this.image_width = (int)(bounds.width*.5);
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 
         createComponents();
         layoutComponents();
