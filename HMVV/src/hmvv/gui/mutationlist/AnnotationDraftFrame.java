@@ -12,7 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class AnnotationDraftFrame extends JFrame {
+public class AnnotationDraftFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,9 +21,13 @@ public class AnnotationDraftFrame extends JFrame {
     private JButton saveButton;
     
     private MutationCommon mutation;
-    private JFrame parent;
+    private AnnotationFrame parent;
     
-    public AnnotationDraftFrame( JFrame parent, MutationCommon mutation) throws HeadlessException {
+    public AnnotationDraftFrame(AnnotationFrame parent, MutationCommon mutation) throws HeadlessException {
+        super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		String title = "Annotation Draft";
+		setTitle(title);
+        
         this.parent = parent;
         this.mutation = mutation;
         

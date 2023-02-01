@@ -7,9 +7,11 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.Date;
 
+import java.awt.*;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -24,11 +26,12 @@ import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Assay;
 import hmvv.model.Sample;
 
 
-public class SampleSearchFrame extends JFrame {
+public class SampleSearchFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	private JTextField textOrderNumber;
@@ -45,8 +48,8 @@ public class SampleSearchFrame extends JFrame {
 	/**
 	 * Create the dialog.
 	 */
-	public SampleSearchFrame(SampleListFrame parent) {
-		super("Sample Search");
+	public SampleSearchFrame(HMVVFrame parent) {
+		super(parent, "Sample Search", Dialog.ModalityType.APPLICATION_MODAL);
 		JPanel contentPanel = new JPanel();
 		
 		setBounds(100, 100, 438, 348);

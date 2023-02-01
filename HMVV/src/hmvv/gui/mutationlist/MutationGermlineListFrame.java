@@ -124,36 +124,36 @@ public class MutationGermlineListFrame extends JDialog implements AsynchronousCa
 	private void constructTabs(){
 
 		vepTabTableModel = new GermlineSNPEFFTableModel(mutationList);
-		vepTabTable = new GermlineSNPEFFTable(parent, vepTabTableModel);
+		vepTabTable = new GermlineSNPEFFTable(this, vepTabTableModel);
 		vepTabTable.setAutoCreateRowSorter(true);
 
 		transcriptTableModel = new GermlineTranscriptTableModel(mutationList);
-		transcriptTable = new GermlineTranscriptTable(parent, transcriptTableModel);
+		transcriptTable = new GermlineTranscriptTable(this, transcriptTableModel);
 		transcriptTable.setAutoCreateRowSorter(true);
 
 
 		predictionTableModel = new GermlinePredictionTableModel(mutationList);
-		predictionTable = new GermlinePredictionTable(parent, predictionTableModel);
+		predictionTable = new GermlinePredictionTable(this, predictionTableModel);
 		predictionTable.setAutoCreateRowSorter(true);
 
 		HGMDTableModel = new GermlineHGMDTableModel(mutationList);
-		HGMDTable = new GermlineHGMDTable(parent, HGMDTableModel);
+		HGMDTable = new GermlineHGMDTable(this, HGMDTableModel);
 		HGMDTable.setAutoCreateRowSorter(true);
 
 		proteinDomainTableModel = new GermlineProteinDomainTableModel(mutationList);
-		proteinDomainTable = new GermlineProteinDomainTable(parent, proteinDomainTableModel);
+		proteinDomainTable = new GermlineProteinDomainTable(this, proteinDomainTableModel);
 		proteinDomainTable.setAutoCreateRowSorter(true);
 
 		cardiacAtlasTableModel = new GermlineCardiacAtlasTableModel(mutationList);
-		cardiacAtlasTable = new GermlineCardiacAtlasTable(parent, cardiacAtlasTableModel);
+		cardiacAtlasTable = new GermlineCardiacAtlasTable(this, cardiacAtlasTableModel);
 		cardiacAtlasTable.setAutoCreateRowSorter(true);
 
 		clinVarTableModel = new GermlineClinVarTableModel(mutationList);
-		clinVarTable = new GermlineClinVarTable(parent,clinVarTableModel);
+		clinVarTable = new GermlineClinVarTable(this, clinVarTableModel);
 		clinVarTable.setAutoCreateRowSorter(true);
 
 		gnomadTableModel = new GermlineGnomadTableModel(mutationList);
-		gnomadTable = new GermlineGnomadTable(parent,gnomadTableModel);
+		gnomadTable = new GermlineGnomadTable(this, gnomadTableModel);
 		gnomadTable.setAutoCreateRowSorter(true);
 
 	}

@@ -3,13 +3,13 @@ package hmvv.gui.mutationlist.tables;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.VEPTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 import hmvv.model.MutationSomatic;
 
 public class VEPTable extends CommonTable{
         private static final long serialVersionUID = 1L;
 
-        public VEPTable(HMVVFrame parent, VEPTableModel model){
+        public VEPTable(JDialog parent, VEPTableModel model){
             super(parent, model);
         }
 

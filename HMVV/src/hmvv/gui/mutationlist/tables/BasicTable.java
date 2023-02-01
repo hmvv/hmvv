@@ -4,14 +4,13 @@ import javax.swing.*;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.io.IGVConnection;
-import hmvv.main.HMVVFrame;
 import hmvv.model.MutationSomatic;
 
 
 public class BasicTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 	
-	public BasicTable(HMVVFrame parent, BasicTableModel model){
+	public BasicTable(JDialog parent, BasicTableModel model){
 		super(parent, model);
 	}
 	

@@ -3,14 +3,13 @@ package hmvv.gui.mutationlist.tables;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineSNPEFFTableModel;
 import hmvv.io.IGVConnection;
-import hmvv.main.HMVVFrame;
 import hmvv.model.MutationGermline;
 import javax.swing.*;
 
 public class GermlineSNPEFFTable extends CommonTableGermline{
         private static final long serialVersionUID = 1L;
 
-        public GermlineSNPEFFTable(HMVVFrame parent, GermlineSNPEFFTableModel model){
+        public GermlineSNPEFFTable(JDialog parent, GermlineSNPEFFTableModel model){
             super(parent, model);
         }
 

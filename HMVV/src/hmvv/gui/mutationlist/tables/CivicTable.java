@@ -1,15 +1,16 @@
 package hmvv.gui.mutationlist.tables;
 
+import javax.swing.JDialog;
+
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.CivicTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
 import hmvv.model.MutationSomatic;
 
 public class CivicTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public CivicTable(HMVVFrame parent, CivicTableModel model) {
+    public CivicTable(JDialog parent, CivicTableModel model) {
         super(parent, model);
     }
 

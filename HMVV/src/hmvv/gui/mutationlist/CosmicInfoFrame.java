@@ -4,7 +4,6 @@ import hmvv.gui.mutationlist.CosmicInfoPopup.CosmicInfo;
 import hmvv.io.DatabaseCommands_Mutations;
 import hmvv.io.InternetCommands;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class CosmicInfoFrame extends JFrame {
+public class CosmicInfoFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,7 +25,8 @@ public class CosmicInfoFrame extends JFrame {
     private JTable table;
     private Boolean cosmicIdMatch;
     
-    public CosmicInfoFrame( HMVVFrame parent, JTable table, ArrayList<CosmicInfo> comsicInfoList, Boolean cosmicIdMatch) throws HeadlessException {
+    public CosmicInfoFrame(JDialog parent, JTable table, ArrayList<CosmicInfo> comsicInfoList, Boolean cosmicIdMatch) throws HeadlessException {
+        super(parent, "Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.", Dialog.ModalityType.APPLICATION_MODAL);
         this.table = table;
         this.comsicInfoList = comsicInfoList;
         this.cosmicIdMatch = cosmicIdMatch;
@@ -40,7 +40,6 @@ public class CosmicInfoFrame extends JFrame {
         setSize((int)(bounds.width*.60), (int)(bounds.height*.50));
         setResizable(false);
         setLocationRelativeTo(parent);
-        setTitle("Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.");
     }
     
     private void createComponents(){

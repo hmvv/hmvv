@@ -4,13 +4,13 @@ import java.awt.Component;
 
 import java.util.ArrayList;
 
+import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 
 import hmvv.main.Configurations;
-import hmvv.main.HMVVFrame;
 import hmvv.model.CosmicID;
 import hmvv.model.MutationSomatic;
 
@@ -117,7 +117,7 @@ public class CosmicInfoPopup {
 		
 	}
 	
-	public static void handleCosmicClick(HMVVFrame parent, MutationSomatic mutation) throws Exception{
+	public static void handleCosmicClick(JDialog parent, MutationSomatic mutation) throws Exception{
 		ArrayList<CosmicInfo> comsicInfoList = buildCosmicInfoList(mutation);
 		boolean cosmicIdMatch = getMatchedCosmicIdflag(mutation);
 		DefaultTableModel tableModel = new DefaultTableModel(){

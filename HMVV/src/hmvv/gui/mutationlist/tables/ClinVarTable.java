@@ -3,13 +3,13 @@ package hmvv.gui.mutationlist.tables;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.ClinVarTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 import hmvv.model.MutationSomatic;
 
 public class ClinVarTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 	
-	public ClinVarTable(HMVVFrame parent, ClinVarTableModel model){
+	public ClinVarTable(JDialog parent, ClinVarTableModel model){
 		super(parent, model);
 	}
 	

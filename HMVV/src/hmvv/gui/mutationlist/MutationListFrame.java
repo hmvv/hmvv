@@ -89,7 +89,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private volatile boolean isWindowClosed;
 		
 	public MutationListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
-		super();
+		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
 		setTitle(title);
@@ -141,43 +141,43 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	private void constructTabs(){
 		basicTabTableModel = new BasicTableModel(mutationList);
-		basicTabTable = new BasicTable(parent, basicTabTableModel);
+		basicTabTable = new BasicTable(this, basicTabTableModel);
 		basicTabTable.setAutoCreateRowSorter(true);
 
 		vepTabTableModel = new VEPTableModel(mutationList);
-		vepTabTable = new VEPTable(parent, vepTabTableModel);
+		vepTabTable = new VEPTable(this, vepTabTableModel);
 		vepTabTable.setAutoCreateRowSorter(true);
 
 		VCallersTabTableModel = new VCallersTableModel(mutationList);
-		VCallersTabTable = new VCallersTable(parent, VCallersTabTableModel);
+		VCallersTabTable = new VCallersTable(this, VCallersTabTableModel);
 		VCallersTabTable.setAutoCreateRowSorter(true);
 		
 		cosmicTabTableModel = new CosmicTableModel(mutationList);
-		cosmicTabTable = new CosmicTable(parent, cosmicTabTableModel);
+		cosmicTabTable = new CosmicTable(this, cosmicTabTableModel);
 		cosmicTabTable.setAutoCreateRowSorter(true);
 
 		g1000TabTableModel = new G1000TableModel(mutationList);
-		g1000TabTable = new G1000Table(parent, g1000TabTableModel);
+		g1000TabTable = new G1000Table(this, g1000TabTableModel);
 		g1000TabTable.setAutoCreateRowSorter(true);
 
 		clinVarTabTableModel = new ClinVarTableModel(mutationList);
-		clinVarTabTable = new ClinVarTable(parent, clinVarTabTableModel);
+		clinVarTabTable = new ClinVarTable(this, clinVarTabTableModel);
 		clinVarTabTable.setAutoCreateRowSorter(true);
 
 		gnomadTabTableModel = new GnomadTableModel(mutationList);
-		gnomadTabTable = new GnomadTable(parent, gnomadTabTableModel);
+		gnomadTabTable = new GnomadTable(this, gnomadTabTableModel);
 		gnomadTabTable.setAutoCreateRowSorter(true);
 
 		oncokbTabTableModel = new OncokbTableModel(mutationList);
-		oncokbTabTable = new OncokbTable(parent, oncokbTabTableModel);
+		oncokbTabTable = new OncokbTable(this, oncokbTabTableModel);
 		oncokbTabTable.setAutoCreateRowSorter(true);
 
 		civicTabTableModel = new CivicTableModel(mutationList);
-		civicTabTable = new CivicTable(parent, civicTabTableModel);
+		civicTabTable = new CivicTable(this, civicTabTableModel);
 		civicTabTable.setAutoCreateRowSorter(true);
 
 		pmkbTabTableModel = new PmkbTableModel(mutationList);
-		pmkbTabTable = new PmkbTable(parent, pmkbTabTableModel);
+		pmkbTabTable = new PmkbTable(this, pmkbTabTableModel);
 		pmkbTabTable.setAutoCreateRowSorter(true);
 
 	}

@@ -4,13 +4,13 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationGermlineHGMDGeneFrame;
 import hmvv.gui.mutationlist.tablemodels.GermlineHGMDTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 import hmvv.model.MutationGermline;
 
 public class GermlineHGMDTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
 
-	public GermlineHGMDTable(HMVVFrame parent, GermlineHGMDTableModel model){
+	public GermlineHGMDTable(JDialog parent, GermlineHGMDTableModel model){
 		super(parent, model);
 	}
 	

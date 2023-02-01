@@ -3,13 +3,13 @@ package hmvv.gui.mutationlist.tables;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.PmkbTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 import hmvv.model.MutationSomatic;
 
 public class PmkbTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public PmkbTable(HMVVFrame parent, PmkbTableModel model) {
+    public PmkbTable(JDialog parent, PmkbTableModel model) {
         super(parent, model);
     }
 

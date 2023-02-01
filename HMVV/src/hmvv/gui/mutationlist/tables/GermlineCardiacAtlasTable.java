@@ -1,15 +1,16 @@
 package hmvv.gui.mutationlist.tables;
 
+import javax.swing.JDialog;
+
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineCardiacAtlasTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
 import hmvv.model.MutationGermline;
 
 public class GermlineCardiacAtlasTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
 
-	public GermlineCardiacAtlasTable(HMVVFrame parent, GermlineCardiacAtlasTableModel model){
+	public GermlineCardiacAtlasTable(JDialog parent, GermlineCardiacAtlasTableModel model){
 		super(parent, model);
 	}
 

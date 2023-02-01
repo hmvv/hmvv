@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
+import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -21,18 +22,17 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 import hmvv.model.*;
 
 public abstract class CommonTableGermline extends JTable{
 	private static final long serialVersionUID = 1L;
 
-	protected HMVVFrame parent;
+	protected JDialog parent;
 	protected GermlineCommonTableModel model;
 
 	private HMVVTableColumn[] customColumns;
 
-	public CommonTableGermline(HMVVFrame parent, GermlineCommonTableModel model){
+	public CommonTableGermline(JDialog parent, GermlineCommonTableModel model){
 		super();
 		this.parent = parent;
 		this.model = model;
@@ -230,7 +230,7 @@ public abstract class CommonTableGermline extends JTable{
 
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.GERMLINE);
 
-		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, parent);
+		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation, geneAnnotationHistory);
 		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
 	}

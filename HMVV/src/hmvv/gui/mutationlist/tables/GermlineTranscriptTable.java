@@ -2,12 +2,12 @@ package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineTranscriptTableModel;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 
 public class GermlineTranscriptTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
 
-	public GermlineTranscriptTable(HMVVFrame parent, GermlineTranscriptTableModel model){
+	public GermlineTranscriptTable(JDialog parent, GermlineTranscriptTableModel model){
 		super(parent, model);
 	}
 	

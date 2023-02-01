@@ -469,8 +469,6 @@ public class SampleListFrame extends JPanel {
 		Sample sample = getCurrentlySelectedSample();
 
 		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
-		editSample.setVisible(true);
-		editSample.toFront();
 		editSample.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -487,23 +485,25 @@ public class SampleListFrame extends JPanel {
 		editSample.addDeleteListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					String result = JOptionPane.showInputDialog(SampleListFrame.this, "Type DELETE to delete this sample.", "Delete sample?", JOptionPane.QUESTION_MESSAGE);
+					String result = JOptionPane.showInputDialog(parent, "Type DELETE to delete this sample.", "Delete sample?", JOptionPane.QUESTION_MESSAGE);
 					if(result == null) {
 						return;
 					}
 					if(result.equals("DELETE")) {
 						DatabaseCommands.deleteSample(sample.sampleID);
 						tableModel.deleteSample(modelRow);
-						JOptionPane.showMessageDialog(SampleListFrame.this, "Sample deleted.");
+						JOptionPane.showMessageDialog(parent, "Sample deleted.");
 						editSample.dispose();
 					}else {
-						JOptionPane.showMessageDialog(SampleListFrame.this, result + " is not DELETE. Deletion cancelled.");
+						JOptionPane.showMessageDialog(parent, result + " is not DELETE. Deletion cancelled.");
 					}
 				} catch (SQLException e1) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
 				}
 			}
 		});
+
+		editSample.setVisible(true);
 	}
 
 	public void refilterTable(){
@@ -566,7 +566,7 @@ public class SampleListFrame extends JPanel {
 	}
 
 	private void sampleSearchAction(){
-		SampleSearchFrame searchSample = new SampleSearchFrame(this);
+		SampleSearchFrame searchSample = new SampleSearchFrame(parent);
 		searchSample.setVisible(true);
 
 		searchSample.addConfirmListener(new ActionListener() {

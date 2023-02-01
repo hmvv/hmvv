@@ -3,13 +3,13 @@ package hmvv.gui.mutationlist.tables;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.OncokbTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 import hmvv.model.MutationSomatic;
 
 public class OncokbTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public OncokbTable(HMVVFrame parent, OncokbTableModel model) {
+    public OncokbTable(JDialog parent, OncokbTableModel model) {
         super(parent, model);
     }
 

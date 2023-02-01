@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
+import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -22,7 +23,6 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
@@ -31,12 +31,12 @@ import hmvv.model.MutationSomatic;
 public abstract class CommonTable extends JTable{
 	private static final long serialVersionUID = 1L;
 	
-	protected HMVVFrame parent;
+	protected JDialog parent;
 	protected CommonTableModel model;
 	
 	private HMVVTableColumn[] customColumns;
 	
-	public CommonTable(HMVVFrame parent, CommonTableModel model){
+	public CommonTable(JDialog parent, CommonTableModel model){
 		super();
 		this.parent = parent;
 		this.model = model;
@@ -248,10 +248,9 @@ public abstract class CommonTable extends JTable{
 		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,mutation.getMutationType());
 
 
-		AnnotationFrame editAnnotation = new AnnotationFrame(mutation, geneAnnotationHistory, parent);
+		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation, geneAnnotationHistory);
 		
 		editAnnotation.setVisible(true);
-		editAnnotation.toFront();
 		this.setCursor(Cursor.getDefaultCursor());
 		
 		}

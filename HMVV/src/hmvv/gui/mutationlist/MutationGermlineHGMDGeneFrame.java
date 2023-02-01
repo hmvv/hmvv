@@ -7,7 +7,6 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 import hmvv.model.MutationGermline;
 import hmvv.model.MutationGermlineHGMD;
 import hmvv.model.MutationGermlineHGMDGeneLevel;
@@ -20,10 +19,10 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 
 
-public class MutationGermlineHGMDGeneFrame extends JFrame {
+public class MutationGermlineHGMDGeneFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 
-	public final HMVVFrame parent;
+	public final JDialog parent;
 	private MutationGermline mutation;
 
 	private GermlineHGMDGeneLevelSummaryTableModel summaryTableModel;
@@ -35,8 +34,9 @@ public class MutationGermlineHGMDGeneFrame extends JFrame {
 	private JScrollPane mutationScrollPane;
 	private TableRowSorter<GermlineHGMDGeneLevelMutationsTableModel> mutationsSorter;
 
-	public MutationGermlineHGMDGeneFrame(HMVVFrame parent, MutationGermline mutation) throws Exception {
-		String title = "HGMD-Gene: "+ mutation.getGene();
+	public MutationGermlineHGMDGeneFrame(JDialog parent, MutationGermline mutation) throws Exception {
+		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		String title = "Annotation Draft";
 		setTitle(title);
 
 		this.parent = parent;

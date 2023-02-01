@@ -3,13 +3,13 @@ package hmvv.gui.mutationlist.tables;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GnomadTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 import hmvv.model.MutationSomatic;
 
 public class GnomadTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 
-	public GnomadTable (HMVVFrame parent, GnomadTableModel model){
+	public GnomadTable (JDialog parent, GnomadTableModel model){
 		super(parent, model);
 	}
 

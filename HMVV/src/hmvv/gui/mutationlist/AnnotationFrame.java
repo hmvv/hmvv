@@ -6,7 +6,6 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 import hmvv.model.*;
 
 import javax.swing.*;
@@ -21,7 +20,7 @@ import java.awt.event.WindowAdapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class AnnotationFrame extends JFrame {
+public class AnnotationFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	private JButton okButton;
@@ -55,8 +54,10 @@ public class AnnotationFrame extends JFrame {
 	 * Create the dialog.
 	 * @throws Exception
 	 */
-	public AnnotationFrame(MutationCommon mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, HMVVFrame mutationListFrame) throws Exception {
-		super("Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString());
+	public AnnotationFrame(JDialog parent, MutationCommon mutation, ArrayList<GeneAnnotation> geneAnnotationHistory) throws Exception {
+		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		String title = "Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString();
+		setTitle(title);
 		this.mutation = mutation;
 		this.readOnly = !SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN);
 		
@@ -80,15 +81,9 @@ public class AnnotationFrame extends JFrame {
 		
 		pack();
 		setResizable(true);
-		Rectangle bounds = GUICommonTools.getBounds(mutationListFrame);
+		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.70));
-		setLocationRelativeTo(mutationListFrame);
-		//mutationListFrame.setModal(false);
-		//mutationListFrame.setVisible(false);
-		//toFront();
-		//setAlwaysOnTop(true);
-
-
+		setLocationRelativeTo(parent);
 	}
 
 	private void createComponents(){

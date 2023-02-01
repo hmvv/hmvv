@@ -3,13 +3,13 @@ package hmvv.gui.mutationlist.tables;
 import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.tablemodels.GermlineProteinDomainTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.main.HMVVFrame;
+import javax.swing.JDialog;
 import hmvv.model.MutationGermline;
 
 public class GermlineProteinDomainTable extends CommonTableGermline{
 	private static final long serialVersionUID = 1L;
 
-	public GermlineProteinDomainTable(HMVVFrame parent, GermlineProteinDomainTableModel model){
+	public GermlineProteinDomainTable(JDialog parent, GermlineProteinDomainTableModel model){
 		super(parent, model);
 	}
 	

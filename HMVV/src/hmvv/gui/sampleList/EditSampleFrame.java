@@ -42,7 +42,9 @@ public class EditSampleFrame extends JDialog {
 	 * Create the frame.
 	 */
 	public EditSampleFrame(HMVVFrame parent, Sample sample) {
-		super(parent, "Edit Sample");
+		super(parent, "Title Set Later", Dialog.ModalityType.APPLICATION_MODAL);
+		String title = "Edit Sample";
+		setTitle(title);
 		this.sample = sample;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
