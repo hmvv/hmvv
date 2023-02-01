@@ -38,7 +38,7 @@ public class CosmicInfoFrame extends JFrame {
         pack();
         Rectangle bounds = GUICommonTools.getBounds(parent);
         setSize((int)(bounds.width*.60), (int)(bounds.height*.50));
-        setResizable(false);
+        setResizable(true);
         setLocationRelativeTo(parent);
         setTitle("Open CosmicID's in Web Browser? Be sure to use GRCh37 on the COSMIC website.");
     }
@@ -64,6 +64,7 @@ public class CosmicInfoFrame extends JFrame {
         noComicMatchLabel2 = new JLabel("The following options only represent close matches.", SwingConstants.CENTER);
 		noComicMatchLabel2.setFont(GUICommonTools.TAHOMA_BOLD_14);
         noComicMatchLabel2.setForeground(Color.RED);
+        noComicMatchLabel2.setVerticalAlignment(SwingConstants.CENTER); 
         noComicMatchLabel2.setHorizontalAlignment(SwingConstants.CENTER); 
         noComicMatchLabel2.setVisible(false);    
 				
@@ -89,16 +90,16 @@ public class CosmicInfoFrame extends JFrame {
         buttonPanel.add(yesButton);
         buttonPanel.add(noButton);
 
-        JPanel messagePanel = new JPanel();
-        messagePanel.add(noComicMatchLabel2);
+        JPanel messagePanel1 = new JPanel();
+        messagePanel1.add(noComicMatchLabel1);
 
-
-        contentPanel.add(noComicMatchLabel1, BorderLayout.CENTER);
-        contentPanel.add(messagePanel, BorderLayout.CENTER);
+        JPanel messagePanel2 = new JPanel();
+        messagePanel2.add(noComicMatchLabel2);
+        
+        contentPanel.add(messagePanel1, BorderLayout.CENTER);
+        contentPanel.add(messagePanel2, BorderLayout.CENTER);
         contentPanel.add(tablePanel, BorderLayout.CENTER);
         contentPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-
         
     }
 
