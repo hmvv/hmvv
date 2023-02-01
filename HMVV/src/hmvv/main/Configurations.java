@@ -169,7 +169,7 @@ public class Configurations {
 	
 	//Reference database tables
 	public static String CARDIAC_TABLE = REFERENCE_DATABASE_NAME + ".db_cardiac_72020";
-	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v96";
+	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v97";
 	public static String COSMIC_CMC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_cmc_v97";
 	public static String CIVIC_TABLE = REFERENCE_DATABASE_NAME + ".db_civic_42019";
 	public static String CLINVAR_TABLE = REFERENCE_DATABASE_NAME + ".db_clinvar_42019";
@@ -248,7 +248,6 @@ public class Configurations {
 	 */
 	public static String GENOME_VERSION = "37";
 	public static int RESTRICT_SAMPLE_DAYS = 60;
-	public static int READ_DEPTH_FILTER = 100;
 	public static int COVERAGE_PERCENTAGE_100X = 90;
 	public static int COVERAGE_PERCENTAGE_250X = 90;
 	public static int MAX_OCCURENCE_FILTER = 1000000;
@@ -286,6 +285,16 @@ public class Configurations {
 		}
 		double GLOBAL_ALLELE_FREQ_FILTER = 10;
 		return GLOBAL_ALLELE_FREQ_FILTER;
+	}
+
+	public static int HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER = 100;
+	public static int getDefaultReadDepthFilter(Sample sample) {
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq")){
+			int HEME_READ_DEPTH_FILTER = 250;
+			return HEME_READ_DEPTH_FILTER;
+		}
+		int GLOBAL_READ_DEPTH_FILTER = 100;
+		return GLOBAL_READ_DEPTH_FILTER;
 	}
 	
 
