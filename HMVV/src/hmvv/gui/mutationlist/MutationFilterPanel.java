@@ -58,6 +58,7 @@ public class MutationFilterPanel extends JPanel {
 	}
 
 	private void constructComponents(){
+
 		ActionListener actionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				applyRowFilters();
@@ -194,11 +195,14 @@ public class MutationFilterPanel extends JPanel {
 		mutationListFilters.addMaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField);
 		mutationListFilters.addMaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField);
 		mutationListFilters.addMaxOccurrenceFilter(occurenceFromTextField);
-		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
+		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField, Configurations.getDefaultReadDepthFilter(sample));
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
 		mutationListFilters.addVariantAlleleFrequencyFilter(sample, textFreqFrom, textVarFreqTo);
 		mutationListFilters.addVariantPredicationClassFilter(predictionFilterComboBox);
+
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq")){
 		mutationListFilters.addvariantCallerFilter(variantCallerTextField);
+		}
 	}
 
 	private void layoutComponents() {
@@ -294,7 +298,11 @@ public class MutationFilterPanel extends JPanel {
         variantCallerPanel.add(variantCallerLabel);
 		variantCallerPanel.add(variantCallerButton1);
 		variantCallerPanel.add(variantCallerButton2);
-        vepPanel.add(variantCallerPanel);
+
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq")){
+			vepPanel.add(variantCallerPanel);
+			}
+        
 
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
@@ -315,7 +323,7 @@ public class MutationFilterPanel extends JPanel {
 		selectAllCheckbox.setSelected(false);
 		textFreqFrom.setText(Configurations.getDefaultAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
-		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
+		minReadDepthTextField.setText(Configurations.getDefaultReadDepthFilter(sample)+"");
 		occurenceFromTextField.setText(Configurations.MAX_OCCURENCE_FILTER+"");
 		maxPopulationFrequencyG1000TextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
@@ -339,6 +347,8 @@ public class MutationFilterPanel extends JPanel {
 		predictionFilterComboBox.setEnabled(false);
 		variantCallerTextField.setEditable(false);
         resetButton.setEnabled(false);
+		variantCallerButton1.setEnabled(false);
+		variantCallerButton2.setEnabled(false);
 	}
 
 	void enableInputAfterAsynchronousLoad() {
@@ -354,7 +364,7 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyGnomadTextField.setEditable(true);
 		predictionFilterComboBox.setEnabled(true);
 		variantCallerTextField.setEditable(true);
-
+		variantCallerButton1.setEnabled(true);
         resetButton.setEnabled(true);
 	}
 	

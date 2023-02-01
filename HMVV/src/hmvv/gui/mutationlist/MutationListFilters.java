@@ -91,8 +91,8 @@ public class MutationListFilters {
 		addFilter(new MaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField));
 	}
 
-	public void addMinReadDepthFilter(JTextField minReadDepthTextField) {
-		addFilter(new MinReadDepthFilter(minReadDepthTextField));
+	public void addMinReadDepthFilter(JTextField minReadDepthTextField, int defaultReadDepthFilter) {
+		addFilter(new MinReadDepthFilter(minReadDepthTextField, defaultReadDepthFilter));
 	}
 	
 	public void addVariantAlleleFrequencyFilter(Sample sample, JTextField textFreqFrom, JTextField textVarFreqTo) {
@@ -193,14 +193,16 @@ class MaxOccurrenceFilter implements Filter{
 class MinReadDepthFilter implements Filter{
 
 	private JTextField minReadDepthTextField;
+	private int defaultReadDepthFilter;
 
-	public MinReadDepthFilter(JTextField minReadDepthTextField) {
+	public MinReadDepthFilter(JTextField minReadDepthTextField, int defaultReadDepthFilter) {
 		this.minReadDepthTextField = minReadDepthTextField;
+		this.defaultReadDepthFilter = defaultReadDepthFilter;
 	}
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
+		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, defaultReadDepthFilter);
 		if(mutation.getReadDP() != null){
 			int readDepth = mutation.getReadDP();
 			if(minReadDepth > readDepth){
@@ -440,19 +442,19 @@ class VariantCallerFilter implements Filter{
 	
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-
+		
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
 		int variantCaller = GUICommonTools.parseIntegerFromTextField(variantCallerTextField, Integer.parseInt(Configurations.MIN_VARIANT_CALLERS_COUNT));
-
+		
 		int VarScanVAF = current_mutation.getVarScanVAF() != null ? 1 : 0;
 		int Mutect2VAF = current_mutation.getMutect2VAF() != null ? 1 : 0;
 		int freebayesVAF = current_mutation.getfreebayesVAF() != null ? 1 : 0;
 
-  		if (VarScanVAF+freebayesVAF+Mutect2VAF < variantCaller){
+		if (VarScanVAF+freebayesVAF+Mutect2VAF == 0){//Handle all nulls, such as for historic data.
+			return false;
+  		}else if (VarScanVAF+freebayesVAF+Mutect2VAF < variantCaller){
 			return true;
 		}
 		return false;
-		//false is added
-		
 	}
 }
