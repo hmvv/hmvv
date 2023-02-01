@@ -14,6 +14,7 @@ import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
+
 public class MutationListFilters {
 	
 	private ArrayList<Filter> filters;
@@ -82,12 +83,16 @@ public class MutationListFilters {
 		addFilter(new MaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField));
 	}
 	
+	public void addvariantCallerFilter(JTextField variantCallerTextField) {
+		addFilter(new VariantCallerFilter(variantCallerTextField));
+	}
+
 	public void addMaxGnomadFrequencyFilter(JTextField maxPopulationFrequencyGnomadTextField) {
 		addFilter(new MaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField));
 	}
 
-	public void addMinReadDepthFilter(JTextField minReadDepthTextField) {
-		addFilter(new MinReadDepthFilter(minReadDepthTextField));
+	public void addMinReadDepthFilter(JTextField minReadDepthTextField, int defaultReadDepthFilter) {
+		addFilter(new MinReadDepthFilter(minReadDepthTextField, defaultReadDepthFilter));
 	}
 	
 	public void addVariantAlleleFrequencyFilter(Sample sample, JTextField textFreqFrom, JTextField textVarFreqTo) {
@@ -188,14 +193,16 @@ class MaxOccurrenceFilter implements Filter{
 class MinReadDepthFilter implements Filter{
 
 	private JTextField minReadDepthTextField;
+	private int defaultReadDepthFilter;
 
-	public MinReadDepthFilter(JTextField minReadDepthTextField) {
+	public MinReadDepthFilter(JTextField minReadDepthTextField, int defaultReadDepthFilter) {
 		this.minReadDepthTextField = minReadDepthTextField;
+		this.defaultReadDepthFilter = defaultReadDepthFilter;
 	}
 
 	@Override
 	public boolean exclude(MutationCommon mutation) {
-		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
+		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, defaultReadDepthFilter);
 		if(mutation.getReadDP() != null){
 			int readDepth = mutation.getReadDP();
 			if(minReadDepth > readDepth){
@@ -419,6 +426,33 @@ class SynonymousFlagGermlineFilter implements Filter{
 
 		boolean includeSynonymousFlagOnly = synonymousFlagCheckBox.isSelected();
 		if(includeSynonymousFlagOnly && current_mutation.getConsequence().equals("synonymous_variant")) {
+			return true;
+		}
+		return false;
+	}
+}
+
+class VariantCallerFilter implements Filter{
+
+	private JTextField variantCallerTextField;
+	
+	public VariantCallerFilter(JTextField variantCallerTextField) {
+		this.variantCallerTextField = variantCallerTextField;
+	}
+	
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+		
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+		int variantCaller = GUICommonTools.parseIntegerFromTextField(variantCallerTextField, Integer.parseInt(Configurations.MIN_VARIANT_CALLERS_COUNT));
+		
+		int VarScanVAF = current_mutation.getVarScanVAF() != null ? 1 : 0;
+		int Mutect2VAF = current_mutation.getMutect2VAF() != null ? 1 : 0;
+		int freebayesVAF = current_mutation.getfreebayesVAF() != null ? 1 : 0;
+
+		if (VarScanVAF+freebayesVAF+Mutect2VAF == 0){//Handle all nulls, such as for historic data.
+			return false;
+  		}else if (VarScanVAF+freebayesVAF+Mutect2VAF < variantCaller){
 			return true;
 		}
 		return false;

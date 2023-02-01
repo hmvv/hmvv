@@ -11,6 +11,7 @@ import hmvv.model.Instrument;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineStatus;
 import hmvv.model.RunFolder;
+import hmvv.main.Configurations;
 
 public class DatabaseCommands_Pipelines {
 	
@@ -77,7 +78,7 @@ public class DatabaseCommands_Pipelines {
 	}
 
 	static ArrayList<PipelineStatus> getPipelineDetail(Pipeline pipeline) throws Exception{
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select plStatus, timeUpdated from pipelineStatus " + 
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select instrument, plStatus, timeUpdated from pipelineStatus " + 
 		" where instrument = ? and runFolderName = ? and sampleName = ? order by timeupdated asc");
 		preparedStatement.setString(1, pipeline.instrument.instrumentName);
 		preparedStatement.setString(2, pipeline.runFolderName.runFolderName);
@@ -89,7 +90,7 @@ public class DatabaseCommands_Pipelines {
 			String plStatusString = rs.getString("plStatus");
 			Timestamp timeUpdated = rs.getTimestamp("timeUpdated");
 
-			PipelineStatus pipelineStatus = new PipelineStatus(pipeline, plStatusString, timeUpdated);
+			PipelineStatus pipelineStatus = new PipelineStatus(pipeline, pipeline.instrument.instrumentName, plStatusString, timeUpdated);
 			rows.add(pipelineStatus);
 		}
 		preparedStatement.close();
@@ -108,13 +109,17 @@ public class DatabaseCommands_Pipelines {
 				"  join pipelineStatus ps1 on pipelineStatus.instrument = ps1.instrument and pipelineStatus.runFolderName = ps1.runFolderName and pipelineStatus.sampleName = ps1.sampleName " +
 				"  join samples on pipelineStatus.instrument = samples.instrument and pipelineStatus.runFolderName = samples.runFolderName and pipelineStatus.sampleName = samples.sampleName " +
 
-				"  where pipelineStatus.plStatus = \"queued\" " +
+				"  where pipelineStatus.plStatus = ? " +
 				"  and ps1.plStatus = \"PipelineCompleted\" " +
 				"  and samples.instrument = ? and samples.assay = ?) temp "
 		);
 		
-		preparedStatement.setString(1, pipeline.getInstrument().instrumentName);
-		preparedStatement.setString(2, pipeline.getAssay().assayName);
+		String pipeline_instriment = pipeline.getInstrument().instrumentName;
+		String estimationStep = Configurations.getPipelineFirstStep(pipeline_instriment);
+
+		preparedStatement.setString(1, estimationStep);
+		preparedStatement.setString(2, pipeline_instriment);
+		preparedStatement.setString(3, pipeline.getAssay().assayName);
 
 		ResultSet rs = preparedStatement.executeQuery();
 		while(rs.next()){

@@ -62,8 +62,8 @@ public class Amplicon {
 		String assay = sample.assay.assayName;
 		
 		if(instrument.equals("proton") && total_reads != null){
-			failed_check = total_reads < Configurations.READ_DEPTH_FILTER;
-			qcMeasureDescription = "Total Reads < " + Configurations.READ_DEPTH_FILTER;
+			failed_check = total_reads < Configurations.getDefaultReadDepthFilter(sample);
+			qcMeasureDescription = "Total Reads < " + Configurations.getDefaultReadDepthFilter(sample);
 			if(failed_check == true){
 				failed = true;
 				failed_amplicons = ampliconName;
@@ -72,15 +72,15 @@ public class Amplicon {
 			
 		}else if(assay.equals("heme")){
 			if(instrument.equals("miseq")){
-				failed_check = cumulative_depth < Configurations.READ_DEPTH_FILTER;
-				qcMeasureDescription = "Cumulative Read Depth < " + Configurations.READ_DEPTH_FILTER;
+				failed_check = cumulative_depth <  Configurations.getDefaultReadDepthFilter(sample);
+				qcMeasureDescription = "Cumulative Read Depth < " +  Configurations.getDefaultReadDepthFilter(sample);
 				if(failed_check == true){
 					failed = true;
 					failed_amplicons = ampliconName;
 					qcMeasure = cumulative_depth;
 
 				}
-			}else if(instrument.equals("nextseq") && cov100xPercent != null){
+			}else if(instrument.equals("nextseq") && cov250xPercent != null){
 				failed_check = cov250xPercent < Configurations.COVERAGE_PERCENTAGE_250X;
 				qcMeasureDescription = "250x Coverage < " +(Configurations.COVERAGE_PERCENTAGE_250X) + "% of positions";
 				if(failed_check == true){
@@ -89,9 +89,9 @@ public class Amplicon {
 					qcMeasure = cov250xPercent;
 				}
 			}else if(instrument.equals("nextseq") && average_depth != null){
-				failed_check = average_depth < Configurations.READ_DEPTH_FILTER;
+				failed_check = average_depth < Configurations.HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER;
 				qcMeasure = average_depth;
-				qcMeasureDescription = "Average depth < " + Configurations.READ_DEPTH_FILTER;
+				qcMeasureDescription = "Average depth < " + Configurations.HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER;
 				if(failed_check == true){
 					failed = true;
 					failed_amplicons = ampliconName;
