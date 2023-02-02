@@ -5,7 +5,10 @@ import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.swing.JOptionPane;
 
@@ -258,6 +261,7 @@ public class Configurations {
 	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
 	public static String MIN_VARIANT_CALLERS_COUNT = "2";
 	public static String MAX_VARIANT_CALLERS_COUNT = "3";
+	public static String OLDER_RUN_DATE = "2022-06-01"; 
 
 
 	/**
@@ -289,7 +293,12 @@ public class Configurations {
 
 	public static int HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER = 100;
 	public static int getDefaultReadDepthFilter(Sample sample) {
-		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq")){
+
+		String runDateString = sample.runDate; 
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S", Locale.ROOT);
+    	LocalDate sampleRunDate = LocalDate.parse(runDateString, formatter);
+
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq") && OLDER_RUN_DATE.compareTo(sampleRunDate.toString()) <= 0){
 			int HEME_READ_DEPTH_FILTER = 250;
 			return HEME_READ_DEPTH_FILTER;
 		}

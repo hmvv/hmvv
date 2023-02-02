@@ -439,7 +439,7 @@ public class SSHConnection {
 
 		if (fileType.equals("tmb_control")){
 			serverFileName = "TMB_ControlCOLO829_Scores.png";
-			serverFilePath = "/storage/analysis/environments/" + Configurations.getEnvironment() + "/assayCommonFiles/tmbAssay/";
+			serverFilePath = "/storage/analysis/environments/" + Configurations.getEnvironment() + "/tmbQCFiles/";
 		}
 
 		String fileFolder = temporaryHMVVDirectory + File.separator + fileType.split("_")[0]+"Assay"+File.separator;
