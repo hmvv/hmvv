@@ -24,7 +24,7 @@ public class DatabaseCommands_Samples {
 		DatabaseCommands_Samples.databaseConnection = databaseConnection;
 	}
 	
-	public static void insertbcl2fastqIntoDatabase(Instrument instrument, RunFolder runFolder) throws Exception{
+	public static void insertbclconvertIntoDatabase(Instrument instrument, RunFolder runFolder) throws Exception{
 		String url = "jdbc:mysql://"+SSHConnection.getForwardingHost()+"/";
 		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
 		Connection temp_databaseConnection = DriverManager.getConnection(url+Configurations.BCL2FASTQ_DATABASE_NAME+"?noAccessToProcedureBodies=true", credentials[0], credentials[1]);

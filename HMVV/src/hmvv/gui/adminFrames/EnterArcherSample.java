@@ -9,20 +9,16 @@ import hmvv.main.HMVVFrame;
 import hmvv.model.Assay;
 import hmvv.model.Instrument;
 import hmvv.model.RunFolder;
-import hmvv.model.Sample;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Calendar;
 
-public class EnterHEMESample extends JDialog {
+public class EnterArcherSample extends JDialog {
 
     private static final long serialVersionUID = 1L;
     
     private JTextField runIDTextField;
-    private JTextArea sampleListTextArea;
     private JTextField runFolderTextField;
     private JTextField assayTextField;
 
@@ -35,13 +31,15 @@ public class EnterHEMESample extends JDialog {
 
     private Thread findRunThread;
     private Thread enterSampleThread;
+    private JButton btnClear;
     
-    private Assay hemeAssay = Assay.getAssay("heme");
-    private RunFolder runFolder = null;
-    private ArrayList<String> samples = new ArrayList<String>();
+    private Assay ArcherAssay = Assay.getAssay("archer");
 
-    public EnterHEMESample(HMVVFrame parent, SampleListFrame sampleListFrame) {
-        super(parent, "Enter HEME Sample", ModalityType.APPLICATION_MODAL);
+
+    private RunFolder runFolder = null;
+
+    public EnterArcherSample(HMVVFrame parent, SampleListFrame sampleListFrame) {
+        super(parent, "Enter ARCHER Run - Research only", ModalityType.APPLICATION_MODAL);
         this.sampleListFrame = sampleListFrame;
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -58,16 +56,16 @@ public class EnterHEMESample extends JDialog {
     private void createComponents(){
         instrumentComboBox = new JComboBox<Instrument>();
         try{
-            for(Instrument instrument : DatabaseCommands.getInstrumentsForAssay(hemeAssay)){
+            for(Instrument instrument : DatabaseCommands.getInstrumentsForAssay(ArcherAssay)){
                 instrumentComboBox.addItem(instrument);
-            }
+        }
         }catch(Exception e){
-            HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterHEMESample.this, e, "Error getting Instruments from database");
+            HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterArcherSample.this, e, "Error getting Instruments from database");
             dispose();
             return;
         }
 
-        assayTextField = new JTextField(hemeAssay.assayName); 
+        assayTextField = new JTextField("Archer"); 
         assayTextField.setEditable(false);
 
         runIDTextField = new JTextField();
@@ -76,13 +74,10 @@ public class EnterHEMESample extends JDialog {
         runFolderTextField = new JTextField();
         runFolderTextField.setEditable(false);
 
-        sampleListTextArea = new JTextArea();
-        sampleListTextArea.setLineWrap(true);
-        sampleListTextArea.setWrapStyleWord(true);
-        sampleListTextArea.setColumns(5);
-
-        enterSampleButton = new JButton("Enter HEME Samples");
+        enterSampleButton = new JButton("Enter Archer Run");
         enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+        btnClear = new JButton("Clear");
+        btnClear.setFont(GUICommonTools.TAHOMA_BOLD_13);
     }
 
     private void layoutComponents(){
@@ -100,21 +95,10 @@ public class EnterHEMESample extends JDialog {
         runIDPanel.add(runIDTextField);
         runIDPanel.add(findRunButton);
 
-        leftPanel.add(new RowPanel("Assay", assayTextField));
+        //leftPanel.add(new RowPanel("Assay", assayTextField));
         leftPanel.add(new RowPanel("Instrument", instrumentComboBox));
         leftPanel.add(new RowPanel("RunID", runIDPanel));
         leftPanel.add(new RowPanel("RunFolder",runFolderTextField ));
-        leftPanel.add(new RowPanel("SampleNames", sampleListTextArea));
-        sampleListTextArea.setEnabled(false);
-
-        JLabel sampleListLabel = new JLabel();
-        sampleListLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-        Dimension textAreaDimension = new Dimension(260, 250);
-        JScrollPane textNoteScroll = new JScrollPane(sampleListTextArea);
-        textNoteScroll.setPreferredSize(textAreaDimension);
-        leftPanel.add(sampleListLabel);
-        leftPanel.add(textNoteScroll);
-        leftPanel.add(Box.createVerticalStrut(10));
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setPreferredSize(new Dimension(100, 50));
@@ -124,6 +108,7 @@ public class EnterHEMESample extends JDialog {
         southGridLayout.setHgap(30);
         southPanel.setLayout(southGridLayout);
         southPanel.add(enterSampleButton);
+        southPanel.add(btnClear);
         bottomPanel.add(southPanel);
 
         add(leftPanel, BorderLayout.LINE_START);
@@ -131,6 +116,7 @@ public class EnterHEMESample extends JDialog {
     }
 
     private void activateComponents(){
+
         findRunButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -140,7 +126,7 @@ public class EnterHEMESample extends JDialog {
                         try {
                             findRun();
                         } catch (Exception e) {
-                            JOptionPane.showMessageDialog(EnterHEMESample.this, "Error finding run: " + e.getMessage());
+                            JOptionPane.showMessageDialog(EnterArcherSample.this, "Error finding run: " + e.getMessage());
                         }
                     }
                 });
@@ -156,14 +142,9 @@ public class EnterHEMESample extends JDialog {
                         @Override
                         public void run() {
                             if(runFolderTextField.getText().equals("")){
-                                JOptionPane.showMessageDialog(EnterHEMESample.this, "Please select a run before entering samples.");
+                                JOptionPane.showMessageDialog(EnterArcherSample.this, "Please select a run before entering samples.");
                                 return;
                             }
-                            if(sampleListTextArea.getText().equals("")){
-                                JOptionPane.showMessageDialog(EnterHEMESample.this, "No samples found. Please select a valid run before entering samples.");
-                                return;
-                            }
-
                             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                             enterSampleButton.setText("Processing...");
                             enterSampleButton.setEnabled(false);
@@ -171,19 +152,30 @@ public class EnterHEMESample extends JDialog {
                                 enterData();
                                 enterSampleButton.setText("Completed");
                             } catch (Exception e) {
-                                HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterHEMESample.this, e, "Error entering sample data");
-                                enterSampleButton.setText("Enter HEME Samples");
+                                HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterArcherSample.this, e, "Error entering sample data");
+                                enterSampleButton.setText("Enter Archer Run");
                                 enterSampleButton.setEnabled(true);
                             }
                             setCursor(Cursor.getDefaultCursor());
                         }
                     });
                     enterSampleThread.start();
+                }else if(e.getSource() == btnClear){
+                    runFolderTextField.setText("");
+                    runIDTextField.setText("");
+                    runIDTextField.setEnabled(true);
+                    findRunButton.setEnabled(true);
+                    instrumentComboBox.setEnabled(true);
+                    enterSampleButton.setEnabled(true);
+                    enterSampleButton.setText("Enter Archer Run");
+                    
                 }
             }
         };
 
         enterSampleButton.addActionListener(actionListener);
+        btnClear.addActionListener(actionListener);
+
         runIDTextField.addKeyListener(new KeyListener() {
             @Override
             public void keyPressed(KeyEvent arg0) {
@@ -204,36 +196,16 @@ public class EnterHEMESample extends JDialog {
         try {
             setEnabled(false);
             Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
-            
-            if(samples.size() != 0){
-                DatabaseCommands.insertbclconvertIntoDatabase(instrument, runFolder);
-                for(String currentSample : samples){
-                    try{
-                        Sample sampleObject = sampleListFrame.getSampleTabelModel().getSample(instrument, runFolder, "", "", currentSample);
-                        if(sampleObject == null){
-                            Sample sample = constructSampleFromTextFields(currentSample);
-                            DatabaseCommands.insertDataIntoDatabase(sample);
-                            sampleListFrame.addSample(sample);
-                        }
-                    }catch(Exception e){
-                        HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterHEMESample.this, e);
-                    }
-                }
-            }
-        }finally {
+            DatabaseCommands.insertbclconvertIntoDatabase(instrument, runFolder);
             setEnabled(true);
-        }
+            }catch(Exception e){
+                HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterArcherSample.this, e);
+            }
+        //}finally {
+        //    setEnabled(true);
+        //}
     }
 
-    private Sample constructSampleFromTextFields(String currentSample) throws Exception{
-        int sampleID = -1;//This will be computed by the database when the sample is inserted
-        Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
-        String runID = runIDTextField.getText();
-        String sampleName = currentSample;
-        String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
-        String enteredBy = SSHConnection.getUserName();
-        return new Sample(sampleID, hemeAssay, instrument, runFolder, "", "", "", "", "", "", "", runID, sampleName, "", "", runDate, "", "", "", enteredBy);
-    }
 
     private void findRun() throws Exception{
         String runID = runIDTextField.getText();
@@ -246,25 +218,7 @@ public class EnterHEMESample extends JDialog {
 
         runFolder = SSHConnection.getRunFolderIllumina(instrument, runID); 
         runFolderTextField.setText(runFolder.runFolderName);
-
-        samples = SSHConnection.getSampleListIllumina(instrument, runFolder);
-        fillSample(samples, instrument, runFolder, sampleListTextArea);
         updateMainPanel(false);
-    }
-
-    private void fillSample(ArrayList<String> samples, Instrument instrument, RunFolder runFolder, JTextArea textNotel){
-        sampleListTextArea.setText("");
-        StringBuilder builder = new StringBuilder();
-        for(String sampleName : samples){
-            Sample sampleObject = sampleListFrame.getSampleTabelModel().getSample(instrument, runFolder, "", "", sampleName);
-            if(sampleObject == null){
-                builder.append(sampleName);
-            }else{
-                builder.append("---" + sampleName);
-            }
-            builder.append("\n");
-        }
-        sampleListTextArea.setText(builder.toString());
     }
 
     private void updateMainPanel(boolean mode){

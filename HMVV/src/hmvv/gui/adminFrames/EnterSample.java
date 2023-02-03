@@ -387,7 +387,7 @@ public class EnterSample extends JDialog {
         Instrument instrument = (Instrument) comboBoxInstrument.getSelectedItem();
         comboBoxAssay.removeAllItems();
         for(Assay assay : DatabaseCommands.getAssaysForInstrument(instrument)){
-            if(assay.assayName.equals("heme")){
+            if(assay.assayName.equals("heme") || assay.assayName.equals("archer")){
                 continue;
             }
             comboBoxAssay.addItem(assay);
@@ -649,7 +649,9 @@ public class EnterSample extends JDialog {
                 btnEnterSample.setEnabled(true); 
             }else{
                 DatabaseCommands.insertDataIntoDatabase(sample);
-                //DatabaseCommands.insertbcl2fastqIntoDatabase(sample.instrument, sample.runFolder);
+                if(sample.assay.assayName.equals("tmb")){
+                    DatabaseCommands.insertbclconvertIntoDatabase(sample.instrument, sample.runFolder);
+                }
                 sampleListFrame.addSample(sample);
                 //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
                 updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
