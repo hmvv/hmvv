@@ -14,9 +14,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowAdapter;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -82,7 +79,7 @@ public class AnnotationFrame extends JDialog {
 		pack();
 		setResizable(true);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.85), (int)(bounds.height*.70));
+		setSize((int)(bounds.width*.70), (int)(bounds.height*.70));
 		setLocationRelativeTo(parent);
 	}
 
@@ -239,10 +236,8 @@ public class AnnotationFrame extends JDialog {
 		//JLabel lblMaxCharacters = new JLabel("Max " + maxCharacters + " characters");
 		
 		JPanel buttonPane = new JPanel();
-		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
 		buttonPane.add(draftButton);
-		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-        buttonPane.add(Box.createRigidArea(new Dimension(1240,0)));
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);
 		
@@ -276,11 +271,9 @@ public class AnnotationFrame extends JDialog {
 			@Override
 			
 			public void actionPerformed(ActionEvent arg0) {
-				draftButton.setEnabled(false);
 				try{
 					
 					showAnnotationDraftFrame();
-					//setEnabled(false);
 					
 				}catch(Exception e){
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
@@ -446,23 +439,5 @@ public class AnnotationFrame extends JDialog {
 	private void showAnnotationDraftFrame(){
 		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);	
 		annotationdraftframe.setVisible(true);
-		WindowListener listener = new WindowAdapter() {
-			public void windowClosed(WindowEvent evt) {
-				enableDraftButton();
-				
-				}
-			
-			public void windowClosing(WindowEvent evt) {
-					enableDraftButton();
-				}
-			};
-		
-		annotationdraftframe.addWindowListener(listener); 
-
-		}
-		
-		private void enableDraftButton(){
-			draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
-			setEnabled(true);
-		}
+	}	
 }
