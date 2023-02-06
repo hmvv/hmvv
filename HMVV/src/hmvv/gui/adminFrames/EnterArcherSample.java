@@ -1,7 +1,6 @@
 package hmvv.gui.adminFrames;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
@@ -27,8 +26,6 @@ public class EnterArcherSample extends JDialog {
     private JButton findRunButton;
     private JButton enterSampleButton;
 
-    private SampleListFrame sampleListFrame;
-
     private Thread findRunThread;
     private Thread enterSampleThread;
     private JButton btnClear;
@@ -38,9 +35,8 @@ public class EnterArcherSample extends JDialog {
 
     private RunFolder runFolder = null;
 
-    public EnterArcherSample(HMVVFrame parent, SampleListFrame sampleListFrame) {
+    public EnterArcherSample(HMVVFrame parent) {
         super(parent, "Enter ARCHER Run - Research only", ModalityType.APPLICATION_MODAL);
-        this.sampleListFrame = sampleListFrame;
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 

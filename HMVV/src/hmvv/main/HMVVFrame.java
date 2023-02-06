@@ -178,7 +178,7 @@ public class HMVVFrame extends JFrame{
 						EnterHEMESample sampleHEMEEnter = new EnterHEMESample(HMVVFrame.this, samplePanel);
 						sampleHEMEEnter.setVisible(true);
 					}else if(e.getSource() == enterArcherSampleMenuItem){
-						EnterArcherSample sampleArcherEnter = new EnterArcherSample(HMVVFrame.this, samplePanel);
+						EnterArcherSample sampleArcherEnter = new EnterArcherSample(HMVVFrame.this);
 						sampleArcherEnter.setVisible(true);
 					}else if(e.getSource() == monitorPipelinesItem) {
 						handleMonitorPipelineClick();
