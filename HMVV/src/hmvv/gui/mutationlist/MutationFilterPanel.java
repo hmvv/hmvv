@@ -58,7 +58,6 @@ public class MutationFilterPanel extends JPanel {
 	}
 
 	private void constructComponents(){
-
 		ActionListener actionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				applyRowFilters();
@@ -121,7 +120,6 @@ public class MutationFilterPanel extends JPanel {
 		variantCallerButton2 = new JButton("2+");
         variantCallerButton2.setToolTipText("Choose only 2 Variant calls");
         variantCallerButton2.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		variantCallerButton2.setEnabled(false);
 		variantCallerButton1.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				variantCallerTextField.setText(Configurations.MAX_VARIANT_CALLERS_COUNT);
