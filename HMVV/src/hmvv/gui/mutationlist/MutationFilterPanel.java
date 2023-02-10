@@ -293,7 +293,6 @@ public class MutationFilterPanel extends JPanel {
         variantCallerLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		JPanel variantCallerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         variantCallerPanel.add(variantCallerLabel);
-        variantCallerPanel.add(variantCallerLabel);
 		variantCallerPanel.add(variantCallerButton1);
 		variantCallerPanel.add(variantCallerButton2);
 
