@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
+import hmvv.model.Assay;
 import hmvv.model.Instrument;
 import hmvv.model.RunFolder;
 import hmvv.model.Sample;
@@ -29,12 +30,12 @@ public class SampleListTableModel extends AbstractTableModel{
 		
 		columns.add(new SampleTableModelColumn("The assay used",
 				"Assay",
-				String.class,
+				Assay.class,
 				(Sample sample) -> sample.assay));
 		
 		columns.add(new SampleTableModelColumn("The instrument used",
 				"Instrument",
-				String.class,
+				Instrument.class,
 				(Sample sample) -> sample.instrument));
 		
 		columns.add(new SampleTableModelColumn("The patient's MRN (and the number of samples for that patient)", 
@@ -95,7 +96,7 @@ public class SampleListTableModel extends AbstractTableModel{
 		columns.add(new SampleTableModelColumn("The date the sample was run", 
 				"Run Date", 
 				String.class,
-				(Sample sample) -> sample.runDate));
+				(Sample sample) -> sample.runDate.toString()));
 
 		columns.add(new SampleTableModelColumn("The patient's clinical history",
 				"Patient History",
