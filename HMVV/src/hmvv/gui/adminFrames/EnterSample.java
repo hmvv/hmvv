@@ -16,6 +16,7 @@ import hmvv.model.TMBSample;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -690,7 +691,8 @@ public class EnterSample extends JDialog {
             variantCallerID = comboBoxVariantCallerIDList.getSelectedItem().toString();
         }
 
-        String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
+        String runDateString = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
+        Timestamp runDate = Timestamp.valueOf(runDateString);
         String patientHistory = textPatientHistory.getText();
         String diagnosis = textDiagnosis.getText();
         String note = textNote.getText();

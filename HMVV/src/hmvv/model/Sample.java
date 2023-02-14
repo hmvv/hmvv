@@ -1,5 +1,6 @@
 package hmvv.model;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 public class Sample {
@@ -12,7 +13,7 @@ public class Sample {
 	public final String sampleName;
 	public final String coverageID;
 	public final String callerID;
-	public final String runDate;
+	public final Timestamp runDate;
 	public final String enteredBy;
 	private String mrn;
 	private String lastName;
@@ -26,13 +27,13 @@ public class Sample {
 	private String note;
 	private ArrayList<Sample> patientSamples;
 
-	public Sample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder2, String mrn, String lastName, String firstName, String orderNumber,
+	public Sample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
-			String coverageID, String callerID, String runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
+			String coverageID, String callerID, Timestamp runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
 		this.sampleID = sampleID;
 		this.assay = assay;
 		this.instrument = instrument;
-		this.runFolder = runFolder2;
+		this.runFolder = runFolder;
 		this.mrn = notNull(mrn);
 		this.lastName = notNull(lastName);
 		this.firstName = notNull(firstName);
@@ -44,7 +45,7 @@ public class Sample {
 		this.sampleName = notNull(sampleName);
 		this.coverageID = notNull(coverageID);
 		this.callerID = notNull(callerID);
-		this.runDate = notNull(runDate);
+		this.runDate = runDate;
 		this.patientHistory = notNull(patientHistory);
 		this.diagnosis = notNull(bmDiagnosis);
 		this.note = notNull(note);

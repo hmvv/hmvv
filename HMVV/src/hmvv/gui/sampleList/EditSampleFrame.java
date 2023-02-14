@@ -186,7 +186,7 @@ public class EditSampleFrame extends JDialog {
 		labelPanel.add(createPair("Entered by", createJLabel(sample.enteredBy)));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
-		labelPanel.add(createPair("Run Date", createJLabel(sample.runDate)));
+		labelPanel.add(createPair("Run Date", createJLabel(sample.runDate.toString())));
 		labelPanel.add(Box.createVerticalStrut(strutHeight));
 		
 		labelPanel.add(createPair("Barcode", textBarcode));

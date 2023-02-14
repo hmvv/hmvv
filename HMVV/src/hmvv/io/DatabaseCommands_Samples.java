@@ -1,5 +1,6 @@
 package hmvv.io;
 
+import java.sql.Timestamp;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -56,7 +57,7 @@ public class DatabaseCommands_Samples {
 		String sampleName = sample.sampleName;
 		String coverageID = sample.coverageID;//no coverageID on nextseq
 		String variantCallerID = sample.callerID;//no variant caller on nextseq
-		String runDate = sample.runDate;
+		Timestamp runDate = sample.runDate;
 		String patientHistory = sample.getPatientHistory();
 		String diagnosis = sample.getDiagnosis();
 		String note = sample.getNote();
@@ -99,7 +100,7 @@ public class DatabaseCommands_Samples {
 		pstEnterSample.setString(11, pathologyNumber);
 		pstEnterSample.setString(12, tumorSource);
 		pstEnterSample.setString(13, tumorPercent);
-		pstEnterSample.setString(14, runDate);
+		pstEnterSample.setTimestamp(14, runDate);
 		pstEnterSample.setString(15, note);
 		pstEnterSample.setString(16, enteredBy);
 		pstEnterSample.setString(17, patientHistory);
@@ -282,7 +283,7 @@ public class DatabaseCommands_Samples {
 					row.getString("sampleName"),
 					row.getString("coverageID"),
 					row.getString("callerID"),
-					row.getString("runDate"),
+					row.getTimestamp("runDate"),
 					row.getString("patientHistory"),
 					row.getString("bmDiagnosis"),
 					row.getString("note"),
@@ -309,7 +310,7 @@ public class DatabaseCommands_Samples {
 					row.getString("sampleName"),
 					row.getString("coverageID"),
 					row.getString("callerID"),
-					row.getString("runDate"),
+					row.getTimestamp("runDate"),
 					row.getString("patientHistory"),
 					row.getString("bmDiagnosis"),
 					row.getString("note"),

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -68,13 +69,13 @@ public class SampleSearchFrame extends JDialog {
 		contentPanel.setLayout(null);
 		{
 			JLabel lblAssay = new JLabel("Assay");
-			lblAssay.setBounds(95, 39, 40, 17);
+			lblAssay.setBounds(95, 39, 60, 17);
 			lblAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblAssay);
 		}
 		{
 			JLabel lblOrderNumber = new JLabel("Order Number");
-			lblOrderNumber.setBounds(35, 69, 100, 17);
+			lblOrderNumber.setBounds(35, 68, 110, 17);
 			lblOrderNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblOrderNumber);
 		}
@@ -86,7 +87,7 @@ public class SampleSearchFrame extends JDialog {
 		}
 		{
 			JLabel lblPathNumber = new JLabel("Path Number");
-			lblPathNumber.setBounds(43, 99, 100, 17);
+			lblPathNumber.setBounds(43, 97, 110, 17);
 			lblPathNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblPathNumber);
 		}
@@ -98,7 +99,7 @@ public class SampleSearchFrame extends JDialog {
 		}
 		{
 			JLabel lblLastName = new JLabel("Last Name");
-			lblLastName.setBounds(62, 129, 73, 17);
+			lblLastName.setBounds(62, 128, 80, 17);
 			lblLastName.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblLastName);
 		}
@@ -110,7 +111,7 @@ public class SampleSearchFrame extends JDialog {
 		}
 		{
 			JLabel lblFirstName = new JLabel("First Name");
-			lblFirstName.setBounds(61, 159, 74, 17);
+			lblFirstName.setBounds(61, 157, 80, 17);
 			lblFirstName.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblFirstName);
 		}
@@ -122,14 +123,14 @@ public class SampleSearchFrame extends JDialog {
 		}
 		{
 			JLabel lblRunDate = new JLabel("Run Date");
-			lblRunDate.setBounds(21, 207, 64, 17);
+			lblRunDate.setBounds(21, 207, 75, 17);
 			lblRunDate.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblRunDate);
 		}
 		{
 			JLabel lblTo = new JLabel("TO");
 			lblTo.setFont(GUICommonTools.TAHOMA_BOLD_13);
-			lblTo.setBounds(95, 231, 27, 17);
+			lblTo.setBounds(115, 234, 27, 17);
 			contentPanel.add(lblTo);
 		}
 
@@ -150,7 +151,7 @@ public class SampleSearchFrame extends JDialog {
 
 		JLabel lblFrom = new JLabel("FROM");
 		lblFrom.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblFrom.setBounds(95, 188, 35, 17);
+		lblFrom.setBounds(95, 191, 45, 17);
 		contentPanel.add(lblFrom);
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -244,7 +245,7 @@ public class SampleSearchFrame extends JDialog {
 		if(!dateStringFrom.equals("NA")){
 			try {
 				Date filterDate = GUICommonTools.shortDateFormat.parse(dateStringFrom);
-				Date sampleDate = GUICommonTools.shortDateFormat.parse(sample.runDate);
+				Timestamp sampleDate = sample.runDate;
 				if(filterDate.after(sampleDate)){
 					return false;
 				}
@@ -257,7 +258,7 @@ public class SampleSearchFrame extends JDialog {
 		if(!dateStringTo.equals("NA")){
 			try {
 				Date filterDate = GUICommonTools.shortDateFormat.parse(dateStringTo);
-				Date sampleDate = GUICommonTools.shortDateFormat.parse(sample.runDate);
+				Timestamp sampleDate = sample.runDate;
 				if(filterDate.before(sampleDate)){
 					return false;
 				}

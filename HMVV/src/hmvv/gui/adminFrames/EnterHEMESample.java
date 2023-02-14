@@ -14,6 +14,7 @@ import hmvv.model.Sample;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -230,7 +231,8 @@ public class EnterHEMESample extends JDialog {
         Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
         String runID = runIDTextField.getText();
         String sampleName = currentSample;
-        String runDate = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
+        String runDateString = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
+        Timestamp runDate = Timestamp.valueOf(runDateString);
         String enteredBy = SSHConnection.getUserName();
         return new Sample(sampleID, hemeAssay, instrument, runFolder, "", "", "", "", "", "", "", runID, sampleName, "", "", runDate, "", "", "", enteredBy);
     }

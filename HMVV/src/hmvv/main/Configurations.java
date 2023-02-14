@@ -5,10 +5,9 @@ import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Locale;
+
 
 import javax.swing.JOptionPane;
 
@@ -294,11 +293,9 @@ public class Configurations {
 	public static int HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER = 100;
 	public static int getDefaultReadDepthFilter(Sample sample) {
 
-		String runDateString = sample.runDate; 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S", Locale.ROOT);
-    	LocalDate sampleRunDate = LocalDate.parse(runDateString, formatter);
+		Timestamp runDate = sample.runDate; 
 
-		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq") && OLDER_RUN_DATE.compareTo(sampleRunDate.toString()) <= 0){
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq") && OLDER_RUN_DATE.compareTo(runDate.toString()) <= 0){
 			int HEME_READ_DEPTH_FILTER = 250;
 			return HEME_READ_DEPTH_FILTER;
 		}
