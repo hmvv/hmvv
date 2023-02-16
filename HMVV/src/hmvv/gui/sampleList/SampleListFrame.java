@@ -567,8 +567,6 @@ public class SampleListFrame extends JPanel {
 
 	private void sampleSearchAction(){
 		SampleSearchFrame searchSample = new SampleSearchFrame(parent);
-		searchSample.setVisible(true);
-
 		searchSample.addConfirmListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RowFilter<SampleListTableModel, Integer> rowFilter = new RowFilter<SampleListTableModel, Integer>(){
@@ -586,6 +584,8 @@ public class SampleListFrame extends JPanel {
 				searchSample.dispose();
 			}
 		});
+
+		searchSample.setVisible(true);
 	}
 
 	private void resetFilters(){
@@ -627,7 +627,6 @@ public class SampleListFrame extends JPanel {
 			mutationListLoading = false;
 			try {
 				MutationListFrame mutationListFrame = new MutationListFrame(parent, sample, get());
-				//mutationListFrame.setModal(true);
 				mutationListFrame.setVisible(true);
 				mutationListFrame.addWindowListener(new WindowAdapter() {
 					public void windowClosed(WindowEvent evt) {
