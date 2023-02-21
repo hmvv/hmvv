@@ -403,7 +403,7 @@ public class SSHConnection {
 	}
 
 	private static void createTempBamFileONServer(String fileName) throws Exception {
-	    String command = "/storage/apps/pipelines/"+Configurations.getEnvironment()+"/scripts/common/shell/createLocalBam.sh -f "+ fileName;
+	    String command = "bash /storage/apps/pipelines/"+Configurations.getEnvironment()+"/scripts/common/shell/createLocalBam.sh -f "+ fileName;
 		//System.out.printf(command);
         CommandResponse rs = executeCommandAndGetOutput(command);
         if(rs.exitStatus != 0) {
