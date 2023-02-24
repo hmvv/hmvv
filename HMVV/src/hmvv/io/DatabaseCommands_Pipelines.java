@@ -34,7 +34,7 @@ public class DatabaseCommands_Pipelines {
 	}
 
 	static ArrayList<Pipeline> getAllPipelines() throws Exception{
-		String query = "select" + 
+		String query = "(select" + 
 				" queueTable.sampleID, queueTable.instrument, queueTable.runFolderName, queueTable.sampleName, queueTable.assay, " + 
 				" statusTable.plStatus, statusTable.timeUpdated" + 
 				" from" + 
@@ -62,7 +62,16 @@ public class DatabaseCommands_Pipelines {
 				" ) as statusTable" + 
 				 
 				" on queueTable.instrument = statusTable.instrument and queueTable.runFolderName = statusTable.runFolderName and queueTable.sampleName = statusTable.sampleName" + 
-				" order by queueTable.assay, queueTable.instrument, queueTable.runFolderName, queueTable.sampleName";
+				" order by queueTable.assay, queueTable.instrument, queueTable.runFolderName, queueTable.sampleName)" +
+
+				"UNION" +
+
+				" (SELECT tbl3.sampleID,tbl2.instrument,tbl2.runFolderName,tbl2.sampleName,tbl3.assay,tbl2.plstatus,tbl2.timeUpdated FROM " +
+				" (select max(timeUpdated) as timeUpdated,runFolderName,sampleName from pipelineStatus group by runFolderName,sampleName)" + 
+				" AS tbl1 left join pipelineStatus AS tbl2 ON tbl2.timeUpdated = tbl1.timeUpdated AND tbl2.runFolderName = tbl1.runFolderName" + 
+				" AND tbl2.sampleName = tbl1.sampleName left JOIN samples AS tbl3 ON tbl2.runFolderName = tbl3.runFolderName" + 
+				" AND tbl2.instrument = tbl3.instrument AND tbl2.sampleName = tbl3.sampleName" +
+				" WHERE tbl3.sampleID IS NOT NULL AND tbl2.plStatus != 'PipelineCompleted' AND tbl2.timeUpdated < NOW() - INTERVAL 10 DAY AND tbl2.timeUpdated > NOW() - INTERVAL 60 DAY)";
 		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
