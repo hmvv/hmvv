@@ -12,9 +12,9 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineProgram;
 import hmvv.model.PipelineStatus;
@@ -36,8 +36,8 @@ public class MonitorPipelines extends JDialog {
 	 * Create the frame.
 	 * @throws Exception 
 	 */
-	public MonitorPipelines(SampleListFrame parent) throws Exception {
-		super(parent, "Monitor Pipelines");
+	public MonitorPipelines(HMVVFrame parent) throws Exception {
+		super(parent, "Monitor Pipelines", ModalityType.APPLICATION_MODAL);
 
 		tableModel = new MonitorPipelinesTableModel();
 
@@ -45,7 +45,6 @@ public class MonitorPipelines extends JDialog {
 		setSize((int)(bounds.width*.97), (int)(bounds.height*.90));
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setModalityType(ModalityType.APPLICATION_MODAL);
 
 		createComponents();
 		layoutComponents();
@@ -213,7 +212,7 @@ public class MonitorPipelines extends JDialog {
 		if(currentPipeline == null) {
 			return;
 		}
-		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(currentPipeline.queueID);
+		ArrayList<PipelineStatus> rows = DatabaseCommands.getPipelineDetail(currentPipeline);
 
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
@@ -270,8 +269,8 @@ public class MonitorPipelines extends JDialog {
 		table.setRowSorter(sorter);
 
 		JOptionPane.showMessageDialog(this, tableSP,
-				String.format("Pipeline Status (%s %s runID=%s sampleID=%s)",
-						currentPipeline.instrumentName, currentPipeline.assayName, currentPipeline.runID, currentPipeline.sampleName),
+				String.format("Pipeline Status (%s %s/%s/%s)",
+				currentPipeline.assay.assayName, currentPipeline.instrument, currentPipeline.runFolderName, currentPipeline.sampleName),
 				JOptionPane.INFORMATION_MESSAGE);
 	}
 	

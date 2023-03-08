@@ -3,7 +3,7 @@ package hmvv.gui.mutationlist.tablemodels;
 import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 
 public abstract class CommonTableModel extends AbstractTableModel implements MutationListListener{
 	private static final long serialVersionUID = 1L;
@@ -19,8 +19,8 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 	
 	protected abstract ArrayList<MutationTableModelColumn> constructColumns();
 	
-	public final Mutation getMutation(int row){
-		return mutationList.getMutation(row);
+	public final MutationSomatic getMutation(int row){
+		return (MutationSomatic)mutationList.getMutation(row);
 	}
 	
 	/**
@@ -55,7 +55,7 @@ public abstract class CommonTableModel extends AbstractTableModel implements Mut
 
 	@Override
 	public  final Object getValueAt(int row, int column) {
-		Mutation mutation = mutationList.getMutation(row);
+		MutationSomatic mutation = (MutationSomatic)mutationList.getMutation(row);
 		return columns.get(column).getValue(mutation);
 	}
 	

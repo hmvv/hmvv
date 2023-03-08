@@ -31,33 +31,26 @@ public class InternetCommands {
 	}
 
 	public static void searchGoogle(String term) throws Exception{
-		browseToURL("https://www.google.com/#q=" + "human%20genome%20" + term );
+		browseToURL("https://www.google.com/#q=" + term );
 	}
+
+	public static void searchGoogleHGMD(String gene, String id) throws Exception{
+		browseToURL("http://www.hgmd.cf.ac.uk/ac/gene.php?gene=" + gene + "&accession=" + id );
+
+
+	}
+
 	public static void searchGene(String term) throws Exception{
-		browseToURL("https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + term );
+		browseToURL("https://www.ncbi.nlm.nih.gov/omim/?term=" + term );
 	}
 	public static void searchSNP(String ID) throws Exception{
-		if(ID.contains(",")){
-			String searchTerm = "";
-			Integer n = 0;
-			for (String oneID: ID.split(",")){
-				if(n == 0){
-					searchTerm += oneID;
-				}else{
-					searchTerm += String.format("%%20OR%%20%s", oneID);
-				}
-				n += 1;
-			}
-			browseToURL("http://www.ncbi.nlm.nih.gov/snp?term=" + searchTerm);
-		}
-		else{
-			browseToURL("http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=" + ID);
+			for (String oneID: ID.split("&")){
+			browseToURL("https://www.ncbi.nlm.nih.gov/snp/" + oneID);
 		}
 	}
 
-	public static void searchCosmic(String cosmicID) throws Exception{
-		String cosmicIDNumber = cosmicID.replaceAll("^COSM", "");
-		browseToURL("http://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=" + Configurations.GENOME_VERSION + "&id=" + cosmicIDNumber);
+	public static void searchCosmic(String url) throws Exception{
+		browseToURL(url);
 	}
 
 	public static void searchClinvar(String term) throws Exception{
@@ -92,5 +85,29 @@ public class InternetCommands {
 	public static void hmvvBugsReport() throws Exception{
 		String search = "http://" + Configurations.SSH_SERVER_ADDRESS + "/hmvv3/bugs.html";
 		browseToURL(search);
+	}
+
+	public static void searchCardiacAtlas(String term) throws Exception{
+		browseToURL("https://www.cardiodb.org/acgv/acgv_gene.php?gene=" + term );
+	}
+
+	public static void searchClinvarID(String term) throws Exception{
+		browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term +"/");
+	}
+	public static void searchNCBIProtein(String term) throws Exception{
+		browseToURL("https://www.ncbi.nlm.nih.gov/protein/" + term+"/" );
+
+	}
+	public static void searchExpasyVariant(String term) throws Exception{
+		browseToURL("https://web.expasy.org/variant_pages/" + term +".html");
+	}
+
+	public static void searchUniprotProtein(String term) throws Exception{
+
+		if (term.contains("NP_")){
+			browseToURL("https://www.ncbi.nlm.nih.gov/protein/" + term);
+		} else{
+			browseToURL("https://www.uniprot.org/uniprot/" + term);}
+
 	}
 }

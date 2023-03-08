@@ -14,6 +14,14 @@
 	<classpathentry kind="lib" path="HMVV/lib/jsch-0.1.53.jar"/>
 	<classpathentry kind="lib" path="HMVV/lib/LGoodDatePicker-7.6.3.jar"/>
 	<classpathentry kind="lib" path="HMVV/lib/mysql-connector-java-5.1.37-bin.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/ojdbc8.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/oraclepki.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/osdt_cert.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/osdt_core.jar"/>
 	<classpathentry kind="lib" path="HMVV/lib/xchart-3.5.2.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/ojdbc8.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/oraclepki.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/osdt_cert.jar"/>
+	<classpathentry kind="lib" path="HMVV/lib/osdt_core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

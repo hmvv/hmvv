@@ -2,7 +2,6 @@ package hmvv.main;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
@@ -43,7 +42,7 @@ public class HMVVDefectReportFrame extends JDialog{
 	}
 	
 	private HMVVDefectReportFrame(Window parent, Exception exception, String message) {
-		super(parent, "HMVV Defect Report Frame", Dialog.ModalityType.APPLICATION_MODAL);
+		super(parent, "HMVV Defect Report Frame", ModalityType.APPLICATION_MODAL);
 		this.exception = exception;
 		this.message = message;
 		createComponents();

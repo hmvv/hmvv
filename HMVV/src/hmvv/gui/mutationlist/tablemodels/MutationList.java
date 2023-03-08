@@ -3,41 +3,44 @@ package hmvv.gui.mutationlist.tablemodels;
 import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.MutationListFilters;
-import hmvv.model.Mutation;
+import hmvv.main.Configurations;
+import hmvv.model.MutationCommon;
 
 public class MutationList {
-	private ArrayList<Mutation> mutations;
-	private ArrayList<Mutation> filteredMutations;
+	private Configurations.MUTATION_TYPE mutation_type;
+	private ArrayList<MutationCommon> mutations;
+	private ArrayList<MutationCommon> filteredMutations;
 	private ArrayList<MutationListListener> listeners;
 	
-	public MutationList(ArrayList<Mutation> mutations){
+	public MutationList(ArrayList<MutationCommon> mutations, Configurations.MUTATION_TYPE mutation_type){
 		this.mutations = mutations;
-		this.filteredMutations = new ArrayList<Mutation>();
+		this.mutation_type = mutation_type;
+		this.filteredMutations = new ArrayList<MutationCommon>();
 		this.listeners = new ArrayList<MutationListListener>();
 	}
 	
-	public final void addFilteredMutation(Mutation mutation) {
+	public final void addFilteredMutation(MutationCommon mutation) {
 		filteredMutations.add(mutation);
 	}
 	
 	public void updateReportedStatus(boolean reported, int index){
-		Mutation mutation = getMutation(index);
+		MutationCommon mutation = getMutation(index);
 		mutation.setReported(reported);
 		notifyReportedStatusChanged(index);
 	}
 
 	public void sortModel(int[] newOrder){
-		ArrayList<Mutation> newSortedOrder = new ArrayList<Mutation>(mutations);
+		ArrayList<MutationCommon> newSortedOrder = new ArrayList<MutationCommon>(mutations);
 		
 		//get new order
 		for(int i = 0; i < mutations.size(); i++){
-			Mutation mutation = mutations.get(i);
+			MutationCommon mutation = mutations.get(i);
 			newSortedOrder.set(newOrder[i], mutation);
 		}
 		
 		//set model with new order
 		for(int i = 0; i < mutations.size(); i++){
-			Mutation mutation = newSortedOrder.get(i);
+			MutationCommon mutation = newSortedOrder.get(i);
 			mutations.set(i, mutation);
 		}
 		notifyStructureChanged();
@@ -48,7 +51,7 @@ public class MutationList {
 		notifyDataChanged();
 	}
 	
-	public final Mutation getMutation(int index){
+	public final MutationCommon getMutation(int index){
 		return mutations.get(index);
 	}
 	
@@ -59,7 +62,7 @@ public class MutationList {
 	public int getSelectedMutationCount() {
 		int count = 0;
 		for (int i = 0; i < mutations.size(); i++) {
-			Mutation mutation = mutations.get(i);
+			MutationCommon mutation = mutations.get(i);
 			if (mutation.isSelected()) {
 				count++;
 			}
@@ -67,12 +70,12 @@ public class MutationList {
 		return count;
 	}
 
-	public ArrayList<Mutation> getSelectedMutations() {
+	public ArrayList<MutationCommon> getSelectedMutations() {
 
-		ArrayList<Mutation> selectedMutations = new ArrayList<Mutation>();
+		ArrayList<MutationCommon> selectedMutations = new ArrayList<MutationCommon>();
 
 		for (int i = 0; i < mutations.size(); i++){
-			Mutation m = mutations.get(i);
+			MutationCommon m = mutations.get(i);
 			if (m.isSelected()) {
 				selectedMutations.add(m);
 			}
@@ -84,11 +87,15 @@ public class MutationList {
 		return filteredMutations.size();
 	}
 	
-	public Mutation getFilteredMutation(int index) {
+	public MutationCommon getFilteredMutation(int index) {
 		return filteredMutations.get(index);
 	}
 	
 	public void addListener(CommonTableModel listener){
+		listeners.add(listener);
+	}
+
+	public void addListenerGermline(GermlineCommonTableModel listener){
 		listeners.add(listener);
 	}
 	
@@ -115,5 +122,13 @@ public class MutationList {
 		for(MutationListListener listener : listeners){
 			listener.mutationListStructureChanged();
 		}
+	}
+
+	public Configurations.MUTATION_TYPE getMutation_type() {
+		return mutation_type;
+	}
+
+	public void setMutation_type(Configurations.MUTATION_TYPE mutation_type) {
+		this.mutation_type = mutation_type;
 	}
 }

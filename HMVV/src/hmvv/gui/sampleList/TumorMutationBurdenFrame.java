@@ -2,6 +2,7 @@ package hmvv.gui.sampleList;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.HMVVFrame;
 import hmvv.model.ExomeTumorMutationBurden;
 import hmvv.model.TMBSample;
 
@@ -19,8 +20,8 @@ public class TumorMutationBurdenFrame extends JDialog {
 
     private TMBSample sample;
 
-    public TumorMutationBurdenFrame (SampleListFrame parent, TMBSample sample) throws Exception{
-        super(parent, "Title Set Later");
+    public TumorMutationBurdenFrame (HMVVFrame parent, TMBSample sample) throws Exception{
+        super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
         String title = "Tumor Mutation Burden Result - " + sample.getLastName() + "," + sample.getFirstName() +
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
@@ -30,7 +31,6 @@ public class TumorMutationBurdenFrame extends JDialog {
         Rectangle bounds = GUICommonTools.getBounds(parent);
         setSize((int)(bounds.width*.5), (int)(bounds.height*.5));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         setResizable(false);
 
         createComponents();

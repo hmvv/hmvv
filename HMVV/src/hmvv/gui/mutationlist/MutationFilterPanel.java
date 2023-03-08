@@ -12,11 +12,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.LoadFileButton;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
 
@@ -33,15 +34,19 @@ public class MutationFilterPanel extends JPanel {
 	private JTextField occurenceFromTextField;
 	private JTextField maxPopulationFrequencyG1000TextField;
 	private JTextField maxPopulationFrequencyGnomadTextField;
+	private JTextField variantCallerTextField;
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
-	
+
+	private JButton variantCallerButton1;
+	private JButton variantCallerButton2;
+
 	private Sample sample;
     private MutationListFrame parent;
 	private MutationList mutationList;
 	private MutationListFilters mutationListFilters;
 
     private JButton resetButton;
-    private LoadIGVButton loadIGVButton;
+    private LoadFileButton loadIGVButton;
     
 	MutationFilterPanel(MutationListFrame parent,Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
 		this.parent = parent;
@@ -77,8 +82,9 @@ public class MutationFilterPanel extends JPanel {
 				handleSelectAllClick(selectAllCheckbox.isSelected());
 			}
 		});
+
 		
-		loadIGVButton = new LoadIGVButton();
+		loadIGVButton = new LoadFileButton("Load IGV");
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
 		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
 		loadIGVButton.addActionListener(new ActionListener() {
@@ -104,8 +110,35 @@ public class MutationFilterPanel extends JPanel {
         resetButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 resetFilters();
-            }
+            }			
         });
+
+
+		variantCallerButton1 = new JButton("3");
+        variantCallerButton1.setToolTipText("Choose only 3 Variant calls");
+        variantCallerButton1.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		variantCallerButton2 = new JButton("2+");
+        variantCallerButton2.setToolTipText("Choose only 2 Variant calls");
+        variantCallerButton2.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		variantCallerButton1.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				variantCallerTextField.setText(Configurations.MAX_VARIANT_CALLERS_COUNT);
+				variantCallerButton2.setEnabled(true);
+				variantCallerButton1.setEnabled(false);
+				
+			}
+		});
+
+		variantCallerButton2.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				variantCallerTextField.setText(Configurations.MIN_VARIANT_CALLERS_COUNT);
+				variantCallerButton1.setEnabled(true);
+				variantCallerButton2.setEnabled(false);
+				
+			}
+		});
+
+
 
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
@@ -144,6 +177,10 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyGnomadTextField.getDocument().addDocumentListener(documentListener);
 		maxPopulationFrequencyGnomadTextField.setColumns(textFieldColumnWidth);
 
+		variantCallerTextField = new JTextField();
+		variantCallerTextField.getDocument().addDocumentListener(documentListener);
+		variantCallerTextField.setColumns(textFieldColumnWidth);
+
 		predictionFilterComboBox = new JComboBox<VariantPredictionClass>(VariantPredictionClass.getAllClassifications());
 		predictionFilterComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -156,10 +193,14 @@ public class MutationFilterPanel extends JPanel {
 		mutationListFilters.addMaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField);
 		mutationListFilters.addMaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField);
 		mutationListFilters.addMaxOccurrenceFilter(occurenceFromTextField);
-		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField);
+		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField, Configurations.getDefaultReadDepthFilter(sample));
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
-		mutationListFilters.addVariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo);
+		mutationListFilters.addVariantAlleleFrequencyFilter(sample, textFreqFrom, textVarFreqTo);
 		mutationListFilters.addVariantPredicationClassFilter(predictionFilterComboBox);
+
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq")){
+		mutationListFilters.addvariantCallerFilter(variantCallerTextField);
+		}
 	}
 
 	private void layoutComponents() {
@@ -247,6 +288,19 @@ public class MutationFilterPanel extends JPanel {
         predictionFilterPanel.add(predictionFilterComponentsPanel);
         vepPanel.add(predictionFilterPanel);
 
+
+		JLabel variantCallerLabel = new JLabel("Variant Callers: ");
+        variantCallerLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		JPanel variantCallerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        variantCallerPanel.add(variantCallerLabel);
+		variantCallerPanel.add(variantCallerButton1);
+		variantCallerPanel.add(variantCallerButton2);
+
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq")){
+			vepPanel.add(variantCallerPanel);
+			}
+        
+
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
 		
@@ -264,13 +318,14 @@ public class MutationFilterPanel extends JPanel {
 		cosmicOnlyCheckbox.setSelected(false);
 		reportedOnlyCheckbox.setSelected(false);
 		selectAllCheckbox.setSelected(false);
-		textFreqFrom.setText(Configurations.getAlleleFrequencyFilter(sample)+"");
+		textFreqFrom.setText(Configurations.getDefaultAlleleFrequencyFilter(sample)+"");
 		textVarFreqTo.setText(Configurations.MAX_ALLELE_FREQ_FILTER+"");
-		minReadDepthTextField.setText(Configurations.READ_DEPTH_FILTER+"");
+		minReadDepthTextField.setText(Configurations.getDefaultReadDepthFilter(sample)+"");
 		occurenceFromTextField.setText(Configurations.MAX_OCCURENCE_FILTER+"");
 		maxPopulationFrequencyG1000TextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
+		variantCallerTextField.setText(Configurations.MIN_VARIANT_CALLERS_COUNT);
 		applyRowFilters();
 		handleSelectAllClick(false);
 	}
@@ -287,7 +342,10 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.setEditable(false);
 		maxPopulationFrequencyGnomadTextField.setEditable(false);
 		predictionFilterComboBox.setEnabled(false);
+		variantCallerTextField.setEditable(false);
         resetButton.setEnabled(false);
+		variantCallerButton1.setEnabled(false);
+		variantCallerButton2.setEnabled(false);
 	}
 
 	void enableInputAfterAsynchronousLoad() {
@@ -302,6 +360,8 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.setEditable(true);
 		maxPopulationFrequencyGnomadTextField.setEditable(true);
 		predictionFilterComboBox.setEnabled(true);
+		variantCallerTextField.setEditable(true);
+		variantCallerButton1.setEnabled(true);
         resetButton.setEnabled(true);
 	}
 	
@@ -311,7 +371,7 @@ public class MutationFilterPanel extends JPanel {
 
     private void handleSelectAllClick(boolean choice) {
 		for (int i = 0; i < mutationList.getMutationCount(); i++) {
-			Mutation mutation = mutationList.getMutation(i);
+			MutationSomatic mutation = (MutationSomatic)mutationList.getMutation(i);
 			if (choice){mutation.setSelected(true);}
 			else {mutation.setSelected(false);}
 		}
@@ -352,9 +412,9 @@ public class MutationFilterPanel extends JPanel {
     
     private void loadIGVAsynchronous_Filtered() throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		ServerTask serverTask = new ServerTask(0);
-		loadIGVButtonTimerLabel(serverTask);
-		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverTask);
+		ServerWorker serverWorker = new ServerWorker(0);
+		loadIGVButtonTimerLabel(serverWorker);
+		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverWorker);
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		loadIGVButton.setText("Finding BAM File...");
@@ -370,7 +430,7 @@ public class MutationFilterPanel extends JPanel {
 		}
 	}
     
-    private void loadIGVButtonTimerLabel(ServerTask task) {
+    private void loadIGVButtonTimerLabel(ServerWorker task) {
 		int seconds = 3 * mutationList.getSelectedMutationCount();
 		final long duration = seconds * 1000;   // calculate to milliseconds
 		final Timer timer = new Timer(1, new ActionListener() {
@@ -396,21 +456,5 @@ public class MutationFilterPanel extends JPanel {
 		});
 		timer.start();
 	}
-    
-    public class ServerTask {
 
-		int status;
-
-		public ServerTask(int s) {
-			this.status = s;
-		}
-
-		public int getStatus() {
-			return status;
-		}
-
-		public void setStatus(int s) {
-			this.status = s;
-		}
-	}
 }

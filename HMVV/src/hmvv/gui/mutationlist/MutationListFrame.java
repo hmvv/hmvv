@@ -1,35 +1,34 @@
 package hmvv.gui.mutationlist;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.border.EmptyBorder;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.*;
 import hmvv.gui.mutationlist.tables.*;
-import hmvv.gui.sampleList.SampleListFrame;
+import hmvv.gui.sampleList.ReportFramePatientHistory;
 import hmvv.io.AsynchronousCallback;
 import hmvv.io.AsynchronousMutationDataIO;
+import hmvv.io.LIS.LISConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
+import hmvv.model.MutationSomatic;
+import hmvv.model.PatientHistory;
 import hmvv.model.Sample;
 
 public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private static final long serialVersionUID = 1L;
+	
+	public final HMVVFrame parent;
 	
 	private MutationListMenuBar mutationListMenuBar;
 	
@@ -38,6 +37,9 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 
 	private VEPTable vepTabTable;
 	private VEPTableModel vepTabTableModel;
+
+	private VCallersTable VCallersTabTable;
+	private VCallersTableModel VCallersTabTableModel;
 
 	private CosmicTable cosmicTabTable;
 	private CosmicTableModel cosmicTabTableModel;
@@ -60,8 +62,11 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private PmkbTable pmkbTabTable;
 	private PmkbTableModel pmkbTabTableModel;
 
+	private ReportFramePatientHistory reportFrame;
+
 	private JScrollPane basicTabScrollPane;
 	private JScrollPane vepTabScrollPane;
+	private JScrollPane VCallersTabScrollPane;
 	private JScrollPane cosmicTabScrollPane;
 	private JScrollPane g1000TabScrollPane;
 	private JScrollPane clinVarTabScrollPane;
@@ -69,26 +74,27 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	private JScrollPane oncokbTabScrollPane;
 	private JScrollPane civicTabScrollPane;
 	private JScrollPane pmkbTabScrollPane;
+	private JScrollPane patientHistoryTabScrollPane;
 
 	private MutationList mutationList;
 	private MutationListFilters mutationListFilters;
-	
-	private JPanel contentPane;
+
 	private JTabbedPane tabbedPane;
 	private CommonTable selectedTable;
 	private JScrollPane selectedScrollPane;
 	
 	private Sample sample;
 	private MutationFilterPanel mutationFilterPanel;
-	
+
 	private volatile boolean isWindowClosed;
 		
-	public MutationListFrame(SampleListFrame parent, Sample sample, MutationList mutationList){
-		super(parent);
+	public MutationListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
+		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
 		setTitle(title);
-		
+
+		this.parent = parent;
 		this.mutationList = mutationList;
 		this.sample = sample;
 		this.mutationListFilters = new MutationListFilters();
@@ -96,14 +102,21 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		constructComponents();
 		layoutComponents();
 		createSortChangeListener();
-		
+
+
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
 		setMinimumSize(new Dimension(700, getHeight()/3));
-		
-		setLocationRelativeTo(parent);
-		
+
+		setLocationRelativeTo(parent);		
+		//setModal(true);
+
+		for(int i = 0; i < mutationList.getMutationCount(); i++){
+			MutationSomatic current_mutation = (MutationSomatic)mutationList.getMutation(i);
+			current_mutation.addCosmicIDLoading();
+		}
+
 		isWindowClosed = false;
 		addWindowListener(new WindowAdapter(){
 			@Override
@@ -111,21 +124,18 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 				isWindowClosed = true;
 			}
 		});
-		
-		AsynchronousMutationDataIO.loadMissingDataAsynchronous(mutationList, this);
+
+		AsynchronousMutationDataIO.loadMissingDataAsynchronous(sample,mutationList, this);
+
+
 	}
 
 	private void constructComponents() {
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		
 		mutationFilterPanel = new MutationFilterPanel(this,sample, mutationList, mutationListFilters);
 		mutationFilterPanel.resetFilters();
 		
-		mutationListMenuBar = new MutationListMenuBar(this, sample, mutationList, mutationFilterPanel);
+		mutationListMenuBar = new MutationListMenuBar(this, this, sample, mutationList, mutationFilterPanel);
 		setJMenuBar(mutationListMenuBar);
-		
 		constructTabs();
 	}
 	
@@ -137,6 +147,10 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		vepTabTableModel = new VEPTableModel(mutationList);
 		vepTabTable = new VEPTable(this, vepTabTableModel);
 		vepTabTable.setAutoCreateRowSorter(true);
+
+		VCallersTabTableModel = new VCallersTableModel(mutationList);
+		VCallersTabTable = new VCallersTable(this, VCallersTabTableModel);
+		VCallersTabTable.setAutoCreateRowSorter(true);
 		
 		cosmicTabTableModel = new CosmicTableModel(mutationList);
 		cosmicTabTable = new CosmicTable(this, cosmicTabTableModel);
@@ -165,6 +179,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		pmkbTabTableModel = new PmkbTableModel(mutationList);
 		pmkbTabTable = new PmkbTable(this, pmkbTabTableModel);
 		pmkbTabTable.setAutoCreateRowSorter(true);
+
 	}
 	
 	private void layoutComponents(){
@@ -172,6 +187,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		basicTabTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 		
 		vepTabScrollPane = new JScrollPane(vepTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		VCallersTabScrollPane = new JScrollPane(VCallersTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		cosmicTabScrollPane = new JScrollPane(cosmicTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		g1000TabScrollPane = new JScrollPane(g1000TabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		clinVarTabScrollPane = new JScrollPane(clinVarTabTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -183,6 +199,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.addTab("Basic", null, basicTabScrollPane, null);
 		tabbedPane.addTab("VEP", null, vepTabScrollPane, null);
+		tabbedPane.addTab("VCallers", null, VCallersTabScrollPane, null);
 		tabbedPane.addTab("Cosmic", null, cosmicTabScrollPane, null);
 		tabbedPane.addTab("G1000", null, g1000TabScrollPane, null);
 		tabbedPane.addTab("ClinVar", null, clinVarTabScrollPane, null);
@@ -191,20 +208,32 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		tabbedPane.addTab("Civic", null, civicTabScrollPane, null);
 		tabbedPane.addTab("PMKB", null, pmkbTabScrollPane, null);
 
+		if (patientHistoryAvailable()) {
+			createPatientHistory();
+			patientHistoryTabScrollPane = new JScrollPane(reportFrame, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			tabbedPane.addTab("Patient History", null, patientHistoryTabScrollPane, null);
+		}else{
+			tabbedPane.addTab("Patient History", null, null);
+			tabbedPane.setEnabledAt(10, false);
+		}
+
 		selectedTable = basicTabTable;
 		selectedScrollPane = basicTabScrollPane;
 		
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
 		northPanel.add(mutationFilterPanel, BorderLayout.WEST);
+
+		setLayout(new BorderLayout());
+		add(northPanel, BorderLayout.NORTH);
+		add(tabbedPane, BorderLayout.CENTER);
 		
-		JPanel contentPane = new JPanel();
-		contentPane.setLayout(new BorderLayout());
-		contentPane.add(northPanel, BorderLayout.NORTH);
-		contentPane.add(tabbedPane, BorderLayout.CENTER);
-		
-		contentPane.setBorder(new EmptyBorder(15, 15, 15, 15));
-		setContentPane(contentPane);
+//		setBorder(new EmptyBorder(15, 15, 15, 15));
+	}
+
+	public void createTab(String title, JPanel panel) {
+		tabbedPane.addTab(title, null, panel, null);
+		tabbedPane.setSelectedComponent(panel);
 	}
 	
 	private void createSortChangeListener(){
@@ -228,27 +257,32 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 					selectedTable = vepTabTable;
 					selectedScrollPane = vepTabScrollPane;
 	        	}else if(selectedIndex == 2){
+	        		selectedTable = VCallersTabTable;
+	        		selectedScrollPane = VCallersTabScrollPane;
+				}else if(selectedIndex == 3){
 	        		selectedTable = cosmicTabTable;
 	        		selectedScrollPane = cosmicTabScrollPane;
-	        	}else if(selectedIndex == 3){
+	        	}else if(selectedIndex == 4){
 	        		selectedTable = g1000TabTable;
 	        		selectedScrollPane = g1000TabScrollPane;
-				}else if(selectedIndex == 4){
+				}else if(selectedIndex == 5){
 					selectedTable = clinVarTabTable;
 					selectedScrollPane = clinVarTabScrollPane;
-				}else if(selectedIndex == 5){
+				}else if(selectedIndex == 6){
 					selectedTable = gnomadTabTable;
 					selectedScrollPane = gnomadTabScrollPane;
-				}else if(selectedIndex == 6){
+				}else if(selectedIndex == 7){
 					selectedTable = oncokbTabTable;
 					selectedScrollPane = oncokbTabScrollPane;
-				}else if(selectedIndex == 7){
+				}else if(selectedIndex == 8){
 					selectedTable = civicTabTable;
 					selectedScrollPane = civicTabScrollPane;
-	        	}else if(selectedIndex == 8){
+	        	}else if(selectedIndex == 9){
 					selectedTable = pmkbTabTable;
 					selectedScrollPane = pmkbTabScrollPane;
-				}else{
+				}else if(selectedIndex == 10){
+					selectedScrollPane = pmkbTabScrollPane;
+	        	}else{
 	        		//undefined
 	        		return;
 	        	}
@@ -264,7 +298,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	}
 	
 	void exportReport(File exportFile) throws IOException {
-		MutationReportGenerator.exportReport(exportFile, basicTabTableModel, clinVarTabTableModel, cosmicTabTableModel, g1000TabTableModel);
+		MutationReportGenerator.exportReportSomatic(exportFile, basicTabTableModel, clinVarTabTableModel, cosmicTabTableModel, g1000TabTableModel);
 	}	
 	
 	public void disableInputForAsynchronousLoad() {
@@ -286,10 +320,35 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	}
 	
 	public void showErrorMessage(Exception e, String message) {
-		HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, message);
+		HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e, message);
+	}
+	
+	public void setClosed() {
+		isWindowClosed = true;
 	}
 	
 	public boolean isCallbackClosed() {
-		return this.isWindowClosed;
+		return isWindowClosed;
+	}
+
+	private boolean patientHistoryAvailable() {
+		if (sample.getOrderNumber().length() == 0 && sample.getPathNumber().length() == 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private void createPatientHistory() {
+		try {
+				String labOrderNumber = sample.getOrderNumber();
+					if (labOrderNumber.length() == 0) {
+						labOrderNumber = LISConnection.getLabOrderNumber(sample.assay, sample.getPathNumber(), sample.sampleName);
+					}
+					ArrayList<PatientHistory> history = LISConnection.getPatientHistory(labOrderNumber);
+					reportFrame = new ReportFramePatientHistory(this, sample, labOrderNumber, history);
+		} catch (Exception e) {
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
+		}
 	}
 }

@@ -1,92 +1,125 @@
 package hmvv.gui.mutationlist;
-
-import java.awt.Dimension;
 import java.awt.event.MouseEvent;
+import java.awt.Component;
+
 import java.util.ArrayList;
 
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
+import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
-import hmvv.io.DatabaseCommands;
-import hmvv.io.InternetCommands;
-import hmvv.model.Mutation;
+import hmvv.main.Configurations;
+import hmvv.model.CosmicID;
+import hmvv.model.MutationSomatic;
 
 public class CosmicInfoPopup {
 	static class CosmicInfo{
 		public boolean openItem;
-		public String cosmicID;
-		public String geneName;
-		public String geneStrand;
-		public String cdsAnnotation;
-		public String peptideAnnotation;
-		public String count;
-		public String classifiedAsSnp;
-		CosmicInfo(String cosmicID){
+		public CosmicID cosmicID;
+		public Boolean shade;
+
+		CosmicInfo(Boolean openItem, CosmicID cosmicID, Boolean shade){
+			this.openItem = openItem;
 			this.cosmicID = cosmicID;
-		}
-		
-		public String getTranscript() {
-			if(geneName.contains("ENST")) {
-				String[] split = geneName.split("_");
-				if(split.length > 1) {
-					return split[1];
-				}
-			}
-			return "";
+			this.shade = shade;
 		}
 	}
-	
-	private static ArrayList<CosmicInfo> buildCosmicInfoList(Mutation mutation) throws Exception {
-		String HGVSc = mutation.getHGVSc();
-		String transcript = "";
-		if(HGVSc.startsWith("ENST")) {
-			transcript = HGVSc.split("\\.")[0];
-		}
-		
-		ArrayList<String> cosmicIDList = mutation.getCosmicID();
-		ArrayList<CosmicInfo> comsicInfoList = new ArrayList<CosmicInfo>();
-		boolean transcriptFound = false;
-		for(String cosmicID : cosmicIDList) {
-			String cosmicIDInfo = DatabaseCommands.getCosmicInfo(cosmicID);
-			String[] infoArray = cosmicIDInfo.split(";");
-			CosmicInfo thisInfo = new CosmicInfo(cosmicID);
-			comsicInfoList.add(thisInfo);
-			for(String infoField : infoArray) {
-				String[] pair = infoField.split("=");
-				switch(pair[0]) {
-					case "GENE": thisInfo.geneName = pair[1];break;
-					case "STRAND": thisInfo.geneStrand = pair[1];break;
-					case "CDS": thisInfo.cdsAnnotation = pair[1];break;
-					case "AA": thisInfo.peptideAnnotation = pair[1];break;
-					case "CNT": thisInfo.count = pair[1];break;
-					case "SNP": thisInfo.classifiedAsSnp = "SNP";break;
-				}
-			}
-			
-			//looking for transcript that matches this mutation
-			if(thisInfo.getTranscript().equals(transcript)) {
-				thisInfo.openItem = true;
-				transcriptFound = true;
-			}
-		}
-		
-		//Find default cosmicID if no transcript found
-		if(!transcriptFound) {
-			for(CosmicInfo thisInfo : comsicInfoList) {
-				if(thisInfo.getTranscript().equals("")) {
+
+	private static ArrayList<CosmicInfo> buildCosmicInfoList(MutationSomatic mutation) throws Exception {
+		String HGVSc = mutation.getHGVSc();	
+		 ArrayList<CosmicID> cosmicIDList = mutation.getAllCosmicIDs();
+		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 ArrayList<CosmicInfo> cosmicInfoListUnshaded = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 int white_count = 0;
+		 for(CosmicID cosmicID : cosmicIDList) {
+			Boolean shade = true;
+			Boolean openItem = false;
+			CosmicInfo thisInfo = new CosmicInfo(openItem,cosmicID, shade);
+
+			String mut_transcript = HGVSc.split(":")[0];
+			String cos_transcript = cosmicID.HGVSc.split(":")[0];	
+			String cos_dna_change = cosmicID.HGVSc.split(":")[1];
+			String mut_dna_change = HGVSc.split(":")[1];
+
+			if (cos_dna_change.equals(mut_dna_change)){
+				thisInfo.shade = false;
+				if (cos_transcript.equals(mut_transcript)){
 					thisInfo.openItem = true;
 				}
 			}
+			cosmicInfoList.add(thisInfo);
+
+		 }
+
+		
+		 for(CosmicInfo thisInfo : cosmicInfoList) {
+			
+			if (thisInfo.shade == false){
+				white_count++;
+				cosmicInfoListUnshaded.add(thisInfo);
+			}
+		 }
+
+		if(white_count == 0){
+			return cosmicInfoList;
+		}
+		else{
+			return cosmicInfoListUnshaded;
 		}
 		
-		return comsicInfoList;
+	}
+
+
+	private static boolean getMatchedCosmicIdflag(MutationSomatic mutation) throws Exception {
+		String HGVSc = mutation.getHGVSc();	
+		 ArrayList<CosmicID> cosmicIDList = mutation.getAllCosmicIDs();
+		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 ArrayList<CosmicInfo> cosmicInfoListUnshaded = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 int white_count = 0;
+		 for(CosmicID cosmicID : cosmicIDList) {
+			Boolean shade = true;
+			Boolean openItem = false;
+			CosmicInfo thisInfo = new CosmicInfo(openItem,cosmicID, shade);
+
+			String mut_transcript = HGVSc.split(":")[0];
+			String cos_transcript = cosmicID.HGVSc.split(":")[0];	
+			String cos_dna_change = cosmicID.HGVSc.split(":")[1];
+			String mut_dna_change = HGVSc.split(":")[1];
+
+			if (cos_dna_change.equals(mut_dna_change)){
+				thisInfo.shade = false;
+				if (cos_transcript.equals(mut_transcript)){
+					thisInfo.openItem = true;
+				}
+			}
+			cosmicInfoList.add(thisInfo);
+
+		 }
+
+		
+		 for(CosmicInfo thisInfo : cosmicInfoList) {
+			
+			if (thisInfo.shade == false){
+				white_count++;
+				cosmicInfoListUnshaded.add(thisInfo);
+			}
+		 }
+
+		if(white_count == 0){
+			
+			return false;
+		}
+		else{
+			return true;
+		}
+		
 	}
 	
-	public static void handleCosmicClick(MutationListFrame parent, Mutation mutation) throws Exception{
+	public static void handleCosmicClick(JDialog parent, MutationSomatic mutation) throws Exception{
 		ArrayList<CosmicInfo> comsicInfoList = buildCosmicInfoList(mutation);
+		boolean cosmicIdMatch = getMatchedCosmicIdflag(mutation);
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
 			
@@ -100,7 +133,7 @@ public class CosmicInfoPopup {
 			
 			@Override
 			public final int getColumnCount() {
-				return 8;
+				return 11;
 			}
 			
 			@Override
@@ -113,12 +146,15 @@ public class CosmicInfoPopup {
 				switch(column) {
 					case 0: return "Open?";
 					case 1: return "CosmicID";
-					case 2: return "GENE";
-					case 3: return "STRAND";
+					case 2: return "Gene";
+					case 3: return "LegacyID";
 					case 4: return "CDS";
 					case 5: return "AA";
-					case 6: return "CNT";
-					case 7: return "SNP";
+					case 6: return "HGVSc";
+					case 7: return "HGVSp";
+					case 8: return "coordinate";
+					case 9: return "strand";
+					case 10: return "source";
 					default: return "";
 				}
 			}
@@ -134,13 +170,16 @@ public class CosmicInfoPopup {
 			public  final Object getValueAt(int row, int column) {
 				switch(column) {
 					case 0: return comsicInfoList.get(row).openItem;
-					case 1: return comsicInfoList.get(row).cosmicID;
-					case 2: return comsicInfoList.get(row).geneName;
-					case 3: return comsicInfoList.get(row).geneStrand;
-					case 4: return comsicInfoList.get(row).cdsAnnotation;
-					case 5: return comsicInfoList.get(row).peptideAnnotation;
-					case 6: return comsicInfoList.get(row).count;
-					case 7: return comsicInfoList.get(row).classifiedAsSnp;
+					case 1: return comsicInfoList.get(row).cosmicID.cosmicID;
+					case 2: return comsicInfoList.get(row).cosmicID.gene;
+					case 3: return comsicInfoList.get(row).cosmicID.legacyID;
+					case 4: return comsicInfoList.get(row).cosmicID.CDS;
+					case 5: return comsicInfoList.get(row).cosmicID.AA;
+					case 6: return comsicInfoList.get(row).cosmicID.HGVSc;
+					case 7: return comsicInfoList.get(row).cosmicID.HGVSp;
+					case 8: return comsicInfoList.get(row).cosmicID.coordinate.getCoordinateAsString();
+					case 9: return comsicInfoList.get(row).cosmicID.strand;
+					case 10: return comsicInfoList.get(row).cosmicID.source;
 					default: return "";
 				}
 			}
@@ -168,28 +207,43 @@ public class CosmicInfoPopup {
 							case 0: return "Open in browser?";
 							case 1: return "COSMIC ID";
 							case 2: return "Gene Name";
-							case 3: return "Strand (+ or -)";
+							case 3: return "Legacy ID";
 							case 4: return "CDS annotation";
 							case 5: return "Peptide annotation";
-							case 6: return "How many samples (in COSMIC?) have this mutation";
-							case 7: return "Classified as SNP";
 							default: return "";
 						}
 					}
 				};
 			}
-		};
-		
-		JScrollPane tableScrollPane = new JScrollPane(table);
-		tableScrollPane.setPreferredSize(new Dimension(1200,500));
-		int returnValue = JOptionPane.showConfirmDialog(parent, tableScrollPane, "Open CosmicID's in Web Browser?", JOptionPane.YES_NO_OPTION);
-		if(returnValue == JOptionPane.OK_OPTION) {
-			for(CosmicInfo cosmicID : comsicInfoList){
-				if(cosmicID.openItem) {
-					InternetCommands.searchCosmic(cosmicID.cosmicID);
+
+			
+			@Override
+			public Component prepareRenderer(TableCellRenderer renderer, int row, int column){
+				Component c = super.prepareRenderer(renderer, row, column);
+				if (isCellSelected(row, column)){
+					c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+					c.setBackground(Configurations.TABLE_SELECTION_COLOR);
+				}else {
+					c.setForeground(Configurations.TABLE_SELECTION_FONT_COLOR);
+
+					CosmicInfo thisCosmicInfo = comsicInfoList.get(this.convertRowIndexToModel(row));
+					//mutation.getHGVSc()
+
+					if(thisCosmicInfo.shade){
+						c.setBackground(Configurations.TABLE_UNMATCHED_COSMIC_COLOR); //gray
+					}else{
+						c.setBackground(Configurations.TABLE_MATCHED_COSMIC_COLOR); //white
+					}
+
 				}
+				return c;
 			}
-		}
+		};
+		table.setAutoCreateRowSorter(true);
+
+		CosmicInfoFrame CosmicInfoFrame = new CosmicInfoFrame(parent, table, comsicInfoList, cosmicIdMatch);
+		CosmicInfoFrame.setVisible(true);
+
 	}
 }
 

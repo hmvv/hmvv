@@ -5,7 +5,9 @@ import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+
 
 import javax.swing.JOptionPane;
 
@@ -164,7 +166,30 @@ public class Configurations {
 	public static String[] READ_WRITE_CREDENTIALS;
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
+	public static String BCL2FASTQ_DATABASE_NAME = "bcl_convert";
+	public static String REFERENCE_DATABASE_NAME = "ngs_reference";
 	
+	//Reference database tables
+	public static String CARDIAC_TABLE = REFERENCE_DATABASE_NAME + ".db_cardiac_72020";
+	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v97";
+	public static String COSMIC_CMC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_cmc_v97";
+	public static String CIVIC_TABLE = REFERENCE_DATABASE_NAME + ".db_civic_42019";
+	public static String CLINVAR_TABLE = REFERENCE_DATABASE_NAME + ".db_clinvar_42019";
+	public static String G1000_TABLE = REFERENCE_DATABASE_NAME + ".db_g1000_phase3v1";
+	public static String GNOMAD_TABLE = REFERENCE_DATABASE_NAME + ".db_gnomad_r211";
+	public static String GNOMAD_LF_TABLE = REFERENCE_DATABASE_NAME + ".db_gnomad_r211_lf";
+	public static String ONCOKB_TABLE = REFERENCE_DATABASE_NAME + ".db_oncokb";
+	public static String PMKB_TABLE = REFERENCE_DATABASE_NAME + ".db_pmkb_42019";
+
+	//Annotation tables
+	public static String SOMATIC_GENE_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".geneAnnotation";
+	public static String SOMATIC_VARIANT_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".variantAnnotation";
+	public static String SOMATIC_VARIANT_ANNOTATION_DRAFT_TABLE = REFERENCE_DATABASE_NAME + ".variantAnnotationDraft";
+	public static String GERMLINE_GENE_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".germlineGeneAnnotation";
+	public static String GERMLINE_VARIANT_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".germlineVariantAnnotation";
+	public static String GERMLINE_VARIANT_ANNOTATION_DRAFT_TABLE = REFERENCE_DATABASE_NAME + ".germlineVariantAnnotationDraft";
+	
+	//LIS Connection
 	public static String LIS_DRIVER;
 	public static String LIS_CONNECTION_DRIVER;
 	public static String LIS_CONNECTION;
@@ -174,10 +199,10 @@ public class Configurations {
 	 */
 	public enum USER_TYPE{
 		TECHNOLOGIST,
-        ROTATOR,
-        FELLOW,
-        PATHOLOGIST
-    }
+		ROTATOR,
+		FELLOW,
+		PATHOLOGIST
+	}
 	
     public enum USER_FUNCTION{
         ENTER_SAMPLE{
@@ -191,18 +216,18 @@ public class Configurations {
 	    		return userType == USER_TYPE.TECHNOLOGIST || userType == USER_TYPE.PATHOLOGIST;
 	    	}
         },
-        
-        ANNOTATE_MAIN{
-        	public boolean isSuperUser(USER_TYPE userType) {
-        		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST;
-	    	}
-        },
-        
-        ANNOTATE_DRAFT{
-        	public boolean isSuperUser(USER_TYPE userType) {
-	    		return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR;
-	    	}
-        },
+
+		ANNOTATE_MAIN{
+			public boolean isSuperUser(USER_TYPE userType) {
+				return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST;
+			}
+		},
+
+		ANNOTATE_DRAFT{
+			public boolean isSuperUser(USER_TYPE userType) {
+				return userType == USER_TYPE.FELLOW  || userType == USER_TYPE.PATHOLOGIST || userType == USER_TYPE.ROTATOR;
+			}
+		},
 
 		RESTRICT_SAMPLE_ACCESS{
 			public boolean isSuperUser(USER_TYPE userType) {
@@ -213,27 +238,82 @@ public class Configurations {
     	public abstract boolean isSuperUser(USER_TYPE userType);
     }
 
+
+	public enum MUTATION_TYPE{
+		SOMATIC,
+		GERMLINE,
+		COMMON
+	}
     
 	/**
 	 * The Linux group which defines super users.
 	 */
 	public static String GENOME_VERSION = "37";
 	public static int RESTRICT_SAMPLE_DAYS = 60;
+	public static int COVERAGE_PERCENTAGE_100X = 90;
+	public static int COVERAGE_PERCENTAGE_250X = 90;
+	public static int MAX_OCCURENCE_FILTER = 1000000;
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
 	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
-	public static int READ_DEPTH_FILTER = 100;
-	public static int MAX_OCCURENCE_FILTER = 1000000;
-	public static int ALLELE_FREQ_FILTER = 10;
-	public static int HORIZON_ALLELE_FREQ_FILTER = 1;
+	public static int GERMLINE_READ_DEPTH_FILTER = 10;
+	public static int GERMLINE_ALLELE_FREQ_FILTER = 15;
+	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
+	public static String MIN_VARIANT_CALLERS_COUNT = "2";
+	public static String MAX_VARIANT_CALLERS_COUNT = "3";
+	public static String OLDER_RUN_DATE = "2022-06-01"; 
 
-	public static int getAlleleFrequencyFilter(Sample sample) {
+
+	/**
+	 * 
+	 * Somatic Panel Allele Frequency Setups
+	 * 
+	 */
+	public static double getDefaultAlleleFrequencyFilter(Sample sample) {
 		if(sample.getLastName().contains("Horizon")){
+			double HORIZON_ALLELE_FREQ_FILTER = 1;
 			return HORIZON_ALLELE_FREQ_FILTER;
-		}else {
-			return ALLELE_FREQ_FILTER;
+
+		}else if (sample.assay.assayName.equals("heme")){
+			double HEME_ALLELE_FREQ_FILTER = 0;
+			return HEME_ALLELE_FREQ_FILTER;
+
+		}else if (sample.instrument.instrumentName.equals("proton")){
+			double PROTON_ALLELE_FREQ_FILTER = 10;
+			return PROTON_ALLELE_FREQ_FILTER;
+
+		}else if (sample.instrument.instrumentName.equals("pgm")){
+			double PGM_ALLELE_FREQ_FILTER = 10;
+			return PGM_ALLELE_FREQ_FILTER;
+
 		}
+		double GLOBAL_ALLELE_FREQ_FILTER = 10;
+		return GLOBAL_ALLELE_FREQ_FILTER;
+	}
+
+	public static int HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER = 100;
+	public static int getDefaultReadDepthFilter(Sample sample) {
+
+		Timestamp runDate = sample.runDate; 
+
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq") && OLDER_RUN_DATE.compareTo(runDate.toString()) <= 0){
+			int HEME_READ_DEPTH_FILTER = 250;
+			return HEME_READ_DEPTH_FILTER;
+		}
+		int GLOBAL_READ_DEPTH_FILTER = 100;
+		return GLOBAL_READ_DEPTH_FILTER;
 	}
 	
+
+	public static String getPipelineFirstStep(String pipeline_instrument){
+		if(pipeline_instrument.equals("proton")){
+			return "queue";
+		}
+		else{
+			return "trimming started";
+		}
+	}
+
+
 	/*
 	 * SSH server configurations
 	 */
@@ -249,6 +329,10 @@ public class Configurations {
 	public static Color TABLE_SELECTION_COLOR = new Color(51,204,255);
 	public static Color TABLE_SELECTION_FONT_COLOR = Color.black;
 	public static Color TABLE_REPORTED_COLOR = new Color(51,255,102);
+	
+	public static Color TABLE_UNMATCHED_COSMIC_COLOR = Color.LIGHT_GRAY;
+	public static Color TABLE_MATCHED_COSMIC_COLOR = Color.WHITE;
+
 	public static boolean isTestEnvironment() {
 		return !getEnvironment().equals("ngs_live");
 	}
