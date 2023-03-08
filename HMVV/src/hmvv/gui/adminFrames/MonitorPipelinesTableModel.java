@@ -133,4 +133,5 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 	public String getColumnDescription(int column){
 		return columns.get(column).description;
 	}
+
 }
