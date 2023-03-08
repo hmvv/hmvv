@@ -129,6 +129,19 @@ public class SampleListFrame extends JPanel {
 		}
 	}
 	
+
+	public void updateSampleTableModel() throws Exception {
+			//tableModel = new SampleListTableModel(DatabaseCommands.getAllSamples());
+			tableModel.fireTableDataChanged();
+			table.repaint();
+
+			ArrayList<Sample> samples = DatabaseCommands.getAllSamples();
+			for(Sample s : samples) {
+				tableModel.addOrUpdateSample(s);
+		}
+	}
+
+
 	private void createComponents(){
 		table = new JTable(tableModel){
 			private static final long serialVersionUID = 1L;
@@ -216,7 +229,7 @@ public class SampleListFrame extends JPanel {
 		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
-		refreshButton = new JButton("Refresh Data");
+		refreshButton = new JButton("Refresh");
 		refreshButton.setToolTipText("Refresh Sample data");
 		refreshButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
@@ -371,6 +384,23 @@ public class SampleListFrame extends JPanel {
 				refilterTable();
 			}
 		});
+		
+		refreshButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				resetFilters();
+				refilterTable();
+				try {
+					updateSampleTableModel();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		});
+
+		
 
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {

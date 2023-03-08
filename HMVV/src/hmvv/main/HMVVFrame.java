@@ -49,6 +49,7 @@ public class HMVVFrame extends JFrame{
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
+	private JMenuItem refreshMenuItem;
 	private volatile JMenuItem refreshLabel;
 	
 
@@ -112,6 +113,7 @@ public class HMVVFrame extends JFrame{
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
+		refreshMenuItem = new JMenuItem("Refresh");
 		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 
@@ -123,6 +125,7 @@ public class HMVVFrame extends JFrame{
 
 		adminMenu.addSeparator();
 		adminMenu.add(qualityControlMenuItem);
+		
 		try{
 			for(Assay assay : DatabaseCommands.getAllAssays()){
 				if(assay.assayName.equals("tmb")) {
@@ -162,6 +165,7 @@ public class HMVVFrame extends JFrame{
 
 		adminMenu.addSeparator();
 		adminMenu.add(databaseInformationMenuItem);
+		adminMenu.add(refreshMenuItem);
 		adminMenu.add(refreshLabel);
 
 		setJMenuBar(menuBar);
@@ -184,6 +188,9 @@ public class HMVVFrame extends JFrame{
 						handleMonitorPipelineClick();
 					}else if(e.getSource() == databaseInformationMenuItem){
 						handledatabaseInformationClick();
+					}else if(e.getSource() == refreshMenuItem){
+						//samplePanel.updateSampleTableModel();
+						samplePanel = new SampleListFrame(HMVVFrame.this, DatabaseCommands.getAllSamples());
 					}
 				} catch (Exception e1) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVFrame.this, e1);
@@ -197,6 +204,7 @@ public class HMVVFrame extends JFrame{
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);
 		databaseInformationMenuItem.addActionListener(listener);
+		refreshMenuItem.addActionListener(listener);
 	}
 
 	private void setupPipelineRefreshThread() {		
