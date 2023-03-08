@@ -1,5 +1,8 @@
 package hmvv.gui.sampleList;
 
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -9,9 +12,12 @@ import javax.swing.JScrollPane;
 import javax.swing.table.*;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.LoadFileButton;
 import hmvv.io.DatabaseCommands;
+import hmvv.io.SSHConnection;
+import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.Amplicon;
-import hmvv.model.AmpliconCount;
 import hmvv.model.Sample;
 
 import java.awt.*;
@@ -20,11 +26,16 @@ import java.util.ArrayList;
 public class ViewAmpliconFrame extends JDialog {
 
 	private static final long serialVersionUID = 1L;
-	private JLabel lblSample;
-	private JLabel lblNumber;
-	private JLabel lblTotal;
-	private JLabel lblAmpliconsBelowCutoff;
-	private JLabel lblTotalAmplicons;
+
+    private HMVVFrame parent;
+
+	private JLabel patientNameLabel;
+	private JLabel ampliconsReportLabel;
+	private JLabel totalAmpliconsCountLabel;
+	private JLabel failedAmpliconsLabel;
+	private JLabel totalAmpliconsLabel;
+    private JLabel qcMeasureDescriptionLabel;
+    private LoadFileButton ampliconDepthButton;
 
 	private Sample sample;
 
@@ -35,26 +46,29 @@ public class ViewAmpliconFrame extends JDialog {
     private TableRowSorter<ViewAmpliconFrameTableModel> sorter;
 
 
-	public ViewAmpliconFrame(SampleListFrame parent,Sample sample) throws Exception{
-        super(parent, "Sample Amplicons");
+	public ViewAmpliconFrame(HMVVFrame parent, Sample sample) throws Exception{
+        super(parent, "Sample Amplicons", ModalityType.APPLICATION_MODAL);
+        this.parent = parent;
 		this.sample = sample;
 
-        tableModel = new ViewAmpliconFrameTableModel();
+        tableModel = new ViewAmpliconFrameTableModel(sample);
 
         Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.5), (int)(bounds.height*.90));
+        setSize((int)(bounds.width*.90), (int)(bounds.height*.90));
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 
         createComponents();
         layoutComponents();
+        activateComponents();
         setLocationRelativeTo(parent);
         buildModelFromDatabase();
+        
 
         String title = "Sample Amplicons List - " + sample.getLastName() + "," + sample.getFirstName() +
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
+
 	}
 
 	private void createComponents(){
@@ -75,35 +89,46 @@ public class ViewAmpliconFrame extends JDialog {
         tableScrollPane = new JScrollPane();
         tableScrollPane.setViewportView(table);
 
-		lblAmpliconsBelowCutoff = new JLabel("Amplicons below cutoff");
-		lblAmpliconsBelowCutoff.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		failedAmpliconsLabel = new JLabel("Amplicons below cutoff");
+		failedAmpliconsLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblTotalAmplicons = new JLabel("Total amplicons");
-		lblTotalAmplicons.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		totalAmpliconsLabel = new JLabel(" Total amplicons");
+		totalAmpliconsLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblSample = new JLabel("sample");
-		lblSample.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		patientNameLabel = new JLabel("sample");
+		patientNameLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblNumber = new JLabel("below");
-		lblNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		ampliconsReportLabel = new JLabel("below");
+		ampliconsReportLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 
-		lblTotal = new JLabel("total");
-		lblTotal.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		totalAmpliconsCountLabel = new JLabel("total");
+		totalAmpliconsCountLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+
+        qcMeasureDescriptionLabel = new JLabel("measure");
+		qcMeasureDescriptionLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+
+        ampliconDepthButton = new LoadFileButton("Load Depth Figure");
+        ampliconDepthButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        if(!sample.assay.assayName.equals("heme")){
+            ampliconDepthButton.setEnabled(false);
+        }
     }
 
     private void layoutComponents(){
         GroupLayout gl_contentPane = new GroupLayout(getContentPane());
         gl_contentPane.setHorizontalGroup(gl_contentPane.createSequentialGroup()
                         .addGroup(gl_contentPane.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addComponent(lblSample, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(patientNameLabel, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(qcMeasureDescriptionLabel, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ampliconDepthButton, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
 						    .addGroup(gl_contentPane.createSequentialGroup()
-							    .addComponent(lblAmpliconsBelowCutoff, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
+							    .addComponent(failedAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
 							    .addGap(18)
-							    .addComponent(lblNumber))
+							    .addComponent(ampliconsReportLabel))
 						    .addGroup(gl_contentPane.createSequentialGroup()
-							    .addComponent(lblTotalAmplicons, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
+							    .addComponent(totalAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
 							    .addGap(18)
-							    .addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)))
+							    .addComponent(totalAmpliconsCountLabel, GroupLayout.PREFERRED_SIZE, 46, GroupLayout.PREFERRED_SIZE)))
                         .addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE)
         );
 
@@ -112,16 +137,20 @@ public class ViewAmpliconFrame extends JDialog {
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addGap(6)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblAmpliconsBelowCutoff, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblNumber))
+						.addComponent(failedAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+						.addComponent(ampliconsReportLabel))
 					.addGap(4)
 					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblTotalAmplicons, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE))
+						.addComponent(totalAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+						.addComponent(totalAmpliconsCountLabel, GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE))
 					.addGap(18)
-					.addComponent(lblSample, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+					.addComponent(patientNameLabel, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(qcMeasureDescriptionLabel, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+                    .addGap(18)
+                    .addComponent(ampliconDepthButton, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
                     .addGap(25))
-                        .addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE))
+                    .addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE))
                 );
         getContentPane().setLayout(gl_contentPane);
 
@@ -133,6 +162,7 @@ public class ViewAmpliconFrame extends JDialog {
 
         resizeColumnWidths();
     }
+
     private void resizeColumnWidths() {
         TableColumnModel columnModel = table.getColumnModel();
 
@@ -155,16 +185,59 @@ public class ViewAmpliconFrame extends JDialog {
             columnModel.getColumn(column).setPreferredWidth(width);
         }
     }
+
+    private void activateComponents(){
+        ActionListener listener = new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ampliconDepthButton.setText("Copying File");
+                ampliconDepthButton.setEnabled(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            File qcFigureFile = SSHConnection.loadHemeQCFile(sample);
+                            ampliconDepthButton.setText("Load Depth Figure");
+                            Desktop.getDesktop().open(qcFigureFile);
+                        } catch (Exception e1) {
+                            HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e1);
+                        }
+                        ampliconDepthButton.setEnabled(true);
+                    }
+                });
+            }
+        };
+        ampliconDepthButton.addActionListener(listener);
+    }
+
     private void buildModelFromDatabase() throws Exception{
 
-        ArrayList<Amplicon> amplicons = DatabaseCommands.getFailedAmplicon(sample.sampleID);
-        for(Amplicon a : amplicons) {
-            tableModel.addAmplicon(a);
-        }
+        ArrayList<Amplicon> amplicons = DatabaseCommands.getAmplicons(sample);
+        ArrayList<Amplicon> failedAmplicons = new ArrayList<Amplicon>();
 
-		lblSample.setText(String.format("%s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
-		AmpliconCount ampliconCount = DatabaseCommands.getAmpliconCount(sample.sampleID);
-		lblNumber.setText(String.format("%s  [ %.2f %%] ", ampliconCount.failedAmplicon, (Float.parseFloat(ampliconCount.failedAmplicon)/Float.parseFloat(ampliconCount.totalAmplicon))*100));
-		lblTotal.setText(ampliconCount.totalAmplicon);
+        
+        //Assign QC Measure Description Label
+        String qcMeasureDescription = "";
+        if(amplicons.size() > 0){
+            qcMeasureDescription = amplicons.get(0).getQCMeasureDescription();
+        }
+        qcMeasureDescriptionLabel.setText(" QC Measure: " + qcMeasureDescription);
+
+
+		patientNameLabel.setText(String.format(" %s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
+        if(amplicons.size() == 0){
+            ampliconsReportLabel.setText("No amplicon data found.");
+        }else{
+            int failed = 0;
+            for(Amplicon amplicon : amplicons){
+                if(amplicon.isFailedAmplicon()){
+                    failed++;
+                    failedAmplicons.add(amplicon);
+                }
+            }
+            ampliconsReportLabel.setText(String.format("%s  [ %.2f %%] ", failed,  failed * 100.0 / amplicons.size()) );
+        }
+        totalAmpliconsCountLabel.setText(""+amplicons.size() );
+        tableModel.setAmplicons(failedAmplicons);
 	}
 }

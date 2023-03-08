@@ -1,41 +1,25 @@
 package hmvv.gui.mutationlist;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Calendar;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.DocumentFilter;
-
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.tables.CommonTable;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.model.Annotation;
-import hmvv.model.CommonAnnotation;
-import hmvv.model.GeneAnnotation;
-import hmvv.model.Mutation;
+import hmvv.model.*;
 
-public class AnnotationFrame extends JFrame {
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+public class AnnotationFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 
-	private CommonTable parent;
-	
 	private JButton okButton;
 	private JButton cancelButton;
 	private JButton previousGeneAnnotationButton;
@@ -43,37 +27,36 @@ public class AnnotationFrame extends JFrame {
 	private JButton nextGeneAnnotationButton;
 	private JButton nextAnnotationButton;
 	private JButton draftButton;
-	
+
 	private JComboBox<String> pathogenicityComboBox;
 	private JComboBox<String> mutationTypeComboBox;
-	
+
 	private JTextArea geneAnnotationTextArea;
 	private JTextArea annotationTextArea;
-	private int maxCharacters = 5000;
-	private DefaultStyledDocument defaultStyledDocument;
-	
+
 	private JLabel historyLabelGeneAnnotation;
 	private JLabel historyLabelAnnotation;
-	
+
 	private Boolean readOnly;
 	private Integer currentGeneAnnotationIndex;
 	private Integer currentAnnotationIndex;
-	
+
 	private ArrayList<GeneAnnotation> geneAnnotationHistory;
-	private Mutation mutation;
-	
+	private MutationCommon mutation;
+
 	private final Color readOnlyColor = new Color(245,245,245);
 	private final Color readWriteColor = Color.WHITE;
-	
+
 	/**
 	 * Create the dialog.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public AnnotationFrame( Mutation mutation, ArrayList<GeneAnnotation> geneAnnotationHistory, CommonTable parent, MutationListFrame mutationListFrame) throws Exception {
-		super("Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString());
+	public AnnotationFrame(JDialog parent, MutationCommon mutation, ArrayList<GeneAnnotation> geneAnnotationHistory) throws Exception {
+		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
+		String title = "Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString();
+		setTitle(title);
 		this.mutation = mutation;
 		this.readOnly = !SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN);
-		this.parent = parent;
 		
 		this.geneAnnotationHistory = geneAnnotationHistory;
 		currentGeneAnnotationIndex = geneAnnotationHistory.size() - 1; 
@@ -94,8 +77,10 @@ public class AnnotationFrame extends JFrame {
 		}
 		
 		pack();
-		setResizable(false);
-		setLocationRelativeTo(mutationListFrame);
+		setResizable(true);
+		Rectangle bounds = GUICommonTools.getBounds(parent);
+		setSize((int)(bounds.width*.70), (int)(bounds.height*.70));
+		setLocationRelativeTo(parent);
 	}
 
 	private void createComponents(){
@@ -113,6 +98,7 @@ public class AnnotationFrame extends JFrame {
 		mutationTypeComboBox.addItem("Germline");
 		mutationTypeComboBox.addItem("Unknown");
 		mutationTypeComboBox.addItem("Artifact");
+		mutationTypeComboBox.addItem("Both Somatic and Germline");
 		mutationTypeComboBox.addItem("Not Confirmed Somatic");
 		
 		previousGeneAnnotationButton = new JButton("Previous");
@@ -150,8 +136,6 @@ public class AnnotationFrame extends JFrame {
 
 		cancelButton = new JButton("Cancel");
 		cancelButton.setActionCommand("Cancel");
-
-		defaultStyledDocument = new DefaultStyledDocument();
 		
 		setDefaultComponentValues();
 	}
@@ -173,7 +157,21 @@ public class AnnotationFrame extends JFrame {
 	}
 	
 	private void setCommonAnnotationLabel(CommonAnnotation commonAnnotation, JLabel label) {
-		label.setText("Entered By: " + commonAnnotation.enteredBy + "   Date: " + GUICommonTools.extendedDateFormat2.format(commonAnnotation.enterDate));
+		label.setText(commonAnnotation.enteredBy + " [" + GUICommonTools.shortDateFormat.format(commonAnnotation.enterDate) + "]");
+	}
+	
+	private void addItem(JPanel itemPanel, String label, Component content) {
+		JLabel geneLabel = new JLabel(label);
+		geneLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		itemPanel.add(geneLabel);
+		itemPanel.add(content);
+		itemPanel.add(new JLabel());//blank space
+	}
+	
+	private void addItem(JPanel itemPanel, String label, String content) {
+		JTextField textField = new JTextField(content);
+		textField.setEditable(false);
+		addItem(itemPanel, label, textField);
 	}
 	
 	private void layoutComponents(){
@@ -185,69 +183,31 @@ public class AnnotationFrame extends JFrame {
 		
 		JPanel itemPanel = new JPanel();
 		GridLayout itemPanelGridLayout = new GridLayout(0,1);
-		itemPanelGridLayout.setVgap(45);
+		itemPanelGridLayout.setVgap(1);
 		itemPanel.setLayout(itemPanelGridLayout);
 		
-		//blank space
-		itemPanel.add(new JLabel());
+		addItem(itemPanel, "Gene", mutation.getGene());
+		addItem(itemPanel, "Coordinate", mutation.getCoordinate().getCoordinateAsString());
+		String HGVSc = (mutation.getHGVSc().startsWith("ENST")) ? mutation.getHGVSc().split(":")[1] : mutation.getHGVSc();
+		addItem(itemPanel, "HGVSc", HGVSc);
+		String HGVSp = (mutation.getHGVSp().startsWith("ENSP")) ? mutation.getHGVSp().split(":")[1] : mutation.getHGVSp();
+		addItem(itemPanel, "HGVSp", HGVSp);
+		addItem(itemPanel, "Classification", pathogenicityComboBox);
+		addItem(itemPanel, "Origin", mutationTypeComboBox);
 		
-		//Gene
-		JLabel geneLabel = new JLabel("Gene");
-		geneLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		JPanel genePanel = new JPanel();
-		genePanel.setLayout(new GridLayout(1,0));
-		genePanel.add(geneLabel);
-		JLabel geneLabelText = new JLabel(mutation.getGene());
-		geneLabelText.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		genePanel.add(geneLabelText);
-		itemPanel.add(genePanel);
-				
-		//Coordinate
-		JLabel lblCoordinate = new JLabel("Coordinate");
-		lblCoordinate.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		JPanel coordinatePanel = new JPanel();
-		coordinatePanel.setLayout(new GridLayout(1,0));
-		coordinatePanel.add(lblCoordinate);
-		JLabel lblCoordinateText = new JLabel(mutation.getCoordinate().getCoordinateAsString());
-		lblCoordinateText.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		coordinatePanel.add(lblCoordinateText);
-		itemPanel.add(coordinatePanel);
-		
-		//Classification
-		JLabel lblClassification = new JLabel("Classification");
-		lblClassification.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		JPanel classificationPanel = new JPanel();
-		classificationPanel.setLayout(new GridLayout(1,0));
-		classificationPanel.add(lblClassification);
-		classificationPanel.add(pathogenicityComboBox);
-		itemPanel.add(classificationPanel);
-		
-		//Somatic
-		JLabel lblSomatic = new JLabel("Somatic");
-		lblSomatic.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		JPanel somaticPanel = new JPanel();
-		somaticPanel.setLayout(new GridLayout(1,0));
-		somaticPanel.add(lblSomatic);
-		somaticPanel.add(mutationTypeComboBox);
-		itemPanel.add(somaticPanel);
-		
-		//blank space
-		itemPanel.add(new JLabel());
-		itemPanel.add(new JLabel());
-		
-		Dimension textAreaDimension = new Dimension(450,400);
+		Dimension textAreaDimension = new Dimension(300,550);
 		
 		JPanel textAreaPanel = new JPanel();
+		textAreaPanel.setLayout(new GridLayout(1,0));
 		//Annotation
 		JPanel annotationPanel = new JPanel();
 		annotationPanel.setLayout(new BoxLayout(annotationPanel, BoxLayout.Y_AXIS));
 		JScrollPane annotationScrollPane = new JScrollPane(annotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		annotationScrollPane.setPreferredSize(textAreaDimension);
-		TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation (5000 characters max)");
+		TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation");
 		annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
 		annotationPanel.setBorder(annotationBorder);
 		annotationPanel.add(annotationScrollPane);
-		//annotationPanel.add(annotationTextArea);
 		JPanel historyPanelA = new JPanel();
 		historyPanelA.setLayout(new FlowLayout(FlowLayout.LEFT));
 		historyPanelA.add(previousAnnotationButton);
@@ -261,11 +221,10 @@ public class AnnotationFrame extends JFrame {
 		geneAnnotationPanel.setLayout(new BoxLayout(geneAnnotationPanel, BoxLayout.Y_AXIS));
 		JScrollPane geneScrollPane = new JScrollPane(geneAnnotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		geneScrollPane.setPreferredSize(textAreaDimension);
-		TitledBorder geneAnnotationBorder = BorderFactory.createTitledBorder("" + mutation.getGene() + " Annotation (5000 characters max)");
+		TitledBorder geneAnnotationBorder = BorderFactory.createTitledBorder("" + mutation.getGene() + " Annotation");
 		geneAnnotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
 		geneAnnotationPanel.setBorder(geneAnnotationBorder);
 		geneAnnotationPanel.add(geneScrollPane);
-		//geneAnnotationPanel.add(geneAnnotationTextArea);
 		JPanel historyPanelGA = new JPanel();
 		historyPanelGA.setLayout(new FlowLayout(FlowLayout.LEFT));
 		historyPanelGA.add(previousGeneAnnotationButton);
@@ -277,9 +236,8 @@ public class AnnotationFrame extends JFrame {
 		//JLabel lblMaxCharacters = new JLabel("Max " + maxCharacters + " characters");
 		
 		JPanel buttonPane = new JPanel();
-		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
 		buttonPane.add(draftButton);
-        buttonPane.add(Box.createRigidArea(new Dimension(550,0)));
 		buttonPane.add(okButton);
 		buttonPane.add(cancelButton);
 		
@@ -309,15 +267,22 @@ public class AnnotationFrame extends JFrame {
 		});
 
 		draftButton.addActionListener(new ActionListener(){
+			
 			@Override
+			
 			public void actionPerformed(ActionEvent arg0) {
 				try{
+					
 					showAnnotationDraftFrame();
+					
 				}catch(Exception e){
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
 				}
 			}
+			
 		});
+
+		
 
 		ActionListener historyActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -341,9 +306,9 @@ public class AnnotationFrame extends JFrame {
 		nextGeneAnnotationButton.addActionListener(historyActionListener);
 		previousAnnotationButton.addActionListener(historyActionListener);
 		nextAnnotationButton.addActionListener(historyActionListener);
-
-		defaultStyledDocument.setDocumentFilter(new DocumentSizeFilter());
 		annotationTextArea.addMouseListener(new ContextMenuMouseListener());
+
+		
 	}
 
 	private void saveRecord() throws Exception{
@@ -365,7 +330,7 @@ public class AnnotationFrame extends JFrame {
 		if(currentAnnotationIndex == mutation.getAnnotationHistorySize() - 1 || mutation.getAnnotationHistorySize() == 0) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
 			//annotation update
 			Annotation newAnnotation = new Annotation(
-					mutation,
+					mutation.getCoordinate(),
 					pathogenicityComboBox.getSelectedItem().toString(),
 					annotationTextArea.getText(),
 					mutationTypeComboBox.getSelectedItem().toString(),
@@ -374,9 +339,9 @@ public class AnnotationFrame extends JFrame {
 					);
 			Annotation latestAnnotation = mutation.getLatestAnnotation();
 			if (latestAnnotation == null || !latestAnnotation.equals(newAnnotation)) {
-				DatabaseCommands.addVariantAnnotationCuration(newAnnotation);
+				DatabaseCommands.addVariantAnnotationCuration(newAnnotation,Configurations.MUTATION_TYPE.GERMLINE);
 				mutation.addAnnotation(newAnnotation);
-				parent.notifyAnnotationUpdated(newAnnotation);
+//				parent.notifyAnnotationUpdated(newAnnotation);
 			}
 		}
 	}
@@ -392,7 +357,7 @@ public class AnnotationFrame extends JFrame {
 					);
 			GeneAnnotation latestGeneAnnotation = (geneAnnotationHistory.isEmpty()) ? null : geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);		
 			if(latestGeneAnnotation == null || !latestGeneAnnotation.equals(newGeneAnnotation)) {
-				DatabaseCommands.addGeneAnnotationCuration(newGeneAnnotation);
+				DatabaseCommands.addGeneAnnotationCuration(newGeneAnnotation,Configurations.MUTATION_TYPE.GERMLINE);
 				geneAnnotationHistory.add(newGeneAnnotation);//may not be necessary as no GUI object currently stores this list
 			}
 		}
@@ -471,38 +436,8 @@ public class AnnotationFrame extends JFrame {
 		}
 	}
 
-	private class DocumentSizeFilter extends DocumentFilter {
-
-		public DocumentSizeFilter() {
-			super();
-		}
-
-		public void insertString(FilterBypass fb, int offs, String str, AttributeSet a) throws BadLocationException {
-			//This rejects the entire insertion if it would make
-			//the contents too long. Another option would be
-			//to truncate the inserted string so the contents
-			//would be exactly maxCharacters in length.
-			if ((fb.getDocument().getLength() + str.length()) <= maxCharacters)
-				super.insertString(fb, offs, str, a);
-			else
-				Toolkit.getDefaultToolkit().beep();
-		}
-
-		public void replace(FilterBypass fb, int offs, int length, String str, AttributeSet a) throws BadLocationException {
-			//This rejects the entire replacement if it would make
-			//the contents too long. Another option would be
-			//to truncate the replacement string so the contents
-			//would be exactly maxCharacters in length.
-			if ((fb.getDocument().getLength() + str.length()
-			- length) <= maxCharacters)
-				super.replace(fb, offs, length, str, a);
-			else
-				Toolkit.getDefaultToolkit().beep();
-		}
-	}
-
 	private void showAnnotationDraftFrame(){
-		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);
+		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);	
 		annotationdraftframe.setVisible(true);
-	}
+	}	
 }

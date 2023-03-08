@@ -8,8 +8,12 @@ import javax.swing.JTextField;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.main.Configurations;
-import hmvv.model.Mutation;
+import hmvv.model.MutationCommon;
+import hmvv.model.MutationGermline;
+import hmvv.model.MutationSomatic;
+import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
+
 
 public class MutationListFilters {
 	
@@ -23,15 +27,15 @@ public class MutationListFilters {
 		filters.add(filter);
 	}
 	
-	public void filterMutations(ArrayList<Mutation> mutations, ArrayList<Mutation> filteredMutations){
-		ArrayList<Mutation> allMutations = new ArrayList<Mutation>(mutations.size() + filteredMutations.size());
+	public void filterMutations(ArrayList<MutationCommon> mutations, ArrayList<MutationCommon> filteredMutations){
+		ArrayList<MutationCommon> allMutations = new ArrayList<MutationCommon>(mutations.size() + filteredMutations.size());
 		allMutations.addAll(mutations);
 		allMutations.addAll(filteredMutations);
 
-		ArrayList<Mutation> newFilteredMutations = new ArrayList<Mutation>();
+		ArrayList<MutationCommon> newFilteredMutations = new ArrayList<MutationCommon>();
 		
 		for(int i = 0; i < allMutations.size(); i++){
-			Mutation mutation = allMutations.get(i);
+			MutationCommon mutation = allMutations.get(i);
 
 			if(!includeMutation(mutation)){				
 				newFilteredMutations.add(mutation);
@@ -45,9 +49,8 @@ public class MutationListFilters {
 		filteredMutations.clear();
 		filteredMutations.addAll(newFilteredMutations);
 	}
-	
-	
-	private boolean includeMutation(Mutation mutation){
+
+	private boolean includeMutation(MutationCommon mutation){
 		for(Filter f : filters) {
 			if(f.exclude(mutation)) {
 				return false;
@@ -56,6 +59,22 @@ public class MutationListFilters {
 		return true;
 	}
 	
+
+	//common
+	public void addMaxOccurrenceFilter(JTextField occurenceFromTextField) {
+		addFilter(new MaxOccurrenceFilter(occurenceFromTextField));
+	}
+
+	public void addReportedOnlyFilter(JCheckBox reportedOnlyCheckbox) {
+		addFilter(new ReportedOnlyFilter(reportedOnlyCheckbox));
+	}
+
+	public void addVariantPredicationClassFilter(JComboBox<VariantPredictionClass> predictionFilterComboBox) {
+		addFilter(new VariantPredicationClassFilter(predictionFilterComboBox));
+	}
+
+
+	//somatic
 	public void addCosmicIDFilter(JCheckBox cosmicIDCheckBox) {
 		addFilter(new CosmicIDFilter(cosmicIDCheckBox));
 	}
@@ -64,33 +83,164 @@ public class MutationListFilters {
 		addFilter(new MaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField));
 	}
 	
+	public void addvariantCallerFilter(JTextField variantCallerTextField) {
+		addFilter(new VariantCallerFilter(variantCallerTextField));
+	}
+
 	public void addMaxGnomadFrequencyFilter(JTextField maxPopulationFrequencyGnomadTextField) {
 		addFilter(new MaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField));
 	}
-	
-	public void addMaxOccurrenceFilter(JTextField occurenceFromTextField) {
-		addFilter(new MaxOccurrenceFilter(occurenceFromTextField));
+
+	public void addMinReadDepthFilter(JTextField minReadDepthTextField, int defaultReadDepthFilter) {
+		addFilter(new MinReadDepthFilter(minReadDepthTextField, defaultReadDepthFilter));
 	}
 	
-	public void addMinReadDepthFilter(JTextField minReadDepthTextField) {
-		addFilter(new MinReadDepthFilter(minReadDepthTextField));
+	public void addVariantAlleleFrequencyFilter(Sample sample, JTextField textFreqFrom, JTextField textVarFreqTo) {
+		addFilter(new VariantAlleleFrequencyFilter(sample, textFreqFrom, textVarFreqTo));
 	}
-	
-	public void addReportedOnlyFilter(JCheckBox reportedOnlyCheckbox) {
-		addFilter(new ReportedOnlyFilter(reportedOnlyCheckbox));
+
+
+	//germline
+	public void addMinReadDepthGermlineFilter(JTextField minReadDepthTextField) {
+		addFilter(new MinReadDepthGermlineFilter(minReadDepthTextField));
 	}
-	
-	public void addVariantAlleleFrequencyFilter(JTextField textFreqFrom, JTextField textVarFreqTo) {
-		addFilter(new VariantAlleleFrequencyFilter(textFreqFrom, textVarFreqTo));
+
+	public void addVariantAlleleFrequencyGermlineFilter(JTextField textFreqFrom, JTextField textVarFreqTo) {
+		addFilter(new VariantAlleleFrequencyGermlineFilter(textFreqFrom, textVarFreqTo));
 	}
-	
-	public void addVariantPredicationClassFilter(JComboBox<VariantPredictionClass> predictionFilterComboBox) {
-		addFilter(new VariantPredicationClassFilter(predictionFilterComboBox));
+
+	public void addMaxGnomadFrequencyGermlineFilter (JTextField maxPopulationFrequencyGnomadTextField) {
+		addFilter(new MaxGnomadFrequencyGermlineFilter(maxPopulationFrequencyGnomadTextField));
+	}
+
+	public void addTranscriptFlagGermlineFilter(JCheckBox transcriptFlagCheckBox) {
+		addFilter(new TranscriptFlagGermlineFilter(transcriptFlagCheckBox));
+	}
+
+	public void addSynonymousFlagGermlineFilter(JCheckBox synonymousFlagCheckBox) {
+		addFilter(new SynonymousFlagGermlineFilter(synonymousFlagCheckBox));
 	}
 }
 
 interface Filter {
-	public boolean exclude(Mutation mutation);
+	public boolean exclude(MutationCommon mutation);
+}
+
+//common
+class VariantPredicationClassFilter implements Filter{
+
+	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
+
+	public VariantPredicationClassFilter(JComboBox<VariantPredictionClass> predictionFilterComboBox) {
+		this.predictionFilterComboBox = predictionFilterComboBox;
+	}
+
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+		VariantPredictionClass minPredictionClass = (VariantPredictionClass)predictionFilterComboBox.getSelectedItem();
+		if(mutation.getVariantPredictionClass() != null){
+			if(mutation.getVariantPredictionClass().importance < minPredictionClass.importance){
+				return true;
+			}
+		}
+		return false;
+	}
+
+}
+
+class ReportedOnlyFilter implements Filter{
+
+	private JCheckBox reportedOnlyCheckBox;
+
+	public ReportedOnlyFilter(JCheckBox reportedOnlyCheckBox) {
+		this.reportedOnlyCheckBox = reportedOnlyCheckBox;
+	}
+
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+		boolean includeReportedOnly = reportedOnlyCheckBox.isSelected();
+		if(includeReportedOnly && !mutation.isReported()) {
+			return true;
+		}
+		return false;
+	}
+}
+
+class MaxOccurrenceFilter implements Filter{
+
+	private JTextField maxOccurrenceTextField;
+
+	public MaxOccurrenceFilter(JTextField maxOccurrenceTextField) {
+		this.maxOccurrenceTextField = maxOccurrenceTextField;
+	}
+
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+		int maxOccurence = GUICommonTools.parseIntegerFromTextField(maxOccurrenceTextField, Configurations.MAX_OCCURENCE_FILTER);
+		if(mutation.getOccurrence() != null){
+			int occurrence = mutation.getOccurrence();
+			if(maxOccurence < occurrence){
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+
+//somatic
+
+class MinReadDepthFilter implements Filter{
+
+	private JTextField minReadDepthTextField;
+	private int defaultReadDepthFilter;
+
+	public MinReadDepthFilter(JTextField minReadDepthTextField, int defaultReadDepthFilter) {
+		this.minReadDepthTextField = minReadDepthTextField;
+		this.defaultReadDepthFilter = defaultReadDepthFilter;
+	}
+
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, defaultReadDepthFilter);
+		if(mutation.getReadDP() != null){
+			int readDepth = mutation.getReadDP();
+			if(minReadDepth > readDepth){
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+class VariantAlleleFrequencyFilter implements Filter{
+
+	private Sample sample;
+	private JTextField frequencyFromTextField;
+	private JTextField frequencyToTextField;
+
+	public VariantAlleleFrequencyFilter(Sample sample, JTextField frequencyFromTextField, JTextField frequencyToTextField) {
+		this.sample = sample;
+		this.frequencyFromTextField = frequencyFromTextField;
+		this.frequencyToTextField = frequencyToTextField;
+	}
+
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+		double frequencyFrom =  GUICommonTools.parseDoubleFromTextField(frequencyFromTextField, Configurations.getDefaultAlleleFrequencyFilter(sample));
+		double frequencyTo = GUICommonTools.parseDoubleFromTextField(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
+
+		double variantFrequency = mutation.getAltFreq();
+		if(frequencyFrom > variantFrequency){
+			return true;
+		}
+
+		if(frequencyTo < variantFrequency){
+			return true;
+		}
+		return false;
+	}
+
 }
 
 class CosmicIDFilter implements Filter{
@@ -102,18 +252,17 @@ class CosmicIDFilter implements Filter{
 	}
 	
 	@Override
-	public boolean exclude(Mutation mutation) {
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+
 		boolean includeCosmicOnly = cosmicIDCheckBox.isSelected();
 		
 		if(!includeCosmicOnly){
 			return false;
 		}
 		
-		if(mutation.getCosmicID() == null){
-			return true;
-		}
-		
-		return (mutation.getCosmicID().size() == 0);
+		return current_mutation.cosmicIDsToString().equals("");
 	}
 }
 
@@ -126,10 +275,13 @@ class MaxG1000FrequencyFilter implements Filter{
 	}
 	
 	@Override
-	public boolean exclude(Mutation mutation) {
-		int maxPopulationFrequency = GUICommonTools.getNumber(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
-		if(mutation.getAltGlobalFreq() != null){
-			double populationFrequency = mutation.getAltGlobalFreq();
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+
+		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		if(current_mutation.getAltGlobalFreq() != null){
+			double populationFrequency = ((MutationSomatic)mutation).getAltGlobalFreq();
 			if(maxPopulationFrequency < populationFrequency){
 				return true;
 			}
@@ -147,10 +299,13 @@ class MaxGnomadFrequencyFilter implements Filter{
 	}
 	
 	@Override
-	public boolean exclude(Mutation mutation) {
-		int maxPopulationFrequency = GUICommonTools.getNumber(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
-		if(mutation.getGnomad_allfreq() != null){
-			double populationFrequency = mutation.getGnomad_allfreq();
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+
+		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		if(current_mutation.getGnomad_allfreq() != null){
+			double populationFrequency = current_mutation.getGnomad_allfreq();
 			if(maxPopulationFrequency < populationFrequency){
 				return true;
 			}
@@ -159,38 +314,20 @@ class MaxGnomadFrequencyFilter implements Filter{
 	}
 }
 
-class MaxOccurrenceFilter implements Filter{
 
-	private JTextField maxOccurrenceTextField;
-	
-	public MaxOccurrenceFilter(JTextField maxOccurrenceTextField) {
-		this.maxOccurrenceTextField = maxOccurrenceTextField;
-	}
-	
-	@Override
-	public boolean exclude(Mutation mutation) {
-		int maxOccurence = GUICommonTools.getNumber(maxOccurrenceTextField, Configurations.MAX_OCCURENCE_FILTER);
-		if(mutation.getOccurrence() != null){
-			int occurrence = mutation.getOccurrence();
-			if(maxOccurence < occurrence){
-				return true;
-			}
-		}
-		return false;
-	}
-}
+//germline
 
-class MinReadDepthFilter implements Filter{
+class MinReadDepthGermlineFilter implements Filter{
 
 	private JTextField minReadDepthTextField;
-	
-	public MinReadDepthFilter(JTextField minReadDepthTextField) {
+
+	public MinReadDepthGermlineFilter(JTextField minReadDepthTextField) {
 		this.minReadDepthTextField = minReadDepthTextField;
 	}
-	
+
 	@Override
-	public boolean exclude(Mutation mutation) {
-		int minReadDepth = GUICommonTools.getNumber(minReadDepthTextField, Configurations.READ_DEPTH_FILTER);
+	public boolean exclude(MutationCommon mutation) {
+		int minReadDepth = GUICommonTools.parseIntegerFromTextField(minReadDepthTextField, Configurations.GERMLINE_READ_DEPTH_FILTER);
 		if(mutation.getReadDP() != null){
 			int readDepth = mutation.getReadDP();
 			if(minReadDepth > readDepth){
@@ -201,69 +338,123 @@ class MinReadDepthFilter implements Filter{
 	}
 }
 
-class ReportedOnlyFilter implements Filter{
-	
-	private JCheckBox reportedOnlyCheckBox;
-	
-	public ReportedOnlyFilter(JCheckBox reportedOnlyCheckBox) {
-		this.reportedOnlyCheckBox = reportedOnlyCheckBox;
-	}
-	
-	@Override
-	public boolean exclude(Mutation mutation) {
-		boolean includeReportedOnly = reportedOnlyCheckBox.isSelected();
-		if(includeReportedOnly && !mutation.isReported()) {
-			return true;
-		}
-		return false;
-	}
-}
+class VariantAlleleFrequencyGermlineFilter implements Filter{
 
-class VariantAlleleFrequencyFilter implements Filter{
-	
 	private JTextField frequencyFromTextField;
-	private JTextField frequencyToTextField;	
+	private JTextField frequencyToTextField;
 
-	public VariantAlleleFrequencyFilter(JTextField frequencyFromTextField, JTextField frequencyToTextField) {
+	public VariantAlleleFrequencyGermlineFilter(JTextField frequencyFromTextField, JTextField frequencyToTextField) {
 		this.frequencyFromTextField = frequencyFromTextField;
 		this.frequencyToTextField = frequencyToTextField;
 	}
-	
+
 	@Override
-	public boolean exclude(Mutation mutation) {
-		int frequencyFrom =  GUICommonTools.getNumber(frequencyFromTextField, Configurations.ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
-		int frequencyTo = GUICommonTools.getNumber(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
-		
+	public boolean exclude(MutationCommon mutation) {
+		int frequencyFrom =  GUICommonTools.parseIntegerFromTextField(frequencyFromTextField, Configurations.GERMLINE_ALLELE_FREQ_FILTER);//TODO Base this on Configurations.getAlleleFrequencyFilter
+		int frequencyTo = GUICommonTools.parseIntegerFromTextField(frequencyToTextField, Configurations.MAX_ALLELE_FREQ_FILTER);
+
 		double variantFrequency = mutation.getAltFreq();
 		if(frequencyFrom > variantFrequency){
 			return true;
 		}
-		
+
 		if(frequencyTo < variantFrequency){
 			return true;
 		}
 		return false;
 	}
-	
+
 }
 
-class VariantPredicationClassFilter implements Filter{
+class MaxGnomadFrequencyGermlineFilter implements Filter{
 
-	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
-	
-	public VariantPredicationClassFilter(JComboBox<VariantPredictionClass> predictionFilterComboBox) {
-		this.predictionFilterComboBox = predictionFilterComboBox;
+	private JTextField maxGAFTextField;
+
+	public MaxGnomadFrequencyGermlineFilter(JTextField maxGAFTextField) {
+		this.maxGAFTextField = maxGAFTextField;
 	}
-	
+
 	@Override
-	public boolean exclude(Mutation mutation) {
-		VariantPredictionClass minPredictionClass = (VariantPredictionClass)predictionFilterComboBox.getSelectedItem();
-		if(mutation.getVariantPredictionClass() != null){
-			if(mutation.getVariantPredictionClass().importance < minPredictionClass.importance){
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationGermline current_mutation = (MutationGermline)mutation;
+
+		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		if(current_mutation.getGnomad_allfreq() != null){
+			double populationFrequency = current_mutation.getGnomad_allfreq();
+			if(maxPopulationFrequency < populationFrequency){
 				return true;
 			}
 		}
 		return false;
 	}
+}
 
+class TranscriptFlagGermlineFilter implements Filter{
+
+	private JCheckBox transcriptFlagCheckBox;
+
+	public TranscriptFlagGermlineFilter(JCheckBox transcriptFlagCheckBox) {
+		this.transcriptFlagCheckBox = transcriptFlagCheckBox;
+	}
+
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationGermline current_mutation = (MutationGermline)mutation;
+
+		boolean includeTranscriptFlagOnly = transcriptFlagCheckBox.isSelected();
+		if(includeTranscriptFlagOnly && current_mutation.getAlt_transcript_position().equals("MIDDLE")) {
+			return true;
+		}
+		return false;
+	}
+}
+
+class SynonymousFlagGermlineFilter implements Filter{
+
+	private JCheckBox synonymousFlagCheckBox;
+
+	public SynonymousFlagGermlineFilter(JCheckBox synonymousFlagCheckBox) {
+		this.synonymousFlagCheckBox = synonymousFlagCheckBox;
+	}
+
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationGermline current_mutation = (MutationGermline)mutation;
+
+		boolean includeSynonymousFlagOnly = synonymousFlagCheckBox.isSelected();
+		if(includeSynonymousFlagOnly && current_mutation.getConsequence().equals("synonymous_variant")) {
+			return true;
+		}
+		return false;
+	}
+}
+
+class VariantCallerFilter implements Filter{
+
+	private JTextField variantCallerTextField;
+	
+	public VariantCallerFilter(JTextField variantCallerTextField) {
+		this.variantCallerTextField = variantCallerTextField;
+	}
+	
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+		
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+		int variantCaller = GUICommonTools.parseIntegerFromTextField(variantCallerTextField, Integer.parseInt(Configurations.MIN_VARIANT_CALLERS_COUNT));
+		
+		int VarScanVAF = current_mutation.getVarScanVAF() != null ? 1 : 0;
+		int Mutect2VAF = current_mutation.getMutect2VAF() != null ? 1 : 0;
+		int freebayesVAF = current_mutation.getfreebayesVAF() != null ? 1 : 0;
+
+		if (VarScanVAF+freebayesVAF+Mutect2VAF == 0){//Handle all nulls, such as for historic data.
+			return false;
+  		}else if (VarScanVAF+freebayesVAF+Mutect2VAF < variantCaller){
+			return true;
+		}
+		return false;
+	}
 }

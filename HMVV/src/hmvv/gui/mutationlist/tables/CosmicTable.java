@@ -1,13 +1,13 @@
 package hmvv.gui.mutationlist.tables;
 
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CosmicTableModel;
+import javax.swing.JDialog;
 
 public class CosmicTable extends CommonTable{
 	private static final long serialVersionUID = 1L;
 
-	public CosmicTable(MutationListFrame parent, CosmicTableModel model){
+	public CosmicTable(JDialog parent, CosmicTableModel model){
 		super(parent, model);
 	}
 	

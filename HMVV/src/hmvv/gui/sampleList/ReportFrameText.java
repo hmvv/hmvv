@@ -1,18 +1,16 @@
 package hmvv.gui.sampleList;
-
 import java.awt.Component;
-
+import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import hmvv.gui.mutationlist.MutationListFrame;
 
 public class ReportFrameText extends ReportFrame{
 	private static final long serialVersionUID = 1L;
 	
 	private JTextArea textArea;
 	
-	public ReportFrameText(MutationListFrame parent, String title, String report) {
+	public ReportFrameText(JDialog parent, String title, String report) {
 		super(parent, title);
 		
 		textArea = new JTextArea(report);

@@ -26,6 +26,7 @@ public class GUICommonTools {
 	public static final Color PROGRESS_BACKGROUND_COLOR = Color.YELLOW;
 	public static final Color PROGRESS_FOREGROUND_COLOR = Color.GREEN.darker();
 	
+	public static Font TAHOMA_PLAIN_10 = new Font("Tahoma", Font.PLAIN, 10);
 	public static Font TAHOMA_PLAIN_13 = new Font("Tahoma", Font.PLAIN, 13);
 	public static Font TAHOMA_BOLD_11 = new Font("Tahoma", Font.BOLD, 11);
 	public static Font TAHOMA_BOLD_12 = new Font("Tahoma", Font.BOLD, 12);
@@ -72,7 +73,7 @@ public class GUICommonTools {
 	    return bounds;
 	}	
 
-	public static int getNumber(JTextField field, Integer defaultInt){
+	public static int parseIntegerFromTextField(JTextField field, Integer defaultInt){
 		String value = field.getText();
 		Integer valueInt = null;
 		if(value.equals("")){
@@ -85,5 +86,21 @@ public class GUICommonTools {
 			}
 		}
 		return valueInt;
+	}
+
+
+	public static double parseDoubleFromTextField(JTextField field, double defaultdouble){
+		String value = field.getText();
+		double valuedouble = 0.0;
+		if(value.equals("")){
+			valuedouble = defaultdouble;
+		}else{
+			try{
+				valuedouble = Double.parseDouble(value);
+			}catch(Exception e){
+				return defaultdouble;
+			}
+		}
+		return valuedouble;
 	}
 }

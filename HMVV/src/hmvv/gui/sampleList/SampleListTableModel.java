@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
+import hmvv.model.Assay;
+import hmvv.model.Instrument;
+import hmvv.model.RunFolder;
 import hmvv.model.Sample;
 
 public class SampleListTableModel extends AbstractTableModel{
@@ -27,18 +30,18 @@ public class SampleListTableModel extends AbstractTableModel{
 		
 		columns.add(new SampleTableModelColumn("The assay used",
 				"Assay",
-				String.class,
+				Assay.class,
 				(Sample sample) -> sample.assay));
 		
 		columns.add(new SampleTableModelColumn("The instrument used",
 				"Instrument",
-				String.class,
+				Instrument.class,
 				(Sample sample) -> sample.instrument));
 		
-		columns.add(new SampleTableModelColumn("The patient's MRN", 
-				"MRN", 
+		columns.add(new SampleTableModelColumn("The patient's MRN (and the number of samples for that patient)", 
+				"MRN (#)", 
 				String.class,
-				(Sample sample) -> sample.getMRN()));
+				(Sample sample) -> sample.getMRN() + sample.getLinkedPatientSampleSize()));
 		
 		columns.add(new SampleTableModelColumn("The patient's last name", 
 				"Last Name", 
@@ -80,20 +83,20 @@ public class SampleListTableModel extends AbstractTableModel{
 				String.class,
 				(Sample sample) -> sample.sampleName));
 		
-		columns.add(new SampleTableModelColumn("The instrument generated coverage ID (Life Technologies instruments only)", 
-				"Coverage ID", 
-				String.class,
-				(Sample sample) -> sample.coverageID));
-		
-		columns.add(new SampleTableModelColumn("The instrument generated caller ID (Life Technologies instruments only)", 
-				"Caller ID", 
-				String.class,
-				(Sample sample) -> sample.callerID));
+//		columns.add(new SampleTableModelColumn("The instrument generated coverage ID (Life Technologies instruments only)", 
+//				"Coverage ID", 
+//				String.class,
+//				(Sample sample) -> sample.coverageID));
+//		
+//		columns.add(new SampleTableModelColumn("The instrument generated caller ID (Life Technologies instruments only)", 
+//				"Caller ID", 
+//				String.class,
+//				(Sample sample) -> sample.callerID));
 		
 		columns.add(new SampleTableModelColumn("The date the sample was run", 
 				"Run Date", 
 				String.class,
-				(Sample sample) -> sample.runDate));
+				(Sample sample) -> sample.runDate.toString()));
 
 		columns.add(new SampleTableModelColumn("The patient's clinical history",
 				"Patient History",
@@ -110,10 +113,10 @@ public class SampleListTableModel extends AbstractTableModel{
 				String.class,
 				(Sample sample) -> sample.getNote()));
 		
-		columns.add(new SampleTableModelColumn("User ID of the individual who entered this sample", 
-				"Entered By", 
-				String.class,
-				(Sample sample) -> sample.enteredBy));
+//		columns.add(new SampleTableModelColumn("User ID of the individual who entered this sample", 
+//				"Entered By", 
+//				String.class,
+//				(Sample sample) -> sample.enteredBy));
 		
 		columns.add(new SampleTableModelColumn("Quality control metrics of this assay.",
 				"AssayQC",
@@ -126,13 +129,13 @@ public class SampleListTableModel extends AbstractTableModel{
 				(Sample sample) -> "edit"));
 	}
 	
-	public Sample getSample(String instrument, String runID, String coverageID, String variantCallerID, String sampleName){
+	public Sample getSample(Instrument instrument, RunFolder runFolder, String coverageID, String variantCallerID, String sampleName){
 		for(Sample s : samples){
 			//only check sampleID because the coverageID and variantCallerID can be blank depending on the instrument
-			if(s.runID.equals("") || s.sampleName.equals("")){
+			if(s.runFolder.runFolderName.equals("") || s.sampleName.equals("")){
 				continue;
 			}
-			if(s.instrument.equals(instrument) && s.runID.equals(runID) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
+			if(s.instrument.equals(instrument) && s.runFolder.equals(runFolder) && s.coverageID.equals(coverageID) && s.callerID.equals(variantCallerID) && s.sampleName.equals(sampleName)){
 				return s;
 			}
 		}

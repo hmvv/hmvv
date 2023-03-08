@@ -3,7 +3,7 @@ package hmvv.gui.mutationlist;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.model.Mutation;
+import hmvv.model.MutationCommon;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,7 +12,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class AnnotationDraftFrame extends JFrame {
+public class AnnotationDraftFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
@@ -20,10 +20,14 @@ public class AnnotationDraftFrame extends JFrame {
     private JButton clearButton;
     private JButton saveButton;
     
-    private Mutation mutation;
+    private MutationCommon mutation;
     private AnnotationFrame parent;
     
-    public AnnotationDraftFrame( AnnotationFrame parent, Mutation mutation) throws HeadlessException {
+    public AnnotationDraftFrame(AnnotationFrame parent, MutationCommon mutation) throws HeadlessException {
+        super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
+		String title = "Annotation Draft";
+		setTitle(title);
+        
         this.parent = parent;
         this.mutation = mutation;
         
@@ -32,16 +36,23 @@ public class AnnotationDraftFrame extends JFrame {
         activateComponents();
 
         pack();
-        setResizable(false);
+        Rectangle bounds = GUICommonTools.getBounds(parent);
+		setSize((int)(bounds.width*.70), (int)(bounds.height*.60));
+        setResizable(true);
         setLocationRelativeTo(parent);
+        //setAlwaysOnTop(true);
+        
     }
     
     private void createComponents(){
         annotationTextArea = new JTextArea();
+        
         annotationTextArea.setWrapStyleWord(true);
         annotationTextArea.setLineWrap(true);
         try {
-        	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate()));
+
+        	annotationTextArea.setText(DatabaseCommands.getVariantAnnotationDraft(mutation.getCoordinate(),mutation.getMutationType()));
+            
         } catch (Exception e) {
         	HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
         }
@@ -61,18 +72,20 @@ public class AnnotationDraftFrame extends JFrame {
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPanel.setLayout(new BorderLayout());
 
-        Dimension textAreaDimension = new Dimension(400,400);
+        Dimension textAreaDimension = new Dimension(700,400);
 
         JPanel textAreaPanel = new JPanel();
+        
         //Annotation
         JPanel annotationPanel = new JPanel();
         annotationPanel.setLayout(new BoxLayout(annotationPanel, BoxLayout.Y_AXIS));
         JScrollPane annotationScrollPane = new JScrollPane(annotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         annotationScrollPane.setPreferredSize(textAreaDimension);
-        TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation Draft (5000 characters max)");
+        TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation Draft");
         annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
         annotationPanel.setBorder(annotationBorder);
         annotationPanel.add(annotationScrollPane);
+        
         textAreaPanel.add(annotationPanel);
 
         JPanel buttonPane = new JPanel();
@@ -82,6 +95,7 @@ public class AnnotationDraftFrame extends JFrame {
 
         contentPanel.add(textAreaPanel, BorderLayout.CENTER);
         contentPanel.add(buttonPane, BorderLayout.SOUTH);
+        
     }
 
     private void activateComponents() {
@@ -100,8 +114,11 @@ public class AnnotationDraftFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText());
+                    DatabaseCommands.addVariantAnnotationDraft(mutation.getCoordinate(),annotationTextArea.getText(),mutation.getMutationType());
                     AnnotationDraftFrame.this.dispose();
+                    
+                    
+
                 } catch (Exception e) {
                 	HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationDraftFrame.this, e);
                 }

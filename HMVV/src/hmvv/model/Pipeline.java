@@ -4,28 +4,27 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import hmvv.io.DatabaseCommands;
+import hmvv.main.Configurations;
 
 public class Pipeline {
 	
-	public final int queueID;
 	public final int sampleID;
-	public final String runID;
+	public final RunFolder runFolderName;
 	public final String sampleName;
-	public final String assayName;
-	public final String instrumentName;
+	public final Assay assay;
+	public final Instrument instrument;
 	public final String status;
 	public final Timestamp timeStatusUpdated;
 	
 	public final PipelineProgram pipelineProgram;
 	private int progress;
 	
-	public Pipeline (Integer queueID, Integer sampleTableID, String runID , String sampleName , String assayName, String instrumentName, String status, Timestamp timeStatusUpdated) {
-        this.queueID = queueID;
+	public Pipeline (Integer sampleTableID, RunFolder runFolderName, String sampleName, Assay assay, Instrument instrumentName, String status, Timestamp timeStatusUpdated) {
         this.sampleID = sampleTableID;
-        this.runID = runID;
+        this.runFolderName = runFolderName;
         this.sampleName = sampleName;
-        this.assayName = assayName;
-        this.instrumentName = instrumentName;
+        this.assay = assay;
+        this.instrument = instrumentName;
         this.status = status;
         this.timeStatusUpdated = timeStatusUpdated;
         pipelineProgram = computeProgram();
@@ -37,20 +36,20 @@ public class Pipeline {
 		}
 	}
 
-	public String getRunID() {
-		return runID;
+	public RunFolder getRunFolder() {
+		return runFolderName;
 	}
 
 	public String getsampleName() {
 		return sampleName;
 	}
 
-	public String getAssayName() {
-		return assayName;
+	public Assay getAssay() {
+		return assay;
 	}
 
-	public String getInstrumentName() {
-		return instrumentName;
+	public Instrument getInstrument() {
+		return instrument;
 	}
 
 	public String getStatus() {
@@ -73,45 +72,14 @@ public class Pipeline {
 		//default to RUNNING
 		PipelineProgram program = PipelineProgram.runningProgram();
 		
-		if (status.toLowerCase().equals("pipelinecompleted")){
+		if (status.equals("PipelineCompleted")){
 			return PipelineProgram.completeProgram();
-		}else if ( instrumentName.equals("proton")) {
-			if (status.equals("started") || status.equals("queued") ) {
-				program.setDisplayString("0/3");
-			}else if (status.equals("RunningVEP")) {
-				program.setDisplayString("1/3");
-			}else if (status.equals("CompletedVEP")) {
-				program.setDisplayString("2/3");
-			}else if (status.equals("UpdatingDatabase")) {
-				program.setDisplayString("3/3");
-			}else if (status.startsWith("ERROR")) {
-				return PipelineProgram.errorProgram();
-			}
-		}else if  ( assayName.equals("heme") || assayName.equals("tmb")) {
-			if (status.equals("started") || status.equals("queued")) {
-				program.setDisplayString("0/6");
-			}else if (status.equals("bcl2fastq_running_now")) {
-				program.setDisplayString("1/6");
-			}else if ( status.equals("bcl2fastq_completed_now")) {
-				program.setDisplayString("1/6");
-			}else if ( status.equals("bcl2fastq_completed_past")) {
-				program.setDisplayString("1/6");
-			}else if (status.equals("bcl2fastq_wait") ) {
-				program.setDisplayString("1/6");
-			}else if (status.equals("Alignment") || status.equals("Trimming")) {
-				program.setDisplayString("2/6");
-			}else if (status.equals("VariantCaller")) {
-				program.setDisplayString("3/6");
-			}else if (status.equals("RunningVEP")) {
-				program.setDisplayString("4/6");
-			}else if (status.equals("CompletedVEP")){
-				program.setDisplayString("5/6");
-			}else if (status.equals("UpdatingDatabase")) {
-				program.setDisplayString("6/6");
-			}else if (status.startsWith("ERROR")) {
-				return PipelineProgram.errorProgram();
-			}
 		}
+		if (status.startsWith("ERROR")) {
+			return PipelineProgram.errorProgram();
+		}
+		program.setDisplayString(status);
+		
 		return program;
 	}
 
@@ -125,10 +93,10 @@ public class Pipeline {
 
 			// if pipeline has already started then get the start time
 			ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
-			rows = DatabaseCommands.getPipelineDetail(queueID);
+			rows = DatabaseCommands.getPipelineDetail(this);
 			for (PipelineStatus ps : rows) {
-				if (ps.pipelineStatus.equals("started")){
-					pipelineStartTime = ps.getDateUpdated();
+				if (ps.pipelineStatus.equals(Configurations.getPipelineFirstStep(ps.instrument))){
+					pipelineStartTime = ps.dateUpdated;
 				}
 			}
 

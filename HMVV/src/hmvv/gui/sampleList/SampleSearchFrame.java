@@ -4,12 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -24,10 +25,12 @@ import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.HMVVDefectReportFrame;
+import hmvv.main.HMVVFrame;
+import hmvv.model.Assay;
 import hmvv.model.Sample;
 
 
-public class SampleSearchFrame extends JFrame {
+public class SampleSearchFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	private JTextField textOrderNumber;
@@ -36,7 +39,7 @@ public class SampleSearchFrame extends JFrame {
 	private JTextField textfirstName;
 	private DatePicker datePickerFrom;
 	private DatePicker datePickerTo;
-	private JComboBox<String> assayComboBox;
+	private JComboBox<Assay> assayComboBox;
 	
 	private JButton okButton;
 	private JButton cancelButton;
@@ -44,8 +47,8 @@ public class SampleSearchFrame extends JFrame {
 	/**
 	 * Create the dialog.
 	 */
-	public SampleSearchFrame(SampleListFrame parent) {
-		super("Sample Search");
+	public SampleSearchFrame(HMVVFrame parent) {
+		super(parent, "Sample Search", ModalityType.APPLICATION_MODAL);
 		JPanel contentPanel = new JPanel();
 		
 		setBounds(100, 100, 438, 348);
@@ -66,13 +69,13 @@ public class SampleSearchFrame extends JFrame {
 		contentPanel.setLayout(null);
 		{
 			JLabel lblAssay = new JLabel("Assay");
-			lblAssay.setBounds(95, 39, 40, 17);
+			lblAssay.setBounds(95, 39, 60, 17);
 			lblAssay.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblAssay);
 		}
 		{
 			JLabel lblOrderNumber = new JLabel("Order Number");
-			lblOrderNumber.setBounds(35, 69, 100, 17);
+			lblOrderNumber.setBounds(35, 68, 110, 17);
 			lblOrderNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblOrderNumber);
 		}
@@ -84,7 +87,7 @@ public class SampleSearchFrame extends JFrame {
 		}
 		{
 			JLabel lblPathNumber = new JLabel("Path Number");
-			lblPathNumber.setBounds(43, 99, 100, 17);
+			lblPathNumber.setBounds(43, 97, 110, 17);
 			lblPathNumber.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblPathNumber);
 		}
@@ -96,7 +99,7 @@ public class SampleSearchFrame extends JFrame {
 		}
 		{
 			JLabel lblLastName = new JLabel("Last Name");
-			lblLastName.setBounds(62, 129, 73, 17);
+			lblLastName.setBounds(62, 128, 80, 17);
 			lblLastName.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblLastName);
 		}
@@ -108,7 +111,7 @@ public class SampleSearchFrame extends JFrame {
 		}
 		{
 			JLabel lblFirstName = new JLabel("First Name");
-			lblFirstName.setBounds(61, 159, 74, 17);
+			lblFirstName.setBounds(61, 157, 80, 17);
 			lblFirstName.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblFirstName);
 		}
@@ -120,23 +123,23 @@ public class SampleSearchFrame extends JFrame {
 		}
 		{
 			JLabel lblRunDate = new JLabel("Run Date");
-			lblRunDate.setBounds(21, 207, 64, 17);
+			lblRunDate.setBounds(21, 207, 75, 17);
 			lblRunDate.setFont(GUICommonTools.TAHOMA_BOLD_14);
 			contentPanel.add(lblRunDate);
 		}
 		{
 			JLabel lblTo = new JLabel("TO");
 			lblTo.setFont(GUICommonTools.TAHOMA_BOLD_13);
-			lblTo.setBounds(95, 231, 27, 17);
+			lblTo.setBounds(115, 234, 27, 17);
 			contentPanel.add(lblTo);
 		}
 
-		assayComboBox = new JComboBox<String>();
+		assayComboBox = new JComboBox<Assay>();
 		assayComboBox.setBounds(140, 39, 183, 20);
-		assayComboBox.addItem("All");
+		assayComboBox.addItem(Assay.getAssay("All"));
 		
 		try {
-			for(String assay : DatabaseCommands.getAllAssays()){
+			for(Assay assay : DatabaseCommands.getAllAssays()){
 				assayComboBox.addItem(assay);
 			}
 		} catch (Exception e) {
@@ -148,7 +151,7 @@ public class SampleSearchFrame extends JFrame {
 
 		JLabel lblFrom = new JLabel("FROM");
 		lblFrom.setFont(GUICommonTools.TAHOMA_BOLD_13);
-		lblFrom.setBounds(95, 188, 35, 17);
+		lblFrom.setBounds(95, 191, 45, 17);
 		contentPanel.add(lblFrom);
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -213,8 +216,8 @@ public class SampleSearchFrame extends JFrame {
 	
 	
 	public boolean include(Sample sample){
-		String assay = assayComboBox.getSelectedItem().toString();
-		if(!assay.equals("All") && !assay.equals(sample.assay)){
+		Assay assay = (Assay)assayComboBox.getSelectedItem();
+		if(!assay.assayName.equals("All") && !assay.equals(sample.assay)){
 			return false;
 		}
 		
@@ -242,7 +245,7 @@ public class SampleSearchFrame extends JFrame {
 		if(!dateStringFrom.equals("NA")){
 			try {
 				Date filterDate = GUICommonTools.shortDateFormat.parse(dateStringFrom);
-				Date sampleDate = GUICommonTools.shortDateFormat.parse(sample.runDate);
+				Timestamp sampleDate = sample.runDate;
 				if(filterDate.after(sampleDate)){
 					return false;
 				}
@@ -255,7 +258,7 @@ public class SampleSearchFrame extends JFrame {
 		if(!dateStringTo.equals("NA")){
 			try {
 				Date filterDate = GUICommonTools.shortDateFormat.parse(dateStringTo);
-				Date sampleDate = GUICommonTools.shortDateFormat.parse(sample.runDate);
+				Timestamp sampleDate = sample.runDate;
 				if(filterDate.before(sampleDate)){
 					return false;
 				}

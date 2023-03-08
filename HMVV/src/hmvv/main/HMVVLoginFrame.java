@@ -18,7 +18,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
@@ -104,8 +103,8 @@ public class HMVVLoginFrame extends JFrame {
 		JLabel lblhmvv = new JLabel("Houston Methodist Variant Viewer");
 		lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
 		lblhmvv.setBounds(75, 100, 1000, 30);
-		
-		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 3.4.1.2 </a></html>");
+
+		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 4.0</a></html>");
 		lblhmvv_version.setFont(GUICommonTools.TAHOMA_BOLD_11);
 		lblhmvv_version.setBounds(215, 125, 100, 30);
 
@@ -214,8 +213,8 @@ public class HMVVLoginFrame extends JFrame {
 		
 		try{
 			loginButton.setText("Loading Sample list...");
-			SampleListFrame sampleList = new SampleListFrame(HMVVLoginFrame.this, DatabaseCommands.getAllSamples());
-			sampleList.setVisible(true);
+			HMVVFrame hmvvFrame = new HMVVFrame(HMVVLoginFrame.this, DatabaseCommands.getAllSamples());
+			hmvvFrame.setVisible(true);
 			dispose();
 		}catch(Exception e){
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Could not construct sample list. Please contact the system administrator.");

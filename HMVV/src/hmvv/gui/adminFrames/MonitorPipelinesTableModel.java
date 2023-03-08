@@ -20,11 +20,6 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 
 	private void constructColumns(){
 		columns = new ArrayList<PipelineTableModelColumn>();
-		columns.add(new PipelineTableModelColumn("The queue ID",
-				"QueueID",
-				Integer.class,
-				(Pipeline pipeline) -> pipeline.queueID));
-
 		columns.add(new PipelineTableModelColumn("The sampleID",
 				"sampleID",
 				Integer.class,
@@ -33,7 +28,7 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 		columns.add(new PipelineTableModelColumn("The runID",
 				"RunID",
 				Integer.class,
-				(Pipeline pipeline) -> pipeline.runID));
+				(Pipeline pipeline) -> pipeline.runFolderName));
 
 		columns.add(new PipelineTableModelColumn("The sample used",
 				"sampleName",
@@ -41,14 +36,19 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 				(Pipeline pipeline) -> pipeline.sampleName));
 
 		columns.add(new PipelineTableModelColumn("The assay used", 
-				"assayID", 
+				"assay", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.assayName));
+				(Pipeline pipeline) -> pipeline.assay));
 
 		columns.add(new PipelineTableModelColumn("The instrument used", 
 				"instrumentID", 
 				String.class,
-				(Pipeline pipeline) -> pipeline.instrumentName));
+				(Pipeline pipeline) -> pipeline.instrument));
+
+		columns.add(new PipelineTableModelColumn("The run folder used", 
+				"runFolder", 
+				String.class,
+				(Pipeline pipeline) -> pipeline.runFolderName));
 
 		columns.add(new PipelineTableModelColumn("The pipeline status", 
 				"status", 
@@ -83,7 +83,7 @@ public class MonitorPipelinesTableModel extends AbstractTableModel{
 	public void addOrUpdatePipeline(Pipeline pipeline) {
 		for(int i = 0; i < pipelines.size(); i++) {
 			Pipeline p = pipelines.get(i);
-            if(p.queueID == pipeline.queueID) {
+            if((p.instrument == pipeline.instrument) && (p.runFolderName.equals(pipeline.runFolderName)) && (p.sampleName.equals(pipeline.sampleName))){
 				pipelines.set(i, pipeline);
 				fireTableRowsUpdated(i, i);
 				return;

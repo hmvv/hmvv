@@ -21,7 +21,7 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.gui.sampleList.SampleListFrame;
+import hmvv.main.HMVVFrame;
 import hmvv.model.QCTrend;
 import hmvv.model.GeneQCDataElementTrend;
 
@@ -41,8 +41,8 @@ public class QualityControlFrame extends JDialog{
 	private JPanel checkboxPanel;
 	private HashMap<String, Color> seriesColors;
 	
-	public QualityControlFrame(SampleListFrame parent, TreeMap<String, GeneQCDataElementTrend> qualityControlTrends, String jframeTitle, String chartTitle, String xAxis, String yAxis) {
-		super(parent, "HMVV QC Chart - " + jframeTitle);
+	public QualityControlFrame(HMVVFrame parent, TreeMap<String, GeneQCDataElementTrend> qualityControlTrends, String jframeTitle, String chartTitle, String xAxis, String yAxis) {
+		super(parent, "HMVV QC Chart - " + jframeTitle, ModalityType.APPLICATION_MODAL);
 		this.qualityControlTrends = qualityControlTrends;
 		this.chartTitle = chartTitle;
 		this.xAxis = xAxis;
@@ -53,7 +53,6 @@ public class QualityControlFrame extends JDialog{
 		setSize((int)(bounds.width*.6), (int)(bounds.height*.5));
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setModalityType(ModalityType.APPLICATION_MODAL);
 
 		createComponents();
 		layoutComponents();

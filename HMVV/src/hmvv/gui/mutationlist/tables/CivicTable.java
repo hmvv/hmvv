@@ -1,15 +1,16 @@
 package hmvv.gui.mutationlist.tables;
 
+import javax.swing.JDialog;
+
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.tablemodels.CivicTableModel;
 import hmvv.io.InternetCommands;
-import hmvv.model.Mutation;
+import hmvv.model.MutationSomatic;
 
 public class CivicTable extends CommonTable {
     private static final long serialVersionUID = 1L;
 
-    public CivicTable(MutationListFrame parent, CivicTableModel model) {
+    public CivicTable(JDialog parent, CivicTableModel model) {
         super(parent, model);
     }
 
@@ -26,7 +27,7 @@ public class CivicTable extends CommonTable {
     }
 
     private void searchCivic() throws Exception {
-        Mutation mutation = getSelectedMutation();
+        MutationSomatic mutation = getSelectedMutation();
         String civic_url = mutation.getCivic_variant_url();
         if (!civic_url.equals("") && !civic_url.equals("null")) {
             InternetCommands.searchCivic(civic_url);

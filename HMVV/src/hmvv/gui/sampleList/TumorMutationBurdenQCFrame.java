@@ -2,6 +2,7 @@ package hmvv.gui.sampleList;
 
 import hmvv.gui.GUICommonTools;
 import hmvv.io.SSHConnection;
+import hmvv.main.HMVVFrame;
 import hmvv.model.TMBSample;
 
 import javax.swing.*;
@@ -17,22 +18,19 @@ public class TumorMutationBurdenQCFrame extends JDialog {
     private JTable table;
     private DefaultTableModel tableModel;
     private JScrollPane tableScrollPane;
-    private SampleListFrame parent;
     private TMBSample sample;
     private Rectangle bounds;
 
-    public TumorMutationBurdenQCFrame(SampleListFrame parent, TMBSample sample) throws Exception{
-        super(parent, "Title Set Later");
+    public TumorMutationBurdenQCFrame(HMVVFrame parent, TMBSample sample) throws Exception{
+        super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
         String title = "TMB Quality Control - " + sample.getLastName() + "," + sample.getFirstName() +
                 " (runID = " + sample.runID + ", sampleID = " + sample.sampleID + ")";
         setTitle(title);
-        this.parent = parent;
         this.sample = sample;
 
         this.bounds = GUICommonTools.getBounds(parent);
         setSize((int)(bounds.width*.6), (int)(bounds.height*.6));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         setResizable(false);
 
         createComponents();

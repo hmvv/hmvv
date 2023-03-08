@@ -12,6 +12,7 @@ public class BasicTableModel extends CommonTableModel {
 	protected ArrayList<MutationTableModelColumn> constructColumns(){
 		ArrayList<MutationTableModelColumn> columns = new ArrayList<MutationTableModelColumn>();
 		columns.add(MutationTableModelColumn.reportedColumn);
+		columns.add(MutationTableModelColumn.otherReportedColumn);
 		columns.add(MutationTableModelColumn.gotoIGVColumn);
 		columns.add(MutationTableModelColumn.igvLoadColumn);
 		
