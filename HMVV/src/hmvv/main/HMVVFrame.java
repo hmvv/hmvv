@@ -49,7 +49,6 @@ public class HMVVFrame extends JFrame{
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
-	private JMenuItem refreshMenuItem;
 	private volatile JMenuItem refreshLabel;
 	
 
@@ -113,7 +112,6 @@ public class HMVVFrame extends JFrame{
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		databaseInformationMenuItem = new JMenuItem("Database Information");
 		qualityControlMenuItem = new JMenu("Quality Control");
-		refreshMenuItem = new JMenuItem("Refresh");
 		refreshLabel = new JMenuItem("Loading status refresh...");
 		refreshLabel.setEnabled(false);
 
@@ -165,7 +163,6 @@ public class HMVVFrame extends JFrame{
 
 		adminMenu.addSeparator();
 		adminMenu.add(databaseInformationMenuItem);
-		adminMenu.add(refreshMenuItem);
 		adminMenu.add(refreshLabel);
 
 		setJMenuBar(menuBar);
@@ -201,7 +198,6 @@ public class HMVVFrame extends JFrame{
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);
 		databaseInformationMenuItem.addActionListener(listener);
-		refreshMenuItem.addActionListener(listener);
 	}
 
 	private void setupPipelineRefreshThread() {		
