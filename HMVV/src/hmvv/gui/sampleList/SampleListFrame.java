@@ -131,14 +131,12 @@ public class SampleListFrame extends JPanel {
 	
 
 	public void updateSampleTableModel() throws Exception {
-			//tableModel = new SampleListTableModel(DatabaseCommands.getAllSamples());
-			tableModel.fireTableDataChanged();
-			table.repaint();
 
 			ArrayList<Sample> samples = DatabaseCommands.getAllSamples();
 			for(Sample s : samples) {
 				tableModel.addOrUpdateSample(s);
 		}
+		table.repaint();
 	}
 
 
@@ -393,7 +391,6 @@ public class SampleListFrame extends JPanel {
 				try {
 					updateSampleTableModel();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				

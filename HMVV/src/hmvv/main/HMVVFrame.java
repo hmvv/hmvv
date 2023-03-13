@@ -142,7 +142,7 @@ public class HMVVFrame extends JFrame{
 							}
 						}
 					});
-				} else {
+				} else if(!assay.assayName.equals("archer")) {
 					JMenuItem variantAlleleFrequencyMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
 					qualityControlMenuItem.add(variantAlleleFrequencyMenuItem);
 					variantAlleleFrequencyMenuItem.addActionListener(new ActionListener() {
@@ -188,9 +188,6 @@ public class HMVVFrame extends JFrame{
 						handleMonitorPipelineClick();
 					}else if(e.getSource() == databaseInformationMenuItem){
 						handledatabaseInformationClick();
-					}else if(e.getSource() == refreshMenuItem){
-						//samplePanel.updateSampleTableModel();
-						samplePanel = new SampleListFrame(HMVVFrame.this, DatabaseCommands.getAllSamples());
 					}
 				} catch (Exception e1) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(HMVVFrame.this, e1);

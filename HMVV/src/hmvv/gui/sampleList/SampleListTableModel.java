@@ -201,9 +201,10 @@ public class SampleListTableModel extends AbstractTableModel{
 	public void addOrUpdateSample(Sample sample) {
 		for(int i = 0; i < samples.size(); i++) {
 			Sample s = samples.get(i);
+			
             if(s.sampleID == sample.sampleID){
 				updateSample(i,s);
-				//fireTableRowsUpdated(i, i);
+				fireTableRowsUpdated(i, i);
 				return;
 			}
 		}

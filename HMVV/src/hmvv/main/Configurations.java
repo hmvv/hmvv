@@ -290,6 +290,16 @@ public class Configurations {
 		return GLOBAL_ALLELE_FREQ_FILTER;
 	}
 
+	public static String getqcMeasureDescription(Sample sample) {
+
+		Timestamp runDate = sample.runDate; 
+
+		if (sample.assay.assayName.equals("heme") && sample.instrument.instrumentName.equals("nextseq") && OLDER_RUN_DATE.compareTo(runDate.toString()) <= 0){
+			return "250x Coverage < ";
+		}
+		return "100x Coverage < ";
+	}
+
 	public static int HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER = 100;
 	public static int getDefaultReadDepthFilter(Sample sample) {
 

@@ -82,7 +82,7 @@ public class Amplicon {
 				}
 			}else if(instrument.equals("nextseq") && cov250xPercent != null){
 				failed_check = cov250xPercent < Configurations.COVERAGE_PERCENTAGE_250X;
-				qcMeasureDescription = "250x Coverage < " +(Configurations.COVERAGE_PERCENTAGE_250X) + "% of positions";
+				qcMeasureDescription =  Configurations.getqcMeasureDescription(sample) +(Configurations.COVERAGE_PERCENTAGE_250X) + "% of positions";
 				if(failed_check == true){
 					failed = true;
 					failed_amplicons = ampliconName;
