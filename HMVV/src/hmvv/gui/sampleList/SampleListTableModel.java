@@ -198,18 +198,9 @@ public class SampleListTableModel extends AbstractTableModel{
 		return columns.get(column).description;
 	}
 
-	public void addOrUpdateSample(Sample sample) {
-		for(int i = 0; i < samples.size(); i++) {
-			Sample s = samples.get(i);
-			
-            if(s.sampleID == sample.sampleID){
-				updateSample(i,s);
-				fireTableRowsUpdated(i, i);
-				return;
-			}
-		}
-
-		//not found, so add to model
-		addSample(sample);
+	public void rebuildSampleList(ArrayList<Sample> freshSamples) throws Exception {
+		samples.clear();
+		samples.addAll(freshSamples);
+		fireTableDataChanged();
 	}
 }

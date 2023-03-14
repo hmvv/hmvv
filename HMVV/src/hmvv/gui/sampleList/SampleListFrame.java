@@ -128,17 +128,6 @@ public class SampleListFrame extends JPanel {
 			return false;
 		}
 	}
-	
-
-	public void updateSampleTableModel() throws Exception {
-
-			ArrayList<Sample> samples = DatabaseCommands.getAllSamples();
-			for(Sample s : samples) {
-				tableModel.addOrUpdateSample(s);
-		}
-		table.repaint();
-	}
-
 
 	private void createComponents(){
 		table = new JTable(tableModel){
@@ -386,14 +375,15 @@ public class SampleListFrame extends JPanel {
 		refreshButton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				resetFilters();
-				refilterTable();
 				try {
-					updateSampleTableModel();
+					ArrayList<Sample> freshSamples = DatabaseCommands.getAllSamples();
+					tableModel.rebuildSampleList(freshSamples);
+					refilterTable();
+					updatePipelinesASynch();
+
 				} catch (Exception e) {
-					e.printStackTrace();
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
 				}
-				
 			}
 		});
 
