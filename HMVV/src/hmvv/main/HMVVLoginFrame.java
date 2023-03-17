@@ -56,7 +56,6 @@ public class HMVVLoginFrame extends JFrame {
 			JOptionPane.showMessageDialog(null, e.getMessage() + "\nShutting down.");
 			return;
 		}
-		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				HMVVLoginFrame window = new HMVVLoginFrame();
@@ -104,7 +103,7 @@ public class HMVVLoginFrame extends JFrame {
 		lblhmvv.setFont(GUICommonTools.TAHOMA_BOLD_20);
 		lblhmvv.setBounds(75, 100, 1000, 30);
 
-		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version 4.1</a></html>");
+		lblhmvv_version = new JLabel("<html> <a style=\"text-decoration:none\" href=\"\">version " + Configurations.DATABASE_VERSION + "</a></html>");
 		lblhmvv_version.setFont(GUICommonTools.TAHOMA_BOLD_11);
 		lblhmvv_version.setBounds(215, 125, 100, 30);
 
@@ -175,6 +174,7 @@ public class HMVVLoginFrame extends JFrame {
 	private void login(){
 		String userName = usernameTextField.getText();
 		String passwd = new String(passwordTextField.getPassword());
+		
 		try{
 			loginButton.setText("Logging in...");
 			SSHConnection.connect(userName, passwd);
@@ -198,11 +198,25 @@ public class HMVVLoginFrame extends JFrame {
 		try {
 			loginButton.setText("Connecting to database...");
 			DatabaseCommands.connect();
+			Boolean dbVersionFlag = DatabaseCommands.checkDbVersion();
+			if (dbVersionFlag){
+				
+				int result = JOptionPane.showConfirmDialog(this,"Would you like to download the latest version of HMVV "  + Configurations.DATABASE_NAME.substring(4).toUpperCase() + "?",
+														"Your current HMVV version is outdated", JOptionPane.YES_NO_OPTION);
+				
+				if (result == JOptionPane.YES_OPTION){
+					InternetCommands.downloadHMVV();
+				}
+				System.exit(1);
+				
+			}
+
+			
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Database connection failed. Please contact the system administrator.");
 			return;
 		}
-		
+
 		try {
 			loginButton.setText("Connecting to LIS...");
 			LISConnection.connect();

@@ -38,6 +38,8 @@ public class Configurations {
 					DATABASE_PORT = Integer.parseInt(variableValue);
 				}else if(variableName.startsWith("DATABASE_NAME")){
 					DATABASE_NAME = variableValue;
+				}else if(variableName.startsWith("DATABASE_VERSION")){
+						DATABASE_VERSION = variableValue;
 				}else {
 					JOptionPane.showMessageDialog(parent, "Unknown configuration: " + line);
 				}
@@ -61,6 +63,9 @@ public class Configurations {
 		}
 		if(DATABASE_NAME == null){
 			message+="DATABASE_NAME ";
+		}
+		if(DATABASE_VERSION == null){
+			message+="DATABASE_VERSION ";
 		}
 		if(message.length() > 0){
 			throw new Exception("The following were not present in the configuration file: " + message);
@@ -166,6 +171,7 @@ public class Configurations {
 	public static String[] READ_WRITE_CREDENTIALS;
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
+	public static String DATABASE_VERSION;
 	public static String BCL2FASTQ_DATABASE_NAME = "bcl_convert";
 	public static String REFERENCE_DATABASE_NAME = "ngs_reference";
 	
@@ -299,6 +305,10 @@ public class Configurations {
 		}
 		return "100x Coverage < ";
 	}
+
+
+
+
 
 	public static int HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER = 100;
 	public static int getDefaultReadDepthFilter(Sample sample) {

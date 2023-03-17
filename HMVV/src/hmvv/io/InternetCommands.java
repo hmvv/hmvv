@@ -53,6 +53,10 @@ public class InternetCommands {
 		browseToURL(url);
 	}
 
+	public static void downloadHMVV() throws Exception{
+		browseToURL("http://10.110.21.19/hmvv3/download_application.html");
+	}
+
 	public static void searchClinvar(String term) throws Exception{
 		browseToURL("https://www.ncbi.nlm.nih.gov/clinvar/variation/" + term );
 
