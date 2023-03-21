@@ -18,6 +18,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.DbVersionCheckFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
@@ -199,19 +200,13 @@ public class HMVVLoginFrame extends JFrame {
 			loginButton.setText("Connecting to database...");
 			DatabaseCommands.connect();
 			Boolean dbVersionFlag = DatabaseCommands.checkDbVersion();
-			if (dbVersionFlag){
-				
-				int result = JOptionPane.showConfirmDialog(this,"Would you like to download the latest version of HMVV "  + Configurations.DATABASE_NAME.substring(4).toUpperCase() + "?",
-														"Your current HMVV version is outdated", JOptionPane.YES_NO_OPTION);
-				
-				if (result == JOptionPane.YES_OPTION){
-					InternetCommands.downloadHMVV();
-				}
-				System.exit(1);
-				
-			}
-
 			
+			
+			if (dbVersionFlag){
+				DbVersionCheckFrame dbVersionCheckFrame = new DbVersionCheckFrame(this);
+				dbVersionCheckFrame.setVisible(true);
+			}
+		
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Database connection failed. Please contact the system administrator.");
 			return;
