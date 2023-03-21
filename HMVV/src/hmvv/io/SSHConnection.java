@@ -381,7 +381,7 @@ public class SSHConnection {
             channel = sshSession.openChannel("sftp");
             channel.connect();
             ChannelSftp channelSftp = (ChannelSftp) channel;
-            channelSftp.put(tempFile.getAbsolutePath(), "/storage/scratch/hmvv3/igv/"+tempFile.getName());
+            channelSftp.put(tempFile.getAbsolutePath(), "/storage/scratch/hmvv/igv/"+tempFile.getName());
 
         } catch (SftpException e) {
             e.printStackTrace();
@@ -417,7 +417,7 @@ public class SSHConnection {
         new File(runIDFolder).mkdirs();
 
         String serverFileName = tempBamFileName+".bam";
-        String filePath = "/storage/scratch/hmvv3/igv/";
+        String filePath = "/storage/scratch/hmvv/igv/";
 
 //        File localBamFile = new File(runIDFolder + File.separator + serverFileName.split("-")[0]+".bam").getAbsoluteFile();
 		File localBamFile = new File(runIDFolder + File.separator + serverFileName);
