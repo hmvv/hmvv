@@ -80,9 +80,9 @@ public class Amplicon {
 					qcMeasure = cumulative_depth;
 
 				}
-			}else if(instrument.equals("nextseq") && total_reads != null && Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0){
-				failed_check = total_reads <  Configurations.getDefaultReadDepthFilter(sample);
-				qcMeasureDescription = "Total Reads < " +  Configurations.getDefaultReadDepthFilter(sample);
+			}else if(instrument.equals("nextseq") && total_reads != null && Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0){ // Older heme runs
+				failed_check = average_depth <  Configurations.getDefaultReadDepthFilter(sample);
+				qcMeasureDescription = "Average Depth < " +  Configurations.getDefaultReadDepthFilter(sample);
 				if(failed_check == true){
 					failed = true;
 					failed_amplicons = ampliconName;
@@ -100,7 +100,7 @@ public class Amplicon {
 			}else if(instrument.equals("nextseq") && average_depth != null){
 				failed_check = average_depth < Configurations.HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER;
 				qcMeasure = average_depth;
-				qcMeasureDescription = "Average depth < " + Configurations.HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER;
+				qcMeasureDescription = "Average Depth < " + Configurations.HISTORICAL_NEXTSEQ_HEME_READ_DEPTH_FILTER;
 				if(failed_check == true){
 					failed = true;
 					failed_amplicons = ampliconName;
@@ -122,7 +122,7 @@ public class Amplicon {
             return "Total Reads";
         }
 		else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("nextseq") && (Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0))){
-            return "Total Reads";
+            return "Average Depth";
         }
         else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("nextseq"))){
             return "% Positions";
