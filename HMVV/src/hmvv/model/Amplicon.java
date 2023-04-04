@@ -80,6 +80,15 @@ public class Amplicon {
 					qcMeasure = cumulative_depth;
 
 				}
+			}else if(instrument.equals("nextseq") && total_reads != null && Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0){
+				failed_check = total_reads <  Configurations.getDefaultReadDepthFilter(sample);
+				qcMeasureDescription = "Total Reads < " +  Configurations.getDefaultReadDepthFilter(sample);
+				if(failed_check == true){
+					failed = true;
+					failed_amplicons = ampliconName;
+					qcMeasure = total_reads;
+
+				}
 			}else if(instrument.equals("nextseq") && cov250xPercent != null){
 				failed_check = cov250xPercent < Configurations.COVERAGE_PERCENTAGE_250X;
 				qcMeasureDescription =  Configurations.getqcMeasureDescription(sample) +(Configurations.COVERAGE_PERCENTAGE_250X) + "% of positions";
@@ -112,13 +121,16 @@ public class Amplicon {
         if(sample.instrument.instrumentName.equals("proton")){
             return "Total Reads";
         }
+		else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("nextseq") && (Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0))){
+            return "Total Reads";
+        }
         else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("nextseq"))){
             return "% Positions";
         }
         else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("miseq"))){
             return "Cumulative Depth";
         }
-
+		
         else{
             return "QC Measure";
         }
