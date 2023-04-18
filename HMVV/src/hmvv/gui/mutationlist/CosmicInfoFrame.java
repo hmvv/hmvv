@@ -114,6 +114,7 @@ public class CosmicInfoFrame extends JDialog {
                         		 if(cosmicInfo.openItem) {
                         			String MutationURL = DatabaseCommands_Mutations.getMutationURL(cosmicInfo.cosmicID);
                         		 	InternetCommands.searchCosmic(MutationURL);
+                                    CosmicInfoFrame.this.dispose();
                         		 }
                         	}
                 } catch (Exception e) {

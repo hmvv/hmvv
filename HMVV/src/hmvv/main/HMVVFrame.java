@@ -123,6 +123,7 @@ public class HMVVFrame extends JFrame{
 
 		adminMenu.addSeparator();
 		adminMenu.add(qualityControlMenuItem);
+		
 		try{
 			for(Assay assay : DatabaseCommands.getAllAssays()){
 				if(assay.assayName.equals("tmb")) {
@@ -139,7 +140,7 @@ public class HMVVFrame extends JFrame{
 							}
 						}
 					});
-				} else {
+				} else if(!assay.assayName.equals("archer")) {
 					JMenuItem variantAlleleFrequencyMenuItem = new JMenuItem(assay + "_VariantAlleleFrequency");
 					qualityControlMenuItem.add(variantAlleleFrequencyMenuItem);
 					variantAlleleFrequencyMenuItem.addActionListener(new ActionListener() {

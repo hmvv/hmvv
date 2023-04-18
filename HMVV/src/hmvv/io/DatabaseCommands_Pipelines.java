@@ -34,36 +34,49 @@ public class DatabaseCommands_Pipelines {
 	}
 
 	static ArrayList<Pipeline> getAllPipelines() throws Exception{
-		String query = "select" + 
-				" queueTable.sampleID, queueTable.instrument, queueTable.runFolderName, queueTable.sampleName, queueTable.assay, " + 
-				" statusTable.plStatus, statusTable.timeUpdated" + 
-				" from" + 
-				" (" + 
-					" select samples.sampleID, samples.runFolderName, samples.sampleName, samples.assay, samples.instrument" + 
-					" from pipelineQueue" + 
-					" join samples on samples.instrument = pipelineQueue.instrument and samples.runFolderName = pipelineQueue.runFolderName and samples.sampleName = pipelineQueue.sampleName" + 
-					" where timeSubmitted >= now() - interval 10 day" + 
-					" ) as queueTable" + 
-				
-				" left join " + 
-				
-				" (" + 
-				" select pipelineStatus.instrument, pipelineStatus.runFolderName, pipelineStatus.sampleName, pipelineStatus.plStatus, pipelineStatus.timeUpdated" + 
-				"   from" + 
-				"    (" + 
-				"     select max(timeUpdated) as timeUpdated, runFolderName, sampleName" + 
-				"     from pipelineStatus" + 
-				"     where timeUpdated >= now() - interval 10 day" + 
-				"     group by runFolderName, sampleName" + 
-				"    ) as maxPipelineStatusTimeUpdated" + 
-				"   join pipelineStatus on pipelineStatus.timeUpdated = maxPipelineStatusTimeUpdated.timeUpdated " + 
-				"   AND pipelineStatus.runFolderName = maxPipelineStatusTimeUpdated.runFolderName AND" +
-				"	pipelineStatus.sampleName = maxPipelineStatusTimeUpdated.sampleName	" + 
-				" ) as statusTable" + 
-				 
-				" on queueTable.instrument = statusTable.instrument and queueTable.runFolderName = statusTable.runFolderName and queueTable.sampleName = statusTable.sampleName" + 
-				" order by queueTable.assay, queueTable.instrument, queueTable.runFolderName, queueTable.sampleName";
-		
+		String query = " select " + 
+					" sampleTable.sampleID, statusTable.instrument, statusTable.runFolderName, statusTable.sampleName, sampleTable.assay, " + 
+					" statusTable.plStatus, statusTable.timeUpdated " +
+					" from " +
+
+					" (SELECT tempStatusTable.instrument, tempStatusTable.runFolderName, tempStatusTable.sampleName, " +
+					" COALESCE(errorTable.plStatus,tempStatusTable.plStatus) plStatus, " +
+					" COALESCE(errorTable.timeUpdated,tempStatusTable.timeUpdated) timeUpdated " +
+
+					" FROM " + 
+
+					" (SELECT rowNumTable.instrument,rowNumTable.runFolderName,rowNumTable.sampleName,rowNumTable.timeUpdated,rowNumTable.plStatus,rowNumTable.row_num rowNum " + 
+
+					" FROM " + 
+
+					" (SELECT *, ROW_NUMBER() over (PARTITION BY runFolderName, sampleName ORDER BY timeUpdated desc) AS row_num " + 
+					" FROM pipelineStatus) rowNumTable " + 
+					" WHERE " + 
+					" rowNumTable.row_num = 1 " + 
+					" AND (timeUpdated >= now() - INTERVAL 10 DAY " + 
+					" OR " + 
+					" (timeUpdated < NOW() - INTERVAL 10 DAY " + 
+					" AND timeUpdated > NOW() - INTERVAL 60 DAY " + 
+					" AND plStatus != 'PipelineCompleted' " + 
+					" )) " + 
+					" GROUP BY rowNumTable.runFolderName, rowNumTable.sampleName " + 
+					" ) AS  tempStatusTable" +  
+
+					" LEFT JOIN " +
+
+					" (SELECT * FROM pipelineStatus " +
+					" WHERE plStatus LIKE '%ERROR%' " +
+					" GROUP BY runFolderName,sampleName) as errorTable " +
+					" ON tempStatusTable.runFolderName = errorTable.runFolderName AND tempStatusTable.sampleName = errorTable.sampleName " + 
+					" ) AS statusTable " + 
+
+					" LEFT JOIN " + 
+
+					" samples sampleTable " + 
+					" on sampleTable.instrument = statusTable.instrument and sampleTable.runFolderName = statusTable.runFolderName and sampleTable.sampleName = statusTable.sampleName " + 
+					" order by sampleTable.assay, sampleTable.instrument, sampleTable.runFolderName, sampleTable.sampleName ";
+
+						
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<Pipeline> pipelines = new ArrayList<Pipeline>();

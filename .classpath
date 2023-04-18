@@ -19,9 +19,5 @@
 	<classpathentry kind="lib" path="HMVV/lib/osdt_cert.jar"/>
 	<classpathentry kind="lib" path="HMVV/lib/osdt_core.jar"/>
 	<classpathentry kind="lib" path="HMVV/lib/xchart-3.5.2.jar"/>
-	<classpathentry kind="lib" path="HMVV/lib/ojdbc8.jar"/>
-	<classpathentry kind="lib" path="HMVV/lib/oraclepki.jar"/>
-	<classpathentry kind="lib" path="HMVV/lib/osdt_cert.jar"/>
-	<classpathentry kind="lib" path="HMVV/lib/osdt_core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

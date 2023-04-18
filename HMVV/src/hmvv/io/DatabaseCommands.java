@@ -2,14 +2,22 @@ package hmvv.io;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TreeMap;
+
+import java.sql.PreparedStatement;
 
 import hmvv.main.Configurations;
 import hmvv.model.*;
 
 public class DatabaseCommands {
+
+	private static Connection databaseConnection = null;
+	static void setConnection(Connection databaseConnection) {
+		DatabaseCommands.databaseConnection = databaseConnection;
+	}
 
 	public static void connect() throws Exception{
 		String driver = "com.mysql.jdbc.Driver";
@@ -19,6 +27,7 @@ public class DatabaseCommands {
 		try{
 			Class.forName(driver);
 			Connection databaseConnection = DriverManager.getConnection(url+Configurations.DATABASE_NAME+"?noAccessToProcedureBodies=true", credentials[0], credentials[1]);
+			DatabaseCommands.setConnection(databaseConnection);
 			DatabaseCommands_Annotations.setConnection(databaseConnection);
 			DatabaseCommands_Assays.setConnection(databaseConnection);
 			DatabaseCommands_Mutations.setConnection(databaseConnection);
@@ -29,6 +38,23 @@ public class DatabaseCommands {
 		}catch (Exception e){
 			throw new Exception("mysql connection error: " + e.getMessage());
 		}
+	}
+
+	public static  boolean checkDbVersion() throws Exception{
+		String env = Configurations.DATABASE_NAME;
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select version from admin.hmvv_versions where environment = ? " +
+		" AND expirationDate IS null ");
+		preparedStatement.setString(1, env);
+		ResultSet rs = preparedStatement.executeQuery();
+		String version = new String();
+
+		while(rs.next()){
+			version = rs.getString(1);
+		}
+		preparedStatement.close();
+
+		return (!version.equals(Configurations.DATABASE_VERSION));
+		
 	}
 	
 	/* ************************************************************************
@@ -162,7 +188,7 @@ public class DatabaseCommands {
 	public static ArrayList<PipelineStatus> getPipelineDetail(Pipeline pipeline) throws Exception{
 		return DatabaseCommands_Pipelines.getPipelineDetail(pipeline);
 	}
-	
+
 	public static float getPipelineTimeEstimate(Pipeline pipeline) throws Exception {
 		return DatabaseCommands_Pipelines.getPipelineTimeEstimate(pipeline);
 	}
@@ -196,4 +222,6 @@ public class DatabaseCommands {
 	public static ArrayList<MutationGermlineHGMD> getAllMutationsByGene(String gene) throws Exception{
 		return DatabaseCommands_HGMD.getAllMutationsByGene(gene);
 	}
+
+
 }

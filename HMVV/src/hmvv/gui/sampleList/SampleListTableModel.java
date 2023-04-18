@@ -197,4 +197,10 @@ public class SampleListTableModel extends AbstractTableModel{
 	public String getColumnDescription(int column){
 		return columns.get(column).description;
 	}
+
+	public void rebuildSampleList(ArrayList<Sample> freshSamples) throws Exception {
+		samples.clear();
+		samples.addAll(freshSamples);
+		fireTableDataChanged();
+	}
 }

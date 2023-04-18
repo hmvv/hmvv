@@ -67,6 +67,7 @@ public class SampleListFrame extends JPanel {
 	//Buttons
 	private JButton sampleSearchButton;
 	private JButton resetButton;
+	private JButton refreshButton;
 
 	//Filters
 	private JLabel assayLabel;
@@ -127,7 +128,7 @@ public class SampleListFrame extends JPanel {
 			return false;
 		}
 	}
-	
+
 	private void createComponents(){
 		table = new JTable(tableModel){
 			private static final long serialVersionUID = 1L;
@@ -215,6 +216,10 @@ public class SampleListFrame extends JPanel {
 		resetButton.setToolTipText("Reset Sample Filters (remove all filters)");
 		resetButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
 
+		refreshButton = new JButton("Refresh");
+		refreshButton.setToolTipText("Refresh Sample data");
+		refreshButton.setFont(GUICommonTools.TAHOMA_BOLD_12);
+
 		assayLabel = new JLabel("Assay");
 		assayLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
 		
@@ -258,7 +263,9 @@ public class SampleListFrame extends JPanel {
 						.addGap(18)
 						.addComponent(sampleSearchButton)
 						.addGap(18)
-						.addComponent(resetButton))
+						.addComponent(resetButton)
+						.addGap(18)
+						.addComponent(refreshButton))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE)
@@ -277,6 +284,7 @@ public class SampleListFrame extends JPanel {
 												.addComponent(instrumentComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(sampleSearchButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(resetButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(refreshButton, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(mrnLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(mrnTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(runIDLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -363,6 +371,23 @@ public class SampleListFrame extends JPanel {
 				refilterTable();
 			}
 		});
+		
+		refreshButton.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					ArrayList<Sample> freshSamples = DatabaseCommands.getAllSamples();
+					tableModel.rebuildSampleList(freshSamples);
+					refilterTable();
+					updatePipelinesASynch();
+
+				} catch (Exception e) {
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e);
+				}
+			}
+		});
+
+		
 
 		DocumentListener documentListener = new DocumentListener(){
 			public void changedUpdate(DocumentEvent e) {
