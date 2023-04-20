@@ -339,7 +339,7 @@ public class AnnotationFrame extends JDialog {
 					);
 			Annotation latestAnnotation = mutation.getLatestAnnotation();
 			if (latestAnnotation == null || !latestAnnotation.equals(newAnnotation)) {
-				DatabaseCommands.addVariantAnnotationCuration(newAnnotation,Configurations.MUTATION_TYPE.GERMLINE);
+				DatabaseCommands.addVariantAnnotationCuration(newAnnotation,Configurations.MUTATION_TYPE.SOMATIC);
 				mutation.addAnnotation(newAnnotation);
 //				parent.notifyAnnotationUpdated(newAnnotation);
 			}
@@ -357,7 +357,7 @@ public class AnnotationFrame extends JDialog {
 					);
 			GeneAnnotation latestGeneAnnotation = (geneAnnotationHistory.isEmpty()) ? null : geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);		
 			if(latestGeneAnnotation == null || !latestGeneAnnotation.equals(newGeneAnnotation)) {
-				DatabaseCommands.addGeneAnnotationCuration(newGeneAnnotation,Configurations.MUTATION_TYPE.GERMLINE);
+				DatabaseCommands.addGeneAnnotationCuration(newGeneAnnotation,Configurations.MUTATION_TYPE.SOMATIC);
 				geneAnnotationHistory.add(newGeneAnnotation);//may not be necessary as no GUI object currently stores this list
 			}
 		}
