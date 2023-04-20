@@ -71,22 +71,21 @@ public class Amplicon {
 			}
 			
 		}else if(assay.equals("heme")){
-			if(instrument.equals("miseq")){
-				failed_check = cumulative_depth <  Configurations.getDefaultReadDepthFilter(sample);
-				qcMeasureDescription = "Cumulative Read Depth < " +  Configurations.getDefaultReadDepthFilter(sample);
-				if(failed_check == true){
-					failed = true;
-					failed_amplicons = ampliconName;
-					qcMeasure = cumulative_depth;
-
-				}
-			}else if(instrument.equals("nextseq") && total_reads != null && Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0){ // Older heme runs
+			 if(total_reads != null && Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0){ // Older heme runs
 				failed_check = average_depth <  Configurations.getDefaultReadDepthFilter(sample);
 				qcMeasureDescription = "Average Depth < " +  Configurations.getDefaultReadDepthFilter(sample);
 				if(failed_check == true){
 					failed = true;
 					failed_amplicons = ampliconName;
 					qcMeasure = total_reads;
+				}
+			}else if(instrument.equals("miseq")){
+				failed_check = cumulative_depth <  Configurations.getDefaultReadDepthFilter(sample);
+				qcMeasureDescription = "Cumulative Read Depth < " +  Configurations.getDefaultReadDepthFilter(sample);
+				if(failed_check == true){
+					failed = true;
+					failed_amplicons = ampliconName;
+					qcMeasure = cumulative_depth;
 
 				}
 			}else if(instrument.equals("nextseq") && cov250xPercent != null){
@@ -121,7 +120,7 @@ public class Amplicon {
         if(sample.instrument.instrumentName.equals("proton")){
             return "Total Reads";
         }
-		else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("nextseq") && (Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0))){
+		else if ((sample.assay.assayName.equals("heme"))  && (Configurations.OLDER_RUN_DATE.compareTo(sample.runDate.toString()) >= 0)){
             return "Average Depth";
         }
         else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("nextseq"))){
