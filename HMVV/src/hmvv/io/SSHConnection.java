@@ -201,6 +201,15 @@ public class SSHConnection {
 		}
 	}
 
+	public static void checkSampleSheetError(Instrument instrument, String runFolder) throws Exception {
+		String integrityCode = "/storage/apps/pipelines/ngs_dev/scripts/common/python/sampleSheet_integrity_check.py";
+		String checkSampleSheetCommand = String.format("python3 %s /storage/instruments/%s/%s/SampleSheet.csv", integrityCode, instrument, runFolder);
+		CommandResponse sampleSheetIntegrityResult = SSHConnection.executeCommandAndGetOutput(checkSampleSheetCommand);
+		if(sampleSheetIntegrityResult.responseLines.get(0).toUpperCase().contains("ERROR")){
+			throw new IllegalArgumentException(sampleSheetIntegrityResult.responseLines.get(0));
+		}
+	}
+
 	public static RunFolder getRunFolderIllumina(Instrument instrument, String runID) throws Exception {
 		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s_*", instrument, runID);
 		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
