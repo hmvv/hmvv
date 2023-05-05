@@ -10,7 +10,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
@@ -45,6 +44,7 @@ import hmvv.gui.HMVVTableColumn;
 import hmvv.gui.mutationlist.MutationListFrame;
 import hmvv.gui.mutationlist.MutationGermlineListFrame;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
+import hmvv.gui.sampleList.EditSampleFrame.RESPONSE_CODE;
 import hmvv.gui.GUICommonTools;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
@@ -405,9 +405,14 @@ public class SampleListFrame extends JPanel {
 		runIDTextField.getDocument().addDocumentListener(documentListener);
 	}
 
-	private Sample getCurrentlySelectedSample(){
+	private int getCurrentlySelectedModelRow(){
 		int viewRow = table.getSelectedRow();
 		int modelRow = table.convertRowIndexToModel(viewRow);
+		return modelRow;
+	}
+
+	private Sample getCurrentlySelectedSample(){
+		int modelRow = getCurrentlySelectedModelRow();
 		return tableModel.getSample(modelRow);
 	}
 	
@@ -445,7 +450,7 @@ public class SampleListFrame extends JPanel {
 			MutationListLoaderGermline loader = new MutationListLoaderGermline(parent, currentSample);
 			loader.execute();
 		}else{
-			MutationListLoader loader = new MutationListLoader(parent, currentSample);
+			MutationListLoader loader = new MutationListLoader(parent, currentSample, this);
 			loader.execute();
 		}
 	}
@@ -485,50 +490,34 @@ public class SampleListFrame extends JPanel {
 		assayComboBox.setSelectedItem(sample.assay);
 		instrumentComboBox.setSelectedItem(sample.instrument);
 	}
-	
+
 	private void handleEditSampleClick() throws Exception{
-		//Edit sample
-		
-		int viewRow = table.getSelectedRow();
-		final int modelRow = table.convertRowIndexToModel(viewRow);
 		Sample sample = getCurrentlySelectedSample();
-
 		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
-		editSample.addConfirmListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					//editSample form submission action
-					Sample updatedSample = editSample.getUpdatedSample();
-					DatabaseCommands.updateSample(updatedSample);
-					tableModel.updateSample(modelRow, updatedSample);
-				} catch (Exception e1) {
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
-				}
-				editSample.dispose();
-			}
-		});
-		editSample.addDeleteListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String result = JOptionPane.showInputDialog(parent, "Type DELETE to delete this sample.", "Delete sample?", JOptionPane.QUESTION_MESSAGE);
-					if(result == null) {
-						return;
-					}
-					if(result.equals("DELETE")) {
-						DatabaseCommands.deleteSample(sample.sampleID);
-						tableModel.deleteSample(modelRow);
-						JOptionPane.showMessageDialog(parent, "Sample deleted.");
-						editSample.dispose();
-					}else {
-						JOptionPane.showMessageDialog(parent, result + " is not DELETE. Deletion cancelled.");
-					}
-				} catch (SQLException e1) {
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(editSample, e1);
-				}
-			}
-		});
-
 		editSample.setVisible(true);
+		RESPONSE_CODE responseCode = editSample.getResponseCode();
+		handleEditSampleResponse(sample, responseCode);
+	}
+
+	public void handleEditSampleResponse(Sample sample, RESPONSE_CODE responseCode) throws Exception{
+		int modelRow = getCurrentlySelectedModelRow();
+		Sample currentlySelectedSample = getCurrentlySelectedSample();
+		if (currentlySelectedSample.sampleID != sample.sampleID){
+			throw new Exception("The samples don't match. Please contact the developer.");
+		}
+		switch(responseCode){
+			case SAMPLE_UPDATED:
+				DatabaseCommands.updateSample(sample);
+				tableModel.updateSample(modelRow, sample);
+				break;
+			case SAMPLE_DELETED:
+				DatabaseCommands.deleteSample(sample.sampleID);
+				JOptionPane.showMessageDialog(parent, "Sample deleted.");
+				tableModel.deleteSample(modelRow);
+			case CANCELLED:
+				break;
+		
+		}
 	}
 
 	public void refilterTable(){
@@ -625,11 +614,13 @@ public class SampleListFrame extends JPanel {
 //
 		private final HMVVFrame parent;
 		private final Sample sample;
+		private final SampleListFrame sampleListFrame;
 
-		public MutationListLoader(HMVVFrame parent, Sample sample) {
+		public MutationListLoader(HMVVFrame parent, Sample sample, SampleListFrame sampleListFrame) {
 			table.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			this.parent = parent;
 			this.sample = sample;
+			this.sampleListFrame = sampleListFrame;
 			mutationListLoading = true;
 		}
 		
@@ -651,7 +642,7 @@ public class SampleListFrame extends JPanel {
 			table.setCursor(Cursor.getDefaultCursor());
 			mutationListLoading = false;
 			try {
-				MutationListFrame mutationListFrame = new MutationListFrame(parent, sample, get());
+				MutationListFrame mutationListFrame = new MutationListFrame(parent, sampleListFrame, sample, get());
 				mutationListFrame.setVisible(true);
 				mutationListFrame.addWindowListener(new WindowAdapter() {
 					public void windowClosed(WindowEvent evt) {
