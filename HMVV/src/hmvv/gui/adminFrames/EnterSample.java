@@ -651,7 +651,7 @@ public class EnterSample extends JDialog {
                 btnEnterSample.setEnabled(true); 
             }else{
                 if(sample.assay.assayName.equals("tmb")){
-                    SSHConnection.checkSampleSheetError(sample.instrument, sample.runFolder.toString());
+                    SSHConnection.checkSampleSheetError(sample.instrument, sample.runFolder.runFolderName, sample.assay.assayName);
                     DatabaseCommands.insertbclconvertIntoDatabase(sample.instrument, sample.runFolder);
                 }
                 DatabaseCommands.insertDataIntoDatabase(sample);

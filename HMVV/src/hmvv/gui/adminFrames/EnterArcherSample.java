@@ -194,7 +194,7 @@ public class EnterArcherSample extends JDialog {
         try {
             setEnabled(false);
             Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
-            SSHConnection.checkSampleSheetError(instrument, runFolderTextField.getText());
+            SSHConnection.checkSampleSheetError(instrument, runFolderTextField.getText(),assayTextField.getText());
             DatabaseCommands.insertbclconvertIntoDatabase(instrument, runFolder);
             setEnabled(true);
         }finally {

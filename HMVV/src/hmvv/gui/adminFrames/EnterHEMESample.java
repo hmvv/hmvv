@@ -205,6 +205,7 @@ public class EnterHEMESample extends JDialog {
         try {
             setEnabled(false);
             Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
+            SSHConnection.checkSampleSheetError(instrument, runFolder.runFolderName, hemeAssay.assayName);
             
             if(samples.size() != 0){
                 DatabaseCommands.insertbclconvertIntoDatabase(instrument, runFolder);
