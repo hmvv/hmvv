@@ -54,15 +54,13 @@ public class BasicTable extends CommonTable{
 			searchCosmic();
 		}else if(column == 14){
 			handleAnnotationClick();
-			//parent.setVisible(false);
-			
 		}
 	}
 
 	private void handleIGVClick() throws Exception{
 		MutationSomatic mutation = getSelectedMutation();
 		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
-		if(result.length() > 0) {
+		if((result.length() > 0) && (!result.equals("OK"))) {
 			JOptionPane.showMessageDialog(this, result);
 		}
 	}
