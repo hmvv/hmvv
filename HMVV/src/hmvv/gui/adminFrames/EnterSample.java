@@ -296,6 +296,7 @@ public class EnterSample extends JDialog {
                     textTMBNormalRunFolder.setText("");
                     clearAndDisableSamplePanel();
                     clearAndDisableSampleRecords();
+                    btnEnterSample.setText("Enter Sample");
                 }
             }
         };
@@ -649,10 +650,11 @@ public class EnterSample extends JDialog {
                 btnEnterSample.setText("Enter Sample");
                 btnEnterSample.setEnabled(true); 
             }else{
-                DatabaseCommands.insertDataIntoDatabase(sample);
                 if(sample.assay.assayName.equals("tmb")){
+                    SSHConnection.checkSampleSheetError(sample.instrument, sample.runFolder.toString());
                     DatabaseCommands.insertbclconvertIntoDatabase(sample.instrument, sample.runFolder);
                 }
+                DatabaseCommands.insertDataIntoDatabase(sample);
                 sampleListFrame.addSample(sample);
                 //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
                 updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
