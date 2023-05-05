@@ -36,7 +36,7 @@ public class EnterArcherSample extends JDialog {
     private RunFolder runFolder = null;
 
     public EnterArcherSample(HMVVFrame parent) {
-        super(parent, "Enter ARCHER Run - Research only", ModalityType.APPLICATION_MODAL);
+        super(parent, "Enter ARCHER Run", ModalityType.APPLICATION_MODAL);
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -147,6 +147,8 @@ public class EnterArcherSample extends JDialog {
                             try {
                                 enterData();
                                 enterSampleButton.setText("Completed");
+                            } catch (IllegalArgumentException e) {
+                                JOptionPane.showMessageDialog(EnterArcherSample.this, e.getMessage());
                             } catch (Exception e) {
                                 HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterArcherSample.this, e, "Error entering sample data");
                                 enterSampleButton.setText("Enter Archer Run");
@@ -192,14 +194,12 @@ public class EnterArcherSample extends JDialog {
         try {
             setEnabled(false);
             Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
+            SSHConnection.checkSampleSheetError(instrument, runFolderTextField.getText());
             DatabaseCommands.insertbclconvertIntoDatabase(instrument, runFolder);
             setEnabled(true);
-            }catch(Exception e){
-                HMVVDefectReportFrame.showHMVVDefectReportFrame(EnterArcherSample.this, e);
-            }
-        //}finally {
-        //    setEnabled(true);
-        //}
+        }finally {
+            setEnabled(true);
+        }
     }
 
 
