@@ -505,19 +505,20 @@ public class SampleListFrame extends JPanel {
 		if (currentlySelectedSample.sampleID != sample.sampleID){
 			throw new Exception("The samples don't match. Please contact the developer.");
 		}
-		switch(responseCode){
-			case SAMPLE_UPDATED:
-				DatabaseCommands.updateSample(sample);
-				tableModel.updateSample(modelRow, sample);
-				break;
-			case SAMPLE_DELETED:
-				DatabaseCommands.deleteSample(sample.sampleID);
-				JOptionPane.showMessageDialog(parent, "Sample deleted.");
-				tableModel.deleteSample(modelRow);
-			case CANCELLED:
-				break;
+		if (responseCode != null){
+			switch(responseCode){
+				case SAMPLE_UPDATED:
+					DatabaseCommands.updateSample(sample);
+					tableModel.updateSample(modelRow, sample);
+					break;
+				case SAMPLE_DELETED:
+					DatabaseCommands.deleteSample(sample.sampleID);
+					JOptionPane.showMessageDialog(parent, "Sample deleted.");
+					tableModel.deleteSample(modelRow);
+				case CANCELLED:
+					break;
 		
-		}
+		}}
 	}
 
 	public void refilterTable(){
