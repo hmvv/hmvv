@@ -19,6 +19,7 @@ public class SSHConnection {
 	private static USER_TYPE userType;
 	private static int forwardingPort;
 	private static String temporaryHMVVDirectory = "temp_HMVV_files";
+	private static String sampleSheetErrorString = "";
 	
 	private SSHConnection(){
 		//never constructed
@@ -206,7 +207,11 @@ public class SSHConnection {
 		String checkSampleSheetCommand = String.format("python3 %s /storage/instruments/%s/%s/SampleSheet.csv %s", integrityScript, instrument, runFolder, assay);
 		CommandResponse sampleSheetIntegrityResult = SSHConnection.executeCommandAndGetOutput(checkSampleSheetCommand);
 		if(sampleSheetIntegrityResult.responseLines.get(0).toUpperCase().contains("ERROR")){
-			throw new IllegalArgumentException(sampleSheetIntegrityResult.responseLines.toString().replace("[","").replace("]",""));
+			
+			for(int i =0; i < sampleSheetIntegrityResult.responseLines.size(); i++){
+				sampleSheetErrorString += sampleSheetIntegrityResult.responseLines.get(i) + "\n";
+			};
+			throw new IllegalArgumentException(sampleSheetErrorString);
 		}
 	}
 
