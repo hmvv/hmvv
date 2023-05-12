@@ -107,6 +107,10 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getOccurrenceCount(mutation);
 	}
 	
+	public static ArrayList<repeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{
+		return DatabaseCommands_Mutations.getrepeatMutations(mutation);
+	}
+
 	public static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		DatabaseCommands_Mutations.updateReportedStatus(setToReported, sampleID, coordinate);
 	}

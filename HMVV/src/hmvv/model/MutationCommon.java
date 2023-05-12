@@ -17,6 +17,7 @@ public class MutationCommon {
     // custom
     private boolean selected;
     private Integer occurrence;
+    private Integer variantRepeatCount;
     private ArrayList<Annotation> annotationHistory;
 
     //Sample
@@ -210,6 +211,14 @@ public class MutationCommon {
 
     public void setOccurrence(Integer occurrence) {
         this.occurrence = occurrence;
+    }
+
+    public Integer getvariantRepeatCount() {
+        return variantRepeatCount;
+    }
+
+    public void setvariantRepeatCount(Integer variantRepeatCount) {
+        this.variantRepeatCount = variantRepeatCount;
     }
 
     public String getChr() {

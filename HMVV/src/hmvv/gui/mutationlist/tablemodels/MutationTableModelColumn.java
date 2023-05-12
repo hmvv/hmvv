@@ -46,6 +46,11 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			Integer.class,
 			(MutationSomatic mutation) -> mutation.getOccurrence());
 
+	public static final MutationTableModelColumn variantRepeatCountColumn = new MutationTableModelColumn("Number of occurrences of the detected variant in other samples of the same run",
+			"repeats",
+			Integer.class,
+			(MutationSomatic mutation) -> mutation.getvariantRepeatCount());
+
 	public static final MutationTableModelColumn annotationColumn = new MutationTableModelColumn("The text entered by the pathologist to generate the clinical laboratory report.",
 			"annotation",
 			String.class,
