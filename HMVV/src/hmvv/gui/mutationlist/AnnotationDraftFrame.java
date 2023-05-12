@@ -37,7 +37,7 @@ public class AnnotationDraftFrame extends JDialog {
 
         pack();
         Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.70), (int)(bounds.height*.60));
+		setSize((int)(bounds.width), (int)(bounds.height*.60));
         setResizable(true);
         setLocationRelativeTo(parent);
         //setAlwaysOnTop(true);
