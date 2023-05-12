@@ -14,6 +14,7 @@ import javax.swing.event.DocumentListener;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.LoadFileButton;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
+import hmvv.gui.sampleList.ViewAmpliconFrame;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
@@ -109,6 +110,21 @@ public class MutationFilterPanel extends JPanel {
 		assayQCButton = new JButton("Amplicon");
 		assayQCButton.setToolTipText("Edit the current sample");
 		assayQCButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		assayQCButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	new Thread(new Runnable() {
+					public void run() {
+						try {
+							ViewAmpliconFrame amplicon = new ViewAmpliconFrame(parent, sample);
+							amplicon.setVisible(true);
+						} catch (Exception ex) {
+							JOptionPane.showMessageDialog(parent, ex.getMessage());
+						}
+						editSampleButton.setEnabled(true);
+					}
+				}).start();
+            }
+        });
 
 
 		loadIGVButton = new LoadFileButton("Load IGV");
