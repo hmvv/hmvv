@@ -205,7 +205,6 @@ public class EnterHEMESample extends JDialog {
         try {
             setEnabled(false);
             Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
-            SSHConnection.checkSampleSheetError(instrument, runFolder.runFolderName, hemeAssay.assayName);
             
             if(samples.size() != 0){
                 DatabaseCommands.insertbclconvertIntoDatabase(instrument, runFolder);
@@ -247,7 +246,8 @@ public class EnterHEMESample extends JDialog {
             throw new Exception("Run ID must be an integer.");
         }
 
-        runFolder = SSHConnection.getRunFolderIllumina(instrument, runID); 
+        runFolder = SSHConnection.getRunFolderIllumina(instrument, runID);
+        SSHConnection.checkSampleSheetError(instrument, runFolder.runFolderName, hemeAssay.assayName); 
         runFolderTextField.setText(runFolder.runFolderName);
 
         samples = SSHConnection.getSampleListIllumina(instrument, runFolder);

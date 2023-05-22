@@ -413,6 +413,8 @@ public class EnterSample extends JDialog {
         }
 
         RunFolder runFolder = SSHConnection.getRunFolderIon(instrument, runID);
+        SSHConnection.checkSampleSheetError(instrument, runFolder.runFolderName, comboBoxAssay.getSelectedItem().toString());
+
         if(instrument.instrumentName.equals("miseq") || instrument.instrumentName.equals("nextseq") || instrument.instrumentName.equals("novaseq") ){
             findRunIllumina(instrument, runFolder, comboboxSample, isTMBNormal);
         }else if(instrument.instrumentName.equals("pgm") || instrument.instrumentName.equals("proton")){
@@ -651,7 +653,6 @@ public class EnterSample extends JDialog {
                 btnEnterSample.setEnabled(true); 
             }else{
                 if(sample.assay.assayName.equals("tmb")){
-                    SSHConnection.checkSampleSheetError(sample.instrument, sample.runFolder.runFolderName, sample.assay.assayName);
                     DatabaseCommands.insertbclconvertIntoDatabase(sample.instrument, sample.runFolder);
                 }
                 DatabaseCommands.insertDataIntoDatabase(sample);
