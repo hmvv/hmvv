@@ -19,7 +19,7 @@ public class SSHConnection {
 	private static USER_TYPE userType;
 	private static int forwardingPort;
 	private static String temporaryHMVVDirectory = "temp_HMVV_files";
-	private static String sampleSheetErrorString = "";
+	
 	
 	private SSHConnection(){
 		//never constructed
@@ -208,6 +208,7 @@ public class SSHConnection {
 		CommandResponse sampleSheetIntegrityResult = SSHConnection.executeCommandAndGetOutput(checkSampleSheetCommand);
 		if(sampleSheetIntegrityResult.responseLines.get(0).toUpperCase().contains("ERROR")){
 			
+			String sampleSheetErrorString = "";
 			for(int i =0; i < sampleSheetIntegrityResult.responseLines.size(); i++){
 				sampleSheetErrorString += sampleSheetIntegrityResult.responseLines.get(i) + "\n";
 			};
@@ -216,7 +217,7 @@ public class SSHConnection {
 	}
 
 	public static RunFolder getRunFolderIllumina(Instrument instrument, String runID) throws Exception {
-		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s_*", instrument, runID);
+		String runFolderCommand = String.format("ls /storage/instruments/%s -t | grep _%s_ | head -1", instrument, runID);
 		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
 		if(runFolderResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
@@ -225,7 +226,7 @@ public class SSHConnection {
 	}
 
 	public static RunFolder getRunFolderIon(Instrument instrument, String runID) throws Exception {
-		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s*", instrument, runID);
+		String runFolderCommand = String.format("ls /storage/instruments/%s -t | grep _%s_ | head -1", instrument, runID);
 		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
 		if(runFolderResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
