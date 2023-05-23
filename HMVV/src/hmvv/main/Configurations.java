@@ -180,7 +180,7 @@ public class Configurations {
 	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v97";
 	public static String COSMIC_CMC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_cmc_v97";
 	public static String CIVIC_TABLE = REFERENCE_DATABASE_NAME + ".db_civic_42019";
-	public static String CLINVAR_TABLE = REFERENCE_DATABASE_NAME + ".db_clinvar_42019";
+	public static String CLINVAR_TABLE = REFERENCE_DATABASE_NAME + ".db_clinvar_20230514";
 	public static String G1000_TABLE = REFERENCE_DATABASE_NAME + ".db_g1000_phase3v1";
 	public static String GNOMAD_TABLE = REFERENCE_DATABASE_NAME + ".db_gnomad_r211";
 	public static String GNOMAD_LF_TABLE = REFERENCE_DATABASE_NAME + ".db_gnomad_r211_lf";
