@@ -18,7 +18,9 @@ public class MutationCommon {
     private boolean selected;
     private Integer occurrence;
     private Integer variantRepeatCount;
-    private ArrayList<Annotation> annotationHistory;
+    private Annotation latestAnnotation;
+    private String annotationDisplayText;
+    private String somaticDisplayText;
 
     //Sample
     private String lastName;
@@ -301,29 +303,45 @@ public class MutationCommon {
         this.sampleID = sampleID;
     }
 
-    public void addAnnotation(Annotation annotation) {
-        annotationHistory.add(annotation);
-    }
-
-    public int getAnnotationHistorySize() {
-        return annotationHistory.size();
-    }
-
-    public Annotation getAnnotation(int index) {
-        return annotationHistory.get(index);
-    }
-
-    public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
-        this.annotationHistory = annotationHistory;
+    public void setLatestAnnotation(Annotation annotation) {
+        this.latestAnnotation = annotation;
     }
     
     public Annotation getLatestAnnotation() {
-    	if (annotationHistory.size() == 0) {
-            return null;
-        }
-    	return annotationHistory.get(annotationHistory.size() - 1);
+    	return latestAnnotation;
     }
 
+    public void setOriginAnnotationAssignment() {
+		if(latestAnnotation == null) {
+			this.somaticDisplayText = "";
+		}
+		else if(latestAnnotation.somatic == null || latestAnnotation.somatic.equals("Not set")) {
+			this.somaticDisplayText = "";
+		}else {
+			this.somaticDisplayText = latestAnnotation.somatic;
+        }
+            //latestAnnotation.getDisplayText();
+	}
+
+    public String getOriginAnnotationAssignment(){
+		return somaticDisplayText;
+    }
+
+    public void setAnnotationDisplayText() {
+		if(latestAnnotation == null) {
+			this.annotationDisplayText = "Enter";
+		}
+		else if(latestAnnotation.curation == null || latestAnnotation.curation.trim().length() == 0) {
+			this.annotationDisplayText = "Enter";
+		}else {
+			this.annotationDisplayText = "Annotation";
+        }
+            //latestAnnotation.getDisplayText();
+	}
+
+    public String getAnnotationDisplayText(){
+        return annotationDisplayText;
+    }
 
     public boolean equals(Object o) {
     	if(o instanceof MutationCommon) {

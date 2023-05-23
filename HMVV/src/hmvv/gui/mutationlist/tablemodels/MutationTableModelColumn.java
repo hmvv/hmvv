@@ -1,6 +1,5 @@
 package hmvv.gui.mutationlist.tablemodels;
 
-import hmvv.model.Annotation;
 import hmvv.model.MutationSomatic;
 import hmvv.model.VariantPredictionClass;
 
@@ -54,41 +53,13 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn annotationColumn = new MutationTableModelColumn("The text entered by the pathologist to generate the clinical laboratory report.",
 			"annotation",
 			String.class,
-			(MutationSomatic mutation) -> getAnnotationDisplayText(mutation));
+			(MutationSomatic mutation) -> mutation.getAnnotationDisplayText());
 
-	public static String getAnnotationDisplayText(MutationSomatic mutation) {
-		Annotation latestAnnotation = mutation.getLatestAnnotation();
-		if(latestAnnotation == null) {
-			return "Enter";
-		}
-		return latestAnnotation.getDisplayText();
-	}
 
 	public static final MutationTableModelColumn somaticColumn = new MutationTableModelColumn("The somatic designation as entered by the pathologist in the annotation report.",
 			"somatic",
 			String.class,
-			(MutationSomatic mutation) -> getSomaticDisplayText(mutation));
-
-	public static String getSomaticDisplayText(MutationSomatic mutation) {
-		Annotation latestAnnotation = mutation.getLatestAnnotation();
-		if(latestAnnotation == null) {
-			return "";
-		}
-		return latestAnnotation.getSomaticDisplayText();
-	}
-
-	public static final MutationTableModelColumn classificationColumn = new MutationTableModelColumn("The classification designation as entered by the pathologist in the annotation report.",
-			"classification",
-			String.class,
-			(MutationSomatic mutation) -> getClassificationDisplayText(mutation));
-
-	public static String getClassificationDisplayText(MutationSomatic mutation) {
-		Annotation latestAnnotation = mutation.getLatestAnnotation();
-		if(latestAnnotation == null) {
-			return "";
-		}
-		return latestAnnotation.getClassificationDisplayText();
-	}
+			(MutationSomatic mutation) -> mutation.getOriginAnnotationAssignment());
 
 	public static final MutationTableModelColumn gotoIGVColumn = new MutationTableModelColumn("Link to load the variant coordinate into IGV.",
 			"IGV",

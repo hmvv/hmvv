@@ -225,13 +225,13 @@ public abstract class CommonTableGermline extends JTable{
 
 	protected void handleAnnotationClick() throws Exception{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		MutationGermline mutation = getSelectedMutation();
-		String gene = mutation.getGene();
+		//MutationGermline mutation = getSelectedMutation();
+		//String gene = mutation.getGene();
 
-		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.GERMLINE);
+		//ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.GERMLINE);
 
-		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation, geneAnnotationHistory);
-		editAnnotation.setVisible(true);
+		//AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation, geneAnnotationHistory);
+		//editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
 	}
 

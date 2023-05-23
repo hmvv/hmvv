@@ -111,6 +111,10 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getrepeatMutations(mutation);
 	}
 
+	public static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate, Configurations.MUTATION_TYPE mutationType) throws Exception{
+		return DatabaseCommands_Mutations.getVariantAnnotationHistory(coordinate, mutationType);
+	}
+
 	public static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		DatabaseCommands_Mutations.updateReportedStatus(setToReported, sampleID, coordinate);
 	}

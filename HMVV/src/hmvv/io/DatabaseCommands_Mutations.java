@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import hmvv.main.Configurations;
 import hmvv.model.*;
@@ -29,13 +30,18 @@ public class DatabaseCommands_Mutations {
 	}
 
 	private static ArrayList<MutationSomatic> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
-		String query = "WITH OTHER_VARIANT_COUNT AS (SELECT chr, pos, ref, alt, COUNT(*) AS variantRepeatCount "
+		String query = "WITH " 
+				+ " OTHER_VARIANT_COUNT AS (SELECT chr, pos, ref, alt, COUNT(*) AS variantRepeatCount "
 				+ " from sampleVariants "
 				+ " inner join samples ON sampleVariants.sampleID = samples.sampleID "
 				+ " where "
 				+ " samples.runFolderName = ? " 
 				+ " and samples.sampleID != ? " 
-		 		+ " group by CHR, pos, ref, alt) "
+		 		+ " group by CHR, pos, ref, alt), "
+				+ " all_annotations AS (SELECT annotationID,chr,pos,ref,alt, classification,curation, "
+				+ " somatic, enteredBy, enterDate, "
+				+ " ROW_NUMBER() over (PARTITION BY CHR,pos,ref,alt ORDER BY enterDate DESC) AS rownum "
+				+ " FROM " + Configurations.SOMATIC_VARIANT_ANNOTATION_TABLE + " )"
 		
 		
 				+ " select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
@@ -44,7 +50,7 @@ public class DatabaseCommands_Mutations {
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
 				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, occ.variantRepeatCount, "
-				+ " t8.AF "
+				+ " t8.AF, t9.annotationID,t9.curation, t9.somatic,t9.classification, t9.enteredBy, t9.enterDate "
 				+ " from sampleVariants as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
 				+ " left join " + Configurations.G1000_TABLE + " as t4"
@@ -53,6 +59,7 @@ public class DatabaseCommands_Mutations {
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				+ " left join " + Configurations.GNOMAD_TABLE + " as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
 				+ " left join OTHER_VARIANT_COUNT AS occ ON t2.chr = occ.chr AND t2.pos = occ.pos AND t2.ref = occ.ref AND t2.alt = occ.alt"
+				+ " LEFT JOIN (SELECT * FROM all_annotations WHERE rownum = 1) AS t9 ON t9.chr = t2.chr and t9.pos = t2.pos AND t9.ref = t2.ref AND t9.alt = t2.alt"
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
 		String where = " ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getDefaultAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.getDefaultReadDepthFilter(sample) + ")";
@@ -361,10 +368,23 @@ public class DatabaseCommands_Mutations {
 			mutation.setMutect2VAF(getDoubleOrNull(rs, "Mutect2VAF"));
 			mutation.setfreebayesVAF(getDoubleOrNull(rs, "freebayesVAF"));
 			mutation.setvariantRepeatCount(getIntegerOrNull(rs, "variantRepeatCount"));
+			
 
 			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.SOMATIC);
-			mutation.setAnnotationHistory(annotationHistory);
+			//Integer annotationID, Coordinate cordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate
+			Integer annotationID = getIntegerOrNull(rs, "annotationID");
+			Coordinate coordinate = mutation.getCoordinate();
+			String classification = rs.getString("classification");
+			String curation = rs.getString("curation");
+			String somatic = rs.getString("somatic");
+			String enteredBy = rs.getString("enteredBy");
+			Date enterDate = rs.getDate("enterDate");
+
+			Annotation latestAnnotation = new Annotation(getIntegerOrNull(rs, "annotationID"), mutation.getCoordinate(), rs.getString("classification") ,rs.getString("curation"), 
+														rs.getString("somatic"), rs.getString("enteredBy"),rs.getDate("enterDate") );
+			mutation.setLatestAnnotation(latestAnnotation);
+			mutation.setAnnotationDisplayText();
+			mutation.setOriginAnnotationAssignment();
 
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
@@ -571,8 +591,8 @@ public class DatabaseCommands_Mutations {
 
 
 			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.GERMLINE);
-			mutation.setAnnotationHistory(annotationHistory);
+			//ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.GERMLINE);
+			//mutation.setAnnotationHistory(annotationHistory);
 
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
@@ -624,7 +644,7 @@ public class DatabaseCommands_Mutations {
 		}
 	}
 	
-	private static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+	static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 
 		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
 

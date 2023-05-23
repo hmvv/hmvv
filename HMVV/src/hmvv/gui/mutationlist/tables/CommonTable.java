@@ -243,12 +243,12 @@ public abstract class CommonTable extends JTable{
 	protected void handleAnnotationClick() throws Exception{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		MutationSomatic mutation = getSelectedMutation();
-		String gene = mutation.getGene();
 		
-		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,mutation.getMutationType());
+		
+		
 
 
-		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation, geneAnnotationHistory);
+		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation);
 		
 		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
