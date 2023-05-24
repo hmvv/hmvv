@@ -311,33 +311,9 @@ public class MutationCommon {
     	return latestAnnotation;
     }
 
-    public void setOriginAnnotationAssignment() {
-		if(latestAnnotation == null) {
-			this.somaticDisplayText = "";
-		}
-		else if(latestAnnotation.somatic == null || latestAnnotation.somatic.equals("Not set")) {
-			this.somaticDisplayText = "";
-		}else {
-			this.somaticDisplayText = latestAnnotation.somatic;
-        }
-            //latestAnnotation.getDisplayText();
-	}
-
     public String getOriginAnnotationAssignment(){
 		return somaticDisplayText;
     }
-
-    public void setAnnotationDisplayText() {
-		if(latestAnnotation == null) {
-			this.annotationDisplayText = "Enter";
-		}
-		else if(latestAnnotation.curation == null || latestAnnotation.curation.trim().length() == 0) {
-			this.annotationDisplayText = "Enter";
-		}else {
-			this.annotationDisplayText = "Annotation";
-        }
-            //latestAnnotation.getDisplayText();
-	}
 
     public String getAnnotationDisplayText(){
         return annotationDisplayText;
