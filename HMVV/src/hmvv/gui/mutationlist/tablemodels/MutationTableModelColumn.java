@@ -1,5 +1,7 @@
 package hmvv.gui.mutationlist.tablemodels;
 
+import hmvv.model.Annotation;
+
 import hmvv.model.MutationSomatic;
 import hmvv.model.VariantPredictionClass;
 
@@ -53,13 +55,37 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 	public static final MutationTableModelColumn annotationColumn = new MutationTableModelColumn("The text entered by the pathologist to generate the clinical laboratory report.",
 			"annotation",
 			String.class,
-			(MutationSomatic mutation) -> mutation.getAnnotationDisplayText());
+			(MutationSomatic mutation) -> getAnnotationDisplayText(mutation));
+
+	    public static String getAnnotationDisplayText(MutationSomatic mutation) {
+			Annotation latestAnnotation = mutation.getLatestAnnotation();
+			if(latestAnnotation == null) {
+				return "Enter";
+			}
+			else if(latestAnnotation.curation == null || latestAnnotation.curation.trim().length() == 0) {
+				return "Enter";
+			}else {
+				return "Annotation";
+        	}
+		}
 
 
 	public static final MutationTableModelColumn somaticColumn = new MutationTableModelColumn("The somatic designation as entered by the pathologist in the annotation report.",
 			"somatic",
 			String.class,
-			(MutationSomatic mutation) -> mutation.getOriginAnnotationAssignment());
+			(MutationSomatic mutation) -> getOriginAnnotationAssignment(mutation));
+
+			public static String getOriginAnnotationAssignment(MutationSomatic mutation) {
+				Annotation latestAnnotation = mutation.getLatestAnnotation();
+				if(latestAnnotation == null) {
+					return "";
+				}
+				else if(latestAnnotation.somatic == null || latestAnnotation.somatic.equals("Not set")) {
+					return "";
+				}else {
+					return latestAnnotation.somatic;
+				}
+			}
 
 	public static final MutationTableModelColumn gotoIGVColumn = new MutationTableModelColumn("Link to load the variant coordinate into IGV.",
 			"IGV",
