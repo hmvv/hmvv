@@ -372,13 +372,6 @@ public class DatabaseCommands_Mutations {
 
 			//annotation history
 			//Integer annotationID, Coordinate cordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate
-			Integer annotationID = getIntegerOrNull(rs, "annotationID");
-			Coordinate coordinate = mutation.getCoordinate();
-			String classification = rs.getString("classification");
-			String curation = rs.getString("curation");
-			String somatic = rs.getString("somatic");
-			String enteredBy = rs.getString("enteredBy");
-			Date enterDate = rs.getDate("enterDate");
 
 			Annotation latestAnnotation = new Annotation(getIntegerOrNull(rs, "annotationID"), mutation.getCoordinate(), rs.getString("classification") ,rs.getString("curation"), 
 														rs.getString("somatic"), rs.getString("enteredBy"),rs.getDate("enterDate") );
