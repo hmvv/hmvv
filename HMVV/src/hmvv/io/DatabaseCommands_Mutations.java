@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 
 import hmvv.main.Configurations;
 import hmvv.model.*;
@@ -376,8 +375,6 @@ public class DatabaseCommands_Mutations {
 			Annotation latestAnnotation = new Annotation(getIntegerOrNull(rs, "annotationID"), mutation.getCoordinate(), rs.getString("classification") ,rs.getString("curation"), 
 														rs.getString("somatic"), rs.getString("enteredBy"),rs.getDate("enterDate") );
 			mutation.setLatestAnnotation(latestAnnotation);
-			mutation.setAnnotationDisplayText();
-			mutation.setOriginAnnotationAssignment();
 
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
