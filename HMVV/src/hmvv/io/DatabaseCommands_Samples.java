@@ -17,6 +17,7 @@ import hmvv.model.Instrument;
 import hmvv.model.RunFolder;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
+import hmvv.model.TMBSampleQC;
 
 public class DatabaseCommands_Samples {
 	
@@ -371,5 +372,55 @@ public class DatabaseCommands_Samples {
         preparedStatement.close();
 
         return exomeTumorMutationBurden;
+    }
+
+	static TMBSampleQC getTMBSampleQC(TMBSample sample) throws Exception{
+        PreparedStatement preparedStatement = databaseConnection.prepareStatement("select * from sampleTumorMutationBurden where sampleID = ? ");
+        preparedStatement.setInt(1, sample.sampleID);
+        ResultSet rs = preparedStatement.executeQuery();
+        
+        TMBSampleQC TMBSampleQC = null;
+        if(rs.next()){
+        	TMBSampleQC = new TMBSampleQC(
+        		rs.getInt("sampleTMBID"),
+        		rs.getInt("sampleID"),
+        		rs.getString("TMBPair"),
+        		rs.getString("TMBTotalVariants"),
+        		rs.getString("TMBScore"),
+				rs.getString("TMBGroup"),
+				rs.getString("varscan_strelka"),
+				rs.getString("varscan_mutect"),
+				rs.getString("mutect_strelka"),
+				rs.getString("varscan_strelka_mutect"),
+				rs.getString("Tumor_Total_Reads"),
+				rs.getString("Normal_Total_Reads"),
+				rs.getString("Tumor_Q20"),
+				rs.getString("Normal_Q20"),
+				rs.getString("Tumor_Total_Reads_AQC"),
+				rs.getString("Normal_Total_Reads_AQC"),
+				rs.getString("Tumor_Duplicate"),
+				rs.getString("Normal_Duplicate"),
+				rs.getString("Tumor_Total_Reads_ADup"),
+				rs.getString("Normal_Total_Reads_ADup"),
+				rs.getString("Tumor_Coverage"),
+				rs.getString("Normal_Coverage"),
+				rs.getString("Tumor_Target_Coverage"),
+				rs.getString("Normal_Target_Coverage"),
+				rs.getString("Tumor_Coverage_10X"),
+				rs.getString("Normal_Coverage_10X"),
+				rs.getString("Tumor_Coverage_20X"),
+				rs.getString("Normal_Coverage_20X"),
+				rs.getString("Tumor_Coverage_50X"),
+				rs.getString("Normal_Coverage_50X"),
+				rs.getString("Tumor_Coverage_100X"),
+				rs.getString("Normal_Coverage_100X"),
+				rs.getString("Tumor_Breadth_Coverage"),
+				rs.getString("TiTv_Ratio")
+
+				
+        	);
+        }
+        preparedStatement.close();
+        return TMBSampleQC;
     }
 }

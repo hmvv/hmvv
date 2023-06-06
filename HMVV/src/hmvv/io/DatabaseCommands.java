@@ -151,6 +151,11 @@ public class DatabaseCommands {
         return DatabaseCommands_Samples.getSampleTumorMutationBurden(sample);
     }
 	
+	public static TMBSampleQC getTMBSampleQC(TMBSample sample)throws Exception{
+        return DatabaseCommands_Samples.getTMBSampleQC(sample);
+    }
+
+
 	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
 		DatabaseCommands_Samples.updateSampleNote(sampleID, newNote);
 	}
