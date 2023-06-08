@@ -4,6 +4,7 @@ import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.Assay;
@@ -234,7 +235,8 @@ public class EnterHEMESample extends JDialog {
         String runDateString = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
         Timestamp runDate = Timestamp.valueOf(runDateString);
         String enteredBy = SSHConnection.getUserName();
-        return new Sample(sampleID, hemeAssay, instrument, runFolder, "", "", "", "", "", "", "", runID, sampleName, "", "", runDate, "", "", "", enteredBy);
+        String analyzedBy = Configurations.ANALYZEDBY;
+        return new Sample(sampleID, hemeAssay, instrument, runFolder, "", "", "", "", "", "", "", runID, sampleName, "", "", runDate, "", "", "", enteredBy,analyzedBy);
     }
 
     private void findRun() throws Exception{

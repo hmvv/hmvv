@@ -63,6 +63,7 @@ public class DatabaseCommands_Samples {
 		String diagnosis = sample.getDiagnosis();
 		String note = sample.getNote();
 		String enteredBy = sample.enteredBy;
+		String analyzedBy = sample.analyzedBy;
 
 		//check if sample is already present in data
 		String checkSample = "select samples.instrument, samples.runFolderName, samples.sampleName from samples " +
@@ -85,8 +86,8 @@ public class DatabaseCommands_Samples {
 		}
 
 		String enterSample = "insert into samples "
-				+ "(assay, instrument, runID, sampleName, coverageID, callerID, lastName, firstName, mrn,orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis, runFolderName) "
-				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+				+ "(assay, instrument, runID, sampleName, coverageID, callerID, lastName, firstName, mrn,orderNumber, pathNumber, tumorSource ,tumorPercent,  runDate, note, enteredBy, patientHistory, bmDiagnosis, runFolderName, analyzedBy) "
+				+ "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		PreparedStatement pstEnterSample = databaseConnection.prepareStatement(enterSample);
 		pstEnterSample.setString(1, assay.assayName);
 		pstEnterSample.setString(2, instrument.instrumentName);
@@ -107,6 +108,8 @@ public class DatabaseCommands_Samples {
 		pstEnterSample.setString(17, patientHistory);
 		pstEnterSample.setString(18, diagnosis);
 		pstEnterSample.setString(19, runFolder.runFolderName);
+		pstEnterSample.setString(20, analyzedBy);
+
 		
 		pstEnterSample.executeUpdate();
 		pstEnterSample.close();
@@ -178,7 +181,7 @@ public class DatabaseCommands_Samples {
 
 		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
-				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
+				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, s.analyzedBy," +
 				" t2.normalPairInstrument, t2.normalPairRunFolder, t2.normalSampleName " +
 				" from samples as s " +
 				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalPairInstrument " ;
@@ -244,7 +247,7 @@ public class DatabaseCommands_Samples {
 	private static ArrayList<Sample> getExceptionSamples(int sampleID , String sampleMRN ) throws Exception{
 		String query = "select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, s.orderNumber, " +
 				" s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, s.coverageID, s.callerID, " +
-				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, " +
+				" s.runDate, s.patientHistory, s.bmDiagnosis, s.note, s.enteredBy, s.analyzedBy," +
 				" t2.normalPairInstrument, t2.normalPairRunFolder, t2.normalSampleName " +
 				" from samples as s " +
 				" left join sampleNormalPair as t2 on s.sampleID = t2.sampleID and s.instrument = t2.normalPairInstrument " +
@@ -289,6 +292,7 @@ public class DatabaseCommands_Samples {
 					row.getString("bmDiagnosis"),
 					row.getString("note"),
 					row.getString("enteredBy"),
+					row.getString("analyzedBy"),
 					row.getString("normalPairInstrument"),
 					new RunFolder(row.getString("normalPairRunFolder")),
 					row.getString("normalSampleName")
@@ -315,7 +319,8 @@ public class DatabaseCommands_Samples {
 					row.getString("patientHistory"),
 					row.getString("bmDiagnosis"),
 					row.getString("note"),
-					row.getString("enteredBy")
+					row.getString("enteredBy"),
+					row.getString("analyzedBy")
 					);
 			return sample;
 		}		

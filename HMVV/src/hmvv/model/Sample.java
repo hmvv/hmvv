@@ -15,6 +15,7 @@ public class Sample {
 	public final String callerID;
 	public final Timestamp runDate;
 	public final String enteredBy;
+	public final String analyzedBy;
 	private String mrn;
 	private String lastName;
 	private String firstName;
@@ -29,7 +30,7 @@ public class Sample {
 
 	public Sample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
-			String coverageID, String callerID, Timestamp runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy) {
+			String coverageID, String callerID, Timestamp runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy, String analyzedBy) {
 		this.sampleID = sampleID;
 		this.assay = assay;
 		this.instrument = instrument;
@@ -50,6 +51,7 @@ public class Sample {
 		this.diagnosis = notNull(bmDiagnosis);
 		this.note = notNull(note);
 		this.enteredBy = notNull(enteredBy);
+		this.analyzedBy = notNull(analyzedBy);
 		patientSamples = new ArrayList<Sample>();
 	}
 	

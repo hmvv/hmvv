@@ -5,6 +5,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.Assay;
@@ -700,6 +701,7 @@ public class EnterSample extends JDialog {
         String diagnosis = textDiagnosis.getText();
         String note = textNote.getText();
         String enteredBy = SSHConnection.getUserName();
+        String analyzedBy = Configurations.ANALYZEDBY;
 
         RunFolder runFolder = new RunFolder(textRunFolder.getText());
         RunFolder tmbNormalRunFolder = new RunFolder(textTMBNormalRunFolder.getText());
@@ -741,12 +743,12 @@ public class EnterSample extends JDialog {
             // TODO  replace comboBoxInstrument with normal sample instrument in future
             return new TMBSample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
-                    runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
+                    runDate, patientHistory, diagnosis, note, enteredBy,analyzedBy, comboBoxInstrument.getSelectedItem().toString(),
                     tmbNormalRunFolder,comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{
             return new Sample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
-                    pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
+                    pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy, analyzedBy);
         }
     }
 

@@ -13,25 +13,25 @@ public class AsynchronousMutationDataIO {
 	public static void loadMissingDataAsynchronous(Sample sample, MutationList mutationList, AsynchronousCallback callback){
 
 		if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.SOMATIC) {
-			createExtraMutationDataThread(mutationList, callback);
+			createExtraMutationDataThread(mutationList, callback, sample);
 		} else if (mutationList.getMutation_type() == Configurations.MUTATION_TYPE.GERMLINE){
 			createExtraGermlineMutationDataThread(mutationList, callback);
 		}
 	}
 	
-	private static void createExtraMutationDataThread(MutationList mutationList, AsynchronousCallback callback){
+	private static void createExtraMutationDataThread(MutationList mutationList, AsynchronousCallback callback, Sample sample){
 		Thread missingDataThread = new Thread(new Runnable(){
 			@Override
 			public void run() {
 				callback.disableInputForAsynchronousLoad();
-				getDatabaseMutationData(mutationList, callback);
+				getDatabaseMutationData(mutationList, callback, sample);
 				callback.enableInputAfterAsynchronousLoad();
 			}
 		});
 		missingDataThread.start();
 	}
 	
-	private static void getDatabaseMutationData(MutationList mutationList, AsynchronousCallback callback){
+	private static void getDatabaseMutationData(MutationList mutationList, AsynchronousCallback callback, Sample sample){
 		for(int index = 0; index < mutationList.getMutationCount(); index++) {
 			if(callback.isCallbackClosed()){
 				return;
@@ -39,7 +39,7 @@ public class AsynchronousMutationDataIO {
 			try{
 
 				MutationSomatic mutation = (MutationSomatic)mutationList.getMutation(index);
-				getMutationData(mutation);
+				getMutationData(mutation, sample);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
 				callback.showErrorMessage(e, "Could not load mutation dbs data - main.");
@@ -53,7 +53,7 @@ public class AsynchronousMutationDataIO {
 			
 			try{
 				MutationSomatic mutation = (MutationSomatic)mutationList.getFilteredMutation(index);
-				getMutationData(mutation);
+				getMutationData(mutation, sample);
 				callback.mutationListIndexUpdated(index);
 			}catch(Exception e){
 				callback.showErrorMessage(e, "Could not load mutation dbs data - filtered.");
@@ -61,10 +61,14 @@ public class AsynchronousMutationDataIO {
 		}
 	}
 	
-	public static void getMutationData(MutationSomatic mutation) throws Exception {
+	public static void getMutationData(MutationSomatic mutation, Sample sample) throws Exception {
 		//cosmic
-		ArrayList<CosmicID> cosmicIDs = DatabaseCommands.getLinkedCosmicIDs(mutation);
-		mutation.addLinkedCosmicIDs(cosmicIDs);
+
+		if (sample.analyzedBy == ""){
+			ArrayList<CosmicID> cosmicIDs = DatabaseCommands.getLinkedCosmicIDs(mutation);
+			mutation.addLinkedCosmicIDs(cosmicIDs);
+		}
+		
 		mutation.removeCosmicIDLoading();
 		
 		//gnomad

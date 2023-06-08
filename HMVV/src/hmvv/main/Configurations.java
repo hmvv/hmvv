@@ -172,6 +172,7 @@ public class Configurations {
 	public static String DATABASE_NAME;
 	public static Integer DATABASE_PORT;
 	public static String DATABASE_VERSION;
+	public static String ANALYZEDBY = "HMVV_" + Configurations.DATABASE_NAME + "_" + Configurations.DATABASE_VERSION;
 	public static String BCL2FASTQ_DATABASE_NAME = "bcl_convert";
 	public static String REFERENCE_DATABASE_NAME = "ngs_reference";
 	
