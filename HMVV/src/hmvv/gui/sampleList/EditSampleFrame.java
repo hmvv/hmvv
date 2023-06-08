@@ -59,6 +59,12 @@ public class EditSampleFrame extends JDialog {
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
 		setMinimumSize(new Dimension(700, getHeight()/3));
 		
+		addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent evt){
+				setResponseCode(RESPONSE_CODE.CANCELLED);
+			}
+		});
+		
 		textBarcode = new JTextField("");
 		textBarcode.setColumns(10);
         textBarcode.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
@@ -146,6 +152,7 @@ public class EditSampleFrame extends JDialog {
 						if(result.equals("DELETE")) {
 							setResponseCode(RESPONSE_CODE.SAMPLE_DELETED);
 						}else {
+							setResponseCode(RESPONSE_CODE.CANCELLED);
 							JOptionPane.showMessageDialog(parent, result + " is not DELETE. Deletion cancelled.");
 						}
 						dispose();

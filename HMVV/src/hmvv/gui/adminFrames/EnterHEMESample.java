@@ -235,7 +235,7 @@ public class EnterHEMESample extends JDialog {
         String runDateString = GUICommonTools.extendedDateFormat1.format(Calendar.getInstance().getTime());
         Timestamp runDate = Timestamp.valueOf(runDateString);
         String enteredBy = SSHConnection.getUserName();
-        String analyzedBy = Configurations.ANALYZEDBY;
+        String analyzedBy = "HMVV_" + Configurations.DATABASE_NAME + "_" + Configurations.DATABASE_VERSION;
         return new Sample(sampleID, hemeAssay, instrument, runFolder, "", "", "", "", "", "", "", runID, sampleName, "", "", runDate, "", "", "", enteredBy,analyzedBy);
     }
 

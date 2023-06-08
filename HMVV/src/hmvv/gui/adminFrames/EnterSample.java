@@ -701,7 +701,7 @@ public class EnterSample extends JDialog {
         String diagnosis = textDiagnosis.getText();
         String note = textNote.getText();
         String enteredBy = SSHConnection.getUserName();
-        String analyzedBy = Configurations.ANALYZEDBY;
+        String analyzedBy = "HMVV_" + Configurations.DATABASE_NAME + "_" + Configurations.DATABASE_VERSION;
 
         RunFolder runFolder = new RunFolder(textRunFolder.getText());
         RunFolder tmbNormalRunFolder = new RunFolder(textTMBNormalRunFolder.getText());
