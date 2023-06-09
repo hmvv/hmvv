@@ -226,7 +226,7 @@ public class SSHConnection {
 	}
 
 	public static RunFolder getRunFolderIon(Instrument instrument, String runID) throws Exception {
-		String runFolderCommand = String.format("ls /storage/instruments/%s -t | grep _%s_ | head -1", instrument, runID);
+		String runFolderCommand = String.format("ls /storage/instruments/%s -t | grep _%s | head -1", instrument, runID);
 		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
 		if(runFolderResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
