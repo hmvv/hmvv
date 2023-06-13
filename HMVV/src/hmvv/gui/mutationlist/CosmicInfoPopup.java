@@ -10,8 +10,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 
+import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
 import hmvv.model.CosmicID;
+import hmvv.model.CosmicIdentifier;
 import hmvv.model.MutationSomatic;
 
 public class CosmicInfoPopup {
@@ -29,38 +31,46 @@ public class CosmicInfoPopup {
 
 	private static ArrayList<CosmicInfo> buildCosmicInfoList(MutationSomatic mutation) throws Exception {
 		String HGVSc = mutation.getHGVSc();	
-		 ArrayList<CosmicID> cosmicIDList = mutation.getAllCosmicIDs();
+		 ArrayList<CosmicIdentifier> cosmicIDList = mutation.getAllCosmicIDs();
 		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
 		 ArrayList<CosmicInfo> cosmicInfoListUnshaded = new ArrayList<CosmicInfo>(cosmicIDList.size());
+		 ArrayList<CosmicID> cosmicIDListWithMetadata = new ArrayList<CosmicID>(cosmicIDList.size());
+
 		 int white_count = 0;
-		 for(CosmicID cosmicID : cosmicIDList) {
-			Boolean shade = true;
-			Boolean openItem = false;
-			CosmicInfo thisInfo = new CosmicInfo(openItem,cosmicID, shade);
+		 for(CosmicIdentifier cosmicID : cosmicIDList) {
+			ArrayList<CosmicID> cosmicIDInfoList = DatabaseCommands.getCosmicIDInfo(cosmicID);
+			cosmicIDListWithMetadata.addAll(cosmicIDInfoList);
+			for(CosmicID thisCosmicID : cosmicIDInfoList ){
+				Boolean shade = true;
+				Boolean openItem = false;
+				CosmicInfo thisInfo = new CosmicInfo(openItem,thisCosmicID, shade);
 
-			String mut_transcript = HGVSc.split(":")[0];
-			String cos_transcript = cosmicID.HGVSc.split(":")[0];	
-			String cos_dna_change = cosmicID.HGVSc.split(":")[1];
-			String mut_dna_change = HGVSc.split(":")[1];
+				String mut_transcript = HGVSc.split(":")[0];
+				String cos_transcript = thisCosmicID.HGVSc.split(":")[0];	
+				String cos_dna_change = thisCosmicID.HGVSc.split(":")[1];
+				String mut_dna_change = HGVSc.split(":")[1];
 
-			if (cos_dna_change.equals(mut_dna_change)){
-				thisInfo.shade = false;
-				if (cos_transcript.equals(mut_transcript)){
-					thisInfo.openItem = true;
+				if (cos_dna_change.equals(mut_dna_change)){
+					thisInfo.shade = false;
+					if (cos_transcript.equals(mut_transcript)){
+						thisInfo.openItem = true;
+					}
 				}
-			}
-			cosmicInfoList.add(thisInfo);
+				cosmicInfoList.add(thisInfo);
 
-		 }
+		 	}
 
 		
-		 for(CosmicInfo thisInfo : cosmicInfoList) {
+		 	for(CosmicInfo thisInfo : cosmicInfoList) {
 			
-			if (thisInfo.shade == false){
-				white_count++;
-				cosmicInfoListUnshaded.add(thisInfo);
-			}
+				if (thisInfo.shade == false){
+					white_count++;
+					cosmicInfoListUnshaded.add(thisInfo);
+				}
+		 	}
 		 }
+
+		 mutation.buildCosmicIDList(cosmicIDListWithMetadata);
 
 		if(white_count == 0){
 			return cosmicInfoList;
@@ -74,7 +84,7 @@ public class CosmicInfoPopup {
 
 	private static boolean getMatchedCosmicIdflag(MutationSomatic mutation) throws Exception {
 		String HGVSc = mutation.getHGVSc();	
-		 ArrayList<CosmicID> cosmicIDList = mutation.getAllCosmicIDs();
+		 ArrayList<CosmicID> cosmicIDList = mutation.getCosmicIDList();
 		 ArrayList<CosmicInfo> cosmicInfoList = new ArrayList<CosmicInfo>(cosmicIDList.size());
 		 ArrayList<CosmicInfo> cosmicInfoListUnshaded = new ArrayList<CosmicInfo>(cosmicIDList.size());
 		 int white_count = 0;

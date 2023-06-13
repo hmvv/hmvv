@@ -134,7 +134,7 @@ public class DatabaseCommands_Mutations {
 	/**
 	 * Acquires the cosmicID from the database. If it isn't found, an empty array is returned
 	 */
-	static ArrayList<CosmicID> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
+	static ArrayList<CosmicIdentifier> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
 		String query = "select cosmicID, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from " + Configurations.COSMIC_TABLE + " where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -143,21 +143,21 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.setString(3, coordinate.getRef());
 		preparedStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<CosmicID> cosmicIDs = new ArrayList<CosmicID>();
+		ArrayList<CosmicIdentifier> cosmicIDs = new ArrayList<CosmicIdentifier>();
 		while(rs.next()){
-			CosmicID cosmicID = new CosmicID(
+			CosmicIdentifier cosmicID = new CosmicIdentifier(
 				getStringOrBlank(rs, "cosmicID"),
 				coordinate,
 				getStringOrBlank(rs, "gene"),
-				getStringOrBlank(rs, "strand"),
-				getStringOrBlank(rs, "genomic_ID"),
-				getStringOrBlank(rs, "legacyID"),
-				getStringOrBlank(rs, "CDS"),
-				getStringOrBlank(rs, "AA"),
-				getStringOrBlank(rs, "HGVSc"),
-				getStringOrBlank(rs, "HGVSp"),
-				getStringOrBlank(rs, "HGVSg"),
-				getStringOrBlank(rs, "old_variant"),
+				// getStringOrBlank(rs, "strand"),
+				// getStringOrBlank(rs, "genomic_ID"),
+				// getStringOrBlank(rs, "legacyID"),
+				// getStringOrBlank(rs, "CDS"),
+				// getStringOrBlank(rs, "AA"),
+				// getStringOrBlank(rs, "HGVSc"),
+				// getStringOrBlank(rs, "HGVSp"),
+				// getStringOrBlank(rs, "HGVSg"),
+				// getStringOrBlank(rs, "old_variant"),
 				"Linked"
 			);
 			cosmicIDs.add(cosmicID);
@@ -355,9 +355,9 @@ public class DatabaseCommands_Mutations {
 			mutation.setClinicalorigin(getStringOrBlank(rs, "cln_origin"));
 			
 			//COSMIC
-			ArrayList<CosmicID> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&", "Pipeline");
+			ArrayList<CosmicIdentifier> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&", "Pipeline",mutation);
 			mutation.addCosmicIDsPipeline(pipelineCosmicIDList);
-			ArrayList<CosmicID> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&", "VEP");
+			ArrayList<CosmicIdentifier> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&", "VEP",mutation);
 			mutation.addVEPCosmicIDs(vepCosmicIDList);
 					
 			//temp holder fields - filled later separately
@@ -388,25 +388,25 @@ public class DatabaseCommands_Mutations {
 	}
 
 	
-    private static ArrayList<CosmicID> parseCosmicIDsFromDelimiter(String cosmicIDString, String separator, String source) throws Exception{
-		ArrayList<CosmicID> cosmicIDList = new ArrayList<CosmicID>();
+    private static ArrayList<CosmicIdentifier> parseCosmicIDsFromDelimiter(String cosmicIDString, String separator, String source, MutationSomatic mutation) throws Exception{
+		ArrayList<CosmicIdentifier> cosmicIDList = new ArrayList<CosmicIdentifier>();
         String[] cosmicIDs = cosmicIDString.split(separator);
         for(String cosmicID : cosmicIDs){
             if(cosmicID.equals("")){
                 continue;
             }
 
-			ArrayList<CosmicID> cosmicIDObject = getCosmicIDInfo(cosmicID, source);
-            cosmicIDList.addAll(cosmicIDObject);
+			CosmicIdentifier cosmicIDObject = new CosmicIdentifier(cosmicID, mutation.getCoordinate(), mutation.getGene(), source);
+            cosmicIDList.add(cosmicIDObject);
         }
 		return cosmicIDList;
     }
 
-	private static ArrayList<CosmicID> getCosmicIDInfo(String cosmicID, String source) throws Exception{
+	static ArrayList<CosmicID> getCosmicIDInfo(CosmicIdentifier cosmicID) throws Exception{
 		String query = "select cosmicID, chr, pos, ref, alt, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from " + Configurations.COSMIC_TABLE + " where cosmicID = ? or legacyID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		preparedStatement.setString(1, cosmicID);
-		preparedStatement.setString(2, cosmicID);
+		preparedStatement.setString(1, cosmicID.cosmicID);
+		preparedStatement.setString(2, cosmicID.cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<CosmicID> cosmicIDs = new ArrayList<CosmicID>();
 		while(rs.next()){
@@ -431,7 +431,8 @@ public class DatabaseCommands_Mutations {
 				getStringOrBlank(rs, "HGVSp"),
 				getStringOrBlank(rs, "HGVSg"),
 				getStringOrBlank(rs, "old_variant"),
-				source
+				cosmicID.source
+				
 			);
 			cosmicIDs.add(cosmicIDObj);
 		}

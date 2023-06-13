@@ -20,11 +20,12 @@ public class MutationSomatic extends MutationCommon {
 
 
     //cosmic
-    private ArrayList<CosmicID> pipeline_cosmicIDs;
-    private ArrayList<CosmicID> VEP_cosmicIDs;
-    private ArrayList<CosmicID> linked_cosmicIDs;
+    private ArrayList<CosmicIdentifier> pipeline_cosmicIDs;
+    private ArrayList<CosmicIdentifier> VEP_cosmicIDs;
+    private ArrayList<CosmicIdentifier> linked_cosmicIDs;
     private String uniqueCosmicIDString;
     private boolean cosmicLoadComplete = false;
+    private ArrayList<CosmicID> cosmicIDs;
     
     //G1000
     private Integer altCount;
@@ -61,10 +62,18 @@ public class MutationSomatic extends MutationCommon {
     private String pmkb_tissue_type;
 
     public MutationSomatic(){
-        this.pipeline_cosmicIDs = new ArrayList<CosmicID>();
-        this.VEP_cosmicIDs = new ArrayList<CosmicID>();
-        this.linked_cosmicIDs = new ArrayList<CosmicID>();
+        this.pipeline_cosmicIDs = new ArrayList<CosmicIdentifier>();
+        this.VEP_cosmicIDs = new ArrayList<CosmicIdentifier>();
+        this.linked_cosmicIDs = new ArrayList<CosmicIdentifier>();
         buildUniqueCosmicIDString();
+    }
+
+    public void buildCosmicIDList(ArrayList<CosmicID> cosmicIDs){
+        this.cosmicIDs = cosmicIDs;
+    }
+
+    public ArrayList<CosmicID> getCosmicIDList(){
+        return cosmicIDs;
     }
 
     public String getDbSNPID() {
@@ -75,30 +84,37 @@ public class MutationSomatic extends MutationCommon {
         this.dbSNPID = dbSNPID;
     }
 
-    public void addLinkedCosmicIDs(ArrayList<CosmicID> linkedCosmicIDs){
+    public void addLinkedCosmicIDs(ArrayList<CosmicIdentifier> linkedCosmicIDs){
         this.linked_cosmicIDs.addAll(linkedCosmicIDs);
         buildUniqueCosmicIDString();
     }
 
-    public void addCosmicIDsPipeline(ArrayList<CosmicID> pipelineCosmicIDs) {
+    public void addCosmicIDsPipeline(ArrayList<CosmicIdentifier> pipelineCosmicIDs) {
         this.pipeline_cosmicIDs.addAll(pipelineCosmicIDs);
         buildUniqueCosmicIDString();
     }
 
-    public void addVEPCosmicIDs(ArrayList<CosmicID> vepCosmicIDs) {
+    public void addVEPCosmicIDs(ArrayList<CosmicIdentifier> vepCosmicIDs) {
         this.VEP_cosmicIDs.addAll(vepCosmicIDs);
         buildUniqueCosmicIDString();
     }
 
-    public ArrayList<CosmicID> getAllCosmicIDs(){
-        ArrayList<CosmicID> allIDs = new ArrayList<CosmicID>();
+
+    
+
+
+
+
+
+    public ArrayList<CosmicIdentifier> getAllCosmicIDs(){
+        ArrayList<CosmicIdentifier> allIDs = new ArrayList<CosmicIdentifier>();
         allIDs.addAll(linked_cosmicIDs);
         allIDs.addAll(VEP_cosmicIDs);
         allIDs.addAll(pipeline_cosmicIDs);
         
-        ArrayList<CosmicID> all_IDs = new ArrayList<CosmicID>(new HashSet<CosmicID>(allIDs));
-        all_IDs.sort(new Comparator<CosmicID>(){
-            public int compare(CosmicID left, CosmicID right){
+        ArrayList<CosmicIdentifier> all_IDs = new ArrayList<CosmicIdentifier>(new HashSet<CosmicIdentifier>(allIDs));
+        all_IDs.sort(new Comparator<CosmicIdentifier>(){
+            public int compare(CosmicIdentifier left, CosmicIdentifier right){
                 return (left.cosmicID + " " + left.gene).compareTo(right.cosmicID + " " + right.gene);
             }
         });
@@ -107,9 +123,9 @@ public class MutationSomatic extends MutationCommon {
     }
 
     private void buildUniqueCosmicIDString(){
-        ArrayList<CosmicID> allIDs = getAllCosmicIDs();
+        ArrayList<CosmicIdentifier> allIDs = getAllCosmicIDs();
         HashSet<String> uniqueCosmicIDs = new HashSet<String>();
-        for (CosmicID cosmicID : allIDs) {
+        for (CosmicIdentifier cosmicID : allIDs) {
             uniqueCosmicIDs.add(cosmicID.cosmicID);
         }
 

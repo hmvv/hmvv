@@ -87,7 +87,7 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getExtraMutationsBySample(sample);
 	}
 	
-	public static ArrayList<CosmicID> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
+	public static ArrayList<CosmicIdentifier> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
 		return DatabaseCommands_Mutations.getLinkedCosmicIDs(mutation);
 	}
 
@@ -105,6 +105,10 @@ public class DatabaseCommands {
 	
 	public static int getOccurrenceCount(MutationCommon mutation) throws Exception{
 		return DatabaseCommands_Mutations.getOccurrenceCount(mutation);
+	}
+
+	public static ArrayList<CosmicID> getCosmicIDInfo(CosmicIdentifier cosmicID) throws Exception{
+		return DatabaseCommands_Mutations.getCosmicIDInfo(cosmicID);
 	}
 	
 	public static ArrayList<repeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{

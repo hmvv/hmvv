@@ -19,6 +19,7 @@ public class CosmicID{
         this.cosmicID = cosmicID;
         this.coordinate = coordinate;
         this.gene = gene;
+        this.source = source;
         this.strand = strand;
         this.genomic_ID = genomic_ID;
         this.legacyID = legacyID;
@@ -28,7 +29,7 @@ public class CosmicID{
         this.HGVSp = HGVSp;
         this.HGVSg = HGVSg;
         this.old_variant = old_variant;
-        this.source = source;
+        
     }
 
     public String getTranscript() {

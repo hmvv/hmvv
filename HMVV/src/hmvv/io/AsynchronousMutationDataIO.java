@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.main.Configurations;
-import hmvv.model.CosmicID;
+import hmvv.model.CosmicIdentifier;
 import hmvv.model.MutationGermline;
 import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
@@ -64,8 +64,8 @@ public class AsynchronousMutationDataIO {
 	public static void getMutationData(MutationSomatic mutation, Sample sample) throws Exception {
 		//cosmic
 
-		if (sample.analyzedBy == ""){
-			ArrayList<CosmicID> cosmicIDs = DatabaseCommands.getLinkedCosmicIDs(mutation);
+		if (sample.analyzedBy == ""){ // analyzedBy is null for samples before HMVV 4.2
+			ArrayList<CosmicIdentifier> cosmicIDs = DatabaseCommands.getLinkedCosmicIDs(mutation);
 			mutation.addLinkedCosmicIDs(cosmicIDs);
 		}
 		
