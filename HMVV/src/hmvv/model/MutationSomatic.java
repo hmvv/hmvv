@@ -25,7 +25,6 @@ public class MutationSomatic extends MutationCommon {
     private ArrayList<CosmicIdentifier> linked_cosmicIDs;
     private String uniqueCosmicIDString;
     private boolean cosmicLoadComplete = false;
-    private ArrayList<CosmicID> cosmicIDs;
     
     //G1000
     private Integer altCount;
@@ -68,14 +67,6 @@ public class MutationSomatic extends MutationCommon {
         buildUniqueCosmicIDString();
     }
 
-    public void buildCosmicIDList(ArrayList<CosmicID> cosmicIDs){
-        this.cosmicIDs = cosmicIDs;
-    }
-
-    public ArrayList<CosmicID> getCosmicIDList(){
-        return cosmicIDs;
-    }
-
     public String getDbSNPID() {
         return dbSNPID;
     }
@@ -98,13 +89,6 @@ public class MutationSomatic extends MutationCommon {
         this.VEP_cosmicIDs.addAll(vepCosmicIDs);
         buildUniqueCosmicIDString();
     }
-
-
-    
-
-
-
-
 
     public ArrayList<CosmicIdentifier> getAllCosmicIDs(){
         ArrayList<CosmicIdentifier> allIDs = new ArrayList<CosmicIdentifier>();
