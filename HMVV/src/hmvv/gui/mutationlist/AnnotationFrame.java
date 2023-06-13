@@ -62,10 +62,10 @@ public class AnnotationFrame extends JDialog {
 		this.readOnly = !SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN);
 		
 		gene = mutation.getGene();
-		geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,mutation.getMutationType());
+		geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene, mutation.getMutationType());
 		currentGeneAnnotationIndex = geneAnnotationHistory.size() - 1; 
 
-		annotationHistory = DatabaseCommands.getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.SOMATIC);
+		annotationHistory = DatabaseCommands.getVariantAnnotationHistory(mutation.getCoordinate(),mutation.getMutationType());
 		this.annotationHistorySize = annotationHistory.size();
 		
 

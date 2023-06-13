@@ -2,7 +2,7 @@ package hmvv.model;
 import hmvv.main.Configurations;
 import java.util.ArrayList;
 
-public class MutationCommon {
+public abstract class MutationCommon {
 
     //common
     private boolean reported;
@@ -327,8 +327,6 @@ public class MutationCommon {
     	return false;
     }
 
-    public Configurations.MUTATION_TYPE getMutationType(){
-        return Configurations.MUTATION_TYPE.COMMON;
-    }    
+    public abstract Configurations.MUTATION_TYPE getMutationType(); 
 
 }

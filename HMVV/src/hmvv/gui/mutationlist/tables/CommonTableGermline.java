@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.util.ArrayList;
 
 import javax.swing.JDialog;
 import javax.swing.JTable;
@@ -225,13 +224,10 @@ public abstract class CommonTableGermline extends JTable{
 
 	protected void handleAnnotationClick() throws Exception{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		//MutationGermline mutation = getSelectedMutation();
-		//String gene = mutation.getGene();
+		MutationGermline mutation = getSelectedMutation();
 
-		//ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,Configurations.MUTATION_TYPE.GERMLINE);
-
-		//AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation, geneAnnotationHistory);
-		//editAnnotation.setVisible(true);
+		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation);
+		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());
 	}
 
