@@ -61,9 +61,6 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			Annotation latestAnnotation = mutation.getLatestAnnotation();
 			if(latestAnnotation == null) {
 				return "Enter";
-			}
-			else if(latestAnnotation.curation == null || latestAnnotation.curation.trim().length() == 0) {
-				return "Enter";
 			}else {
 				return "Annotation";
         	}
