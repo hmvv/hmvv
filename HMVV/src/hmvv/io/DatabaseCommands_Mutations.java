@@ -358,6 +358,7 @@ public class DatabaseCommands_Mutations {
 			ArrayList<CosmicIdentifier> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&", "Pipeline",mutation);
 			mutation.addCosmicIDsPipeline(pipelineCosmicIDList);
 			ArrayList<CosmicIdentifier> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&", "VEP",mutation);
+			vepCosmicIDList.removeAll(pipelineCosmicIDList);
 			mutation.addVEPCosmicIDs(vepCosmicIDList);
 					
 			//temp holder fields - filled later separately
@@ -371,11 +372,13 @@ public class DatabaseCommands_Mutations {
 
 			//annotation history
 			//Integer annotationID, Coordinate cordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate
-
-			Annotation latestAnnotation = new Annotation(getIntegerOrNull(rs, "annotationID"), mutation.getCoordinate(), rs.getString("classification") ,rs.getString("curation"), 
-														rs.getString("somatic"), rs.getString("enteredBy"),rs.getDate("enterDate") );
-			mutation.setLatestAnnotation(latestAnnotation);
-
+			
+			if ( getIntegerOrNull(rs, "annotationID") != null){
+				Annotation latestAnnotation = new Annotation(getIntegerOrNull(rs, "annotationID"), mutation.getCoordinate(), rs.getString("classification") ,rs.getString("curation"), 
+															rs.getString("somatic"), rs.getString("enteredBy"),rs.getDate("enterDate") );
+				mutation.setLatestAnnotation(latestAnnotation);
+			};
+			
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
 			if(gnomadAllFreq != null) {
