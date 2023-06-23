@@ -23,6 +23,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.io.SSHConnection;
 import hmvv.io.LIS.LISConnection;
+import hmvv.main.Configurations.USER_TYPE;
 
 public class HMVVLoginFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -211,6 +212,22 @@ public class HMVVLoginFrame extends JFrame {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "Database connection failed. Please contact the system administrator.");
 			return;
 		}
+
+		try {
+			String usertype = DatabaseCommands.getAccountType(userName);
+	
+			if( usertype != null && !usertype.equals("")){
+				usertype = usertype.toUpperCase();
+				SSHConnection.setUserType(USER_TYPE.valueOf(usertype));
+			} else {
+				throw new Exception("");
+			}
+		} catch (Exception e){
+			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e, "User not found. Please contact your system administrator.");
+			return;
+		}
+		
+		
 
 		try {
 			loginButton.setText("Connecting to LIS...");

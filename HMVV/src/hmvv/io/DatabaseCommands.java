@@ -56,6 +56,18 @@ public class DatabaseCommands {
 		return (!version.equals(Configurations.DATABASE_VERSION));
 		
 	}
+
+	public static  String getAccountType(String userName) throws Exception{
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select userType from admin.user_access where networkID=? and status='active' ");
+		preparedStatement.setString(1, userName);
+		ResultSet rs = preparedStatement.executeQuery();
+		String userAccountType = new String();
+		while(rs.next()){
+			userAccountType = rs.getString(1);
+		}
+		
+		return userAccountType;
+	}
 	
 	/* ************************************************************************
 	 * Assay Queries

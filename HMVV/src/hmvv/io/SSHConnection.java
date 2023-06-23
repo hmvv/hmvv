@@ -40,6 +40,10 @@ public class SSHConnection {
 	public static String getUserName(){
 		return sshSession.getUserName();
 	}
+
+	public static void setUserType(USER_TYPE usertype){
+		userType = usertype;
+	}
 	
 	public static boolean isSuperUser(USER_FUNCTION function){
 		return function.isSuperUser(userType);
@@ -47,7 +51,6 @@ public class SSHConnection {
 	
 	public static void connect(String user, String password) throws Exception{
 		sshSession = connectToSSH(user, password);
-        readUserType();
 	}
 	
 	private static Session connectToSSH(String userName, String password) throws Exception{
@@ -60,20 +63,7 @@ public class SSHConnection {
 		return sshSession;
 	}
 	
-	private static void readUserType() throws Exception{
-		ChannelExec channel = (ChannelExec) sshSession.openChannel("exec");
-		BufferedReader in=new BufferedReader(new InputStreamReader(channel.getInputStream()));
-		channel.setCommand("checkAccountType");
-		channel.connect();
-		String usertype = in.readLine();
 
-		if( usertype != null && !usertype.equals("")){
-			usertype = usertype.toUpperCase();
-			userType = USER_TYPE.valueOf(usertype);
-        }else{
-            throw new Exception(String.format("User not found. Please contact your system administrator."));
-        }
-	}
 	
 	private static File copyFile(Sample sample, String file_location, SftpProgressMonitor progressMonitor) throws Exception{
 		String runFolderName = sample.runFolder.runFolderName;
