@@ -37,7 +37,7 @@ public class CosmicInfoFrame extends JDialog {
 
         pack();
         Rectangle bounds = GUICommonTools.getBounds(parent);
-        setSize((int)(bounds.width*.60), (int)(bounds.height*.50));
+        setSize((int)(bounds.width), (int)(bounds.height*.60));
         setResizable(true);
         setLocationRelativeTo(parent);
     }

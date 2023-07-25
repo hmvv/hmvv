@@ -16,7 +16,6 @@ import hmvv.gui.LoadFileButton;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 import hmvv.model.Amplicon;
 import hmvv.model.Sample;
 
@@ -27,7 +26,7 @@ public class ViewAmpliconFrame extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 
-    private HMVVFrame parent;
+    private Window parent;
 
 	private JLabel patientNameLabel;
 	private JLabel ampliconsReportLabel;
@@ -46,7 +45,7 @@ public class ViewAmpliconFrame extends JDialog {
     private TableRowSorter<ViewAmpliconFrameTableModel> sorter;
 
 
-	public ViewAmpliconFrame(HMVVFrame parent, Sample sample) throws Exception{
+	public ViewAmpliconFrame(Window parent, Sample sample) throws Exception{
         super(parent, "Sample Amplicons", ModalityType.APPLICATION_MODAL);
         this.parent = parent;
 		this.sample = sample;

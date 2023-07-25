@@ -22,7 +22,10 @@ public class Annotation extends CommonAnnotation{
 	}
 	
 	public String getSomaticDisplayText() {
-		if(somatic.equals("Not set")) {
+		if(somatic.equals("Not set")){
+			return "";
+		}
+		if(somatic == null){
 			return "";
 		}
 		return somatic;

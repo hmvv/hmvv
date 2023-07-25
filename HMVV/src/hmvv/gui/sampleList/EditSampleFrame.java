@@ -14,7 +14,6 @@ import hmvv.io.SSHConnection;
 import hmvv.io.LIS.LISConnection;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.main.HMVVFrame;
 import hmvv.model.Assay;
 import hmvv.model.Sample;
 
@@ -37,11 +36,19 @@ public class EditSampleFrame extends JDialog {
 	private JButton btnDelete;
 	private JButton btnCancel;
 	private Sample sample;
+
+	private static RESPONSE_CODE response_code;
+
+	public static enum RESPONSE_CODE{
+		CANCELLED,
+		SAMPLE_UPDATED,
+		SAMPLE_DELETED
+	};
 	
 	/**
 	 * Create the frame.
 	 */
-	public EditSampleFrame(HMVVFrame parent, Sample sample) {
+	public EditSampleFrame(Window parent, Sample sample) {
 		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Edit Sample";
 		setTitle(title);
@@ -51,6 +58,12 @@ public class EditSampleFrame extends JDialog {
 		Rectangle bounds = GUICommonTools.getBounds(parent);
 		setSize((int)(bounds.width*.85), (int)(bounds.height*.85));
 		setMinimumSize(new Dimension(700, getHeight()/3));
+		
+		addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent evt){
+				setResponseCode(RESPONSE_CODE.CANCELLED);
+			}
+		});
 		
 		textBarcode = new JTextField("");
 		textBarcode.setColumns(10);
@@ -100,12 +113,27 @@ public class EditSampleFrame extends JDialog {
 
 		btnSubmit = new JButton("Update");
 		btnSubmit.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		btnSubmit.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					updateSampleFromTextFields();
+					setResponseCode(RESPONSE_CODE.SAMPLE_UPDATED);
+				} catch (Exception e1) {
+					HMVVDefectReportFrame.showHMVVDefectReportFrame(parent, e1);
+				}
+				dispose();
+			}
+		});
+		
+
 
 		btnCancel = new JButton("Cancel");
 		btnCancel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				EditSampleFrame.this.setVisible(false);
+				setResponseCode(RESPONSE_CODE.CANCELLED);
+				dispose();
 			}
 		});
 		btnCancel.setFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -113,6 +141,23 @@ public class EditSampleFrame extends JDialog {
 		btnDelete = new JButton("Delete");
 		btnDelete.setFont(GUICommonTools.TAHOMA_BOLD_14);
         btnDelete.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.EDIT_SAMPLE_LABR));
+		
+		btnDelete.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+						String result = JOptionPane.showInputDialog(parent, "Type DELETE to delete this sample.", "Delete sample?", JOptionPane.QUESTION_MESSAGE);
+						if(result == null) {
+							return;
+						}
+						if(result.equals("DELETE")) {
+							setResponseCode(RESPONSE_CODE.SAMPLE_DELETED);
+						}else {
+							setResponseCode(RESPONSE_CODE.CANCELLED);
+							JOptionPane.showMessageDialog(parent, result + " is not DELETE. Deletion cancelled.");
+						}
+						dispose();
+			}
+		});
 
 		layoutComponents();
 		activateComponents();
@@ -292,7 +337,7 @@ public class EditSampleFrame extends JDialog {
         });
 	}
 
-	public Sample getUpdatedSample(){
+	private void updateSampleFromTextFields(){
 		sample.setMRN(textMRN.getText());
 		sample.setLastName(textLast.getText());
 		sample.setFirstName(textFirst.getText());
@@ -303,9 +348,10 @@ public class EditSampleFrame extends JDialog {
 		sample.setPatientHistory(textPatientHistory.getText());
 		sample.setDiagnosis(textDiagnosis.getText());
 		sample.setNote(textNote.getText());
-		return sample;
 	}
 	
+	//EditSampleFrame nees to be the ActionListener on these buttons.
+	//Need to build way for other objects (Sample"ListFrame and MutationFilterPanel) to register themselves as listenere (Observer design pattern).
 	public void addConfirmListener(ActionListener listener) {
 		btnSubmit.addActionListener(listener);
 	}
@@ -326,6 +372,14 @@ public class EditSampleFrame extends JDialog {
         textPatientHistory.setText(patientHistory);
         textDiagnosis.setText(diagnosis);
         textNote.setText(note);
+	}
+
+	private void setResponseCode(RESPONSE_CODE responseCode){
+		response_code = responseCode;
+	}
+
+	public RESPONSE_CODE getResponseCode(){
+		return response_code;
 	}
 
 	private void runLISIntegration(){

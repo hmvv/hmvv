@@ -31,7 +31,7 @@ public class InternetCommands {
 	}
 
 	public static void searchGoogle(String term) throws Exception{
-		browseToURL("https://www.google.com/#q=" + term );
+		browseToURL("https://www.google.com/search?q=" + term );
 	}
 
 	public static void searchGoogleHGMD(String gene, String id) throws Exception{

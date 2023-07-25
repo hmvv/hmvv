@@ -5,6 +5,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.io.DatabaseCommands;
 import hmvv.io.LIS.LISConnection;
 import hmvv.io.SSHConnection;
+import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.main.HMVVFrame;
 import hmvv.model.Assay;
@@ -296,6 +297,7 @@ public class EnterSample extends JDialog {
                     textTMBNormalRunFolder.setText("");
                     clearAndDisableSamplePanel();
                     clearAndDisableSampleRecords();
+                    btnEnterSample.setText("Enter Sample");
                 }
             }
         };
@@ -412,6 +414,8 @@ public class EnterSample extends JDialog {
         }
 
         RunFolder runFolder = SSHConnection.getRunFolderIon(instrument, runID);
+        SSHConnection.checkSampleSheetError(instrument, runFolder.runFolderName, comboBoxAssay.getSelectedItem().toString());
+
         if(instrument.instrumentName.equals("miseq") || instrument.instrumentName.equals("nextseq") || instrument.instrumentName.equals("novaseq") ){
             findRunIllumina(instrument, runFolder, comboboxSample, isTMBNormal);
         }else if(instrument.instrumentName.equals("pgm") || instrument.instrumentName.equals("proton")){
@@ -649,10 +653,10 @@ public class EnterSample extends JDialog {
                 btnEnterSample.setText("Enter Sample");
                 btnEnterSample.setEnabled(true); 
             }else{
-                DatabaseCommands.insertDataIntoDatabase(sample);
                 if(sample.assay.assayName.equals("tmb")){
                     DatabaseCommands.insertbclconvertIntoDatabase(sample.instrument, sample.runFolder);
                 }
+                DatabaseCommands.insertDataIntoDatabase(sample);
                 sampleListFrame.addSample(sample);
                 //call update fields in order to run the code that updates the editable status of the fields, and also the btnEnterSample
                 updateFields(sample.getMRN(), sample.getLastName(), sample.getFirstName(), sample.getOrderNumber(), sample.getPathNumber(), sample.getTumorSource(), sample.getTumorPercent(), sample.getPatientHistory(), sample.getDiagnosis(), sample.getNote(), false);
@@ -697,6 +701,7 @@ public class EnterSample extends JDialog {
         String diagnosis = textDiagnosis.getText();
         String note = textNote.getText();
         String enteredBy = SSHConnection.getUserName();
+        String analyzedBy = "HMVV_" + Configurations.DATABASE_NAME + "_" + Configurations.DATABASE_VERSION;
 
         RunFolder runFolder = new RunFolder(textRunFolder.getText());
         RunFolder tmbNormalRunFolder = new RunFolder(textTMBNormalRunFolder.getText());
@@ -738,12 +743,12 @@ public class EnterSample extends JDialog {
             // TODO  replace comboBoxInstrument with normal sample instrument in future
             return new TMBSample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
                     pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID,
-                    runDate, patientHistory, diagnosis, note, enteredBy, comboBoxInstrument.getSelectedItem().toString(),
+                    runDate, patientHistory, diagnosis, note, enteredBy,analyzedBy, comboBoxInstrument.getSelectedItem().toString(),
                     tmbNormalRunFolder,comboBoxTMBNormalSample.getSelectedItem().toString());
         }
         else{
             return new Sample(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber,
-                    pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy);
+                    pathologyNumber, tumorSource, tumorPercent, runID, sampleName, coverageID, variantCallerID, runDate, patientHistory, diagnosis, note, enteredBy, analyzedBy);
         }
     }
 

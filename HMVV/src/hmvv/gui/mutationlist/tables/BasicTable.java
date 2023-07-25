@@ -2,6 +2,7 @@ package hmvv.gui.mutationlist.tables;
 
 import javax.swing.*;
 import hmvv.gui.HMVVTableColumn;
+import hmvv.gui.mutationlist.repeatMutationsPopup;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.io.IGVConnection;
 import hmvv.model.MutationSomatic;
@@ -16,7 +17,7 @@ public class BasicTable extends CommonTable{
 	
 	@Override
 	protected HMVVTableColumn[] constructCustomColumns(){
-		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 2, 3, 4, 7, 8, 12, 14);
+		return HMVVTableColumn.getCustomColumnArray(model.getColumnCount(), 2, 3, 4, 7, 8, 12, 14, 16);
 	}
 
 	@Override
@@ -54,17 +55,26 @@ public class BasicTable extends CommonTable{
 			searchCosmic();
 		}else if(column == 14){
 			handleAnnotationClick();
-			//parent.setVisible(false);
-			
+		}else if(column == 16){
+			handleRepeatsClick();
 		}
 	}
 
 	private void handleIGVClick() throws Exception{
 		MutationSomatic mutation = getSelectedMutation();
 		String result = IGVConnection.loadCoordinateIntoIGV(this, mutation.getCoordinate());
-		if(result.length() > 0) {
+		if((result.length() > 0) && (!result.equals("OK"))) {
 			JOptionPane.showMessageDialog(this, result);
 		}
+	}
+
+	private void handleRepeatsClick() throws Exception{
+		MutationSomatic mutation = getSelectedMutation();
+		repeatMutationsPopup.handleRepeatMutationsClick(parent, mutation);
+		
+		
+
+
 	}
 
 	private void handleLoadIGVCheckBoxClick(){

@@ -10,10 +10,10 @@ public class TMBSample extends Sample{
 	
 	public TMBSample(int sampleID, Assay assay, Instrument instrument, RunFolder runFolder, String mrn, String lastName, String firstName, String orderNumber,
 			String pathNumber, String tumorSource, String tumorPercent, String runID, String sampleName,
-			String coverageID, String callerID, Timestamp runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy,
+			String coverageID, String callerID, Timestamp runDate, String patientHistory, String bmDiagnosis, String note, String enteredBy, String analyzedBy,
 			String normalInstrumentName, RunFolder normalRunFolder, String normalSampleName) {
 		super(sampleID, assay, instrument, runFolder, mrn, lastName, firstName, orderNumber, pathNumber, tumorSource, tumorPercent, runID,
-				sampleName, coverageID, callerID, runDate, patientHistory, bmDiagnosis, note, enteredBy);
+				sampleName, coverageID, callerID, runDate, patientHistory, bmDiagnosis, note, enteredBy, analyzedBy);
 		this.normalInstrumentName = normalInstrumentName;
 		this.normalRunFolder = normalRunFolder;
 		this.normalSampleName = normalSampleName;

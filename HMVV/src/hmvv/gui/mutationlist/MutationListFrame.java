@@ -14,7 +14,10 @@ import javax.swing.event.ChangeListener;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.*;
 import hmvv.gui.mutationlist.tables.*;
+import hmvv.gui.sampleList.EditSampleFrame;
 import hmvv.gui.sampleList.ReportFramePatientHistory;
+import hmvv.gui.sampleList.SampleListFrame;
+import hmvv.gui.sampleList.EditSampleFrame.RESPONSE_CODE;
 import hmvv.io.AsynchronousCallback;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.LIS.LISConnection;
@@ -85,10 +88,11 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	
 	private Sample sample;
 	private MutationFilterPanel mutationFilterPanel;
+	private SampleListFrame sampleListFrame;
 
 	private volatile boolean isWindowClosed;
 		
-	public MutationListFrame(HMVVFrame parent, Sample sample, MutationList mutationList){
+	public MutationListFrame(HMVVFrame parent,SampleListFrame sampleListFrame, Sample sample, MutationList mutationList){
 		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Mutation List - " + sample.getLastName() + "," + sample.getFirstName() + "," + sample.getOrderNumber() +
 				" (sampleName = "+ sample.sampleName +", sampleID = " + sample.sampleID + ", runID = " + sample.runID + ", assay = " + sample.assay +", instrument = " + sample.instrument +  ")";
@@ -98,6 +102,7 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		this.mutationList = mutationList;
 		this.sample = sample;
 		this.mutationListFilters = new MutationListFilters();
+		this.sampleListFrame = sampleListFrame;
 		
 		constructComponents();
 		layoutComponents();
@@ -110,7 +115,6 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 		setMinimumSize(new Dimension(700, getHeight()/3));
 
 		setLocationRelativeTo(parent);		
-		//setModal(true);
 
 		for(int i = 0; i < mutationList.getMutationCount(); i++){
 			MutationSomatic current_mutation = (MutationSomatic)mutationList.getMutation(i);
@@ -349,6 +353,20 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 					reportFrame = new ReportFramePatientHistory(this, sample, labOrderNumber, history);
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(this, e);
+		}
+	}
+
+	public void showEditSampleFrame(){
+		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
+		editSample.setVisible(true);
+		RESPONSE_CODE responseCode = editSample.getResponseCode();
+		try {
+			sampleListFrame.handleEditSampleResponse(sample, responseCode);
+			if (responseCode == RESPONSE_CODE.SAMPLE_DELETED){
+				dispose();
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(parent, e.getMessage());
 		}
 	}
 }

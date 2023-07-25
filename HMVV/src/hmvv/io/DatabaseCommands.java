@@ -56,6 +56,18 @@ public class DatabaseCommands {
 		return (!version.equals(Configurations.DATABASE_VERSION));
 		
 	}
+
+	public static  String getAccountType(String userName) throws Exception{
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select userType from admin.user_access where networkID=? and status='active' ");
+		preparedStatement.setString(1, userName);
+		ResultSet rs = preparedStatement.executeQuery();
+		String userAccountType = new String();
+		while(rs.next()){
+			userAccountType = rs.getString(1);
+		}
+		
+		return userAccountType;
+	}
 	
 	/* ************************************************************************
 	 * Assay Queries
@@ -87,7 +99,7 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getExtraMutationsBySample(sample);
 	}
 	
-	public static ArrayList<CosmicID> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
+	public static ArrayList<CosmicIdentifier> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
 		return DatabaseCommands_Mutations.getLinkedCosmicIDs(mutation);
 	}
 
@@ -106,7 +118,19 @@ public class DatabaseCommands {
 	public static int getOccurrenceCount(MutationCommon mutation) throws Exception{
 		return DatabaseCommands_Mutations.getOccurrenceCount(mutation);
 	}
+
+	public static ArrayList<CosmicID> getCosmicIDInfo(CosmicIdentifier cosmicID) throws Exception{
+		return DatabaseCommands_Mutations.getCosmicIDInfo(cosmicID);
+	}
 	
+	public static ArrayList<repeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{
+		return DatabaseCommands_Mutations.getrepeatMutations(mutation);
+	}
+
+	public static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate, Configurations.MUTATION_TYPE mutationType) throws Exception{
+		return DatabaseCommands_Mutations.getVariantAnnotationHistory(coordinate, mutationType);
+	}
+
 	public static void updateReportedStatus(boolean setToReported, Integer sampleID, Coordinate coordinate) throws SQLException{
 		DatabaseCommands_Mutations.updateReportedStatus(setToReported, sampleID, coordinate);
 	}
@@ -143,6 +167,11 @@ public class DatabaseCommands {
         return DatabaseCommands_Samples.getSampleTumorMutationBurden(sample);
     }
 	
+	public static TMBSampleQC getTMBSampleQC(TMBSample sample)throws Exception{
+        return DatabaseCommands_Samples.getTMBSampleQC(sample);
+    }
+
+
 	public static void updateSampleNote(int sampleID, String newNote) throws Exception{
 		DatabaseCommands_Samples.updateSampleNote(sampleID, newNote);
 	}

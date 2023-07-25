@@ -32,6 +32,7 @@ public class BasicTableModel extends CommonTableModel {
 		columns.add(MutationTableModelColumn.occurrenceColumn);
 		columns.add(MutationTableModelColumn.annotationColumn);
 		columns.add(MutationTableModelColumn.somaticColumn);
+		columns.add(MutationTableModelColumn.variantRepeatCountColumn);
 		
 
 		return columns;

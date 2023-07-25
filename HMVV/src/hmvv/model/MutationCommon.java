@@ -2,7 +2,7 @@ package hmvv.model;
 import hmvv.main.Configurations;
 import java.util.ArrayList;
 
-public class MutationCommon {
+public abstract class MutationCommon {
 
     //common
     private boolean reported;
@@ -17,7 +17,10 @@ public class MutationCommon {
     // custom
     private boolean selected;
     private Integer occurrence;
-    private ArrayList<Annotation> annotationHistory;
+    private Integer variantRepeatCount;
+    private Annotation latestAnnotation;
+    private String annotationDisplayText;
+    private String somaticDisplayText;
 
     //Sample
     private String lastName;
@@ -212,6 +215,14 @@ public class MutationCommon {
         this.occurrence = occurrence;
     }
 
+    public Integer getvariantRepeatCount() {
+        return variantRepeatCount;
+    }
+
+    public void setvariantRepeatCount(Integer variantRepeatCount) {
+        this.variantRepeatCount = variantRepeatCount;
+    }
+
     public String getChr() {
         return chr;
     }
@@ -292,29 +303,21 @@ public class MutationCommon {
         this.sampleID = sampleID;
     }
 
-    public void addAnnotation(Annotation annotation) {
-        annotationHistory.add(annotation);
-    }
-
-    public int getAnnotationHistorySize() {
-        return annotationHistory.size();
-    }
-
-    public Annotation getAnnotation(int index) {
-        return annotationHistory.get(index);
-    }
-
-    public void setAnnotationHistory(ArrayList<Annotation> annotationHistory) {
-        this.annotationHistory = annotationHistory;
+    public void setLatestAnnotation(Annotation annotation) {
+        this.latestAnnotation = annotation;
     }
     
     public Annotation getLatestAnnotation() {
-    	if (annotationHistory.size() == 0) {
-            return null;
-        }
-    	return annotationHistory.get(annotationHistory.size() - 1);
+    	return latestAnnotation;
     }
 
+    public String getOriginAnnotationAssignment(){
+		return somaticDisplayText;
+    }
+
+    public String getAnnotationDisplayText(){
+        return annotationDisplayText;
+    }
 
     public boolean equals(Object o) {
     	if(o instanceof MutationCommon) {
@@ -324,8 +327,6 @@ public class MutationCommon {
     	return false;
     }
 
-    public Configurations.MUTATION_TYPE getMutationType(){
-        return Configurations.MUTATION_TYPE.COMMON;
-    }    
+    public abstract Configurations.MUTATION_TYPE getMutationType(); 
 
 }

@@ -36,13 +36,16 @@ public class AnnotationFrame extends JDialog {
 
 	private JLabel historyLabelGeneAnnotation;
 	private JLabel historyLabelAnnotation;
+	private Integer annotationHistorySize;
 
 	private Boolean readOnly;
 	private Integer currentGeneAnnotationIndex;
 	private Integer currentAnnotationIndex;
+	private String gene;
 
 	private ArrayList<GeneAnnotation> geneAnnotationHistory;
 	private MutationCommon mutation;
+	private ArrayList<Annotation> annotationHistory;
 
 	private final Color readOnlyColor = new Color(245,245,245);
 	private final Color readWriteColor = Color.WHITE;
@@ -51,16 +54,22 @@ public class AnnotationFrame extends JDialog {
 	 * Create the dialog.
 	 * @throws Exception
 	 */
-	public AnnotationFrame(JDialog parent, MutationCommon mutation, ArrayList<GeneAnnotation> geneAnnotationHistory) throws Exception {
+	public AnnotationFrame(JDialog parent, MutationCommon mutation) throws Exception {
 		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Annotation - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString();
 		setTitle(title);
 		this.mutation = mutation;
 		this.readOnly = !SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN);
 		
-		this.geneAnnotationHistory = geneAnnotationHistory;
+		gene = mutation.getGene();
+		geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene, mutation.getMutationType());
 		currentGeneAnnotationIndex = geneAnnotationHistory.size() - 1; 
-		currentAnnotationIndex = mutation.getAnnotationHistorySize() - 1;
+
+		annotationHistory = DatabaseCommands.getVariantAnnotationHistory(mutation.getCoordinate(),mutation.getMutationType());
+		this.annotationHistorySize = annotationHistory.size();
+		
+
+		currentAnnotationIndex = annotationHistorySize - 1;
 		
 		createComponents();
 		layoutComponents();
@@ -107,7 +116,7 @@ public class AnnotationFrame extends JDialog {
 		}
 
 		previousAnnotationButton = new JButton("Previous");
-		if (mutation.getAnnotationHistorySize() <= 1) { 
+		if (annotationHistorySize <= 1) { 
 			previousAnnotationButton.setEnabled(false); 
 		}		
 
@@ -141,10 +150,19 @@ public class AnnotationFrame extends JDialog {
 	}
 	
 	private void setDefaultComponentValues() {
+		
 		Annotation defaultAnnotation = mutation.getLatestAnnotation();
 		if(defaultAnnotation != null) {
-			pathogenicityComboBox.setSelectedItem(defaultAnnotation.classification);
+			if (defaultAnnotation.classification == null){
+				pathogenicityComboBox.setSelectedItem("Not Set");
+			}else{
+				pathogenicityComboBox.setSelectedItem(defaultAnnotation.classification);
+			}
+			if (defaultAnnotation.somatic == null){
+				mutationTypeComboBox.setSelectedItem("Not Set");
+			}else{
 			mutationTypeComboBox.setSelectedItem(defaultAnnotation.somatic);
+			}
 			annotationTextArea.setText(defaultAnnotation.curation);
 			setCommonAnnotationLabel(defaultAnnotation, historyLabelAnnotation);
 		}
@@ -157,8 +175,9 @@ public class AnnotationFrame extends JDialog {
 	}
 	
 	private void setCommonAnnotationLabel(CommonAnnotation commonAnnotation, JLabel label) {
+		if(commonAnnotation.enteredBy != null){ 
 		label.setText(commonAnnotation.enteredBy + " [" + GUICommonTools.shortDateFormat.format(commonAnnotation.enterDate) + "]");
-	}
+	}}
 	
 	private void addItem(JPanel itemPanel, String label, Component content) {
 		JLabel geneLabel = new JLabel(label);
@@ -327,7 +346,7 @@ public class AnnotationFrame extends JDialog {
 	}
 	
 	private void saveAnnotationRecord() throws Exception {
-		if(currentAnnotationIndex == mutation.getAnnotationHistorySize() - 1 || mutation.getAnnotationHistorySize() == 0) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
+		if(currentAnnotationIndex == annotationHistorySize - 1 || annotationHistorySize == 0) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
 			//annotation update
 			Annotation newAnnotation = new Annotation(
 					mutation.getCoordinate(),
@@ -340,7 +359,7 @@ public class AnnotationFrame extends JDialog {
 			Annotation latestAnnotation = mutation.getLatestAnnotation();
 			if (latestAnnotation == null || !latestAnnotation.equals(newAnnotation)) {
 				DatabaseCommands.addVariantAnnotationCuration(newAnnotation,Configurations.MUTATION_TYPE.SOMATIC);
-				mutation.addAnnotation(newAnnotation);
+				mutation.setLatestAnnotation(newAnnotation);
 //				parent.notifyAnnotationUpdated(newAnnotation);
 			}
 		}
@@ -392,20 +411,20 @@ public class AnnotationFrame extends JDialog {
 	}
 	
 	private void updateAnnotation() {
-		Annotation currentannotation = mutation.getAnnotation(currentAnnotationIndex);
+		Annotation currentannotation = annotationHistory.get(currentAnnotationIndex); //mutation.getAnnotation(currentAnnotationIndex);
 		annotationTextArea.setText(currentannotation.curation);
 		pathogenicityComboBox.setSelectedItem(currentannotation.classification);
 		mutationTypeComboBox.setSelectedItem(currentannotation.somatic);
 		setCommonAnnotationLabel(currentannotation, historyLabelAnnotation);
 		
-		updateCommon(currentAnnotationIndex, mutation.getAnnotationHistorySize(), annotationTextArea, previousAnnotationButton, nextAnnotationButton);
+		updateCommon(currentAnnotationIndex, annotationHistorySize, annotationTextArea, previousAnnotationButton, nextAnnotationButton);
 		
-		if (currentAnnotationIndex == mutation.getAnnotationHistorySize() - 1) {
+		if (currentAnnotationIndex == annotationHistorySize - 1) {
 			if(!readOnly) {
 				pathogenicityComboBox.setEnabled(true);
 				mutationTypeComboBox.setEnabled(true);
 			}
-		}else if(mutation.getAnnotationHistorySize() != 1) {
+		}else if(annotationHistorySize != 1) {
 			pathogenicityComboBox.setEnabled(false);
 			mutationTypeComboBox.setEnabled(false);
 		}

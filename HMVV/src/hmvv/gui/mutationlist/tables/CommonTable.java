@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.util.ArrayList;
 
 import javax.swing.JDialog;
 import javax.swing.JTable;
@@ -25,7 +24,6 @@ import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
-import hmvv.model.GeneAnnotation;
 import hmvv.model.MutationSomatic;
 
 public abstract class CommonTable extends JTable{
@@ -243,12 +241,12 @@ public abstract class CommonTable extends JTable{
 	protected void handleAnnotationClick() throws Exception{
 		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		MutationSomatic mutation = getSelectedMutation();
-		String gene = mutation.getGene();
 		
-		ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene,mutation.getMutationType());
+		
+		
 
 
-		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation, geneAnnotationHistory);
+		AnnotationFrame editAnnotation = new AnnotationFrame(parent, mutation);
 		
 		editAnnotation.setVisible(true);
 		this.setCursor(Cursor.getDefaultCursor());

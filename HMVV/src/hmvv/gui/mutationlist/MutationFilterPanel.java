@@ -14,6 +14,7 @@ import javax.swing.event.DocumentListener;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.LoadFileButton;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
+import hmvv.gui.sampleList.ViewAmpliconFrame;
 import hmvv.io.IGVConnection;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
@@ -47,12 +48,16 @@ public class MutationFilterPanel extends JPanel {
 
     private JButton resetButton;
     private LoadFileButton loadIGVButton;
-    
+	private JButton editSampleButton;
+	private JButton assayQCButton;
+
 	MutationFilterPanel(MutationListFrame parent,Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
 		this.parent = parent;
 	    this.sample = sample;
 		this.mutationList = mutationList;
 		this.mutationListFilters = mutationListFilters;
+
+
         constructComponents();
 		layoutComponents();
 	}
@@ -83,7 +88,45 @@ public class MutationFilterPanel extends JPanel {
 			}
 		});
 
-		
+		editSampleButton = new JButton("Edit Sample");
+		editSampleButton.setToolTipText("Edit the current sample");
+		editSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		editSampleButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	new Thread(new Runnable() {
+					public void run() {
+						try {
+							editSampleButton.setEnabled(false);
+							parent.showEditSampleFrame();
+						} catch (Exception ex) {
+							JOptionPane.showMessageDialog(parent, ex.getMessage());
+						}
+						editSampleButton.setEnabled(true);
+					}
+				}).start();
+            }
+        });
+
+		assayQCButton = new JButton("Amplicon");
+		assayQCButton.setToolTipText("Edit the current sample");
+		assayQCButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+		assayQCButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	new Thread(new Runnable() {
+					public void run() {
+						try {
+							ViewAmpliconFrame amplicon = new ViewAmpliconFrame(parent, sample);
+							amplicon.setVisible(true);
+						} catch (Exception ex) {
+							JOptionPane.showMessageDialog(parent, ex.getMessage());
+						}
+						editSampleButton.setEnabled(true);
+					}
+				}).start();
+            }
+        });
+
+
 		loadIGVButton = new LoadFileButton("Load IGV");
 		loadIGVButton.setToolTipText("Load the sample into IGV. IGV needs to be already opened");
 		loadIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
@@ -218,6 +261,8 @@ public class MutationFilterPanel extends JPanel {
 		
 		JPanel igvButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		igvButtonPanel.add(loadIGVButton);
+		igvButtonPanel.add(editSampleButton);
+		igvButtonPanel.add(assayQCButton);
 		checkboxPanel.add(igvButtonPanel);
 		
 		leftFilterPanel.add(checkboxPanel);
@@ -334,6 +379,8 @@ public class MutationFilterPanel extends JPanel {
 		cosmicOnlyCheckbox.setEnabled(false);
 		reportedOnlyCheckbox.setEnabled(false);
 		loadIGVButton.setEnabled(false);
+		editSampleButton.setEnabled(false);
+		assayQCButton.setEnabled(false);
 		selectAllCheckbox.setEnabled(false);
 		textFreqFrom.setEditable(false);
 		textVarFreqTo.setEditable(false);
@@ -363,6 +410,8 @@ public class MutationFilterPanel extends JPanel {
 		variantCallerTextField.setEditable(true);
 		variantCallerButton1.setEnabled(true);
         resetButton.setEnabled(true);
+		editSampleButton.setEnabled(true);
+		assayQCButton.setEnabled(true);
 	}
 	
 	void applyRowFilters(){
@@ -391,7 +440,7 @@ public class MutationFilterPanel extends JPanel {
 			JOptionPane.showMessageDialog(this, response);
 		}
 	}
-    
+
     private void handleIGVButtonClickAsynchronous() throws Exception {
 		if (mutationList.getSelectedMutationCount() == 0 ){
 			String msg = "You have not selected any mutations. Would you like to load the entire BAM file?";

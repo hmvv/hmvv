@@ -107,7 +107,7 @@ public class HMVVFrame extends JFrame{
 		enterHEMESampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		enterSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
-		enterArcherSampleMenuItem = new JMenuItem("Enter ARCHER Run - Research only");
+		enterArcherSampleMenuItem = new JMenuItem("Enter ARCHER Run");
 		enterArcherSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		databaseInformationMenuItem = new JMenuItem("Database Information");

@@ -185,7 +185,7 @@ public class MutationListMenuBar extends JMenuBar {
                 
                 try{
                     MutationSomatic mutation = mutations.get(i);
-                    AsynchronousMutationDataIO.getMutationData(mutation);
+                    AsynchronousMutationDataIO.getMutationData(mutation,sample);
                     //no need to call parent.mutationListIndexUpdated() here these mutations are not current displayed
                     mutationList.addFilteredMutation(mutation);
                 }catch(Exception e){

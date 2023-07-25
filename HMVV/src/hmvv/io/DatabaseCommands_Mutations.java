@@ -29,13 +29,27 @@ public class DatabaseCommands_Mutations {
 	}
 
 	private static ArrayList<MutationSomatic> getMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
-		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
+		String query = "WITH " 
+				+ " OTHER_VARIANT_COUNT AS (SELECT chr, pos, ref, alt, COUNT(*) AS variantRepeatCount "
+				+ " from sampleVariants "
+				+ " inner join samples ON sampleVariants.sampleID = samples.sampleID "
+				+ " where "
+				+ " samples.runFolderName = ? " 
+				+ " and samples.sampleID != ? " 
+		 		+ " group by CHR, pos, ref, alt), "
+				+ " all_annotations AS (SELECT annotationID,chr,pos,ref,alt, classification,curation, "
+				+ " somatic, enteredBy, enterDate, "
+				+ " ROW_NUMBER() over (PARTITION BY CHR,pos,ref,alt ORDER BY enterDate DESC) AS rownum "
+				+ " FROM " + Configurations.SOMATIC_VARIANT_ANNOTATION_TABLE + " )"
+		
+		
+				+ " select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, t2.occurrenceCount, t2.VarScanVAF, t2.Mutect2VAF, t2.freebayesVAF, "
 				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID, t2.COSMIC_pipeline, t2.COSMIC_VEP, t2.OncoKB, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
 				+ " t4.altCount, t4.totalCount, t4.altGlobalFreq, t4.americanFreq, t4.eastAsianFreq,t4.southAsianFreq, t4.afrFreq, t4.eurFreq,"
-				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, "
-				+ " t8.AF "
+				+ " t5.clinvarID, t5.cln_disease, t5.cln_significance, t5.cln_consequence,t5.cln_origin, occ.variantRepeatCount, "
+				+ " t8.AF, t9.annotationID,t9.curation, t9.somatic,t9.classification, t9.enteredBy, t9.enterDate "
 				+ " from sampleVariants as t2"
 				+ " join samples as t1 on t2.sampleID = t1.sampleID "
 				+ " left join " + Configurations.G1000_TABLE + " as t4"
@@ -43,6 +57,8 @@ public class DatabaseCommands_Mutations {
 				+ " left join " + Configurations.CLINVAR_TABLE + " as t5"
 				+ " on t2.chr = t5.chr and t2.pos = t5.pos and t2.ref = t5.ref and t2.alt = t5.alt"
 				+ " left join " + Configurations.GNOMAD_TABLE + " as t8 on t2.chr = t8.chr and t2.pos = t8.pos and t2.ref = t8.ref and t2.alt = t8.alt "
+				+ " left join OTHER_VARIANT_COUNT AS occ ON t2.chr = occ.chr AND t2.pos = occ.pos AND t2.ref = occ.ref AND t2.alt = occ.alt"
+				+ " LEFT JOIN (SELECT * FROM all_annotations WHERE rownum = 1) AS t9 ON t9.chr = t2.chr and t9.pos = t2.pos AND t9.ref = t2.ref AND t9.alt = t2.alt"
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
 		String where = " ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getDefaultAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.getDefaultReadDepthFilter(sample) + ")";
@@ -52,7 +68,9 @@ public class DatabaseCommands_Mutations {
 		query = query + " and " + where ;
 		
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		preparedStatement.setString(1, ""+sample.sampleID);
+		preparedStatement.setString(1, ""+sample.runFolder.runFolderName);
+		preparedStatement.setString(2, ""+sample.sampleID);
+		preparedStatement.setString(3, ""+sample.sampleID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<MutationSomatic> mutations = makeModel(rs);
 		preparedStatement.close();
@@ -116,7 +134,7 @@ public class DatabaseCommands_Mutations {
 	/**
 	 * Acquires the cosmicID from the database. If it isn't found, an empty array is returned
 	 */
-	static ArrayList<CosmicID> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
+	static ArrayList<CosmicIdentifier> getLinkedCosmicIDs(MutationSomatic mutation) throws Exception{
 		Coordinate coordinate = mutation.getCoordinate();
 		String query = "select cosmicID, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from " + Configurations.COSMIC_TABLE + " where chr = ? and pos = ? and ref = ? and alt = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
@@ -125,21 +143,21 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.setString(3, coordinate.getRef());
 		preparedStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = preparedStatement.executeQuery();
-		ArrayList<CosmicID> cosmicIDs = new ArrayList<CosmicID>();
+		ArrayList<CosmicIdentifier> cosmicIDs = new ArrayList<CosmicIdentifier>();
 		while(rs.next()){
-			CosmicID cosmicID = new CosmicID(
+			CosmicIdentifier cosmicID = new CosmicIdentifier(
 				getStringOrBlank(rs, "cosmicID"),
 				coordinate,
 				getStringOrBlank(rs, "gene"),
-				getStringOrBlank(rs, "strand"),
-				getStringOrBlank(rs, "genomic_ID"),
-				getStringOrBlank(rs, "legacyID"),
-				getStringOrBlank(rs, "CDS"),
-				getStringOrBlank(rs, "AA"),
-				getStringOrBlank(rs, "HGVSc"),
-				getStringOrBlank(rs, "HGVSp"),
-				getStringOrBlank(rs, "HGVSg"),
-				getStringOrBlank(rs, "old_variant"),
+				// getStringOrBlank(rs, "strand"),
+				// getStringOrBlank(rs, "genomic_ID"),
+				// getStringOrBlank(rs, "legacyID"),
+				// getStringOrBlank(rs, "CDS"),
+				// getStringOrBlank(rs, "AA"),
+				// getStringOrBlank(rs, "HGVSc"),
+				// getStringOrBlank(rs, "HGVSp"),
+				// getStringOrBlank(rs, "HGVSg"),
+				// getStringOrBlank(rs, "old_variant"),
 				"Linked"
 			);
 			cosmicIDs.add(cosmicID);
@@ -337,9 +355,10 @@ public class DatabaseCommands_Mutations {
 			mutation.setClinicalorigin(getStringOrBlank(rs, "cln_origin"));
 			
 			//COSMIC
-			ArrayList<CosmicID> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&", "Pipeline");
+			ArrayList<CosmicIdentifier> pipelineCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_pipeline"), "&", "Pipeline",mutation);
 			mutation.addCosmicIDsPipeline(pipelineCosmicIDList);
-			ArrayList<CosmicID> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&", "VEP");
+			ArrayList<CosmicIdentifier> vepCosmicIDList = parseCosmicIDsFromDelimiter(getStringOrBlank(rs, "COSMIC_VEP"), "&", "VEP",mutation);
+			vepCosmicIDList.removeAll(pipelineCosmicIDList);
 			mutation.addVEPCosmicIDs(vepCosmicIDList);
 					
 			//temp holder fields - filled later separately
@@ -348,11 +367,18 @@ public class DatabaseCommands_Mutations {
 			mutation.setVarScanVAF(getDoubleOrNull(rs, "VarScanVAF"));
 			mutation.setMutect2VAF(getDoubleOrNull(rs, "Mutect2VAF"));
 			mutation.setfreebayesVAF(getDoubleOrNull(rs, "freebayesVAF"));
+			mutation.setvariantRepeatCount(getIntegerOrNull(rs, "variantRepeatCount"));
+			
 
 			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.SOMATIC);
-			mutation.setAnnotationHistory(annotationHistory);
-
+			//Integer annotationID, Coordinate cordinate, String classification, String curation, String somatic, String enteredBy, Date enterDate
+			
+			if ( getIntegerOrNull(rs, "annotationID") != null){
+				Annotation latestAnnotation = new Annotation(getIntegerOrNull(rs, "annotationID"), mutation.getCoordinate(), rs.getString("classification") ,rs.getString("curation"), 
+															rs.getString("somatic"), rs.getString("enteredBy"),rs.getDate("enterDate") );
+				mutation.setLatestAnnotation(latestAnnotation);
+			};
+			
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
 			if(gnomadAllFreq != null) {
@@ -365,25 +391,25 @@ public class DatabaseCommands_Mutations {
 	}
 
 	
-    private static ArrayList<CosmicID> parseCosmicIDsFromDelimiter(String cosmicIDString, String separator, String source) throws Exception{
-		ArrayList<CosmicID> cosmicIDList = new ArrayList<CosmicID>();
+    private static ArrayList<CosmicIdentifier> parseCosmicIDsFromDelimiter(String cosmicIDString, String separator, String source, MutationSomatic mutation) throws Exception{
+		ArrayList<CosmicIdentifier> cosmicIDList = new ArrayList<CosmicIdentifier>();
         String[] cosmicIDs = cosmicIDString.split(separator);
         for(String cosmicID : cosmicIDs){
             if(cosmicID.equals("")){
                 continue;
             }
 
-			ArrayList<CosmicID> cosmicIDObject = getCosmicIDInfo(cosmicID, source);
-            cosmicIDList.addAll(cosmicIDObject);
+			CosmicIdentifier cosmicIDObject = new CosmicIdentifier(cosmicID, mutation.getCoordinate(), mutation.getGene(), source);
+            cosmicIDList.add(cosmicIDObject);
         }
 		return cosmicIDList;
     }
 
-	private static ArrayList<CosmicID> getCosmicIDInfo(String cosmicID, String source) throws Exception{
+	static ArrayList<CosmicID> getCosmicIDInfo(CosmicIdentifier cosmicID) throws Exception{
 		String query = "select cosmicID, chr, pos, ref, alt, gene, strand, genomic_ID, legacyID, CDS, AA, HGVSc, HGVSp, HGVSg, old_variant from " + Configurations.COSMIC_TABLE + " where cosmicID = ? or legacyID = ?";
 		PreparedStatement preparedStatement = databaseConnection.prepareStatement(query);
-		preparedStatement.setString(1, cosmicID);
-		preparedStatement.setString(2, cosmicID);
+		preparedStatement.setString(1, cosmicID.cosmicID);
+		preparedStatement.setString(2, cosmicID.cosmicID);
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<CosmicID> cosmicIDs = new ArrayList<CosmicID>();
 		while(rs.next()){
@@ -408,12 +434,64 @@ public class DatabaseCommands_Mutations {
 				getStringOrBlank(rs, "HGVSp"),
 				getStringOrBlank(rs, "HGVSg"),
 				getStringOrBlank(rs, "old_variant"),
-				source
+				cosmicID.source
+				
 			);
 			cosmicIDs.add(cosmicIDObj);
 		}
 		preparedStatement.close();
 		return cosmicIDs;
+	}
+
+	static ArrayList<repeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{
+		String queryRunforlderName = "SELECT runFolderName FROM samples WHERE sampleID = ?";
+		PreparedStatement preparedStatementRunfolderName = databaseConnection.prepareStatement(queryRunforlderName);
+		preparedStatementRunfolderName.setString(1, mutation.getSampleID().toString());
+		ResultSet rs = preparedStatementRunfolderName.executeQuery();
+
+		String runFolderName = "";
+		if(rs.next()){
+			runFolderName = rs.getString(1);
+			preparedStatementRunfolderName.close();
+		}
+		
+		
+
+		String queryRepeatMutations = "SELECT s.sampleID, s.sampleName, s.lastName, s.firstName, sv.altFreq, sv.readDepth, sv.altReadDepth" +
+		" from sampleVariants sv " +
+		" inner join samples s ON sv.sampleID = s.sampleID   " +
+		" where   " +
+		" s.runFolderName = ?  and s.sampleID != ?  and sv.CHR = ? and sv.pos = ? and sv.ref = ? and sv.alt = ?"; 
+
+		PreparedStatement preparedStatementRepeatMutations = databaseConnection.prepareStatement(queryRepeatMutations);
+		preparedStatementRepeatMutations.setString(1, runFolderName);
+		preparedStatementRepeatMutations.setString(2, mutation.getSampleID().toString());
+		preparedStatementRepeatMutations.setString(3, mutation.getChr().toString());
+		preparedStatementRepeatMutations.setString(4, mutation.getPos().toString());
+		preparedStatementRepeatMutations.setString(5, mutation.getRef().toString());
+		preparedStatementRepeatMutations.setString(6, mutation.getAlt().toString());
+
+		ResultSet rsRepeatMutations = preparedStatementRepeatMutations.executeQuery();
+		
+
+		ArrayList<repeatMutations> repeatMutations = new ArrayList<repeatMutations>();
+
+		while(rsRepeatMutations.next()){
+			repeatMutations repeatMutationsObj = new repeatMutations(
+				rsRepeatMutations.getString("sampleID"),
+				getStringOrBlank(rsRepeatMutations, "sampleName"),
+				getStringOrBlank(rsRepeatMutations, "lastName"),
+				getStringOrBlank(rsRepeatMutations, "firstName"),
+				getDoubleOrNull(rsRepeatMutations,"altFreq"),
+				rsRepeatMutations.getInt("readDepth"),
+				rsRepeatMutations.getInt("altReadDepth"));
+
+			repeatMutations.add(repeatMutationsObj);
+		}
+		preparedStatementRepeatMutations.close();
+
+		return repeatMutations;
+
 	}
 
 	private static ArrayList<MutationGermline> makeGermlineModel(ResultSet rs) throws Exception{
@@ -507,8 +585,8 @@ public class DatabaseCommands_Mutations {
 
 
 			//annotation history
-			ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.GERMLINE);
-			mutation.setAnnotationHistory(annotationHistory);
+			//ArrayList<Annotation> annotationHistory = getVariantAnnotationHistory(mutation.getCoordinate(),Configurations.MUTATION_TYPE.GERMLINE);
+			//mutation.setAnnotationHistory(annotationHistory);
 
 			//gnomad
 			Double gnomadAllFreq = getDoubleOrNull(rs, "AF");
@@ -560,7 +638,7 @@ public class DatabaseCommands_Mutations {
 		}
 	}
 	
-	private static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
+	static ArrayList<Annotation> getVariantAnnotationHistory(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 
 		ArrayList<Annotation> annotations = new ArrayList<Annotation>() ;
 

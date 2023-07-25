@@ -20,6 +20,7 @@ public class SSHConnection {
 	private static int forwardingPort;
 	private static String temporaryHMVVDirectory = "temp_HMVV_files";
 	
+	
 	private SSHConnection(){
 		//never constructed
 	}
@@ -39,6 +40,10 @@ public class SSHConnection {
 	public static String getUserName(){
 		return sshSession.getUserName();
 	}
+
+	public static void setUserType(USER_TYPE usertype){
+		userType = usertype;
+	}
 	
 	public static boolean isSuperUser(USER_FUNCTION function){
 		return function.isSuperUser(userType);
@@ -46,7 +51,6 @@ public class SSHConnection {
 	
 	public static void connect(String user, String password) throws Exception{
 		sshSession = connectToSSH(user, password);
-        readUserType();
 	}
 	
 	private static Session connectToSSH(String userName, String password) throws Exception{
@@ -59,20 +63,7 @@ public class SSHConnection {
 		return sshSession;
 	}
 	
-	private static void readUserType() throws Exception{
-		ChannelExec channel = (ChannelExec) sshSession.openChannel("exec");
-		BufferedReader in=new BufferedReader(new InputStreamReader(channel.getInputStream()));
-		channel.setCommand("checkAccountType");
-		channel.connect();
-		String usertype = in.readLine();
 
-		if( usertype != null && !usertype.equals("")){
-			usertype = usertype.toUpperCase();
-			userType = USER_TYPE.valueOf(usertype);
-        }else{
-            throw new Exception(String.format("User not found. Please contact your system administrator."));
-        }
-	}
 	
 	private static File copyFile(Sample sample, String file_location, SftpProgressMonitor progressMonitor) throws Exception{
 		String runFolderName = sample.runFolder.runFolderName;
@@ -201,8 +192,22 @@ public class SSHConnection {
 		}
 	}
 
+	public static void checkSampleSheetError(Instrument instrument, String runFolder, String assay) throws Exception {
+		String integrityScript = "/storage/apps/pipelines/ngs_dev/scripts/common/python/sampleSheet_integrity_check.py";
+		String checkSampleSheetCommand = String.format("python3 %s /storage/instruments/%s/%s/SampleSheet.csv %s", integrityScript, instrument, runFolder, assay);
+		CommandResponse sampleSheetIntegrityResult = SSHConnection.executeCommandAndGetOutput(checkSampleSheetCommand);
+		if(sampleSheetIntegrityResult.responseLines.get(0).toUpperCase().contains("ERROR")){
+			
+			String sampleSheetErrorString = "";
+			for(int i =0; i < sampleSheetIntegrityResult.responseLines.size(); i++){
+				sampleSheetErrorString += sampleSheetIntegrityResult.responseLines.get(i) + "\n";
+			};
+			throw new IllegalArgumentException(sampleSheetErrorString);
+		}
+	}
+
 	public static RunFolder getRunFolderIllumina(Instrument instrument, String runID) throws Exception {
-		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s_*", instrument, runID);
+		String runFolderCommand = String.format("ls /storage/instruments/%s -t | grep _%s_ | head -1", instrument, runID);
 		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
 		if(runFolderResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
@@ -211,7 +216,7 @@ public class SSHConnection {
 	}
 
 	public static RunFolder getRunFolderIon(Instrument instrument, String runID) throws Exception {
-		String runFolderCommand = String.format("basename /storage/instruments/%s/*_%s*", instrument, runID);
+		String runFolderCommand = String.format("ls /storage/instruments/%s -t | grep _%s | head -1", instrument, runID);
 		CommandResponse runFolderResult = SSHConnection.executeCommandAndGetOutput(runFolderCommand);
 		if(runFolderResult.exitStatus != 0) {
 			throw new Exception(String.format("Error finding Run Folder (%s, %s)", instrument, runID));
