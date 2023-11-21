@@ -92,7 +92,7 @@ public class MutationSomatic extends MutationCommon {
 
     public ArrayList<CosmicIdentifier> getAllCosmicIDs(){
         ArrayList<CosmicIdentifier> allIDs = new ArrayList<CosmicIdentifier>();
-        allIDs.addAll(linked_cosmicIDs);
+        //allIDs.addAll(linked_cosmicIDs);
         allIDs.addAll(VEP_cosmicIDs);
         allIDs.addAll(pipeline_cosmicIDs);
         

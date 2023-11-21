@@ -144,6 +144,7 @@ public class DatabaseCommands_Mutations {
 		preparedStatement.setString(4, coordinate.getAlt());
 		ResultSet rs = preparedStatement.executeQuery();
 		ArrayList<CosmicIdentifier> cosmicIDs = new ArrayList<CosmicIdentifier>();
+
 		while(rs.next()){
 			CosmicIdentifier cosmicID = new CosmicIdentifier(
 				getStringOrBlank(rs, "cosmicID"),
@@ -323,7 +324,7 @@ public class DatabaseCommands_Mutations {
 			mutation.setConsequence(getStringOrBlank(rs, "consequence"));
 			mutation.setSift(getStringOrBlank(rs, "Sift"));
 			mutation.setPolyPhen(getStringOrBlank(rs, "PolyPhen"));
-			mutation.setHGVSc(getStringOrBlank(rs, "HGVSc"));
+			mutation.setHGVSc(rs.getString("HGVSc"));
 			mutation.setHGVSp(getStringOrBlank(rs, "HGVSp"));
 			mutation.setDbSNPID(getStringOrBlank(rs, "dbSNPID"));
 			mutation.setPubmed(getStringOrBlank(rs, "pubmed"));

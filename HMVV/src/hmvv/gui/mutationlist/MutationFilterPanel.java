@@ -37,6 +37,7 @@ public class MutationFilterPanel extends JPanel {
 	private JTextField maxPopulationFrequencyGnomadTextField;
 	private JTextField variantCallerTextField;
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
+	private JTextField searchTextField;
 
 	private JButton variantCallerButton1;
 	private JButton variantCallerButton2;
@@ -216,6 +217,10 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.getDocument().addDocumentListener(documentListener);
 		maxPopulationFrequencyG1000TextField.setColumns(textFieldColumnWidth);
 
+		searchTextField = new JTextField();
+		searchTextField.getDocument().addDocumentListener(documentListener);
+		searchTextField.setColumns(textFieldColumnWidth*4);
+
 		maxPopulationFrequencyGnomadTextField = new JTextField();
 		maxPopulationFrequencyGnomadTextField.getDocument().addDocumentListener(documentListener);
 		maxPopulationFrequencyGnomadTextField.setColumns(textFieldColumnWidth);
@@ -234,6 +239,7 @@ public class MutationFilterPanel extends JPanel {
 		//construct filter objects
 		mutationListFilters.addCosmicIDFilter(cosmicOnlyCheckbox);
 		mutationListFilters.addMaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField);
+		mutationListFilters.addSearchFilter(searchTextField);
 		mutationListFilters.addMaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField);
 		mutationListFilters.addMaxOccurrenceFilter(occurenceFromTextField);
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField, Configurations.getDefaultReadDepthFilter(sample));
@@ -253,8 +259,15 @@ public class MutationFilterPanel extends JPanel {
 		JPanel checkboxPanel = new JPanel(new GridLayout(0,1));
 		JPanel resetButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		resetButtonPanel.add(resetButton);
+
+		JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel searchLabel = new JLabel("Search: ");
+		searchLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		searchPanel.add(searchLabel);
+		searchPanel.add(searchTextField);
 		
         checkboxPanel.add(resetButtonPanel);
+		checkboxPanel.add(searchPanel);
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
 		checkboxPanel.add(selectAllCheckbox);
@@ -371,6 +384,7 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
 		variantCallerTextField.setText(Configurations.MIN_VARIANT_CALLERS_COUNT);
+		searchTextField.setText("");
 		applyRowFilters();
 		handleSelectAllClick(false);
 	}
@@ -393,6 +407,7 @@ public class MutationFilterPanel extends JPanel {
         resetButton.setEnabled(false);
 		variantCallerButton1.setEnabled(false);
 		variantCallerButton2.setEnabled(false);
+		searchTextField.setEditable(false);
 	}
 
 	void enableInputAfterAsynchronousLoad() {
@@ -412,6 +427,7 @@ public class MutationFilterPanel extends JPanel {
         resetButton.setEnabled(true);
 		editSampleButton.setEnabled(true);
 		assayQCButton.setEnabled(true);
+		searchTextField.setEditable(true);
 	}
 	
 	void applyRowFilters(){

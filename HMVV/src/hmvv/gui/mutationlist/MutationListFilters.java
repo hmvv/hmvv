@@ -83,6 +83,10 @@ public class MutationListFilters {
 		addFilter(new MaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField));
 	}
 	
+	public void addSearchFilter(JTextField searchTextField) {
+		addFilter(new addSearchFilter(searchTextField));
+	}
+
 	public void addvariantCallerFilter(JTextField variantCallerTextField) {
 		addFilter(new VariantCallerFilter(variantCallerTextField));
 	}
@@ -287,6 +291,30 @@ class MaxG1000FrequencyFilter implements Filter{
 			}
 		}
 		return false;
+	}
+}
+
+class addSearchFilter implements Filter{
+
+	private JTextField searchTextField;
+	
+	public addSearchFilter(JTextField searchTextField) {
+		this.searchTextField = searchTextField;
+	}
+	
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+		String startingString = searchTextField.getText().toUpperCase();
+
+		if (startingString.replaceAll("\\s", "").equals("")){
+			return false;
+		}
+		if((current_mutation.getGene().toUpperCase().startsWith(startingString)) || (current_mutation.getHGVSc().toUpperCase().startsWith(startingString)) || (current_mutation.getHGVSp().toUpperCase().startsWith(startingString))){
+				return false;		
+		}
+		return true;
 	}
 }
 
