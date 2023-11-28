@@ -177,8 +177,8 @@ public class Configurations {
 	
 	//Reference database tables
 	public static String CARDIAC_TABLE = REFERENCE_DATABASE_NAME + ".db_cardiac_72020";
-	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v98";
-	public static String COSMIC_CMC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_cmc_v98";
+	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v99";
+	public static String COSMIC_CMC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_cmc_v99";
 	public static String CIVIC_TABLE = REFERENCE_DATABASE_NAME + ".db_civic_42019";
 	public static String CLINVAR_TABLE = REFERENCE_DATABASE_NAME + ".db_clinvar_20230514";
 	public static String G1000_TABLE = REFERENCE_DATABASE_NAME + ".db_g1000_phase3v1";
