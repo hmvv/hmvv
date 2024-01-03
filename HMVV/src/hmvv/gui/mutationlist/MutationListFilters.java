@@ -83,8 +83,12 @@ public class MutationListFilters {
 		addFilter(new MaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField));
 	}
 	
-	public void addSearchFilter(JTextField searchTextField) {
-		addFilter(new addSearchFilter(searchTextField));
+	public void addSearchGeneFilter(JTextField searchTextField) {
+		addFilter(new addSearchGeneFilter(searchTextField));
+	}
+
+	public void addSearchVariantFilter(JTextField searchTextField) {
+		addFilter(new addSearchVariantFilter(searchTextField));
 	}
 
 	public void addvariantCallerFilter(JTextField variantCallerTextField) {
@@ -294,29 +298,55 @@ class MaxG1000FrequencyFilter implements Filter{
 	}
 }
 
-class addSearchFilter implements Filter{
+class addSearchGeneFilter implements Filter{
 
-	private JTextField searchTextField;
+	private JTextField searchTextGeneField;
 	
-	public addSearchFilter(JTextField searchTextField) {
-		this.searchTextField = searchTextField;
+	public addSearchGeneFilter(JTextField searchTextGeneField) {
+		this.searchTextGeneField = searchTextGeneField;
 	}
 	
 	@Override
 	public boolean exclude(MutationCommon mutation) {
 
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
-		String startingString = searchTextField.getText().toUpperCase();
+		String startingString = searchTextGeneField.getText().toUpperCase();
 
 		if (startingString.replaceAll("\\s", "").equals("")){
 			return false;
 		}
-		if((current_mutation.getGene().toUpperCase().startsWith(startingString)) || (current_mutation.getHGVSc().toUpperCase().startsWith(startingString)) || (current_mutation.getHGVSp().toUpperCase().startsWith(startingString))){
+		if((current_mutation.getGene().toUpperCase().startsWith(startingString))){
 				return false;		
 		}
 		return true;
 	}
 }
+
+class addSearchVariantFilter implements Filter{
+
+	private JTextField searchTextVariantField;
+	
+	public addSearchVariantFilter(JTextField searchTextVariantField) {
+		this.searchTextVariantField = searchTextVariantField;
+	}
+	
+	@Override
+	public boolean exclude(MutationCommon mutation) {
+
+		MutationSomatic current_mutation = (MutationSomatic)mutation;
+		String startingString = searchTextVariantField.getText().toUpperCase();
+
+		if (startingString.replaceAll("\\s", "").equals("")){
+			return false;
+		}
+		if((current_mutation.getHGVSc().toUpperCase().startsWith(startingString)) || (current_mutation.getHGVSp().toUpperCase().startsWith(startingString))){
+				return false;		
+		}
+		return true;
+	}
+}
+
+
 
 class MaxGnomadFrequencyFilter implements Filter{
 
