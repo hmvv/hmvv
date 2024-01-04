@@ -310,12 +310,12 @@ class addSearchGeneFilter implements Filter{
 	public boolean exclude(MutationCommon mutation) {
 
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
-		String startingString = searchTextGeneField.getText().toUpperCase();
+		String searchString = searchTextGeneField.getText().toUpperCase();
 
-		if (startingString.replaceAll("\\s", "").equals("")){
+		if (searchString.replaceAll("\\s", "").equals("")){
 			return false;
 		}
-		if((current_mutation.getGene().toUpperCase().startsWith(startingString))){
+		if((current_mutation.getGene().toUpperCase().contains(searchString))){
 				return false;		
 		}
 		return true;
@@ -334,12 +334,12 @@ class addSearchVariantFilter implements Filter{
 	public boolean exclude(MutationCommon mutation) {
 
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
-		String startingString = searchTextVariantField.getText().toUpperCase();
+		String searchString = searchTextVariantField.getText().toUpperCase();
 
-		if (startingString.replaceAll("\\s", "").equals("")){
+		if (searchString.replaceAll("\\s", "").equals("")){
 			return false;
 		}
-		if((current_mutation.getHGVSc().toUpperCase().startsWith(startingString)) || (current_mutation.getHGVSp().toUpperCase().startsWith(startingString))){
+		if((current_mutation.getHGVSc().toUpperCase().contains(searchString)) || (current_mutation.getHGVSp().toUpperCase().contains(searchString))){
 				return false;		
 		}
 		return true;

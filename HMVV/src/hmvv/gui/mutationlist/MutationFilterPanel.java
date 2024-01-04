@@ -267,22 +267,9 @@ public class MutationFilterPanel extends JPanel {
 		JPanel resetButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		resetButtonPanel.add(resetButton);
 
-		JPanel searchPanel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel searchLabel1 = new JLabel("Search by Gene:     "); //Spaces are present for alignment
-		searchLabel1.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		searchPanel1.add(searchLabel1);
-		searchPanel1.add(searchTextgeneField);
 
-
-		JPanel searchPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		JLabel searchLabel2 = new JLabel("Search by Variant: ");
-		searchLabel2.setFont(GUICommonTools.TAHOMA_BOLD_14);
-		searchPanel2.add(searchLabel2);
-		searchPanel2.add(searchTextVariantField);
 		
         checkboxPanel.add(resetButtonPanel);
-		checkboxPanel.add(searchPanel1);
-		checkboxPanel.add(searchPanel2);
 		checkboxPanel.add(cosmicOnlyCheckbox);
 		checkboxPanel.add(reportedOnlyCheckbox);
 		checkboxPanel.add(selectAllCheckbox);
@@ -376,6 +363,29 @@ public class MutationFilterPanel extends JPanel {
 
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
+
+
+		JPanel SearchPanel = new JPanel(new GridLayout(0,1));
+        SearchPanel.add(new JLabel("Search:"));
+
+        JPanel searchPanel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel searchLabel1 = new JLabel("Search by Gene:     "); //Spaces are present for alignment
+		searchLabel1.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		searchPanel1.add(searchLabel1);
+		searchPanel1.add(searchTextgeneField);
+
+		JPanel searchPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel searchLabel2 = new JLabel("Search by Variant: ");
+		searchLabel2.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		searchPanel2.add(searchLabel2);
+		searchPanel2.add(searchTextVariantField);
+
+		SearchPanel.add(searchPanel1);
+		SearchPanel.add(searchPanel2);
+		SearchPanel.add(new JPanel(new FlowLayout(FlowLayout.LEFT)));
+		SearchPanel.add(new JPanel(new FlowLayout(FlowLayout.LEFT)));
+		SearchPanel.add(new JPanel(new FlowLayout(FlowLayout.LEFT)));
+
 		
         leftFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(leftFilterPanel);
@@ -383,6 +393,8 @@ public class MutationFilterPanel extends JPanel {
         add(middleFilterPanel);
         rightFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(rightFilterPanel);
+		SearchPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
+		add(SearchPanel);
 
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
