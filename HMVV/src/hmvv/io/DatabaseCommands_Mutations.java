@@ -325,7 +325,7 @@ public class DatabaseCommands_Mutations {
 			mutation.setSift(getStringOrBlank(rs, "Sift"));
 			mutation.setPolyPhen(getStringOrBlank(rs, "PolyPhen"));
 			mutation.setHGVSc(rs.getString("HGVSc"));
-			mutation.setHGVSp(getStringOrBlank(rs, "HGVSp"));
+			mutation.setHGVSp(rs.getString("HGVSp"));
 			mutation.setDbSNPID(getStringOrBlank(rs, "dbSNPID"));
 			mutation.setPubmed(getStringOrBlank(rs, "pubmed"));
 
