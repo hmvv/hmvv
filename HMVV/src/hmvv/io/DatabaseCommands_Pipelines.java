@@ -40,7 +40,7 @@ public class DatabaseCommands_Pipelines {
 					" from " +
 
 					" (SELECT tempStatusTable.instrument, tempStatusTable.runFolderName, tempStatusTable.sampleName, " +
-					" COALESCE(errorTable.plStatus,tempStatusTable.plStatus) plStatus, " +
+					" IF (errorTable.plStatus LIKE '%WARNING%' AND tempStatusTable.plStatus = 'PipelineCompleted', CONCAT(errorTable.plStatus, ' with ', tempStatusTable.plStatus), COALESCE(errorTable.plStatus,tempStatusTable.plStatus)) plStatus, " +
 					" COALESCE(errorTable.timeUpdated,tempStatusTable.timeUpdated) timeUpdated " +
 
 					" FROM " + 
@@ -65,7 +65,7 @@ public class DatabaseCommands_Pipelines {
 					" LEFT JOIN " +
 
 					" (SELECT * FROM pipelineStatus " +
-					" WHERE plStatus LIKE '%ERROR%' " +
+					" WHERE plStatus LIKE '%ERROR%' OR plStatus LIKE '%WARNING%' " +
 					" GROUP BY runFolderName,sampleName) as errorTable " +
 					" ON tempStatusTable.runFolderName = errorTable.runFolderName AND tempStatusTable.sampleName = errorTable.sampleName " + 
 					" ) AS statusTable " + 
