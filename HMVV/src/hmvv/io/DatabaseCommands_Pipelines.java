@@ -64,9 +64,13 @@ public class DatabaseCommands_Pipelines {
 
 					" LEFT JOIN " +
 
-					" (SELECT * FROM pipelineStatus " +
-					" WHERE plStatus LIKE '%ERROR%' OR plStatus LIKE '%WARNING%' " +
-					" GROUP BY runFolderName,sampleName) as errorTable " +
+					" (SELECT * FROM (SELECT *,ROW_NUMBER() over (PARTITION BY runFolderName,  " +
+					" sampleName ORDER BY CASE WHEN plStatus LIKE '%ERROR%' then 0  " +
+ 					" WHEN plStatus LIKE 'WARNING%varscan%' THEN 1 " + 
+ 					" WHEN plStatus LIKE 'WARNING%consensus%' THEN 2 " + 
+ 					" ELSE 3 END) AS row_num FROM pipelineStatus) tbl1 " +
+					" WHERE tbl1.row_num = 1 " +
+					" AND (tbl1.plStatus LIKE '%ERROR%' OR tbl1.plStatus LIKE '%WARNING%')) as errorTable " +
 					" ON tempStatusTable.runFolderName = errorTable.runFolderName AND tempStatusTable.sampleName = errorTable.sampleName " + 
 					" ) AS statusTable " + 
 
