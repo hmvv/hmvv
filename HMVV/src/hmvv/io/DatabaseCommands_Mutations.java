@@ -431,8 +431,8 @@ public class DatabaseCommands_Mutations {
 				getStringOrBlank(rs, "legacyID"),
 				getStringOrBlank(rs, "CDS"),
 				getStringOrBlank(rs, "AA"),
-				getStringOrBlank(rs, "HGVSc"),
-				getStringOrBlank(rs, "HGVSp"),
+				rs.getString( "HGVSc"),
+				rs.getString("HGVSp"),
 				getStringOrBlank(rs, "HGVSg"),
 				getStringOrBlank(rs, "old_variant"),
 				cosmicID.source
