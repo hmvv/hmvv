@@ -75,11 +75,18 @@ public class Pipeline {
 		if (status.equals("PipelineCompleted")){
 			return PipelineProgram.completeProgram();
 		}
+		if (status.contains("PipelineCompleted") && status.contains("WARNING")){
+			return PipelineProgram.completeProgramWithWarning();
+		}
 		if (status.startsWith("ERROR")) {
 			return PipelineProgram.errorProgram();
 		}
+
+		if (!status.contains("PipelineCompleted") && status.contains("WARNING")){
+			program.setDisplayString("Running");
+		}else{
 		program.setDisplayString(status);
-		
+		}
 		return program;
 	}
 
@@ -114,7 +121,7 @@ public class Pipeline {
 				}
 			}
 			return (int)(progress);
-		}else if (pipelineProgram.isCompleteProgram()){
+		}else if (pipelineProgram.isCompleteProgram()|pipelineProgram.isCompleteProgramWithWarning()){
 			return 100;
 		}else {
 			return -1;
@@ -126,7 +133,7 @@ public class Pipeline {
 		
 		if (status.startsWith("ERROR")) {
 			isSync=0;// for error 
-		}else if (status.equals("PipelineCompleted")) {
+		}else if (status.contains("PipelineCompleted")) {
 			isSync=2;// for checking completion 
 		}
 		return isSync;

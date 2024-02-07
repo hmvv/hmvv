@@ -9,7 +9,8 @@ public class PipelineProgram {
 	private static final int COMPLETE = 0;
 	private static final int RUNNING = 1;
 	private static final int ERROR = 2;
-	
+	private static final int WARNING = 3;
+
 	private String displayString;
 	public final int programType;
 	public static final Color DEFAULT_COLOR = GUICommonTools.WHITE_COLOR;
@@ -36,6 +37,7 @@ public class PipelineProgram {
 			case COMPLETE: return GUICommonTools.WHITE_COLOR;
 			case RUNNING: return GUICommonTools.RUNNING_COLOR;
 			case ERROR: return GUICommonTools.ERROR_COLOR;
+			case WARNING: return GUICommonTools.WARNING_COLOR;
 			default: return DEFAULT_COLOR;
 		}
 	}
@@ -47,9 +49,16 @@ public class PipelineProgram {
 	public boolean isRunningProgram() {
 		return programType == RUNNING;
 	}
+		public boolean isCompleteProgramWithWarning() {
+		return programType == WARNING;
+	}
+
 	
 	public static PipelineProgram completeProgram() {
 		return new PipelineProgram("Complete", COMPLETE);
+	}
+		public static PipelineProgram completeProgramWithWarning() {
+		return new PipelineProgram("Complete", WARNING);
 	}
 	
 	public static PipelineProgram runningProgram() {
