@@ -37,6 +37,8 @@ public class MutationFilterPanel extends JPanel {
 	private JTextField maxPopulationFrequencyGnomadTextField;
 	private JTextField variantCallerTextField;
 	private JComboBox<VariantPredictionClass> predictionFilterComboBox;
+	private JTextField searchTextgeneField;
+	private JTextField searchTextVariantField;
 
 	private JButton variantCallerButton1;
 	private JButton variantCallerButton2;
@@ -216,6 +218,15 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyG1000TextField.getDocument().addDocumentListener(documentListener);
 		maxPopulationFrequencyG1000TextField.setColumns(textFieldColumnWidth);
 
+		searchTextgeneField = new JTextField();
+		searchTextgeneField.getDocument().addDocumentListener(documentListener);
+		searchTextgeneField.setColumns(textFieldColumnWidth*4);
+
+		searchTextVariantField = new JTextField();
+		searchTextVariantField.getDocument().addDocumentListener(documentListener);
+		searchTextVariantField.setColumns(textFieldColumnWidth*4);
+		
+
 		maxPopulationFrequencyGnomadTextField = new JTextField();
 		maxPopulationFrequencyGnomadTextField.getDocument().addDocumentListener(documentListener);
 		maxPopulationFrequencyGnomadTextField.setColumns(textFieldColumnWidth);
@@ -234,6 +245,8 @@ public class MutationFilterPanel extends JPanel {
 		//construct filter objects
 		mutationListFilters.addCosmicIDFilter(cosmicOnlyCheckbox);
 		mutationListFilters.addMaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField);
+		mutationListFilters.addSearchGeneFilter(searchTextgeneField);
+		mutationListFilters.addSearchVariantFilter(searchTextVariantField);
 		mutationListFilters.addMaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField);
 		mutationListFilters.addMaxOccurrenceFilter(occurenceFromTextField);
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField, Configurations.getDefaultReadDepthFilter(sample));
@@ -253,6 +266,8 @@ public class MutationFilterPanel extends JPanel {
 		JPanel checkboxPanel = new JPanel(new GridLayout(0,1));
 		JPanel resetButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		resetButtonPanel.add(resetButton);
+
+
 		
         checkboxPanel.add(resetButtonPanel);
 		checkboxPanel.add(cosmicOnlyCheckbox);
@@ -348,6 +363,29 @@ public class MutationFilterPanel extends JPanel {
 
         JPanel rightFilterPanel = new JPanel();
 		rightFilterPanel.add(vepPanel);
+
+
+		JPanel SearchPanel = new JPanel(new GridLayout(0,1));
+        SearchPanel.add(new JLabel("Search:"));
+
+        JPanel searchPanel1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel searchLabel1 = new JLabel("Search by Gene:     "); //Spaces are present for alignment
+		searchLabel1.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		searchPanel1.add(searchLabel1);
+		searchPanel1.add(searchTextgeneField);
+
+		JPanel searchPanel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JLabel searchLabel2 = new JLabel("Search by Variant: ");
+		searchLabel2.setFont(GUICommonTools.TAHOMA_BOLD_14);
+		searchPanel2.add(searchLabel2);
+		searchPanel2.add(searchTextVariantField);
+
+		SearchPanel.add(searchPanel1);
+		SearchPanel.add(searchPanel2);
+		SearchPanel.add(new JPanel(new FlowLayout(FlowLayout.LEFT)));
+		SearchPanel.add(new JPanel(new FlowLayout(FlowLayout.LEFT)));
+		SearchPanel.add(new JPanel(new FlowLayout(FlowLayout.LEFT)));
+
 		
         leftFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(leftFilterPanel);
@@ -355,6 +393,8 @@ public class MutationFilterPanel extends JPanel {
         add(middleFilterPanel);
         rightFilterPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
 		add(rightFilterPanel);
+		SearchPanel.setBorder(new EmptyBorder(1, 5, 1, 5));
+		add(SearchPanel);
 
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
 	}
@@ -371,6 +411,8 @@ public class MutationFilterPanel extends JPanel {
 		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
 		predictionFilterComboBox.setSelectedIndex(1);
 		variantCallerTextField.setText(Configurations.MIN_VARIANT_CALLERS_COUNT);
+		searchTextgeneField.setText("");
+		searchTextVariantField.setText("");
 		applyRowFilters();
 		handleSelectAllClick(false);
 	}
@@ -393,6 +435,8 @@ public class MutationFilterPanel extends JPanel {
         resetButton.setEnabled(false);
 		variantCallerButton1.setEnabled(false);
 		variantCallerButton2.setEnabled(false);
+		searchTextgeneField.setEditable(false);
+		searchTextVariantField.setEditable(false);
 	}
 
 	void enableInputAfterAsynchronousLoad() {
@@ -412,6 +456,8 @@ public class MutationFilterPanel extends JPanel {
         resetButton.setEnabled(true);
 		editSampleButton.setEnabled(true);
 		assayQCButton.setEnabled(true);
+		searchTextgeneField.setEditable(true);
+		searchTextVariantField.setEditable(true);
 	}
 	
 	void applyRowFilters(){

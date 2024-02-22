@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.*;
@@ -25,7 +26,11 @@ public class MutationReportGenerator{
 			String cDNA = mutation.getHGVSc();
 			String codon = mutation.getHGVSp();
 			String gene = mutation.getGene();
-			String mutationText = gene + ":" + cDNA + ";" + codon;
+
+			DecimalFormat altFreqFormat = new DecimalFormat("#.#");
+			double altFreq = Double.valueOf(altFreqFormat.format(mutation.getAltFreq()));
+
+			String mutationText = gene + ":" + cDNA + ";" + codon + "     (" + altFreq + "%)";
 			report.append(mutationText + "\n");
 		}
 
