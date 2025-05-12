@@ -20,6 +20,10 @@ public class Assay {
         this.assayName = assayName;
     }
 
+    public boolean isArcherTumorAssay(){
+        return assayName.equals("archerTumor");
+    }
+
     public String toString(){
         return assayName;
     }

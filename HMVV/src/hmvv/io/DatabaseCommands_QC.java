@@ -10,6 +10,7 @@ import hmvv.main.Configurations;
 import hmvv.model.Amplicon;
 import hmvv.model.Assay;
 import hmvv.model.GeneQCDataElementTrend;
+import hmvv.model.GeneTargetQC;
 import hmvv.model.QCDataElement;
 import hmvv.model.Sample;
 
@@ -106,6 +107,27 @@ public class DatabaseCommands_QC {
 		preparedStatement.close();
 
 		return geneAmpliconTrends;
+	}
+
+	static ArrayList<GeneTargetQC> getGeneTargetQCData(Sample sample) throws Exception{
+		ArrayList<GeneTargetQC> targets = new ArrayList<GeneTargetQC>();
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("SELECT sampleID, Gene, SUM(Pass_Threshold) AS passing, COUNT(Pass_Threshold) AS total "+
+		" FROM sampleAssayQC where sampleID = ? GROUP BY Gene order by Gene asc");
+		preparedStatement.setInt(1, sample.sampleID);
+		ResultSet resultSet = preparedStatement.executeQuery();
+		while(resultSet.next()){
+			GeneTargetQC target = new GeneTargetQC(
+				sample,
+				resultSet.getString("gene"),
+				resultSet.getInt("passing"),
+				resultSet.getInt("total")
+			);
+			targets.add(target);
+		}
+		preparedStatement.close();
+		resultSet.close();
+
+		return targets;
 	}
 	
 	/**

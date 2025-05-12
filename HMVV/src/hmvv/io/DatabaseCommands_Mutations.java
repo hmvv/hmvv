@@ -61,7 +61,7 @@ public class DatabaseCommands_Mutations {
 				+ " LEFT JOIN (SELECT * FROM all_annotations WHERE rownum = 1) AS t9 ON t9.chr = t2.chr and t9.pos = t2.pos AND t9.ref = t2.ref AND t9.alt = t2.alt"
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
-		String where = " ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getDefaultAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.getDefaultReadDepthFilter(sample) + ")";
+		String where = "( t2.alt LIKE '%TANDEM%' OR ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getDefaultAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.getDefaultReadDepthFilter(sample) + ")  )";
 		if(getFilteredData) {
 			where = " !" + where;
 		}

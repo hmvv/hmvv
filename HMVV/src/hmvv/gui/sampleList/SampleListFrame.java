@@ -461,15 +461,16 @@ public class SampleListFrame extends JPanel {
 			Sample currentSample = getCurrentlySelectedSample();
 
 			if (currentSample instanceof TMBSample){//not ideal to condition using instanceof
-
 			    TumorMutationBurdenQCFrame tmbQC = new TumorMutationBurdenQCFrame(parent, (TMBSample)currentSample);
                 tmbQC.setVisible(true);
-
 			}else {
-
-			    ViewAmpliconFrame amplicon = new ViewAmpliconFrame(parent, currentSample);
-				amplicon.setVisible(true);
-
+				if(currentSample.assay.isArcherTumorAssay()){
+					ViewGeneTargetFrame geneTargetQCFrame = new ViewGeneTargetFrame(parent, currentSample);
+					geneTargetQCFrame.setVisible(true);
+				}else{
+					ViewAmpliconFrame amplicon = new ViewAmpliconFrame(parent, currentSample);
+					amplicon.setVisible(true);
+				}
 			}
 		} catch (Exception e) {
 

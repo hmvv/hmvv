@@ -19,6 +19,7 @@ import javax.swing.JTabbedPane;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.adminFrames.DatabaseInformation;
 import hmvv.gui.adminFrames.EnterArcherSample;
+import hmvv.gui.adminFrames.EnterArcherTumorSample;
 import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.EnterHEMESample;
 import hmvv.gui.adminFrames.MonitorPipelines;
@@ -46,6 +47,7 @@ public class HMVVFrame extends JFrame{
 	private JMenuItem enterSampleMenuItem;
 	private JMenuItem enterHEMESampleMenuItem;
 	private JMenuItem enterArcherSampleMenuItem;
+	private JMenuItem enterArcherTumorSampleMenuItem;
 	private JMenuItem monitorPipelinesItem;
 	private JMenuItem databaseInformationMenuItem;
 	private JMenu qualityControlMenuItem;
@@ -107,6 +109,8 @@ public class HMVVFrame extends JFrame{
 		enterHEMESampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		enterSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
+		enterArcherTumorSampleMenuItem = new JMenuItem("Enter Archer Tumor Sample");
+		enterArcherTumorSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		enterArcherSampleMenuItem = new JMenuItem("Enter ARCHER Run");
 		enterArcherSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
@@ -117,6 +121,7 @@ public class HMVVFrame extends JFrame{
 
 		menuBar.add(adminMenu);
 		adminMenu.add(enterSampleMenuItem);
+		adminMenu.add(enterArcherTumorSampleMenuItem);
 		adminMenu.add(enterHEMESampleMenuItem);
 		adminMenu.add(enterArcherSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
@@ -168,7 +173,7 @@ public class HMVVFrame extends JFrame{
 		setJMenuBar(menuBar);
 
 		ActionListener listener = new ActionListener(){
-
+			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -178,6 +183,9 @@ public class HMVVFrame extends JFrame{
 					}else if(e.getSource() == enterHEMESampleMenuItem){
 						EnterHEMESample sampleHEMEEnter = new EnterHEMESample(HMVVFrame.this, samplePanel);
 						sampleHEMEEnter.setVisible(true);
+					}else if(e.getSource() == enterArcherTumorSampleMenuItem){
+						EnterArcherTumorSample enterArcherTumorSample = new EnterArcherTumorSample(HMVVFrame.this, samplePanel);
+						enterArcherTumorSample.setVisible(true);
 					}else if(e.getSource() == enterArcherSampleMenuItem){
 						EnterArcherSample sampleArcherEnter = new EnterArcherSample(HMVVFrame.this);
 						sampleArcherEnter.setVisible(true);
@@ -194,6 +202,7 @@ public class HMVVFrame extends JFrame{
 
 		enterSampleMenuItem.addActionListener(listener);
 		enterHEMESampleMenuItem.addActionListener(listener);
+		enterArcherTumorSampleMenuItem.addActionListener(listener);
 		enterArcherSampleMenuItem.addActionListener(listener);
 		monitorPipelinesItem.addActionListener(listener);
 		qualityControlMenuItem.addActionListener(listener);

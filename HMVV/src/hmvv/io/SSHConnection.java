@@ -193,7 +193,7 @@ public class SSHConnection {
 	}
 
 	public static void checkSampleSheetError(Instrument instrument, String runFolder, String assay) throws Exception {
-		String integrityScript = "/storage/apps/pipelines/ngs_dev/scripts/common/python/sampleSheet_integrity_check.py";
+		String integrityScript = "/storage/apps/pipelines/" + Configurations.getEnvironment() + "/scripts/common/python/sampleSheet_integrity_check.py";
 		String checkSampleSheetCommand = String.format("python3 %s /storage/instruments/%s/%s/SampleSheet.csv %s", integrityScript, instrument, runFolder, assay);
 		CommandResponse sampleSheetIntegrityResult = SSHConnection.executeCommandAndGetOutput(checkSampleSheetCommand);
 		if(sampleSheetIntegrityResult.responseLines.get(0).toUpperCase().contains("ERROR")){

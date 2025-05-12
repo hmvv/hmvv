@@ -51,6 +51,9 @@ public class MutationListFilters {
 	}
 
 	private boolean includeMutation(MutationCommon mutation){
+		if(mutation.getAlt().contains("TANDEM")){
+			return true;
+		}
 		for(Filter f : filters) {
 			if(f.exclude(mutation)) {
 				return false;

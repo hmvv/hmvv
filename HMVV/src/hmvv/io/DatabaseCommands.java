@@ -228,7 +228,11 @@ public class DatabaseCommands {
 	public static ArrayList<Amplicon> getAmplicons(Sample sample) throws Exception{
 		return DatabaseCommands_QC.getAmplicons(sample);
 	}
-	
+
+	public static ArrayList<GeneTargetQC> getGeneTargetQCData(Sample sample) throws Exception{
+		return DatabaseCommands_QC.getGeneTargetQCData(sample);
+	}
+
 	public static TreeMap<String, GeneQCDataElementTrend> getAmpliconQCData(Assay assay) throws Exception{
 		return DatabaseCommands_QC.getAmpliconQCData(assay);
 	}
