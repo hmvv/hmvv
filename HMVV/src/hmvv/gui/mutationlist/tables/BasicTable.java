@@ -2,7 +2,7 @@ package hmvv.gui.mutationlist.tables;
 
 import javax.swing.*;
 import hmvv.gui.HMVVTableColumn;
-import hmvv.gui.mutationlist.repeatMutationsPopup;
+import hmvv.gui.mutationlist.RepeatMutationsPopup;
 import hmvv.gui.mutationlist.tablemodels.BasicTableModel;
 import hmvv.io.IGVConnection;
 import hmvv.model.MutationSomatic;
@@ -70,7 +70,7 @@ public class BasicTable extends CommonTable{
 
 	private void handleRepeatsClick() throws Exception{
 		MutationSomatic mutation = getSelectedMutation();
-		repeatMutationsPopup.handleRepeatMutationsClick(parent, mutation);
+		RepeatMutationsPopup.handleRepeatMutationsClick(parent, mutation);
 		
 		
 

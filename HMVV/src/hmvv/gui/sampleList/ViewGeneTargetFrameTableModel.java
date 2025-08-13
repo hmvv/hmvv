@@ -79,7 +79,7 @@ public class ViewGeneTargetFrameTableModel extends AbstractTableModel{
 
     @Override
     public Object getValueAt(int row, int column) {
-        GeneTargetQC GeneTargetQC = geneTargets.get(row);
-        return columns.get(column).getValue(GeneTargetQC);
+        GeneTargetQC geneTargetQC = geneTargets.get(row);
+        return columns.get(column).getValue(geneTargetQC);
     }
 }

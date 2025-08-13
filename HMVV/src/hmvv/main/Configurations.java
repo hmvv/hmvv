@@ -177,8 +177,8 @@ public class Configurations {
 	
 	//Reference database tables
 	public static String CARDIAC_TABLE = REFERENCE_DATABASE_NAME + ".db_cardiac_72020";
-	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v101";
-	public static String COSMIC_CMC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_cmc_v101";
+	public static String COSMIC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_grch37v102";
+	public static String COSMIC_CMC_TABLE = REFERENCE_DATABASE_NAME + ".db_cosmic_cmc_v102";
 	public static String CIVIC_TABLE = REFERENCE_DATABASE_NAME + ".db_civic_42019";
 	public static String CLINVAR_TABLE = REFERENCE_DATABASE_NAME + ".db_clinvar_20230514";
 	public static String G1000_TABLE = REFERENCE_DATABASE_NAME + ".db_g1000_phase3v1";
@@ -194,6 +194,7 @@ public class Configurations {
 	public static String GERMLINE_GENE_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".germlineGeneAnnotation";
 	public static String GERMLINE_VARIANT_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".germlineVariantAnnotation";
 	public static String GERMLINE_VARIANT_ANNOTATION_DRAFT_TABLE = REFERENCE_DATABASE_NAME + ".germlineVariantAnnotationDraft";
+	public static String PUBMED_ANNOTATION_TABLE = REFERENCE_DATABASE_NAME + ".db_pubmedID";
 	
 	//LIS Connection
 	public static String LIS_DRIVER;
@@ -208,6 +209,54 @@ public class Configurations {
 		ROTATOR,
 		FELLOW,
 		PATHOLOGIST
+	}
+
+	public enum REPORT_TYPE{
+		SHORT("Short Variant Report"),
+		LONG("Long Variant Report");
+
+		public final String title_text;
+		private REPORT_TYPE(String title_text){
+			this.title_text = title_text;
+		}
+	}
+
+	public enum MUTATION_TIER{
+		BLANK("", "", ""),
+		TIER_1("Tier I", "Tier I - variant of strong clinical significance", ""),
+		TIER_2("Tier II", "Tier II - variant of potential clinical significance", "The effect of this mutation on personalized therapeutic strategies for this patient is uncertain."),
+		TIER_3("Tier III", "Tier III - variant of unknown clinical significance", "The effect of this mutation on prognosis and personalized therapeutic strategies for this patient is uncertain.");
+
+		public final String displayName;
+		public final String label;
+		public final String prognosis;
+		private MUTATION_TIER(String displayName, String label, String prognosis){
+			this.displayName = displayName;
+			this.label = label;
+			this.prognosis = prognosis;
+		}
+
+		public String toString(){
+			return displayName;
+		}
+	}
+
+	public enum MUTATION_SOMATIC_HISTORY{
+		BLANK("", ""),
+		CONFIRMED_SOMATIC("Confirmed somatic", "This variant is a confirmed somatic mutation, previously reported in neoplasms of the ______."),
+		PREVIOUSLY_REPORTED("Previously reported", "This variant has been previously reported in neoplasms of the ______."),
+		NOT_PREVIOUSLY_REPORTED("Not previously reported", "This variant has not been previously reported as a somatic mutation in cancer.");
+
+		public final String displayName;
+		public final String label;
+		private MUTATION_SOMATIC_HISTORY(String displayName, String label){
+			this.displayName = displayName;
+			this.label = label;
+		}
+
+		public String toString(){
+			return displayName;
+		}
 	}
 	
     public enum USER_FUNCTION{
@@ -259,7 +308,7 @@ public class Configurations {
 	public static int COVERAGE_PERCENTAGE_250X = 90;
 	public static int MAX_OCCURENCE_FILTER = 1000000;
 	public static int MAX_ALLELE_FREQ_FILTER = 100;
-	public static int MAX_GLOBAL_ALLELE_FREQ_FILTER = 100;
+	public static double MAX_GLOBAL_ALLELE_FREQ_FILTER = 100.0;
 	public static int GERMLINE_READ_DEPTH_FILTER = 10;
 	public static int GERMLINE_ALLELE_FREQ_FILTER = 15;
 	public static int GERMLINE_GNOMAD_MAX_GLOBAL_ALLELE_FREQ_FILTER = 1;
@@ -282,6 +331,10 @@ public class Configurations {
 			double HEME_ALLELE_FREQ_FILTER = 0;
 			return HEME_ALLELE_FREQ_FILTER;
 
+		}else if (sample.assay.assayName.equals("archerTumor")){
+			double ARCHER_TUMOR_ALLELE_FREQ_FILTER = 5;
+			return ARCHER_TUMOR_ALLELE_FREQ_FILTER;
+
 		}else if (sample.instrument.instrumentName.equals("proton")){
 			double PROTON_ALLELE_FREQ_FILTER = 10;
 			return PROTON_ALLELE_FREQ_FILTER;
@@ -293,6 +346,15 @@ public class Configurations {
 		}
 		double GLOBAL_ALLELE_FREQ_FILTER = 10;
 		return GLOBAL_ALLELE_FREQ_FILTER;
+	}
+
+	public static double getDefaultGNOMADFrequencyFilter(Sample sample) {
+		if (sample.assay.assayName.equals("archerTumor")){
+			double ARCHER_GNOMAD_FREQ_FILTER = 1.0;
+			return ARCHER_GNOMAD_FREQ_FILTER;
+		}
+		double GLOBAL_GNOMAD_FREQ_FILTER = 100;
+		return GLOBAL_GNOMAD_FREQ_FILTER;
 	}
 
 	public static String getqcMeasureDescription(Sample sample) {

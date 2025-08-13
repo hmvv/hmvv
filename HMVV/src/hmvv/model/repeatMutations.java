@@ -1,6 +1,6 @@
 package hmvv.model;
 
-public class repeatMutations {
+public class RepeatMutations {
 
     public final String sampleID;
 	public final String sampleName;
@@ -10,7 +10,7 @@ public class repeatMutations {
     public final Integer readDP;
     public final Integer altReadDP;
 
-    public repeatMutations(String sampleID, String sampleName, String lastName, String firstName, Double altFreq, Integer readDp, Integer altReadDp ){
+    public RepeatMutations(String sampleID, String sampleName, String lastName, String firstName, Double altFreq, Integer readDp, Integer altReadDp ){
         this.sampleID = sampleID;
         this.sampleName = sampleName;
         this.lastName = lastName;

@@ -9,12 +9,58 @@ import java.util.ArrayList;
 
 import hmvv.gui.mutationlist.tablemodels.*;
 import hmvv.main.Configurations;
+import hmvv.main.Configurations.MUTATION_SOMATIC_HISTORY;
+import hmvv.main.Configurations.MUTATION_TIER;
 import hmvv.model.*;
 
 public class MutationReportGenerator{
 
-	public static String generateShortReport(MutationList mutationList) throws Exception{
+	public static String generateShortReport(MutationCommon mutation, MUTATION_TIER tier_selected, MUTATION_SOMATIC_HISTORY choice_selected, boolean possibleGermline) throws Exception{
+		StringBuilder report = new StringBuilder(500);
+		String cDNA = mutation.getHGVSc();
+		String codon = mutation.getHGVSp();
+		String gene = mutation.getGene();
 
+		DecimalFormat altFreqFormat = new DecimalFormat("#.#");
+		double altFreq = Double.valueOf(altFreqFormat.format(mutation.getAltFreq()));
+
+		String mutationText = String.format("%s:%s;%s     (%s%%)",gene, cDNA, codon, altFreq);
+		report.append(mutationText + "\n");
+
+		
+		String[] codon_with_transcript_array = codon.split(":");
+		String amino_acid = codon;
+		if(codon_with_transcript_array.length == 2){
+			amino_acid = codon_with_transcript_array[1];
+		}
+		if(tier_selected != null && tier_selected != MUTATION_TIER.BLANK){
+			//String pubmedID = DatabaseCommands.getVariantAnnotationPubmedID(mutation.getCoordinate());
+			String text = String.format("The %s %s variant is classified as a %s (PMID: 27993330).", gene, amino_acid, tier_selected.label);
+			report.append(text);
+		}
+
+		if (choice_selected != null){
+			report.append(String.format(" %s", choice_selected.label));
+		}
+		
+		if(tier_selected == MUTATION_TIER.TIER_2){
+			report.append(" The effect of this mutation on personalized therapeutic strategies for this patient is uncertain.");
+		}else if(tier_selected == MUTATION_TIER.TIER_3){
+			report.append(" The effect of this mutation on prognosis and personalized therapeutic strategies for this patient is uncertain.");
+		}
+
+		if (mutation.getOtherMutations().size() > 0){
+			report.append(" This mutation was detected previously in a [bone marrow aspirate specimen] from this patient (BM case number; date)");
+		}
+		
+		if(possibleGermline){
+			report.append(" Given that the variant is present consistently at a frequency close to 50% in both specimens, the possibility of this variant being germline cannot be ruled out.");
+		}
+
+		return report.toString();
+	}
+
+	public static String generateShortReport(MutationList mutationList, MUTATION_TIER tier_selected) throws Exception{
 		StringBuilder report = new StringBuilder(500);
 
 		for(int i = 0; i < mutationList.getMutationCount(); i++) {
@@ -22,44 +68,9 @@ public class MutationReportGenerator{
 			if (!mutation.isReported()) {
 				continue;
 			}
-
-			String cDNA = mutation.getHGVSc();
-			String codon = mutation.getHGVSp();
-			String gene = mutation.getGene();
-
-			DecimalFormat altFreqFormat = new DecimalFormat("#.#");
-			double altFreq = Double.valueOf(altFreqFormat.format(mutation.getAltFreq()));
-
-			String mutationText = gene + ":" + cDNA + ";" + codon + "     (" + altFreq + "%)";
-			report.append(mutationText + "\n");
+			String thisReport = generateShortReport(mutation, tier_selected, null, false);
+			report.append(thisReport + "\n");
 		}
-
-		report.append("\n");
-
-		for(int i = 0; i < mutationList.getMutationCount(); i++) {
-			MutationCommon mutation = mutationList.getMutation(i);
-			if (!mutation.isReported()) {
-				continue;
-			}
-			Annotation annotation = mutation.getLatestAnnotation();
-			if(annotation != null) {
-				String curation = annotation.curation;
-				if(curation.length() > 0) {
-					report.append(curation + "\n");
-				}
-			}
-
-//			ArrayList<GeneAnnotation> geneAnnotationHistory = DatabaseCommands.getGeneAnnotationHistory(gene);
-//			if(geneAnnotationHistory.size() > 0) {
-//				GeneAnnotation geneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
-//				if(geneAnnotation.curation.length() > 0) {
-//					report.append("Gene Note: " + geneAnnotation.curation + "\n");
-//				}
-//			}
-
-			report.append("\n");
-		}
-
 		return report.toString();
 	}
 

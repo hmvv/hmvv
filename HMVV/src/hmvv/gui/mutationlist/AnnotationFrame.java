@@ -3,8 +3,11 @@ package hmvv.gui.mutationlist;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.sampleList.ContextMenuMouseListener;
 import hmvv.io.DatabaseCommands;
+import hmvv.io.MutationReportGenerator;
 import hmvv.io.SSHConnection;
 import hmvv.main.Configurations;
+import hmvv.main.Configurations.MUTATION_SOMATIC_HISTORY;
+import hmvv.main.Configurations.MUTATION_TIER;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.*;
 
@@ -14,38 +17,50 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Calendar;
 
 public class AnnotationFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
 
-	private JButton okButton;
-	private JButton cancelButton;
-	private JButton previousGeneAnnotationButton;
-	private JButton previousAnnotationButton;
-	private JButton nextGeneAnnotationButton;
-	private JButton nextAnnotationButton;
-	private JButton draftButton;
+	private JButton okButton = new JButton("OK");
+	private JButton cancelButton = new JButton("Cancel");
+	private JButton previousGeneAnnotationButton = new JButton("Previous");
+	private JButton previousAnnotationButton = new JButton("Previous");
+	private JButton previousVariantAnnotationButton = new JButton("Previous");
+	private JButton nextGeneAnnotationButton = new JButton("Next");
+	private JButton nextAnnotationButton = new JButton("Next");
+	private JButton nextVariantAnnotationButton = new JButton("Next");
+	private JButton draftButton = new JButton("Variant Annotation Draft");
 
-	private JComboBox<String> pathogenicityComboBox;
-	private JComboBox<String> mutationTypeComboBox;
+	private JComboBox<String> classificationComboBox;
+	private JComboBox<String> originComboBox;
+	private JComboBox<MUTATION_TIER> variantTierComboBox = new JComboBox<MUTATION_TIER>();
+	private JComboBox<MUTATION_SOMATIC_HISTORY> variantSomaticHistoryComboBox = new JComboBox<MUTATION_SOMATIC_HISTORY>();
+	private JCheckBox germlinCheckBox = new JCheckBox("Possible Germline");
 
-	private JTextArea geneAnnotationTextArea;
-	private JTextArea annotationTextArea;
+	private JTextArea geneAnnotationTextArea = new JTextArea();
+	private JTextArea variantAnnotationTextArea = new JTextArea();
+	private JTextArea sampleVariantAnnotationTextArea = new JTextArea();
 
-	private JLabel historyLabelGeneAnnotation;
-	private JLabel historyLabelAnnotation;
+	private JLabel historyLabelGeneAnnotation = new JLabel("New Gene Annotation");
+	private JLabel historyLabelAnnotation = new JLabel("New Annotation");
+	private JLabel historyLabelSampleAnnotation = new JLabel("New");
+
 	private Integer annotationHistorySize;
 
 	private Boolean readOnly;
 	private Integer currentGeneAnnotationIndex;
 	private Integer currentAnnotationIndex;
+	private Integer currentSampleVariantAnnotationIndex;
 	private String gene;
 
-	private ArrayList<GeneAnnotation> geneAnnotationHistory;
 	private MutationCommon mutation;
+	private ArrayList<GeneAnnotation> geneAnnotationHistory;
 	private ArrayList<Annotation> annotationHistory;
+	private ArrayList<SampleVariantAnnotation> sampleVariantAnnotationHistory;
 
 	private final Color readOnlyColor = new Color(245,245,245);
 	private final Color readWriteColor = Color.WHITE;
@@ -66,10 +81,12 @@ public class AnnotationFrame extends JDialog {
 		currentGeneAnnotationIndex = geneAnnotationHistory.size() - 1; 
 
 		annotationHistory = DatabaseCommands.getVariantAnnotationHistory(mutation.getCoordinate(),mutation.getMutationType());
-		this.annotationHistorySize = annotationHistory.size();
-		
-
+		annotationHistorySize = annotationHistory.size();
 		currentAnnotationIndex = annotationHistorySize - 1;
+
+		sampleVariantAnnotationHistory = DatabaseCommands.getSampleVariantAnnotationHistory(mutation);
+		currentSampleVariantAnnotationIndex = sampleVariantAnnotationHistory.size() - 1;
+
 		
 		createComponents();
 		layoutComponents();
@@ -78,11 +95,16 @@ public class AnnotationFrame extends JDialog {
 		if(readOnly){
 			setTitle("Annotation (read only) - " + mutation.getGene() + " - " + mutation.getCoordinate().getCoordinateAsString());
 			geneAnnotationTextArea.setEditable(false);
-			annotationTextArea.setEditable(false);
-			pathogenicityComboBox.setEnabled(false);
-			mutationTypeComboBox.setEnabled(false);
+			variantAnnotationTextArea.setEditable(false);
+			sampleVariantAnnotationTextArea.setEditable(false);
+			classificationComboBox.setEnabled(false);
+			originComboBox.setEnabled(false);
+			variantTierComboBox.setEnabled(false);
+			variantSomaticHistoryComboBox.setEnabled(false);
+			germlinCheckBox.setEnabled(false);
 			geneAnnotationTextArea.setBackground(new Color(234,240,240));
-			annotationTextArea.setBackground(new Color(234,240,240));
+			variantAnnotationTextArea.setBackground(new Color(234,240,240));
+			sampleVariantAnnotationTextArea.setBackground(new Color(234,240,240));
 		}
 		
 		pack();
@@ -93,77 +115,76 @@ public class AnnotationFrame extends JDialog {
 	}
 
 	private void createComponents(){
-		pathogenicityComboBox = new JComboBox<String>();
-		pathogenicityComboBox.addItem("Not set");
-		pathogenicityComboBox.addItem("Benign");
-		pathogenicityComboBox.addItem("Likely Benign");
-		pathogenicityComboBox.addItem("Unknown");
-		pathogenicityComboBox.addItem("Likely Pathogenic");
-		pathogenicityComboBox.addItem("Pathogenic");		
+		classificationComboBox = new JComboBox<String>();
+		classificationComboBox.addItem("Not set");
+		classificationComboBox.addItem("Benign");
+		classificationComboBox.addItem("Likely Benign");
+		classificationComboBox.addItem("Unknown");
+		classificationComboBox.addItem("Likely Pathogenic");
+		classificationComboBox.addItem("Pathogenic");		
 		
-		mutationTypeComboBox = new JComboBox<String>();
-		mutationTypeComboBox.addItem("Not set");
-		mutationTypeComboBox.addItem("Somatic");
-		mutationTypeComboBox.addItem("Germline");
-		mutationTypeComboBox.addItem("Unknown");
-		mutationTypeComboBox.addItem("Artifact");
-		mutationTypeComboBox.addItem("Both Somatic and Germline");
-		mutationTypeComboBox.addItem("Not Confirmed Somatic");
+		originComboBox = new JComboBox<String>();
+		originComboBox.addItem("Not set");
+		originComboBox.addItem("Somatic");
+		originComboBox.addItem("Germline");
+		originComboBox.addItem("Unknown");
+		originComboBox.addItem("Artifact");
+		originComboBox.addItem("Both Somatic and Germline");
+		originComboBox.addItem("Not Confirmed Somatic");
 		
-		previousGeneAnnotationButton = new JButton("Previous");
+		for(MUTATION_TIER mutation_tier : MUTATION_TIER.values()){
+			variantTierComboBox.addItem(mutation_tier);
+		}
+
+		for(MUTATION_SOMATIC_HISTORY mutation_somatic_history : MUTATION_SOMATIC_HISTORY.values()){
+			variantSomaticHistoryComboBox.addItem(mutation_somatic_history);
+		}
+
 		if (geneAnnotationHistory.size() <= 1) { 	
 			previousGeneAnnotationButton.setEnabled(false); 
 		}
 
-		previousAnnotationButton = new JButton("Previous");
 		if (annotationHistorySize <= 1) { 
 			previousAnnotationButton.setEnabled(false); 
-		}		
+		}
 
-		nextGeneAnnotationButton = new JButton("Next");
+		if (sampleVariantAnnotationHistory.size() <= 1) { 	
+			previousVariantAnnotationButton.setEnabled(false); 
+		}
+
 		nextGeneAnnotationButton.setEnabled(false);
-		
-		nextAnnotationButton = new JButton("Next");
 		nextAnnotationButton.setEnabled(false);
-
-		geneAnnotationTextArea = new JTextArea();
+		nextVariantAnnotationButton.setEnabled(false);
+		draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
+		
 		geneAnnotationTextArea.setWrapStyleWord(true);
 		geneAnnotationTextArea.setLineWrap(true);
 		
-		annotationTextArea = new JTextArea();
-		annotationTextArea.setWrapStyleWord(true);
-		annotationTextArea.setLineWrap(true);
-		
-		historyLabelGeneAnnotation = new JLabel("New Gene Annotation");
-		historyLabelAnnotation = new JLabel("New Annotation");
+		variantAnnotationTextArea.setWrapStyleWord(true);
+		variantAnnotationTextArea.setLineWrap(true);
 
-		draftButton = new JButton("Variant Annotation Draft");
-		draftButton.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_DRAFT));
+		sampleVariantAnnotationTextArea.setWrapStyleWord(true);
+		sampleVariantAnnotationTextArea.setLineWrap(true);
 
-		okButton = new JButton("OK");
-		getRootPane().setDefaultButton(okButton);
-
-		cancelButton = new JButton("Cancel");
 		cancelButton.setActionCommand("Cancel");
-		
+		getRootPane().setDefaultButton(okButton);
 		setDefaultComponentValues();
 	}
 	
 	private void setDefaultComponentValues() {
-		
 		Annotation defaultAnnotation = mutation.getLatestAnnotation();
 		if(defaultAnnotation != null) {
 			if (defaultAnnotation.classification == null){
-				pathogenicityComboBox.setSelectedItem("Not Set");
+				classificationComboBox.setSelectedItem("Not Set");
 			}else{
-				pathogenicityComboBox.setSelectedItem(defaultAnnotation.classification);
+				classificationComboBox.setSelectedItem(defaultAnnotation.classification);
 			}
 			if (defaultAnnotation.somatic == null){
-				mutationTypeComboBox.setSelectedItem("Not Set");
+				originComboBox.setSelectedItem("Not Set");
 			}else{
-			mutationTypeComboBox.setSelectedItem(defaultAnnotation.somatic);
+			originComboBox.setSelectedItem(defaultAnnotation.somatic);
 			}
-			annotationTextArea.setText(defaultAnnotation.curation);
+			variantAnnotationTextArea.setText(defaultAnnotation.curation);
 			setCommonAnnotationLabel(defaultAnnotation, historyLabelAnnotation);
 		}
 		
@@ -171,6 +192,15 @@ public class AnnotationFrame extends JDialog {
 			GeneAnnotation defaultGeneAnnotation = geneAnnotationHistory.get(geneAnnotationHistory.size() - 1);
 			geneAnnotationTextArea.setText(defaultGeneAnnotation.curation);
 			setCommonAnnotationLabel(defaultGeneAnnotation, historyLabelGeneAnnotation);
+		}
+
+		if(sampleVariantAnnotationHistory.size() > 0) {
+			SampleVariantAnnotation defaultSampleVariantAnnotation = sampleVariantAnnotationHistory.get(sampleVariantAnnotationHistory.size() - 1);
+			variantTierComboBox.setSelectedItem(defaultSampleVariantAnnotation.mutation_tier);
+			variantSomaticHistoryComboBox.setSelectedItem(defaultSampleVariantAnnotation.mutation_somatic_history);
+			germlinCheckBox.setSelected(defaultSampleVariantAnnotation.possibleGermline);
+			sampleVariantAnnotationTextArea.setText(defaultSampleVariantAnnotation.curation);
+			setCommonAnnotationLabel(defaultSampleVariantAnnotation, historyLabelSampleAnnotation);
 		}
 	}
 	
@@ -207,21 +237,52 @@ public class AnnotationFrame extends JDialog {
 		
 		addItem(itemPanel, "Gene", mutation.getGene());
 		addItem(itemPanel, "Coordinate", mutation.getCoordinate().getCoordinateAsString());
-		String HGVSc = (mutation.getHGVSc().startsWith("ENST")) ? mutation.getHGVSc().split(":")[1] : mutation.getHGVSc();
+		String HGVSc = "";
+		if(mutation.getHGVSc().startsWith("ENST")){
+			String[] split = mutation.getHGVSc().split(":");
+			if (split.length > 1)
+				HGVSc = split[1];
+			else
+				HGVSc = mutation.getHGVSc();
+		}else{
+			mutation.getHGVSc();
+		}
 		addItem(itemPanel, "HGVSc", HGVSc);
 		String HGVSp = (mutation.getHGVSp().startsWith("ENSP")) ? mutation.getHGVSp().split(":")[1] : mutation.getHGVSp();
 		addItem(itemPanel, "HGVSp", HGVSp);
-		addItem(itemPanel, "Classification", pathogenicityComboBox);
-		addItem(itemPanel, "Origin", mutationTypeComboBox);
+		addItem(itemPanel, "Classification", classificationComboBox);
+		addItem(itemPanel, "Origin", originComboBox);
+		addItem(itemPanel, "Tier", variantTierComboBox);
+		addItem(itemPanel, "Somatic Hx", variantSomaticHistoryComboBox);
+		addItem(itemPanel, "Germline?", germlinCheckBox);
 		
 		Dimension textAreaDimension = new Dimension(300,550);
-		
+
+		//Variant Annotation Setups
 		JPanel textAreaPanel = new JPanel();
 		textAreaPanel.setLayout(new GridLayout(1,0));
-		//Annotation
+
+		//Sample Variant Annotation
+		JPanel sampleVariantAnnotationPanel = new JPanel();
+		sampleVariantAnnotationPanel.setLayout(new BoxLayout(sampleVariantAnnotationPanel, BoxLayout.Y_AXIS));
+		JScrollPane sampleVariantAnnotationScrollPane = new JScrollPane(sampleVariantAnnotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		sampleVariantAnnotationScrollPane.setPreferredSize(textAreaDimension);
+		TitledBorder sampleVariantAnnotationBorder = BorderFactory.createTitledBorder("Sample Variant Annotation");
+		sampleVariantAnnotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
+		sampleVariantAnnotationPanel.setBorder(sampleVariantAnnotationBorder);
+		sampleVariantAnnotationPanel.add(sampleVariantAnnotationScrollPane);
+		JPanel historyPanelSA = new JPanel();
+		historyPanelSA.setLayout(new FlowLayout(FlowLayout.LEFT));
+		historyPanelSA.add(previousVariantAnnotationButton);
+		historyPanelSA.add(historyLabelSampleAnnotation);
+		historyPanelSA.add(nextVariantAnnotationButton);
+		sampleVariantAnnotationPanel.add(historyPanelSA);
+		textAreaPanel.add(sampleVariantAnnotationPanel);
+		
+		//Variant Annotation
 		JPanel annotationPanel = new JPanel();
 		annotationPanel.setLayout(new BoxLayout(annotationPanel, BoxLayout.Y_AXIS));
-		JScrollPane annotationScrollPane = new JScrollPane(annotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane annotationScrollPane = new JScrollPane(variantAnnotationTextArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		annotationScrollPane.setPreferredSize(textAreaDimension);
 		TitledBorder annotationBorder = BorderFactory.createTitledBorder("Variant Annotation");
 		annotationBorder.setTitleFont(GUICommonTools.TAHOMA_BOLD_14);
@@ -251,9 +312,7 @@ public class AnnotationFrame extends JDialog {
 		historyPanelGA.add(nextGeneAnnotationButton);
 		geneAnnotationPanel.add(historyPanelGA);
 		textAreaPanel.add(geneAnnotationPanel);
-		
-		//JLabel lblMaxCharacters = new JLabel("Max " + maxCharacters + " characters");
-		
+				
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
 		buttonPane.add(draftButton);
@@ -266,42 +325,45 @@ public class AnnotationFrame extends JDialog {
 	}
 
 	private void activateComponents(){
-		okButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				try{
-					AnnotationFrame.this.setVisible(false);
-					saveRecord();
-				}catch(Exception e){
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
-				}
-			}
-		});
+		ActionListener listener = new ActionListener(){
+            @Override
+			public void actionPerformed(ActionEvent action) {
+                try {
+					if(action.getSource() == okButton){
+						AnnotationFrame.this.setVisible(false);
+						saveRecord();
+					}else if(action.getSource() == cancelButton){
+						AnnotationFrame.this.dispose();
+					}else if(action.getSource() == draftButton){
+						showAnnotationDraftFrame();
+					}else if(action.getSource() == variantTierComboBox){
+						updateReportText();
+					}else if(action.getSource() == variantSomaticHistoryComboBox){
+						updateReportText();
+					}
+                } catch (Exception e) {
+                    HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
+                }
+            }
+        };
+		okButton.addActionListener(listener);
+		cancelButton.addActionListener(listener);
+		draftButton.addActionListener(listener);
+		variantTierComboBox.addActionListener(listener);
+		variantSomaticHistoryComboBox.addActionListener(listener);
 
-		cancelButton.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				AnnotationFrame.this.dispose();
-			}
-		});
+		ItemListener itemListener = new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+                try {
+                    updateReportText();
+                } catch (Exception e) {
+                    HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
+                }
+            }
+        };
+        germlinCheckBox.addItemListener(itemListener);
 
-		draftButton.addActionListener(new ActionListener(){
-			
-			@Override
-			
-			public void actionPerformed(ActionEvent arg0) {
-				try{
-					
-					showAnnotationDraftFrame();
-					
-				}catch(Exception e){
-					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, e);
-				}
-			}
-			
-		});
-
-		
 
 		ActionListener historyActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -314,20 +376,23 @@ public class AnnotationFrame extends JDialog {
 						showAnnotationPrevious();
 					}else if(e.getSource() == nextAnnotationButton) {
 						showAnnotationNext();
+					}else if(e.getSource() == previousVariantAnnotationButton) {
+						showSampleVariantAnnotationPrevious();
+					}else if(e.getSource() == nextVariantAnnotationButton) {
+						showSampleVariantAnnotationNext();
 					}
 				} catch (Exception exception) {
 					HMVVDefectReportFrame.showHMVVDefectReportFrame(AnnotationFrame.this, exception);
 				}
 			}
 		};
-		
 		previousGeneAnnotationButton.addActionListener(historyActionListener);
 		nextGeneAnnotationButton.addActionListener(historyActionListener);
 		previousAnnotationButton.addActionListener(historyActionListener);
 		nextAnnotationButton.addActionListener(historyActionListener);
-		annotationTextArea.addMouseListener(new ContextMenuMouseListener());
-
-		
+		previousVariantAnnotationButton.addActionListener(historyActionListener);
+		nextVariantAnnotationButton.addActionListener(historyActionListener);
+		variantAnnotationTextArea.addMouseListener(new ContextMenuMouseListener());
 	}
 
 	private void saveRecord() throws Exception{
@@ -341,18 +406,32 @@ public class AnnotationFrame extends JDialog {
 			return;
 		}
 		
+		saveSampleVariantAnnotationRecord();
 		saveAnnotationRecord();
 		saveGeneAnnotationRecord();
 	}
 	
+	private void saveSampleVariantAnnotationRecord() throws Exception{
+		MUTATION_TIER tier_selected = (MUTATION_TIER)variantTierComboBox.getSelectedItem();
+        MUTATION_SOMATIC_HISTORY choice_selected = (MUTATION_SOMATIC_HISTORY)variantSomaticHistoryComboBox.getSelectedItem();
+        boolean possibleGermline = germlinCheckBox.isSelected();
+        String thisUpdatedReport = sampleVariantAnnotationTextArea.getText();
+		SampleVariantAnnotation newSampleVariantAnnotation = new SampleVariantAnnotation(mutation, tier_selected, choice_selected, possibleGermline, thisUpdatedReport,SSHConnection.getUserName(), Calendar.getInstance().getTime());
+		SampleVariantAnnotation latestSampleVariantAnnotation = mutation.getMutationAnnotation();
+		if (latestSampleVariantAnnotation == null || !latestSampleVariantAnnotation.equals(newSampleVariantAnnotation)) {
+			DatabaseCommands.addSampleVariantAnnotation(newSampleVariantAnnotation);
+			mutation.setMutationAnnotation(latestSampleVariantAnnotation);
+		}
+	}
+
 	private void saveAnnotationRecord() throws Exception {
 		if(currentAnnotationIndex == annotationHistorySize - 1 || annotationHistorySize == 0) {//only consider saving annotation if we are at the most recent one, or there never has been an annotation
 			//annotation update
 			Annotation newAnnotation = new Annotation(
 					mutation.getCoordinate(),
-					pathogenicityComboBox.getSelectedItem().toString(),
-					annotationTextArea.getText(),
-					mutationTypeComboBox.getSelectedItem().toString(),
+					classificationComboBox.getSelectedItem().toString(),
+					variantAnnotationTextArea.getText(),
+					originComboBox.getSelectedItem().toString(),
 					SSHConnection.getUserName(),
 					Calendar.getInstance().getTime()
 					);
@@ -360,7 +439,6 @@ public class AnnotationFrame extends JDialog {
 			if (latestAnnotation == null || !latestAnnotation.equals(newAnnotation)) {
 				DatabaseCommands.addVariantAnnotationCuration(newAnnotation,Configurations.MUTATION_TYPE.SOMATIC);
 				mutation.setLatestAnnotation(newAnnotation);
-//				parent.notifyAnnotationUpdated(newAnnotation);
 			}
 		}
 	}
@@ -409,24 +487,58 @@ public class AnnotationFrame extends JDialog {
 		currentAnnotationIndex = currentAnnotationIndex + 1;
 		updateAnnotation();
 	}
+
+	private void showSampleVariantAnnotationPrevious(){
+		currentSampleVariantAnnotationIndex = currentSampleVariantAnnotationIndex - 1;
+		updateSampleVariantAnnotation();
+	}
+
+	private void showSampleVariantAnnotationNext(){
+		currentSampleVariantAnnotationIndex = currentSampleVariantAnnotationIndex + 1;
+		updateSampleVariantAnnotation();
+	}
+
+	private void updateSampleVariantAnnotation() {
+		SampleVariantAnnotation currentSampleVariantAnnotation = sampleVariantAnnotationHistory.get(currentSampleVariantAnnotationIndex);
+		sampleVariantAnnotationTextArea.setText(currentSampleVariantAnnotation.curation);
+		variantTierComboBox.setSelectedItem(currentSampleVariantAnnotation.mutation_tier);
+		variantSomaticHistoryComboBox.setSelectedItem(currentSampleVariantAnnotation.mutation_somatic_history);
+		germlinCheckBox.setSelected(currentSampleVariantAnnotation.possibleGermline);
+
+		setCommonAnnotationLabel(currentSampleVariantAnnotation, historyLabelSampleAnnotation);
+		
+		updateCommon(currentSampleVariantAnnotationIndex, sampleVariantAnnotationHistory.size(), sampleVariantAnnotationTextArea, previousVariantAnnotationButton, nextVariantAnnotationButton);
+		
+		if (currentSampleVariantAnnotationIndex == sampleVariantAnnotationHistory.size() - 1) {
+			if(!readOnly) {
+				variantTierComboBox.setEnabled(true);
+				variantSomaticHistoryComboBox.setEnabled(true);
+				germlinCheckBox.setEnabled(true);
+			}
+		}else if(sampleVariantAnnotationHistory.size() != 1) {
+			variantTierComboBox.setEnabled(false);
+				variantSomaticHistoryComboBox.setEnabled(false);
+				germlinCheckBox.setEnabled(false);
+		}
+	}
 	
 	private void updateAnnotation() {
 		Annotation currentannotation = annotationHistory.get(currentAnnotationIndex); //mutation.getAnnotation(currentAnnotationIndex);
-		annotationTextArea.setText(currentannotation.curation);
-		pathogenicityComboBox.setSelectedItem(currentannotation.classification);
-		mutationTypeComboBox.setSelectedItem(currentannotation.somatic);
+		variantAnnotationTextArea.setText(currentannotation.curation);
+		classificationComboBox.setSelectedItem(currentannotation.classification);
+		originComboBox.setSelectedItem(currentannotation.somatic);
 		setCommonAnnotationLabel(currentannotation, historyLabelAnnotation);
 		
-		updateCommon(currentAnnotationIndex, annotationHistorySize, annotationTextArea, previousAnnotationButton, nextAnnotationButton);
+		updateCommon(currentAnnotationIndex, annotationHistorySize, variantAnnotationTextArea, previousAnnotationButton, nextAnnotationButton);
 		
 		if (currentAnnotationIndex == annotationHistorySize - 1) {
 			if(!readOnly) {
-				pathogenicityComboBox.setEnabled(true);
-				mutationTypeComboBox.setEnabled(true);
+				classificationComboBox.setEnabled(true);
+				originComboBox.setEnabled(true);
 			}
 		}else if(annotationHistorySize != 1) {
-			pathogenicityComboBox.setEnabled(false);
-			mutationTypeComboBox.setEnabled(false);
+			classificationComboBox.setEnabled(false);
+			originComboBox.setEnabled(false);
 		}
 	}
 	
@@ -454,6 +566,14 @@ public class AnnotationFrame extends JDialog {
 			nextButton.setEnabled(true);
 		}
 	}
+
+	private void updateReportText() throws Exception{
+		MUTATION_TIER tier_selected = (MUTATION_TIER) variantTierComboBox.getSelectedItem();
+        MUTATION_SOMATIC_HISTORY choice_selected = (MUTATION_SOMATIC_HISTORY) variantSomaticHistoryComboBox.getSelectedItem();
+        boolean possibleGermline = germlinCheckBox.isSelected();
+		String thisUpdatedReport = MutationReportGenerator.generateShortReport(mutation, tier_selected, choice_selected, possibleGermline);
+        sampleVariantAnnotationTextArea.setText(thisUpdatedReport);
+    }
 
 	private void showAnnotationDraftFrame(){
 		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);	

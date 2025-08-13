@@ -6,9 +6,13 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 
 import hmvv.main.Configurations;
+import hmvv.main.Configurations.MUTATION_SOMATIC_HISTORY;
+import hmvv.main.Configurations.MUTATION_TIER;
 import hmvv.model.Annotation;
 import hmvv.model.Coordinate;
 import hmvv.model.GeneAnnotation;
+import hmvv.model.MutationCommon;
+import hmvv.model.SampleVariantAnnotation;
 
 public class DatabaseCommands_Annotations {
 	private static Connection databaseConnection = null;
@@ -37,6 +41,51 @@ public class DatabaseCommands_Annotations {
 		return geneannotations;
 	}
 
+	static ArrayList<SampleVariantAnnotation> getSampleVariantAnnotationHistory(MutationCommon mutation) throws Exception{
+		ArrayList<SampleVariantAnnotation> sampleVariantAnnotations = new ArrayList<SampleVariantAnnotation>() ;
+		String query = String.format("select sampleVariantID, variantTier, somaticHistory, possibleGermline, curation, enteredBy, enterDate from sampleVariantAnnotation where sampleVariantID = ?");
+		PreparedStatement selectStatement = databaseConnection.prepareStatement(query);
+		selectStatement.setInt(1, mutation.getSampleVariantID());
+		ResultSet rs = selectStatement.executeQuery();
+		while(rs.next()){
+			
+			sampleVariantAnnotations.add(
+				new SampleVariantAnnotation(
+					rs.getInt("sampleVariantID"),
+					mutation,
+					MUTATION_TIER.valueOf(rs.getString("variantTier")),
+					MUTATION_SOMATIC_HISTORY.valueOf(rs.getString("somaticHistory")),
+					rs.getBoolean("possibleGermline"),
+					rs.getString("curation"),
+					rs.getString("enteredBy"),
+					rs.getTimestamp("enterDate")
+				)
+			);
+		}
+		selectStatement.close();
+
+		return sampleVariantAnnotations;
+	}
+
+	static String getVariantAnnotationPubmedID(Coordinate coordinate) throws Exception{
+		String tablename = Configurations.PUBMED_ANNOTATION_TABLE;
+
+		String query = String.format("select recent_pmid from %s where chr = ? and pos = ? and ref = ? and alt = ?", tablename);
+		PreparedStatement selectStatement = databaseConnection.prepareStatement(query);
+		selectStatement.setString(1, coordinate.getChr());
+		selectStatement.setString(2, coordinate.getPos());
+		selectStatement.setString(3, coordinate.getRef());
+		selectStatement.setString(4, coordinate.getAlt());
+		ResultSet rs = selectStatement.executeQuery();
+		
+		String pubmedID="_______";
+		if(rs.next()){
+			pubmedID = rs.getString(1);
+		}
+		selectStatement.close();
+		return pubmedID;
+	}
+
 	static String getVariantAnnotationDraft(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 
 		String tablename = "";
@@ -60,6 +109,21 @@ public class DatabaseCommands_Annotations {
 		selectStatement.close();
 		return draft;
 	}
+
+	public static void addSampleVariantAnnotation(SampleVariantAnnotation sampleVariantAnnotation) throws Exception{
+		String query = String.format("insert into sampleVariantAnnotation (sampleVariantID, variantTier, somaticHistory, possibleGermline, curation, enteredBy, enterDate) VALUES (?, ?, ?, ?, ?, ?, ?)");
+		PreparedStatement pstEnterGeneAnnotation = databaseConnection.prepareStatement(query);
+		pstEnterGeneAnnotation.setInt(1, sampleVariantAnnotation.mutation.getSampleVariantID());
+		pstEnterGeneAnnotation.setString(2, sampleVariantAnnotation.mutation_tier.name());
+		pstEnterGeneAnnotation.setString(3, sampleVariantAnnotation.mutation_somatic_history.name());
+		pstEnterGeneAnnotation.setBoolean(4, sampleVariantAnnotation.possibleGermline);
+		pstEnterGeneAnnotation.setString(5, sampleVariantAnnotation.curation);
+		pstEnterGeneAnnotation.setString(6, sampleVariantAnnotation.enteredBy);
+		pstEnterGeneAnnotation.setTimestamp(7, new java.sql.Timestamp(sampleVariantAnnotation.enterDate.getTime()));
+		pstEnterGeneAnnotation.executeUpdate();
+		pstEnterGeneAnnotation.close();
+	}
+
 
 	static void addGeneAnnotationCuration(GeneAnnotation geneAnnotation, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 		String gene = geneAnnotation.gene;

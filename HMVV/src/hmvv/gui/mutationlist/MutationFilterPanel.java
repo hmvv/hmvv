@@ -247,7 +247,7 @@ public class MutationFilterPanel extends JPanel {
 		mutationListFilters.addMaxG1000FrequencyFilter(maxPopulationFrequencyG1000TextField);
 		mutationListFilters.addSearchGeneFilter(searchTextgeneField);
 		mutationListFilters.addSearchVariantFilter(searchTextVariantField);
-		mutationListFilters.addMaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField);
+		mutationListFilters.addMaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField, Configurations.getDefaultAlleleFrequencyFilter(sample));
 		mutationListFilters.addMaxOccurrenceFilter(occurenceFromTextField);
 		mutationListFilters.addMinReadDepthFilter(minReadDepthTextField, Configurations.getDefaultReadDepthFilter(sample));
 		mutationListFilters.addReportedOnlyFilter(reportedOnlyCheckbox);
@@ -408,7 +408,7 @@ public class MutationFilterPanel extends JPanel {
 		minReadDepthTextField.setText(Configurations.getDefaultReadDepthFilter(sample)+"");
 		occurenceFromTextField.setText(Configurations.MAX_OCCURENCE_FILTER+"");
 		maxPopulationFrequencyG1000TextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
-		maxPopulationFrequencyGnomadTextField.setText(Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER+"");
+		maxPopulationFrequencyGnomadTextField.setText(Configurations.getDefaultGNOMADFrequencyFilter(sample)+"");
 		predictionFilterComboBox.setSelectedIndex(1);
 		variantCallerTextField.setText(Configurations.MIN_VARIANT_CALLERS_COUNT);
 		searchTextgeneField.setText("");

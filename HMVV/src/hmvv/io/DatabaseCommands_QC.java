@@ -72,7 +72,7 @@ public class DatabaseCommands_QC {
 		}else if(assay.assayName.equals("gene50")) {
 			geneFilter = " and (sampleAmplicons.gene like '%EGFR%' or sampleAmplicons.gene like '%KRAS%' or sampleAmplicons.gene like '%NRAS%') and assay = 'gene50'";
 		}else if(assay.assayName.equals("neuro")) {
-			//TODO the sampleAmplicons table currently does not properly store gene name
+			//the sampleAmplicons table currently does not properly store gene name
 			//geneFilter = " and (sampleAmplicons.gene = 'EGFR' or sampleAmplicons.gene = 'IDH1' or sampleAmplicons.gene = 'KRAS' or sampleAmplicons.gene = 'NRAS') and assayName = 'neuro'";
 			throw new Exception("Unsupported Assay: " + assay);
 		}else {

@@ -4,7 +4,7 @@ package hmvv.gui.mutationlist;
 import java.util.ArrayList;
 
 import hmvv.gui.GUICommonTools;
-import hmvv.model.repeatMutations;
+import hmvv.model.RepeatMutations;
 
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
@@ -14,13 +14,13 @@ import javax.swing.JTable;
 
 import java.awt.*;
 
-public class repeatMutationsFrame extends JDialog {
+public class RepeatMutationsFrame extends JDialog {
 
     private static final long serialVersionUID = 1L;
     private JScrollPane tableScrollPane;
     
 
-    public repeatMutationsFrame(JDialog parent,  JTable table, ArrayList<repeatMutations> repeatMutations) throws Exception {
+    public RepeatMutationsFrame(JDialog parent,  JTable table, ArrayList<RepeatMutations> repeatMutations) throws Exception {
         super(parent, "Repeats", ModalityType.APPLICATION_MODAL);
 
         tableScrollPane = new JScrollPane(table);

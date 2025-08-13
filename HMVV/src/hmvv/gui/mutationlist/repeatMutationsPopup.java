@@ -13,9 +13,9 @@ import javax.swing.table.TableCellRenderer;
 import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
 import hmvv.model.MutationSomatic;
-import hmvv.model.repeatMutations;
+import hmvv.model.RepeatMutations;
 
-public class repeatMutationsPopup {
+public class RepeatMutationsPopup {
 	static class CosmicInfo{
 
 		public MutationSomatic mutation;
@@ -28,7 +28,7 @@ public class repeatMutationsPopup {
 	}
 	
 	public static void handleRepeatMutationsClick(JDialog parent, MutationSomatic mutation) throws Exception{
-		ArrayList<repeatMutations> repeatMutationsList = DatabaseCommands.getrepeatMutations(mutation);
+		ArrayList<RepeatMutations> repeatMutationsList = DatabaseCommands.getrepeatMutations(mutation);
 		DefaultTableModel tableModel = new DefaultTableModel(){
 			private static final long serialVersionUID = 1L;
 			
@@ -120,7 +120,7 @@ public class repeatMutationsPopup {
 		};
 		table.setAutoCreateRowSorter(true);
 
-		repeatMutationsFrame repeatMutationsFrame = new repeatMutationsFrame(parent, table, repeatMutationsList);
+		RepeatMutationsFrame repeatMutationsFrame = new RepeatMutationsFrame(parent, table, repeatMutationsList);
 		repeatMutationsFrame.setVisible(true);
 
 	}

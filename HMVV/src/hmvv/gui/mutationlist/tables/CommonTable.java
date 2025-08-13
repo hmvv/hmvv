@@ -22,7 +22,7 @@ import hmvv.io.DatabaseCommands;
 import hmvv.io.InternetCommands;
 import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
-import hmvv.model.Annotation;
+import hmvv.model.SampleVariantAnnotation;
 import hmvv.model.Coordinate;
 import hmvv.model.MutationSomatic;
 
@@ -253,7 +253,7 @@ public abstract class CommonTable extends JTable{
 		
 		}
 	
-	public void notifyAnnotationUpdated(Annotation annotation) {
+	public void notifyAnnotationUpdated(SampleVariantAnnotation annotation) {
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
 		CommonTableModel model = (CommonTableModel)getModel();

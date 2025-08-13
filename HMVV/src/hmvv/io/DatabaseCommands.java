@@ -123,7 +123,7 @@ public class DatabaseCommands {
 		return DatabaseCommands_Mutations.getCosmicIDInfo(cosmicID);
 	}
 	
-	public static ArrayList<repeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{
+	public static ArrayList<RepeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{
 		return DatabaseCommands_Mutations.getrepeatMutations(mutation);
 	}
 
@@ -190,9 +190,21 @@ public class DatabaseCommands {
 	public static ArrayList<GeneAnnotation> getGeneAnnotationHistory(String gene, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 		return DatabaseCommands_Annotations.getGeneAnnotationHistory(gene,mutation_type);
 	}
+
+	public static ArrayList<SampleVariantAnnotation> getSampleVariantAnnotationHistory(MutationCommon mutation) throws Exception{
+		return DatabaseCommands_Annotations.getSampleVariantAnnotationHistory(mutation);
+	}
 	
 	public static String getVariantAnnotationDraft(Coordinate coordinate, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 		return DatabaseCommands_Annotations.getVariantAnnotationDraft(coordinate,mutation_type);
+	}
+
+	public static String getVariantAnnotationPubmedID(Coordinate coordinate) throws Exception{
+		return DatabaseCommands_Annotations.getVariantAnnotationPubmedID(coordinate);
+	}
+
+	public static void addSampleVariantAnnotation(SampleVariantAnnotation sampleVariantAnnotation) throws Exception{
+		DatabaseCommands_Annotations.addSampleVariantAnnotation(sampleVariantAnnotation);
 	}
 	
 	public static void addGeneAnnotationCuration(GeneAnnotation geneAnnotation, Configurations.MUTATION_TYPE mutation_type) throws Exception{
@@ -206,7 +218,7 @@ public class DatabaseCommands {
 	public static void addVariantAnnotationDraft(Coordinate coordinate, String draft, Configurations.MUTATION_TYPE mutation_type) throws Exception{
 		DatabaseCommands_Annotations.addVariantAnnotationDraft(coordinate, draft, mutation_type);
 	}
-	
+
 	/* ************************************************************************
 	 * Monitor Pipelines Queries
 	 *************************************************************************/

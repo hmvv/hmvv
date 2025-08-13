@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public abstract class MutationCommon {
 
+    private Integer sampleVariantID;
+
     //common
     private boolean reported;
     private ArrayList<MutationCommon> otherMutations;
@@ -45,7 +47,8 @@ public abstract class MutationCommon {
     private String clinicalsignificance;
     private String clinicalconsequence;
     private String clinicalorigin;
-    
+
+    private SampleVariantAnnotation sampleVariantAnnotation;
 
     public String getClinvarID() {
         return clinvarID;
@@ -110,6 +113,10 @@ public abstract class MutationCommon {
 
     public void addOtherMutation(MutationCommon otherMutation) {
     	this.otherMutations.add(otherMutation);
+    }
+
+    public ArrayList<MutationCommon> getOtherMutations() {
+    	return this.otherMutations;
     }
     
     public String getOtherMutationsString() {
@@ -294,6 +301,14 @@ public abstract class MutationCommon {
     public void setAssay(Assay assay) {
         this.assay = assay;
     }
+    
+    public Integer getSampleVariantID() {
+        return sampleVariantID;
+    }
+
+    public void setSampleVariantID(Integer sampleVariantID) {
+        this.sampleVariantID = sampleVariantID;
+    }
 
     public Integer getSampleID() {
         return sampleID;
@@ -325,6 +340,14 @@ public abstract class MutationCommon {
     		return m.getCoordinate().equals(getCoordinate());
     	}
     	return false;
+    }
+
+    public void setMutationAnnotation(SampleVariantAnnotation sampleVariantAnnotation){
+        this.sampleVariantAnnotation = sampleVariantAnnotation;
+    }
+
+    public SampleVariantAnnotation getMutationAnnotation(){
+        return sampleVariantAnnotation;
     }
 
     public abstract Configurations.MUTATION_TYPE getMutationType(); 

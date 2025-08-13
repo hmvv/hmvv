@@ -193,7 +193,7 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(MutationSomatic mutation) -> mutation.getClinicalsignificance());
 	
-	public static final MutationTableModelColumn clinicalConsequence = new MutationTableModelColumn("",//TODO Find this
+	public static final MutationTableModelColumn clinicalConsequence = new MutationTableModelColumn("",
 			"clinvar-Consequence",
 			String.class,
 			(MutationSomatic mutation) -> mutation.getClinicalconsequence());
@@ -204,12 +204,12 @@ public class MutationTableModelColumn extends HMVVTableModelColumn{
 			(MutationSomatic mutation) -> mutation.getClinicalorigin());
 	
 	// g1000
-	public static final MutationTableModelColumn altCountColumn = new MutationTableModelColumn("",//TODO Find this
+	public static final MutationTableModelColumn altCountColumn = new MutationTableModelColumn("",
 			"g1000-AltCount",
 			Integer.class,
 			(MutationSomatic mutation) -> mutation.getAltCount());
 	
-	public static final MutationTableModelColumn totalCountColumn = new MutationTableModelColumn("",//TODO Find this
+	public static final MutationTableModelColumn totalCountColumn = new MutationTableModelColumn("",
 			"g1000-TotalCount",
 			Integer.class,
 			(MutationSomatic mutation) -> mutation.getTotalCount());

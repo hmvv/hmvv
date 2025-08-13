@@ -4,10 +4,9 @@ package hmvv.gui.mutationlist;
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
 import hmvv.gui.sampleList.ReportFrame;
-import hmvv.gui.sampleList.ReportFrameText;
 import hmvv.io.AsynchronousMutationDataIO;
 import hmvv.io.DatabaseCommands;
-import hmvv.io.MutationReportGenerator;
+import hmvv.main.Configurations.REPORT_TYPE;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.MutationGermline;
 import hmvv.model.Sample;
@@ -130,24 +129,22 @@ public class MutationListGermlineMenuBar extends JMenuBar {
 
 	private void showShortReportFrame() {
 		try {
-			String report = MutationReportGenerator.generateShortReport(mutationList);
-			showReportFrameText("Short Variant Report", report);
+			showReportFrameText(REPORT_TYPE.SHORT);
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e);
 		}
 	}
 
-		private void showLongReportFrame() {
+	private void showLongReportFrame() {
 		try {
-			String report = MutationReportGenerator.generateLongReport(mutationList);
-			showReportFrameText("Long Variant Report", report);
+			showReportFrameText(REPORT_TYPE.LONG);
 		} catch (Exception e) {
 			HMVVDefectReportFrame.showHMVVDefectReportFrame(mutationListPanel, e);
 		}
 	}
-
-	private void showReportFrameText(String title, String report) {
-		ReportFrame reportPanel = new ReportFrameText(mutationListPanel, title, report);
+	
+	private void showReportFrameText(REPORT_TYPE report_type) throws Exception{
+		ReportFrame reportPanel = new ReportFrame(mutationListPanel, report_type, sample, mutationList);
 		reportPanel.setVisible(true);
 	}
 

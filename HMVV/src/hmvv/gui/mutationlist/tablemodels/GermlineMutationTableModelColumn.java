@@ -191,7 +191,7 @@ public class GermlineMutationTableModelColumn extends HMVVTableModelColumn{
 			String.class,
 			(MutationGermline mutation) -> mutation.getClinicalsignificance());
 
-	public static final GermlineMutationTableModelColumn clinicalConsequence = new GermlineMutationTableModelColumn("",//TODO Find this
+	public static final GermlineMutationTableModelColumn clinicalConsequence = new GermlineMutationTableModelColumn("",
 			"consequence",
 			String.class,
 			(MutationGermline mutation) -> mutation.getClinicalconsequence());

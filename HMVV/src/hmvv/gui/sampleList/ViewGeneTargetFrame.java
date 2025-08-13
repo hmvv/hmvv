@@ -71,7 +71,7 @@ public class ViewGeneTargetFrame extends JDialog {
         table.setRowSorter(sorter);
 
         ArrayList<RowSorter.SortKey> sortKeys = new ArrayList<>();
-        sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
+        sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
         sorter.setSortKeys(sortKeys);
         sorter.sort();
 

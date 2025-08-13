@@ -98,8 +98,8 @@ public class MutationListFilters {
 		addFilter(new VariantCallerFilter(variantCallerTextField));
 	}
 
-	public void addMaxGnomadFrequencyFilter(JTextField maxPopulationFrequencyGnomadTextField) {
-		addFilter(new MaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField));
+	public void addMaxGnomadFrequencyFilter(JTextField maxPopulationFrequencyGnomadTextField, double defaultGnomadFrequencyValue) {
+		addFilter(new MaxGnomadFrequencyFilter(maxPopulationFrequencyGnomadTextField, defaultGnomadFrequencyValue));
 	}
 
 	public void addMinReadDepthFilter(JTextField minReadDepthTextField, int defaultReadDepthFilter) {
@@ -290,7 +290,7 @@ class MaxG1000FrequencyFilter implements Filter{
 
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
 
-		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		double maxPopulationFrequency = GUICommonTools.parseDoubleFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
 		if(current_mutation.getAltGlobalFreq() != null){
 			double populationFrequency = ((MutationSomatic)mutation).getAltGlobalFreq();
 			if(maxPopulationFrequency < populationFrequency){
@@ -354,9 +354,11 @@ class addSearchVariantFilter implements Filter{
 class MaxGnomadFrequencyFilter implements Filter{
 
 	private JTextField maxGAFTextField;
+	private double defaultGnomadFrequencyValue;
 	
-	public MaxGnomadFrequencyFilter(JTextField maxGAFTextField) {
+	public MaxGnomadFrequencyFilter(JTextField maxGAFTextField, double defaultGnomadFrequencyValue) {
 		this.maxGAFTextField = maxGAFTextField;
+		this.defaultGnomadFrequencyValue = defaultGnomadFrequencyValue;
 	}
 	
 	@Override
@@ -364,7 +366,7 @@ class MaxGnomadFrequencyFilter implements Filter{
 
 		MutationSomatic current_mutation = (MutationSomatic)mutation;
 
-		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		double maxPopulationFrequency = GUICommonTools.parseDoubleFromTextField(maxGAFTextField, defaultGnomadFrequencyValue);
 		if(current_mutation.getGnomad_allfreq() != null){
 			double populationFrequency = current_mutation.getGnomad_allfreq();
 			if(maxPopulationFrequency < populationFrequency){
@@ -440,7 +442,7 @@ class MaxGnomadFrequencyGermlineFilter implements Filter{
 
 		MutationGermline current_mutation = (MutationGermline)mutation;
 
-		int maxPopulationFrequency = GUICommonTools.parseIntegerFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
+		double maxPopulationFrequency = GUICommonTools.parseDoubleFromTextField(maxGAFTextField, Configurations.MAX_GLOBAL_ALLELE_FREQ_FILTER);
 		if(current_mutation.getGnomad_allfreq() != null){
 			double populationFrequency = current_mutation.getGnomad_allfreq();
 			if(maxPopulationFrequency < populationFrequency){

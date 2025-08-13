@@ -43,7 +43,7 @@ public class DatabaseCommands_Mutations {
 				+ " FROM " + Configurations.SOMATIC_VARIANT_ANNOTATION_TABLE + " )"
 		
 		
-				+ " select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
+				+ " select t2.sampleVariantID, t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, t2.occurrenceCount, t2.VarScanVAF, t2.Mutect2VAF, t2.freebayesVAF, "
 				+ " t2.consequence, t2.Sift, t2.PolyPhen,t2.HGVSc, t2.HGVSp, t2.dbSNPID, t2.COSMIC_pipeline, t2.COSMIC_VEP, t2.OncoKB, t2.pubmed,"
 				+ " t1.lastName, t1.firstName, t1.orderNumber, t1.assay, t1.tumorSource, t1.tumorPercent,"
@@ -61,7 +61,7 @@ public class DatabaseCommands_Mutations {
 				+ " LEFT JOIN (SELECT * FROM all_annotations WHERE rownum = 1) AS t9 ON t9.chr = t2.chr and t9.pos = t2.pos AND t9.ref = t2.ref AND t9.alt = t2.alt"
 				+ " where t2.sampleID = ? ";
 		//				+ " and t2.exon != '' ";//Filter the introns
-		String where = "( t2.alt LIKE '%TANDEM%' OR ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getDefaultAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.getDefaultReadDepthFilter(sample) + ")  )";
+		String where = "( t2.alt LIKE '%TANDEM%' OR ( (t2.impact = 'HIGH' or t2.impact = 'MODERATE') and t2.altFreq >= " + Configurations.getDefaultAlleleFrequencyFilter(sample) + " and t2.readDepth >= " + Configurations.getDefaultReadDepthFilter(sample) + ") and (t8.AF IS NULL OR t8.AF <= " + Configurations.getDefaultGNOMADFrequencyFilter(sample) + ")  )";
 		if(getFilteredData) {
 			where = " !" + where;
 		}
@@ -79,7 +79,7 @@ public class DatabaseCommands_Mutations {
 
 
 	public static ArrayList<MutationGermline> getGermlineMutationDataByID(Sample sample, boolean getFilteredData) throws Exception{
-		String query = "select t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
+		String query = "select t2.sampleVariantID, t2.sampleID, t2.reported, t2.gene, t2.exon, t2.chr, t2.pos, t2.ref, t2.alt,"
 				+ " t2.impact,t2.type, t2.altFreq, t2.readDepth, t2.altReadDepth, t2.occurrenceCount, "
 				+ " t2.consequence,t2.HGVSc, t2.HGVSp, t2.STRAND, t2.ALT_TRANSCRIPT_START, t2.ALT_TRANSCRIPT_END,t2.ALT_VARIANT_POSITION,"
 				+ " t2.protein_id, t2.protein_type, t2.protein_feature, t2.protein_note, t2.protein_start, t2.protein_end ,"
@@ -307,6 +307,7 @@ public class DatabaseCommands_Mutations {
 			MutationSomatic mutation = new MutationSomatic();
 
 			//common
+			mutation.setSampleVariantID(getIntegerOrNull(rs, "sampleVariantID"));
 			boolean reported = Integer.parseInt(rs.getString("reported")) != 0;
 			mutation.setReported(reported);
 			mutation.setGene(getStringOrBlank(rs, "gene"));
@@ -444,7 +445,7 @@ public class DatabaseCommands_Mutations {
 		return cosmicIDs;
 	}
 
-	static ArrayList<repeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{
+	static ArrayList<RepeatMutations> getrepeatMutations(MutationSomatic mutation) throws Exception{
 		String queryRunforlderName = "SELECT runFolderName FROM samples WHERE sampleID = ?";
 		PreparedStatement preparedStatementRunfolderName = databaseConnection.prepareStatement(queryRunforlderName);
 		preparedStatementRunfolderName.setString(1, mutation.getSampleID().toString());
@@ -475,10 +476,10 @@ public class DatabaseCommands_Mutations {
 		ResultSet rsRepeatMutations = preparedStatementRepeatMutations.executeQuery();
 		
 
-		ArrayList<repeatMutations> repeatMutations = new ArrayList<repeatMutations>();
+		ArrayList<RepeatMutations> repeatMutations = new ArrayList<RepeatMutations>();
 
 		while(rsRepeatMutations.next()){
-			repeatMutations repeatMutationsObj = new repeatMutations(
+			RepeatMutations repeatMutationsObj = new RepeatMutations(
 				rsRepeatMutations.getString("sampleID"),
 				getStringOrBlank(rsRepeatMutations, "sampleName"),
 				getStringOrBlank(rsRepeatMutations, "lastName"),
@@ -502,6 +503,7 @@ public class DatabaseCommands_Mutations {
 			MutationGermline mutation = new MutationGermline();
 
 			//common
+			mutation.setSampleVariantID(getIntegerOrNull(rs, "sampleVariantID"));
 			boolean reported = Integer.parseInt(rs.getString("reported")) != 0;
 			mutation.setReported(reported);
 			mutation.setGene(getStringOrBlank(rs, "gene"));

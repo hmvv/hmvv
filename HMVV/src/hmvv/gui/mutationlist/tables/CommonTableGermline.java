@@ -231,7 +231,7 @@ public abstract class CommonTableGermline extends JTable{
 		this.setCursor(Cursor.getDefaultCursor());
 	}
 
-	public void notifyAnnotationUpdated(Annotation annotation) {
+	public void notifyAnnotationUpdated(SampleVariantAnnotation annotation) {
 		int viewRow = getSelectedRow();
 		int modelRow = convertRowIndexToModel(viewRow);
 		GermlineCommonTableModel model = (GermlineCommonTableModel) getModel();
