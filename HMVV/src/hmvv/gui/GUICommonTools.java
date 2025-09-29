@@ -11,7 +11,6 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.text.SimpleDateFormat;
-
 import javax.swing.JTextField;
 
 public class GUICommonTools {

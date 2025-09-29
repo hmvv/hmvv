@@ -1,27 +1,11 @@
 package hmvv.main;
 
-import java.awt.Cursor;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.TreeMap;
-
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
-
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.adminFrames.DatabaseInformation;
 import hmvv.gui.adminFrames.EnterArcherSample;
 import hmvv.gui.adminFrames.EnterArcherTumorSample;
-import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.EnterHEMESample;
+import hmvv.gui.adminFrames.EnterSample;
 import hmvv.gui.adminFrames.MonitorPipelines;
 import hmvv.gui.adminFrames.QualityControlFrame;
 import hmvv.gui.adminFrames.QualityControlTumorMutationBurden;
@@ -33,6 +17,21 @@ import hmvv.model.Assay;
 import hmvv.model.GeneQCDataElementTrend;
 import hmvv.model.Sample;
 import hmvv.model.TMBSample;
+import java.awt.Cursor;
+import java.awt.Rectangle;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.TreeMap;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 
 public class HMVVFrame extends JFrame{
 	private static final long serialVersionUID = 1L;
@@ -107,11 +106,13 @@ public class HMVVFrame extends JFrame{
 
 		enterHEMESampleMenuItem = new JMenuItem("Enter HEME Samples");
 		enterHEMESampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
+		enterHEMESampleMenuItem.setForeground(Color.GRAY);//Greyed out the button.
 		enterSampleMenuItem = new JMenuItem("Enter Sample");
 		enterSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
-		enterArcherTumorSampleMenuItem = new JMenuItem("Enter Archer Tumor Sample");
+		enterSampleMenuItem.setForeground(Color.GRAY);
+		enterArcherTumorSampleMenuItem = new JMenuItem("Enter Archer Tumor Samples");
 		enterArcherTumorSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
-		enterArcherSampleMenuItem = new JMenuItem("Enter ARCHER Run");
+		enterArcherSampleMenuItem = new JMenuItem("Enter ARCHER CTL Run");
 		enterArcherSampleMenuItem.setEnabled(SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ENTER_SAMPLE));
 		monitorPipelinesItem = new JMenuItem("Monitor Pipelines");
 		databaseInformationMenuItem = new JMenuItem("Database Information");
@@ -120,9 +121,9 @@ public class HMVVFrame extends JFrame{
 		refreshLabel.setEnabled(false);
 
 		menuBar.add(adminMenu);
-		adminMenu.add(enterSampleMenuItem);
+		//adminMenu.add(enterSampleMenuItem);
 		adminMenu.add(enterArcherTumorSampleMenuItem);
-		adminMenu.add(enterHEMESampleMenuItem);
+		//adminMenu.add(enterHEMESampleMenuItem);
 		adminMenu.add(enterArcherSampleMenuItem);
 		adminMenu.add(monitorPipelinesItem);
 

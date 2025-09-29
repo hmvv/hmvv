@@ -419,7 +419,8 @@ public class DatabaseCommands_Mutations {
 			getStringOrBlank(rs, "chr"),
 			getStringOrBlank(rs, "pos"),
 			getStringOrBlank(rs, "ref"),
-			getStringOrBlank(rs, "alt")
+			getStringOrBlank(rs, "alt"),
+			getStringOrBlank(rs, "gene")
 			);
 
 

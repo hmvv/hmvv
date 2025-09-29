@@ -22,8 +22,8 @@ public class DatabaseCommands_QC {
 	
 	static ArrayList<Amplicon> getAmplicons(Sample sample) throws Exception{
 		ArrayList<Amplicon> amplicons = new ArrayList<Amplicon>();
-		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select gene,ampliconName,chr,chr_start,chr_end,length,total_reads,average_depth,cumulative_depth,cov20x,cov100x,cov250x,cov500x,cov100xPercent,cov250xPercent "+
-		" from sampleAmplicons where sampleID = ? ");
+		PreparedStatement preparedStatement = databaseConnection.prepareStatement("select gene,ampliconName,chr,chr_start,chr_end,length,total_reads,average_depth,cumulative_depth,cov20x,cov100x,cov200x,cov250x,cov500x,cov100xPercent,cov200xPercent,cov250xPercent "+
+		" from sampleAmplicons where sampleID = ? order by ampliconName asc");
 		preparedStatement.setInt(1, sample.sampleID);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		while(resultSet.next()){
@@ -41,9 +41,11 @@ public class DatabaseCommands_QC {
 				resultSet.getInt("cumulative_depth"),
 				resultSet.getInt("cov20x"),
 				resultSet.getInt("cov100x"),
+				resultSet.getInt("cov200x"),
 				resultSet.getInt("cov250x"),
 				resultSet.getInt("cov500x"),
 				resultSet.getInt("cov100xPercent"),
+				resultSet.getInt("cov200xPercent"),
 				resultSet.getInt("cov250xPercent")
 			);
 			amplicons.add(amplicon);
@@ -69,6 +71,8 @@ public class DatabaseCommands_QC {
 		String geneFilter;
 		if(assay.assayName.equals("heme")) {
 			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS') and assay = 'heme'";
+		}else if(assay.assayName.equals("archerTumor")) {
+			geneFilter = " and (sampleAmplicons.gene = 'BRAF' or sampleAmplicons.gene = 'KIT' or sampleAmplicons.gene = 'KRAS') and assay = 'archerTumor'";
 		}else if(assay.assayName.equals("gene50")) {
 			geneFilter = " and (sampleAmplicons.gene like '%EGFR%' or sampleAmplicons.gene like '%KRAS%' or sampleAmplicons.gene like '%NRAS%') and assay = 'gene50'";
 		}else if(assay.assayName.equals("neuro")) {
@@ -145,13 +149,13 @@ public class DatabaseCommands_QC {
 				+ " and sampleVariants.HGVSp IS NOT NULL";//have to do this because old data has null values
 
 		String geneFilter;
-		if(assay.assayName.equals("heme")) {
+		if ((assay.assayName.equals("heme")) || (assay.assayName.equals("archerTumor"))) {
 			geneFilter =
 					//COSM1140132 and COSM532 have the same coordinates and track together
 					//COSM1135366 and COSM521 have the same coordinates and track together
 					"   and ( cosmicID = 'COSM476' or cosmicID = 'COSM1314' or cosmicID = 'COSM521' or cosmicID = 'COSM532' "
 					+ "or  cosmicID = 'COSV56056643' or cosmicID = 'COSV55386424' or cosmicID = 'COSV55497369' or cosmicID = 'COSV55497388')"
-					+ " and samples.assay = 'heme' "
+					+ " and samples.assay = '"+ assay.assayName +"' "
 					+ "GROUP BY sampleVariants.sampleID,cosmicID";
 		}else if(assay.assayName.equals("gene50")) {
 			geneFilter =

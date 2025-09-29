@@ -390,7 +390,7 @@ public class EnterSample extends JDialog {
         Instrument instrument = (Instrument) comboBoxInstrument.getSelectedItem();
         comboBoxAssay.removeAllItems();
         for(Assay assay : DatabaseCommands.getAssaysForInstrument(instrument)){
-            if(assay.assayName.equals("heme") || assay.assayName.equals("archer")){
+            if(assay.assayName.equals("heme") || assay.assayName.equals("archer") || assay.assayName.equals("archerTumor")){
                 continue;
             }
             comboBoxAssay.addItem(assay);

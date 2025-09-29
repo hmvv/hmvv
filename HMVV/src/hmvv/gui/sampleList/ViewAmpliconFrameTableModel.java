@@ -33,7 +33,7 @@ public class ViewAmpliconFrameTableModel extends AbstractTableModel{
         columns.add(new ViewAmpliconFrameTableModelColumn("The amplicon Name",
                 "ampliconName",
                 String.class,
-                (Amplicon amplicon) -> amplicon.getAmpliconName()));
+                (Amplicon amplicon) -> amplicon.ampliconName));
 
         columns.add(new ViewAmpliconFrameTableModelColumn("The amplicon QC measure",
                 qcColumnHeader,

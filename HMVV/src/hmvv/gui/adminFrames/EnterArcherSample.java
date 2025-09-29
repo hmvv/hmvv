@@ -36,7 +36,7 @@ public class EnterArcherSample extends JDialog {
     private RunFolder runFolder = null;
 
     public EnterArcherSample(HMVVFrame parent) {
-        super(parent, "Enter ARCHER Run", ModalityType.APPLICATION_MODAL);
+        super(parent, "Enter ARCHER CTL Run", ModalityType.APPLICATION_MODAL);
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -70,7 +70,7 @@ public class EnterArcherSample extends JDialog {
         runFolderTextField = new JTextField();
         runFolderTextField.setEditable(false);
 
-        enterSampleButton = new JButton("Enter Archer Run");
+        enterSampleButton = new JButton("Enter Archer CTL Run");
         enterSampleButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
         btnClear = new JButton("Clear");
         btnClear.setFont(GUICommonTools.TAHOMA_BOLD_13);

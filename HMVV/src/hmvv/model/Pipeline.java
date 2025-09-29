@@ -1,10 +1,10 @@
 package hmvv.model;
 
+import hmvv.io.DatabaseCommands;
+import hmvv.main.Configurations;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import hmvv.io.DatabaseCommands;
-import hmvv.main.Configurations;
 
 public class Pipeline {
 	
@@ -102,13 +102,13 @@ public class Pipeline {
 			ArrayList<PipelineStatus> rows = new ArrayList<PipelineStatus>();
 			rows = DatabaseCommands.getPipelineDetail(this);
 			for (PipelineStatus ps : rows) {
-				if (ps.pipelineStatus.equals(Configurations.getPipelineFirstStep(ps.instrument))){
+				if (ps.pipelineStatus.equals(Configurations.getPipelineFirstStep(ps.instrument, this.assay.assayName))){
 					pipelineStartTime = ps.dateUpdated;
 				}
 			}
 
 			float timeElapsed = (float)((Math.abs(currentTime.getTime() - pipelineStartTime.getTime())) / (1000.0f));
-
+			
 			progress = ((timeElapsed * 100.0f) / (pipelineTotalTime * 60.0f));
 
 			if (syncWithProgram() == 0) {

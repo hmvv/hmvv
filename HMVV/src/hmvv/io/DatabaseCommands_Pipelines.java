@@ -1,17 +1,16 @@
 package hmvv.io;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-
+import hmvv.main.Configurations;
 import hmvv.model.Assay;
 import hmvv.model.Instrument;
 import hmvv.model.Pipeline;
 import hmvv.model.PipelineStatus;
 import hmvv.model.RunFolder;
-import hmvv.main.Configurations;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.ArrayList;
 
 public class DatabaseCommands_Pipelines {
 	
@@ -131,11 +130,12 @@ public class DatabaseCommands_Pipelines {
 				"  and samples.instrument = ? and samples.assay = ?) temp "
 		);
 		
-		String pipeline_instriment = pipeline.getInstrument().instrumentName;
-		String estimationStep = Configurations.getPipelineFirstStep(pipeline_instriment);
+		String pipeline_instrument = pipeline.getInstrument().instrumentName;
+		String pipeline_assay = pipeline.assay.assayName;
+		String estimationStep = Configurations.getPipelineFirstStep(pipeline_instrument, pipeline_assay);
 
 		preparedStatement.setString(1, estimationStep);
-		preparedStatement.setString(2, pipeline_instriment);
+		preparedStatement.setString(2, pipeline_instrument);
 		preparedStatement.setString(3, pipeline.getAssay().assayName);
 
 		ResultSet rs = preparedStatement.executeQuery();

@@ -142,7 +142,7 @@ public class DatabaseCommands_Samples {
 		if(sample instanceof TMBSample) {//not ideal to condition using instanceof
 			insertTumorNormalPair((TMBSample)sample);
 		}
-
+        
 		queueSampleForRunningPipeline(sample);
 	}
 
@@ -150,17 +150,18 @@ public class DatabaseCommands_Samples {
 	private static void queueSampleForRunningPipeline(Sample sample) throws Exception{
 		String queueSample = 
 				"INSERT INTO pipelineQueue "
-				+ "( instrument, runFolderName, sampleName, assay) VALUES (?, ?, ?, ? )";
+				+ "( instrument, runFolderName, sampleName, assay, status) VALUES (?, ?, ?, ? )";
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.setString(1, sample.instrument.instrumentName);
 		pstQueueSample.setString(2, sample.runFolder.runFolderName);
 		pstQueueSample.setString(3, sample.sampleName);
 		pstQueueSample.setString(4, sample.assay.assayName);
+		pstQueueSample.setNull(5, java.sql.Types.INTEGER);
 		
 		pstQueueSample.executeUpdate();
 		pstQueueSample.close();
 	}
-
+	
 	private static void insertTumorNormalPair(TMBSample sampleTMB)throws Exception{
 		String enterSampleNormalPair = " insert into sampleNormalPair "
 		        + " (sampleID, normalPairInstrument, normalPairRunfolder, normalSampleName, enterDate)  "

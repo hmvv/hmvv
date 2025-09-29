@@ -319,7 +319,7 @@ public class MutationGermlineFilterPanel extends JPanel {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		ServerWorker serverWorker = new ServerWorker(0);
 		loadIGVButtonTimerLabel(serverWorker);
-		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverWorker);
+		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverWorker, "No");
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
 		loadIGVButton.setText("Finding BAM File...");

@@ -1,16 +1,5 @@
 package hmvv.gui.sampleList;
 
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.awt.event.ActionEvent;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.table.*;
-
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.LoadFileButton;
 import hmvv.io.DatabaseCommands;
@@ -18,9 +7,14 @@ import hmvv.io.SSHConnection;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Amplicon;
 import hmvv.model.Sample;
-
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.table.*;
 
 public class ViewAmpliconFrame extends JDialog {
 
@@ -108,9 +102,13 @@ public class ViewAmpliconFrame extends JDialog {
 
         ampliconDepthButton = new LoadFileButton("Load Depth Figure");
         ampliconDepthButton.setFont(GUICommonTools.TAHOMA_BOLD_14);
+        if (sample.assay.assayName.equals("archerTumor")) {
+            ampliconDepthButton.setVisible(false);
+        }
         if(!sample.assay.assayName.equals("heme")){
             ampliconDepthButton.setEnabled(false);
         }
+
     }
 
     private void layoutComponents(){
@@ -119,6 +117,7 @@ public class ViewAmpliconFrame extends JDialog {
                         .addGroup(gl_contentPane.createParallelGroup(GroupLayout.Alignment.LEADING)
                             .addComponent(patientNameLabel, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
                             .addComponent(qcMeasureDescriptionLabel, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
+
                             .addComponent(ampliconDepthButton, GroupLayout.PREFERRED_SIZE, 396, GroupLayout.PREFERRED_SIZE)
 						    .addGroup(gl_contentPane.createSequentialGroup()
 							    .addComponent(failedAmpliconsLabel, GroupLayout.PREFERRED_SIZE, 170, GroupLayout.PREFERRED_SIZE)
@@ -216,13 +215,18 @@ public class ViewAmpliconFrame extends JDialog {
 
         
         //Assign QC Measure Description Label
-        String qcMeasureDescription = "";
-        if(amplicons.size() > 0){
-            qcMeasureDescription = amplicons.get(0).getQCMeasureDescription();
+
+        if (sample.assay.isArcherTumorAssay()) {
+            qcMeasureDescriptionLabel.setText("QC Measure: 200x Coverage < 90% of positions");
+        } else {
+            String qcMeasureDescription = "";
+            if(amplicons.size() > 0){
+                qcMeasureDescription = amplicons.get(0).getQCMeasureDescription();
+            }
+            qcMeasureDescriptionLabel.setText(" QC Measure: " + qcMeasureDescription);
         }
-        qcMeasureDescriptionLabel.setText(" QC Measure: " + qcMeasureDescription);
 
-
+    
 		patientNameLabel.setText(String.format(" %s,%s: %s", sample.getLastName(), sample.getFirstName(), sample.getOrderNumber()));
         if(amplicons.size() == 0){
             ampliconsReportLabel.setText("No amplicon data found.");
@@ -238,5 +242,5 @@ public class ViewAmpliconFrame extends JDialog {
         }
         totalAmpliconsCountLabel.setText(""+amplicons.size() );
         tableModel.setAmplicons(failedAmplicons);
-	}
-}
+        	}
+        }

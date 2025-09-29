@@ -1,5 +1,7 @@
 package hmvv.main;
 
+import hmvv.io.SSHConnection;
+import hmvv.model.Sample;
 import java.awt.Color;
 import java.awt.Component;
 import java.io.BufferedReader;
@@ -7,12 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-
-
 import javax.swing.JOptionPane;
-
-import hmvv.io.SSHConnection;
-import hmvv.model.Sample;
 
 public class Configurations {
 
@@ -332,7 +329,7 @@ public class Configurations {
 			return HEME_ALLELE_FREQ_FILTER;
 
 		}else if (sample.assay.assayName.equals("archerTumor")){
-			double ARCHER_TUMOR_ALLELE_FREQ_FILTER = 5;
+			double ARCHER_TUMOR_ALLELE_FREQ_FILTER = 3;
 			return ARCHER_TUMOR_ALLELE_FREQ_FILTER;
 
 		}else if (sample.instrument.instrumentName.equals("proton")){
@@ -385,11 +382,12 @@ public class Configurations {
 	}
 	
 
-	public static String getPipelineFirstStep(String pipeline_instrument){
+	public static String getPipelineFirstStep(String pipeline_instrument, String pipeline_assay){
 		if(pipeline_instrument.equals("proton")){
 			return "queue";
-		}
-		else{
+		}else if (pipeline_assay.equals("archerTumor")){
+			return "Archer Pipeline started";
+		}else{
 			return "trimming started";
 		}
 	}

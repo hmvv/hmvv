@@ -100,7 +100,7 @@ public abstract class MutationCommon {
      * @return
      */
     public Coordinate getCoordinate() {
-        return new Coordinate(chr, pos, ref, alt);
+        return new Coordinate(chr, pos, ref, alt, gene);
     }
 
     public boolean isReported() {

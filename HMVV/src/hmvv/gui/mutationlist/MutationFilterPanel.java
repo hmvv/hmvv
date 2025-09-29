@@ -1,16 +1,5 @@
 package hmvv.gui.mutationlist;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.text.SimpleDateFormat;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
 import hmvv.gui.GUICommonTools;
 import hmvv.gui.LoadFileButton;
 import hmvv.gui.mutationlist.tablemodels.MutationList;
@@ -21,6 +10,15 @@ import hmvv.main.Configurations;
 import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class MutationFilterPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -52,6 +50,9 @@ public class MutationFilterPanel extends JPanel {
     private LoadFileButton loadIGVButton;
 	private JButton editSampleButton;
 	private JButton assayQCButton;
+
+	private LoadFileButton loadSVIGVButton;
+
 
 	MutationFilterPanel(MutationListFrame parent,Sample sample, MutationList mutationList, MutationListFilters mutationListFilters){
 		this.parent = parent;
@@ -138,7 +139,7 @@ public class MutationFilterPanel extends JPanel {
 					public void run() {
 						try {
 							loadIGVButton.setEnabled(false);
-							handleIGVButtonClickAsynchronous();
+							handleIGVButtonClickAsynchronous("No");
 						} catch (Exception ex) {
 							JOptionPane.showMessageDialog(parent, ex.getMessage());
 						}
@@ -148,6 +149,32 @@ public class MutationFilterPanel extends JPanel {
 				}).start();
             }
         });
+
+
+		// NEW: Load SV IGV button 
+        loadSVIGVButton = new LoadFileButton("Load SV IGV");
+        loadSVIGVButton.setToolTipText("Load the Structural Variant BAM into IGV. IGV should be already opened");
+		loadSVIGVButton.setFont(GUICommonTools.TAHOMA_BOLD_13);
+        loadSVIGVButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	new Thread(new Runnable() {
+					public void run() {
+						try {
+							loadSVIGVButton.setEnabled(false);
+							handleIGVButtonClickAsynchronous("Yes");
+						} catch (Exception ex) {
+							JOptionPane.showMessageDialog(parent, ex.getMessage());
+						}
+						loadSVIGVButton.setEnabled(true);
+						loadSVIGVButton.resetText();
+					}
+				}).start();
+            }
+        });
+
+     
+		
+
 		
 		resetButton = new JButton("Reset all Filters");
         resetButton.setToolTipText("Reset filters to defaults");
@@ -276,6 +303,7 @@ public class MutationFilterPanel extends JPanel {
 		
 		JPanel igvButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		igvButtonPanel.add(loadIGVButton);
+		igvButtonPanel.add(loadSVIGVButton);
 		igvButtonPanel.add(editSampleButton);
 		igvButtonPanel.add(assayQCButton);
 		checkboxPanel.add(igvButtonPanel);
@@ -487,7 +515,7 @@ public class MutationFilterPanel extends JPanel {
 		}
 	}
 
-    private void handleIGVButtonClickAsynchronous() throws Exception {
+    private void handleIGVButtonClickAsynchronous(String svFlag) throws Exception {
 		if (mutationList.getSelectedMutationCount() == 0 ){
 			String msg = "You have not selected any mutations. Would you like to load the entire BAM file?";
 			int request = JOptionPane.showConfirmDialog(parent, msg, "Load the entire BAM file Confirmation", JOptionPane.YES_NO_OPTION);
@@ -501,31 +529,45 @@ public class MutationFilterPanel extends JPanel {
 		int request = JOptionPane.showConfirmDialog(parent, msg, "Load IGV Confirmation", JOptionPane.YES_NO_OPTION);
 		
 		if (request == JOptionPane.YES_OPTION) {
-			loadIGVAsynchronous_Filtered();
+			loadIGVAsynchronous_Filtered(svFlag);
 		}
 	}
     
-    private void loadIGVAsynchronous_Filtered() throws Exception {
+    private void loadIGVAsynchronous_Filtered(String svFlag) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		ServerWorker serverWorker = new ServerWorker(0);
-		loadIGVButtonTimerLabel(serverWorker);
-		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverWorker);
+		loadIGVButtonTimerLabel(serverWorker, svFlag);
+		String bamServerFileName = SSHConnection.createTempParametersFile(sample, mutationList, loadIGVButton, serverWorker, svFlag);
 		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
-		loadIGVButton.setText("Finding BAM File...");
-		File bamLocalFile = SSHConnection.copyTempBamFileONLocal(sample, loadIGVButton, bamServerFileName);
-
-		loadIGVButton.setText("Loading File Into IGV...");
-		String response = IGVConnection.loadFileIntoIGV(this, bamLocalFile);
-
-		if (response.equals("OK")) {
-			JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
-		} else if (!response.equals("")) {
-			JOptionPane.showMessageDialog(this, response);
+        
+		if (svFlag.equals("Yes")) {
+			loadSVIGVButton.setText("Finding BAM File...");
+		} else {
+			loadIGVButton.setText("Finding BAM File...");
+		}
+		
+        if (svFlag.equals("Yes")){
+			File bamLocalFile = SSHConnection.copyTempBamFileONLocal(sample, loadSVIGVButton, bamServerFileName);
+			loadSVIGVButton.setText("Loading File Into IGV...");
+			String response = IGVConnection.loadFileIntoIGV(this, bamLocalFile);
+			if (response.equals("OK")) {
+				JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
+			} else if (!response.equals("")) {
+				JOptionPane.showMessageDialog(this, response);
+			}
+		} else {
+			File bamLocalFile = SSHConnection.copyTempBamFileONLocal(sample, loadIGVButton, bamServerFileName);
+			loadIGVButton.setText("Loading File Into IGV...");
+			String response = IGVConnection.loadFileIntoIGV(this, bamLocalFile);
+			if (response.equals("OK")) {
+				JOptionPane.showMessageDialog(this, "BAM file successfully loaded into IGV");
+			} else if (!response.equals("")) {
+				JOptionPane.showMessageDialog(this, response);
+			}
 		}
 	}
     
-    private void loadIGVButtonTimerLabel(ServerWorker task) {
+    private void loadIGVButtonTimerLabel(ServerWorker task, String svFlag) {
 		int seconds = 3 * mutationList.getSelectedMutationCount();
 		final long duration = seconds * 1000;   // calculate to milliseconds
 		final Timer timer = new Timer(1, new ActionListener() {
@@ -546,7 +588,12 @@ public class MutationFilterPanel extends JPanel {
 				if(interval < 0) {
 					interval = 1000;
 				}
-				loadIGVButton.setText(String.format("Processing...%s", minuteSecondDateFormat.format(interval)));
+
+				if (svFlag.equals("Yes")) {
+					loadSVIGVButton.setText(String.format("Processing...%s", minuteSecondDateFormat.format(interval)));
+				} else {
+					loadIGVButton.setText(String.format("Processing...%s", minuteSecondDateFormat.format(interval)));
+				}
 			}
 		});
 		timer.start();

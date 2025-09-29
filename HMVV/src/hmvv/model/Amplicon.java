@@ -18,6 +18,8 @@ public class Amplicon {
 	public final Integer cov100x;
 	public final Integer cov500x;
 	public final Integer cov100xPercent;
+	public final Integer cov200xPercent;
+	public final Integer cov250xPercent;
 
 	private boolean failed;
 	private Integer qcMeasure;
@@ -38,9 +40,11 @@ public class Amplicon {
 		Integer cumulative_depth,
 		Integer cov20x,
 		Integer cov100x,
+		Integer cov200x,
 		Integer cov250x, 
 		Integer cov500x,
 		Integer cov100xPercent,
+		Integer cov200xPercent,
 		Integer cov250xPercent
 	) {
 		this.sample = sample;
@@ -57,6 +61,8 @@ public class Amplicon {
 		this.cov100x = cov100x;
 		this.cov500x = cov500x;
 		this.cov100xPercent = cov100xPercent;
+		this.cov200xPercent = cov200xPercent;
+		this.cov250xPercent = cov250xPercent;
 		
 		String instrument = sample.instrument.instrumentName;
 		String assay = sample.assay.assayName;
@@ -104,15 +110,31 @@ public class Amplicon {
 					failed = true;
 					failed_amplicons = ampliconName;
 					qcMeasure = average_depth;
-				}
+				}				
+			
 				
 			}else{
-				new IllegalArgumentException("Unable to determine amplicon failure.");
+				throw new IllegalArgumentException("Unable to determine amplicon failure.");
 			}
+		}else if(assay.equals("archerTumor")){
+			if(cov200xPercent != null){
+				failed_check = cov200xPercent < 90;
+				qcMeasureDescription = "200x Coverage < 90% of positions";
+				if(failed_check){
+					failed = true;
+					failed_amplicons = ampliconName;
+					qcMeasure = cov200xPercent;
+				}
+			}else{
+				throw new IllegalArgumentException("Missing cov200xPercent for archerTumor assay.");
+			}
+		
 		}else{
-			new IllegalArgumentException("Unable to determine amplicon failure.");
+			throw new IllegalArgumentException("Unable to determine amplicon failure.");
 		}
 	}
+
+	
 
 	
 
@@ -129,6 +151,10 @@ public class Amplicon {
         else if ((sample.assay.assayName.equals("heme")) && (sample.instrument.instrumentName.equals("miseq"))){
             return "Cumulative Depth";
         }
+
+		else if (sample.assay.assayName.equals("archerTumor")) {
+			return "% Positions";
+		}		
 		
         else{
             return "QC Measure";

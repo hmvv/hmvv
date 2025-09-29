@@ -164,7 +164,7 @@ public class Sample {
 
 	public String getAssayQCLabel(){
 		if (assay.isArcherTumorAssay()){
-			return "Gene Targets";
+			return "Amplicons";
 		}else{
 			return "amplicon";
 		}

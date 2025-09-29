@@ -465,8 +465,8 @@ public class SampleListFrame extends JPanel {
                 tmbQC.setVisible(true);
 			}else {
 				if(currentSample.assay.isArcherTumorAssay()){
-					ViewGeneTargetFrame geneTargetQCFrame = new ViewGeneTargetFrame(parent, currentSample);
-					geneTargetQCFrame.setVisible(true);
+					ViewAmpliconFrame ampliconQCFrame = new ViewAmpliconFrame(parent, currentSample);
+					ampliconQCFrame.setVisible(true);
 				}else{
 					ViewAmpliconFrame amplicon = new ViewAmpliconFrame(parent, currentSample);
 					amplicon.setVisible(true);

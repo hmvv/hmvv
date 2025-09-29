@@ -110,8 +110,14 @@ public class AnnotationFrame extends JDialog {
 		pack();
 		setResizable(true);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
-		setSize((int)(bounds.width*.70), (int)(bounds.height*.70));
+		//setSize((int)(bounds.width*.70), (int)(bounds.height*.70));
+		int width = Math.max((int)(bounds.width * 0.70), 1000);
+		int height = Math.max((int)(bounds.height * 0.70), 700);
+		
+		setSize(width, height);
+		setMinimumSize(new Dimension(1000, 700));
 		setLocationRelativeTo(parent);
+		//setLocationRelativeTo(parent);
 	}
 
 	private void createComponents(){

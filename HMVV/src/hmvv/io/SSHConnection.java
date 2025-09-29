@@ -21,6 +21,7 @@ public class SSHConnection {
 	private static String temporaryHMVVDirectory = "temp_HMVV_files";
 	
 	
+	
 	private SSHConnection(){
 		//never constructed
 	}
@@ -334,7 +335,7 @@ public class SSHConnection {
 		}
 	}
 
-	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerWorker serverWorker) throws Exception {
+	public static String createTempParametersFile(Sample sample, MutationList mutationList, JButton loadIGVButton, ServerWorker serverWorker, String svFlag) throws Exception {
 	    //create a local temp file
 		int bamCoverage = 25;
         File tempFile = File.createTempFile(sample.sampleName+"_"+sample.runID+"_",".params");
@@ -350,20 +351,19 @@ public class SSHConnection {
         for (int index = 0; index < selectedMutations.size(); index++) {
 
             MutationCommon mutation = selectedMutations.get(index);
-
+			
             if (selectedCoordinates.isEmpty()){
-				selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
+				selectedCoordinates.add(mutation.getCoordinate());
 			} else {
             	int duplicate = 0;
-            	for (Coordinate coordinate:selectedCoordinates){
-
+            	for (Coordinate coordinate : selectedCoordinates){
             		if ( (coordinate.getChr().equals(mutation.getChr())) && (coordinate.getPos().equals(mutation.getPos()))) {
 						duplicate = 1;
 						break;
 					}
 				}
 				if (duplicate == 0){
-					selectedCoordinates.add(new Coordinate(mutation.getChr(),mutation.getPos(),mutation.getRef(),mutation.getAlt()));
+					selectedCoordinates.add(mutation.getCoordinate());
 				}
 			}
         }
@@ -372,13 +372,14 @@ public class SSHConnection {
 			Coordinate coordinate = selectedCoordinates.get(index);
 			Integer lower = Integer.parseInt(coordinate.getPos()) - bamCoverage;
 			Integer higher = Integer.parseInt(coordinate.getPos()) + bamCoverage;
-			String line = coordinate.getChr() + ':' + lower.toString() + '-' + higher.toString();
+			String selected_gene = coordinate.getGene();
+			String line = coordinate.getChr() + ':' + lower.toString() + '-' + higher.toString() + ';' + selected_gene + ';' + svFlag;
 			bw.write(line);
 			bw.newLine();
 		}
 		bw.close();
 
-		loadIGVButton.setText("Sending mutations to server.");
+		// loadIGVButton.setText("Sending mutations to server.");
 
         // load file to server
         Channel channel = null;
@@ -400,9 +401,9 @@ public class SSHConnection {
         
         //delete local temp file
         deleteFile(tempFile);
-		loadIGVButton.setText("Server started.");
+		//loadIGVButton.setText("Server started.");
         createTempBamFileONServer(tempFile.getName());
-		loadIGVButton.setText("Finished server work.");
+		//loadIGVButton.setText("Finished server work.");
 		serverWorker.setStatus(1);
         return tempFile.getName();
 	}
@@ -411,7 +412,10 @@ public class SSHConnection {
 	    String command = "bash /storage/apps/pipelines/"+Configurations.getEnvironment()+"/scripts/common/shell/createLocalBam.sh -f "+ fileName;
 		//System.out.printf(command);
         CommandResponse rs = executeCommandAndGetOutput(command);
-        if(rs.exitStatus != 0) {
+		if(rs.exitStatus == 2) {
+            throw new Exception("Missing Filtered BAM file for Structural Variants.");
+        }
+        else if(rs.exitStatus != 0) {
             throw new Exception("Error creating local BAM file on server.");
         }
     }
