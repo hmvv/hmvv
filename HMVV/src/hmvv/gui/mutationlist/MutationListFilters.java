@@ -1,11 +1,5 @@
 package hmvv.gui.mutationlist;
 
-import java.util.ArrayList;
-
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
-
 import hmvv.gui.GUICommonTools;
 import hmvv.main.Configurations;
 import hmvv.model.MutationCommon;
@@ -13,6 +7,10 @@ import hmvv.model.MutationGermline;
 import hmvv.model.MutationSomatic;
 import hmvv.model.Sample;
 import hmvv.model.VariantPredictionClass;
+import java.util.ArrayList;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
 
 
 public class MutationListFilters {
