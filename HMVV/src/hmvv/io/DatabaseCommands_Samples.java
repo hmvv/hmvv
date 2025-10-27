@@ -150,7 +150,7 @@ public class DatabaseCommands_Samples {
 	private static void queueSampleForRunningPipeline(Sample sample) throws Exception{
 		String queueSample = 
 				"INSERT INTO pipelineQueue "
-				+ "( instrument, runFolderName, sampleName, assay, status) VALUES (?, ?, ?, ? )";
+				+ "( instrument, runFolderName, sampleName, assay, status) VALUES (?, ?, ?, ?, ?)";
 		PreparedStatement pstQueueSample = databaseConnection.prepareStatement(queueSample);
 		pstQueueSample.setString(1, sample.instrument.instrumentName);
 		pstQueueSample.setString(2, sample.runFolder.runFolderName);
