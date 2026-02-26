@@ -493,12 +493,14 @@ public class SampleListFrame extends JPanel {
 	}
 
 	private void handleEditSampleClick() throws Exception{
-		Sample sample = getCurrentlySelectedSample();
-		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
+		Sample selected = getCurrentlySelectedSample();
+		Sample freshSample = DatabaseCommands.refreshSampleFromDatabase(selected.sampleID);
+		EditSampleFrame editSample = new EditSampleFrame(parent, freshSample);
 		editSample.setVisible(true);
 		RESPONSE_CODE responseCode = editSample.getResponseCode();
-		handleEditSampleResponse(sample, responseCode);
+		handleEditSampleResponse(freshSample, responseCode);
 	}
+	
 
 	public void handleEditSampleResponse(Sample sample, RESPONSE_CODE responseCode) throws Exception{
 		int modelRow = getCurrentlySelectedModelRow();
@@ -510,7 +512,7 @@ public class SampleListFrame extends JPanel {
 			switch(responseCode){
 				case SAMPLE_UPDATED:
 					DatabaseCommands.updateSample(sample);
-					tableModel.updateSample(modelRow, sample);
+					tableModel.updateSample(modelRow,sample);
 					break;
 				case SAMPLE_DELETED:
 					DatabaseCommands.deleteSample(sample.sampleID);

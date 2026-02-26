@@ -1,16 +1,14 @@
 package hmvv.io;
 
+import hmvv.main.Configurations;
+import hmvv.model.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.TreeMap;
-
-import java.sql.PreparedStatement;
-
-import hmvv.main.Configurations;
-import hmvv.model.*;
 
 public class DatabaseCommands {
 
@@ -162,6 +160,10 @@ public class DatabaseCommands {
 	public static ArrayList<Sample> getAllSamples() throws Exception{
 		return DatabaseCommands_Samples.getAllSamples();
 	}
+
+	public static Sample refreshSampleFromDatabase(int sampleID) throws Exception {
+		return DatabaseCommands_Samples.getSampleByID(sampleID);
+	}	
 	
 	public static ExomeTumorMutationBurden getSampleTumorMutationBurden(TMBSample sample)throws Exception{
         return DatabaseCommands_Samples.getSampleTumorMutationBurden(sample);

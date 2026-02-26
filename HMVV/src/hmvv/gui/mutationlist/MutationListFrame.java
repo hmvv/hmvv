@@ -1,5 +1,6 @@
 package hmvv.gui.mutationlist;
 
+
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -20,6 +21,7 @@ import hmvv.gui.sampleList.SampleListFrame;
 import hmvv.gui.sampleList.EditSampleFrame.RESPONSE_CODE;
 import hmvv.io.AsynchronousCallback;
 import hmvv.io.AsynchronousMutationDataIO;
+import hmvv.io.DatabaseCommands;
 import hmvv.io.LIS.LISConnection;
 import hmvv.io.MutationReportGenerator;
 import hmvv.main.HMVVDefectReportFrame;
@@ -357,11 +359,12 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 	}
 
 	public void showEditSampleFrame(){
-		EditSampleFrame editSample = new EditSampleFrame(parent, sample);
-		editSample.setVisible(true);
-		RESPONSE_CODE responseCode = editSample.getResponseCode();
 		try {
-			sampleListFrame.handleEditSampleResponse(sample, responseCode);
+			Sample freshSample = DatabaseCommands.refreshSampleFromDatabase(sample.sampleID);
+			EditSampleFrame editSample = new EditSampleFrame(parent, freshSample);
+			editSample.setVisible(true);
+			RESPONSE_CODE responseCode = editSample.getResponseCode();
+			sampleListFrame.handleEditSampleResponse(freshSample, responseCode);
 			if (responseCode == RESPONSE_CODE.SAMPLE_DELETED){
 				dispose();
 			}

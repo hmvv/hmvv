@@ -10,10 +10,6 @@ import hmvv.main.Configurations.MUTATION_SOMATIC_HISTORY;
 import hmvv.main.Configurations.MUTATION_TIER;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.*;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,6 +17,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 
 public class AnnotationFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -40,6 +41,7 @@ public class AnnotationFrame extends JDialog {
 	private JComboBox<MUTATION_TIER> variantTierComboBox = new JComboBox<MUTATION_TIER>();
 	private JComboBox<MUTATION_SOMATIC_HISTORY> variantSomaticHistoryComboBox = new JComboBox<MUTATION_SOMATIC_HISTORY>();
 	private JCheckBox germlinCheckBox = new JCheckBox("Possible Germline");
+	private JCheckBox repeatMutationCheckBox = new JCheckBox("Repeat Mutation");
 
 	private JTextArea geneAnnotationTextArea = new JTextArea();
 	private JTextArea variantAnnotationTextArea = new JTextArea();
@@ -64,6 +66,7 @@ public class AnnotationFrame extends JDialog {
 
 	private final Color readOnlyColor = new Color(245,245,245);
 	private final Color readWriteColor = Color.WHITE;
+	private boolean userSelectedRepeat = false;
 
 	/**
 	 * Create the dialog.
@@ -177,6 +180,21 @@ public class AnnotationFrame extends JDialog {
 		setDefaultComponentValues();
 	}
 	
+
+	private final String DEFAULT_REPEAT_TEXT = "This mutation was previously detected in this patient's bone marrow / blood.";
+	private void initializeRepeatMutationText() {
+		String prevText = mutation.getOtherMutationsString();
+		boolean isRepeat = prevText != null && !prevText.isEmpty();
+		
+		if (isRepeat) {
+			repeatMutationCheckBox.setSelected(true);
+			if (sampleVariantAnnotationTextArea.getText().trim().isEmpty()) {
+				sampleVariantAnnotationTextArea.setText(DEFAULT_REPEAT_TEXT);
+			}
+		} else {
+			repeatMutationCheckBox.setSelected(false);
+		}
+	}
 	private void setDefaultComponentValues() {
 		Annotation defaultAnnotation = mutation.getLatestAnnotation();
 		if(defaultAnnotation != null) {
@@ -208,6 +226,7 @@ public class AnnotationFrame extends JDialog {
 			sampleVariantAnnotationTextArea.setText(defaultSampleVariantAnnotation.curation);
 			setCommonAnnotationLabel(defaultSampleVariantAnnotation, historyLabelSampleAnnotation);
 		}
+		initializeRepeatMutationText();
 	}
 	
 	private void setCommonAnnotationLabel(CommonAnnotation commonAnnotation, JLabel label) {
@@ -261,6 +280,7 @@ public class AnnotationFrame extends JDialog {
 		addItem(itemPanel, "Tier", variantTierComboBox);
 		addItem(itemPanel, "Somatic Hx", variantSomaticHistoryComboBox);
 		addItem(itemPanel, "Germline?", germlinCheckBox);
+		addItem(itemPanel, "Repeat Mutation", repeatMutationCheckBox);
 		
 		Dimension textAreaDimension = new Dimension(300,550);
 
@@ -336,7 +356,7 @@ public class AnnotationFrame extends JDialog {
 			public void actionPerformed(ActionEvent action) {
                 try {
 					if(action.getSource() == okButton){
-						AnnotationFrame.this.setVisible(false);
+						//AnnotationFrame.this.setVisible(false);
 						saveRecord();
 					}else if(action.getSource() == cancelButton){
 						AnnotationFrame.this.dispose();
@@ -369,7 +389,23 @@ public class AnnotationFrame extends JDialog {
             }
         };
         germlinCheckBox.addItemListener(itemListener);
-
+		 
+		repeatMutationCheckBox.addItemListener(e -> {
+			boolean selected = repeatMutationCheckBox.isSelected();
+			userSelectedRepeat = selected;
+		
+			String text = sampleVariantAnnotationTextArea.getText();
+			String cleaned = text.replaceAll("(?m)^.*previously detected in this patient's.*$", "").trim();
+		
+			if (selected) {
+				String newText = cleaned;
+				if (!newText.isEmpty()) newText += "\n";
+				newText += DEFAULT_REPEAT_TEXT;
+				sampleVariantAnnotationTextArea.setText(newText);
+			} else {
+				sampleVariantAnnotationTextArea.setText(cleaned);
+			}
+		});
 
 		ActionListener historyActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -398,7 +434,7 @@ public class AnnotationFrame extends JDialog {
 		nextAnnotationButton.addActionListener(historyActionListener);
 		previousVariantAnnotationButton.addActionListener(historyActionListener);
 		nextVariantAnnotationButton.addActionListener(historyActionListener);
-		variantAnnotationTextArea.addMouseListener(new ContextMenuMouseListener());
+		variantAnnotationTextArea.addMouseListener(new ContextMenuMouseListener()); 
 	}
 
 	private void saveRecord() throws Exception{
@@ -406,6 +442,19 @@ public class AnnotationFrame extends JDialog {
 			return;
 		}
 		
+		String txt = sampleVariantAnnotationTextArea.getText().trim();
+		boolean NotAllowed = txt.matches("(?s).*previously detected in this patient's bone marrow\\s*/\\s*blood.*");
+
+		if (NotAllowed) {
+			JOptionPane.showMessageDialog(
+				this,
+				"Please select one sample location: bone marrow or blood",
+				"Invalid Sample Location Entry",
+				JOptionPane.WARNING_MESSAGE
+			);
+			return;
+		}
+
 		if(!SSHConnection.isSuperUser(Configurations.USER_FUNCTION.ANNOTATE_MAIN)){
 			//readOnly should prevent this, but just in case
 			JOptionPane.showMessageDialog(this, "Only authorized user can edit annotation");
@@ -415,6 +464,8 @@ public class AnnotationFrame extends JDialog {
 		saveSampleVariantAnnotationRecord();
 		saveAnnotationRecord();
 		saveGeneAnnotationRecord();
+		
+		AnnotationFrame.this.setVisible(false);
 	}
 	
 	private void saveSampleVariantAnnotationRecord() throws Exception{
@@ -573,14 +624,48 @@ public class AnnotationFrame extends JDialog {
 		}
 	}
 
-	private void updateReportText() throws Exception{
-		MUTATION_TIER tier_selected = (MUTATION_TIER) variantTierComboBox.getSelectedItem();
-        MUTATION_SOMATIC_HISTORY choice_selected = (MUTATION_SOMATIC_HISTORY) variantSomaticHistoryComboBox.getSelectedItem();
-        boolean possibleGermline = germlinCheckBox.isSelected();
-		String thisUpdatedReport = MutationReportGenerator.generateShortReport(mutation, tier_selected, choice_selected, possibleGermline);
-        sampleVariantAnnotationTextArea.setText(thisUpdatedReport);
-    }
 
+	private void updateReportText() throws Exception {
+		Configurations.MUTATION_TIER tier_selected = (Configurations.MUTATION_TIER)this.variantTierComboBox.getSelectedItem();
+		Configurations.MUTATION_SOMATIC_HISTORY choice_selected = (Configurations.MUTATION_SOMATIC_HISTORY)this.variantSomaticHistoryComboBox.getSelectedItem();
+		boolean possibleGermline = this.germlinCheckBox.isSelected();
+		String current = this.sampleVariantAnnotationTextArea.getText();
+		String cleaned = current.replaceAll("(?ms)^.*?variant is classified as a Tier.*?(?=\\Z|\\n\\n)", "").trim();
+		cleaned = cleaned.replaceAll("(?m)^.*previously detected in this patient's bone.*$", "").trim();
+		String userText = cleaned.trim();
+		String tierText = MutationReportGenerator.generateShortReport(this.mutation, tier_selected, choice_selected, possibleGermline).trim();
+		StringBuilder builder = new StringBuilder();
+		builder.append(tierText);
+
+		if (!userText.isEmpty()) {
+		  builder.append("\n");
+		  builder.append(userText);
+		} 
+	
+		String previouslyDetectedSentence = "";
+		Pattern p = Pattern.compile("(?m)^(.*previously detected in this patient's.*?)$");
+		Matcher m = p.matcher(current);
+		if (m.find()) {
+			previouslyDetectedSentence = m.group(1).trim();
+		}
+		
+			
+		boolean isRepeat = this.repeatMutationCheckBox.isSelected();
+		boolean hasSentence = previouslyDetectedSentence != null && !previouslyDetectedSentence.isEmpty();
+		
+		if (isRepeat || hasSentence) {
+			builder.append("\n");
+			if (hasSentence) {
+				builder.append(previouslyDetectedSentence);       
+			} else {
+				builder.append("This mutation was previously detected in this patient's bone marrow / blood.");
+			}
+		}
+	
+		this.sampleVariantAnnotationTextArea.setText(builder.toString());
+	  }
+	
+ 
 	private void showAnnotationDraftFrame(){
 		AnnotationDraftFrame annotationdraftframe = new AnnotationDraftFrame(this, mutation);	
 		annotationdraftframe.setVisible(true);

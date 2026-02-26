@@ -1,20 +1,17 @@
 package hmvv.gui.mutationlist;
-import java.awt.event.MouseEvent;
-import java.awt.Component;
-
-import java.util.ArrayList;
-
-import javax.swing.JDialog;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-
 import hmvv.io.DatabaseCommands;
 import hmvv.main.Configurations;
 import hmvv.model.CosmicID;
 import hmvv.model.CosmicIdentifier;
 import hmvv.model.MutationSomatic;
+import java.awt.Component;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import javax.swing.JDialog;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
 public class CosmicInfoPopup {
 
@@ -63,7 +60,7 @@ public class CosmicInfoPopup {
 				if (cos_dna_change.equals(mut_dna_change)){
 					thisInfo.shade = false;
 					if (cos_transcript.equals(mut_transcript)){
-						thisInfo.openItem = true;
+					thisInfo.openItem = true;
 					}
 				}
 				cosmicInfoListAll.add(thisInfo);

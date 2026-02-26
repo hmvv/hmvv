@@ -49,9 +49,9 @@ public class MutationReportGenerator{
 			report.append(" The effect of this mutation on prognosis and personalized therapeutic strategies for this patient is uncertain.");
 		}
 
-		if (mutation.getOtherMutations().size() > 0){
-			report.append(" This mutation was detected previously in a [bone marrow aspirate specimen] from this patient (BM case number; date)");
-		}
+		//if (mutation.getOtherMutations().size() > 0){
+			//report.append(" This mutation was detected previously in a [bone marrow aspirate specimen] from this patient (BM case number; date)");
+		//}
 		
 		if(possibleGermline){
 			report.append(" Given that the variant is present consistently at a frequency close to 50% in both specimens, the possibility of this variant being germline cannot be ruled out.");

@@ -1,5 +1,12 @@
 package hmvv.main;
 
+import hmvv.gui.GUICommonTools;
+import hmvv.gui.mutationlist.DbVersionCheckFrame;
+import hmvv.io.DatabaseCommands;
+import hmvv.io.InternetCommands;
+import hmvv.io.LIS.LISConnection;
+import hmvv.io.SSHConnection;
+import hmvv.main.Configurations.USER_TYPE;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
@@ -8,7 +15,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.InputStream;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -16,14 +22,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-
-import hmvv.gui.GUICommonTools;
-import hmvv.gui.mutationlist.DbVersionCheckFrame;
-import hmvv.io.DatabaseCommands;
-import hmvv.io.InternetCommands;
-import hmvv.io.SSHConnection;
-import hmvv.io.LIS.LISConnection;
-import hmvv.main.Configurations.USER_TYPE;
 
 public class HMVVLoginFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
