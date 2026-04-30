@@ -120,6 +120,7 @@ public class DatabaseCommands_Mutations {
 		ArrayList<MutationSomatic> reportedMutations = new ArrayList<MutationSomatic>();
 		for(Sample otherSample : sample.getLinkedPatientSamples()) {
 			reportedMutations.addAll(getMutationDataByID(otherSample, false));
+			reportedMutations.addAll(getMutationDataByID(otherSample, true)); //Previously detected mutation not linked to the previous case.
 		}
 
 		for(MutationSomatic mutation : mutations) {
