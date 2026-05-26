@@ -49,6 +49,10 @@ public class MutationListFilters {
 	}
 
 	private boolean includeMutation(MutationCommon mutation){
+		if (mutation.isReported()){
+			return true;
+		}
+
 		if(mutation.getAlt().contains("TANDEM")){
 			return true;
 		}

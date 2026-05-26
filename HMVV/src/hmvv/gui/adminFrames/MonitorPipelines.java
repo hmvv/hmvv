@@ -113,9 +113,9 @@ public class MonitorPipelines extends JDialog {
 		groupLayout.setHorizontalGroup(
 				groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-						.addGap(15))
+						.addGap(20)
 						.addComponent(refreshPipelines)
-						.addGap(15)
+						.addGap(15))
 				.addGroup(groupLayout.createSequentialGroup()
 						.addGap(20)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 969, Short.MAX_VALUE)
