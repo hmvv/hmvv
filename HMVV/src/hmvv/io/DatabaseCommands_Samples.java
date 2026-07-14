@@ -43,6 +43,23 @@ public class DatabaseCommands_Samples {
 		temp_databaseConnection.close();
 	}
 
+	public static void insertCTLbclconvertIntoDatabase(Instrument instrument, RunFolder runFolder) throws Exception{
+		String url = "jdbc:mysql://"+SSHConnection.getForwardingHost()+"/";
+		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
+		Connection temp_databaseConnection = DriverManager.getConnection(url+Configurations.BCL2FASTQ_DATABASE_NAME+"?noAccessToProcedureBodies=true", credentials[0], credentials[1]);
+		String enterBcl2fastq = "insert into bcl_convert_status_dev (instrument, runFolder, enteredBy, source) values (?, ?, ?, 'CTL') on duplicate key update runFolder = ?, source = 'CTL'";
+		PreparedStatement pstEnterSample = temp_databaseConnection.prepareStatement(enterBcl2fastq);
+		pstEnterSample.setString(1, instrument.instrumentName);
+		pstEnterSample.setString(2, runFolder.runFolderName);
+		pstEnterSample.setString(3, SSHConnection.getUserName());
+		pstEnterSample.setString(4, runFolder.runFolderName);
+
+		pstEnterSample.executeUpdate();
+		pstEnterSample.close();
+		temp_databaseConnection.close();
+
+	}
+
 	static void insertDataIntoDatabase(Sample sample) throws Exception{
 		Assay assay = sample.assay;
 		Instrument instrument = sample.instrument;

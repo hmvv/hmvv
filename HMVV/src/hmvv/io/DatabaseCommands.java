@@ -153,6 +153,10 @@ public class DatabaseCommands {
 		DatabaseCommands_Samples.insertbclconvertIntoDatabase(instrument, runFolder);
 	}
 
+	public static void insertCTLbclconvertIntoDatabase(Instrument instrument, RunFolder runFolder) throws Exception{
+		DatabaseCommands_Samples.insertCTLbclconvertIntoDatabase(instrument, runFolder);
+	}
+
 	public static void insertDataIntoDatabase(Sample sample) throws Exception{
 		DatabaseCommands_Samples.insertDataIntoDatabase(sample);
 	}

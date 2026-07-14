@@ -194,7 +194,7 @@ public class EnterArcherSample extends JDialog {
         try {
             setEnabled(false);
             Instrument instrument = (Instrument) instrumentComboBox.getSelectedItem();
-            DatabaseCommands.insertbclconvertIntoDatabase(instrument, runFolder);
+            DatabaseCommands.insertCTLbclconvertIntoDatabase(instrument, runFolder);
             setEnabled(true);
         }finally {
             setEnabled(true);
