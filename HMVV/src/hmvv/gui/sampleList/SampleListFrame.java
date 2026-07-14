@@ -81,7 +81,9 @@ public class SampleListFrame extends JPanel {
 	
 	private JLabel runIDLabel;
 	private JTextField runIDTextField;
-	
+
+	private JLabel sampleIDLabel;
+	private JTextField sampleIDTextField;
 
 	private HMVVTableColumn[] customColumns;
 	
@@ -237,6 +239,12 @@ public class SampleListFrame extends JPanel {
 
 		runIDTextField = new JTextField();
 		runIDTextField.setColumns(10);
+
+		sampleIDLabel = new JLabel("Sample ID");
+		sampleIDLabel.setFont(GUICommonTools.TAHOMA_BOLD_14);
+
+		sampleIDTextField = new JTextField();
+		sampleIDTextField.setColumns(10);
 	}
 
 	private void layoutComponents(){
@@ -260,6 +268,10 @@ public class SampleListFrame extends JPanel {
 						.addComponent(runIDLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addPreferredGap(ComponentPlacement.RELATED)
 						.addComponent(runIDTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addGap(18)
+						.addComponent(sampleIDLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(sampleIDTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addGap(18)
 						.addComponent(sampleSearchButton)
 						.addGap(18)
@@ -288,7 +300,9 @@ public class SampleListFrame extends JPanel {
 												.addComponent(mrnLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(mrnTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 												.addComponent(runIDLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addComponent(runIDTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
+												.addComponent(runIDTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(sampleIDLabel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(sampleIDTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
 						.addGap(25)
 						.addComponent(tableScrollPane, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
 						.addGap(25))
@@ -403,6 +417,7 @@ public class SampleListFrame extends JPanel {
 		
 		mrnTextField.getDocument().addDocumentListener(documentListener);
 		runIDTextField.getDocument().addDocumentListener(documentListener);
+		sampleIDTextField.getDocument().addDocumentListener(documentListener);
 	}
 
 	private int getCurrentlySelectedModelRow(){
@@ -575,9 +590,20 @@ public class SampleListFrame extends JPanel {
 				}
 			}
 
+			private boolean doesSampleIDMatch(Entry<? extends SampleListTableModel, ? extends Integer> entry){
+				int row = entry.getIdentifier();
+				Sample sample = tableModel.getSample(row);
+				String sampleID = sampleIDTextField.getText();
+				if(sampleID.equals("")){
+					return true;
+				}else{
+					return String.valueOf(sample.sampleID).contains(sampleID);
+				}
+			}
+
 			@Override
 			public boolean include(Entry<? extends SampleListTableModel, ? extends Integer> entry) {
-				return doesAssayMatch(entry) && doesInstrumentMatch(entry) && doesMRNMatch(entry) && doesRunIDMatch(entry);
+				return doesAssayMatch(entry) && doesInstrumentMatch(entry) && doesMRNMatch(entry) && doesRunIDMatch(entry) && doesSampleIDMatch(entry);
 			}
 		};
 		sorter.setRowFilter(rowFilter);
@@ -611,6 +637,7 @@ public class SampleListFrame extends JPanel {
 		instrumentComboBox.setSelectedIndex(0);
 		mrnTextField.setText("");
 		runIDTextField.setText("");
+		sampleIDTextField.setText("");
 	}
 	
 	private volatile boolean mutationListLoading = false;
