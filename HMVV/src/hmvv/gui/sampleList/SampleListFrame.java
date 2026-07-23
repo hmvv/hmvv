@@ -527,7 +527,9 @@ public class SampleListFrame extends JPanel {
 			switch(responseCode){
 				case SAMPLE_UPDATED:
 					DatabaseCommands.updateSample(sample);
-					tableModel.updateSample(modelRow,sample);
+					ArrayList<Sample> freshSamples = DatabaseCommands.getAllSamples();
+					//tableModel.updateSample(modelRow,sample);
+					tableModel.rebuildSampleList(freshSamples);
 					break;
 				case SAMPLE_DELETED:
 					DatabaseCommands.deleteSample(sample.sampleID);
