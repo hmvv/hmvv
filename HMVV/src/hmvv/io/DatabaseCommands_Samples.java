@@ -284,7 +284,31 @@ public class DatabaseCommands_Samples {
 		}
 	
 		ps.close();
+		linkSampleByMRN(sample);
 		return sample;
+	}
+
+
+	private static void linkSampleByMRN(Sample sample) throws Exception {
+		if (sample == null || sample.getMRN().equals("")) {
+			return;
+		}
+		PreparedStatement psLinked = databaseConnection.prepareStatement(
+			"select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, " +
+			"s.orderNumber, s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, " +
+			"s.coverageID, s.callerID, s.runDate, s.patientHistory, s.bmDiagnosis, s.note, " +
+			"s.enteredBy, s.analyzedBy, t2.normalPairInstrument, t2.normalPairRunFolder, t2.normalSampleName " +
+			"from samples as s " +
+			"left join sampleNormalPair as t2 on s.sampleID = t2.sampleID " +
+			"where s.mrn = ? and s.sampleID != ?"
+		);
+		psLinked.setString(1, sample.getMRN());
+		psLinked.setInt(2, sample.sampleID);
+		ResultSet rsLinked = psLinked.executeQuery();
+		while (rsLinked.next()) {
+			sample.addLinkedPatientSample(getSample(rsLinked));
+		}
+		psLinked.close();
 	}
 	
 
