@@ -151,6 +151,10 @@ public class SampleListTableModel extends AbstractTableModel{
 		return samples.get(row);
 	}
 
+	public ArrayList<Sample> getAllSamples(){
+		return samples;
+	}
+
 	public void deleteSample(int row){
 		samples.remove(row);
 		fireTableRowsDeleted(row, row);

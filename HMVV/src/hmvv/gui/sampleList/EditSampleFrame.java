@@ -1,9 +1,6 @@
 package hmvv.gui.sampleList;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -16,6 +13,7 @@ import hmvv.main.Configurations;
 import hmvv.main.HMVVDefectReportFrame;
 import hmvv.model.Assay;
 import hmvv.model.Sample;
+import java.util.ArrayList;
 
 public class EditSampleFrame extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -36,6 +34,7 @@ public class EditSampleFrame extends JDialog {
 	private JButton btnDelete;
 	private JButton btnCancel;
 	private Sample sample;
+	private ArrayList<Sample> allSamples;
 
 	private static RESPONSE_CODE response_code;
 
@@ -48,11 +47,12 @@ public class EditSampleFrame extends JDialog {
 	/**
 	 * Create the frame.
 	 */
-	public EditSampleFrame(Window parent, Sample sample) {
+	public EditSampleFrame(Window parent, Sample sample, ArrayList<Sample> allSamples) {
 		super(parent, "Title Set Later", ModalityType.APPLICATION_MODAL);
 		String title = "Edit Sample";
 		setTitle(title);
 		this.sample = sample;
+		this.allSamples = allSamples;
 		
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		Rectangle bounds = GUICommonTools.getBounds(parent);
@@ -338,7 +338,11 @@ public class EditSampleFrame extends JDialog {
 	}
 
 	private void updateSampleFromTextFields(){
-		sample.setMRN(textMRN.getText());
+		String oldMRN = sample.getMRN();
+		String newMRN = textMRN.getText();
+		if (!oldMRN.equals(newMRN)){relinkSampleByMRN(oldMRN, newMRN);}
+		sample.setMRN(newMRN);
+		//sample.setMRN(textMRN.getText());
 		sample.setLastName(textLast.getText());
 		sample.setFirstName(textFirst.getText());
 		sample.setOrderNumber(textOrder.getText());
@@ -349,6 +353,33 @@ public class EditSampleFrame extends JDialog {
 		sample.setDiagnosis(textDiagnosis.getText());
 		sample.setNote(textNote.getText());
 	}
+
+	private void relinkSampleByMRN(String oldMRN, String newMRN) {
+		if (!oldMRN.equals("")) {
+			for (Sample otherSample : allSamples) {
+				if (otherSample == sample) {
+					continue;
+				}
+				if (otherSample.getMRN().equals(oldMRN)) {
+					sample.removeLinkedPatientSample(otherSample);
+					otherSample.removeLinkedPatientSample(sample);
+				}
+			}	
+			
+    }
+		if (!newMRN.equals("")) {
+			for (Sample otherSample : allSamples) {
+				if (otherSample == sample) {
+					continue;
+				}
+				if (otherSample.getMRN().equals(newMRN)) {
+					sample.addLinkedPatientSample(otherSample);
+					otherSample.addLinkedPatientSample(sample);
+				}
+			}
+		}
+    }
+
 	
 	//EditSampleFrame nees to be the ActionListener on these buttons.
 	//Need to build way for other objects (Sample"ListFrame and MutationFilterPanel) to register themselves as listenere (Observer design pattern).

@@ -58,6 +58,10 @@ public class Sample {
 	public void addLinkedPatientSample(Sample sample) {
 		patientSamples.add(sample);
 	}
+
+	public void removeLinkedPatientSample(Sample sample){
+		patientSamples.remove(sample);
+	}
 	
 	public ArrayList<Sample> getLinkedPatientSamples() {
 		return patientSamples;

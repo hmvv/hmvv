@@ -509,11 +509,11 @@ public class SampleListFrame extends JPanel {
 
 	private void handleEditSampleClick() throws Exception{
 		Sample selected = getCurrentlySelectedSample();
-		Sample freshSample = DatabaseCommands.refreshSampleFromDatabase(selected.sampleID);
-		EditSampleFrame editSample = new EditSampleFrame(parent, freshSample);
+		//Sample freshSample = DatabaseCommands.refreshSampleFromDatabase(selected.sampleID);
+		EditSampleFrame editSample = new EditSampleFrame(parent, selected, tableModel.getAllSamples());
 		editSample.setVisible(true);
 		RESPONSE_CODE responseCode = editSample.getResponseCode();
-		handleEditSampleResponse(freshSample, responseCode);
+		handleEditSampleResponse(selected, responseCode);
 	}
 	
 
