@@ -360,11 +360,17 @@ public class MutationListFrame extends JDialog implements AsynchronousCallback{
 
 	public void showEditSampleFrame(){
 		try {
-			Sample freshSample = DatabaseCommands.refreshSampleFromDatabase(sample.sampleID);
-			EditSampleFrame editSample = new EditSampleFrame(parent, freshSample);
+			String oldMRNBeforeRefresh = sample.getMRN();
+			DatabaseCommands.refreshSampleFromDatabase(sample);
+			if(!oldMRNBeforeRefresh.equals(sample.getMRN())){
+				Sample.relinkByMRN(sample, sampleListFrame.getSampleTabelModel().getAllSamples());
+			}
+			EditSampleFrame editSample = new EditSampleFrame(parent, sample, sampleListFrame.getSampleTabelModel().getAllSamples());
+			//Sample freshSample = DatabaseCommands.refreshSampleFromDatabase(sample.sampleID);
+			//EditSampleFrame editSample = new EditSampleFrame(parent, freshSample);
 			editSample.setVisible(true);
 			RESPONSE_CODE responseCode = editSample.getResponseCode();
-			sampleListFrame.handleEditSampleResponse(freshSample, responseCode);
+			sampleListFrame.handleEditSampleResponse(sample, responseCode);
 			if (responseCode == RESPONSE_CODE.SAMPLE_DELETED){
 				dispose();
 			}

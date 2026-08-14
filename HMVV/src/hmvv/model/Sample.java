@@ -62,6 +62,29 @@ public class Sample {
 	public void removeLinkedPatientSample(Sample sample){
 		patientSamples.remove(sample);
 	}
+
+	private static void clearLinkedPatientSamples(Sample sample) {
+		ArrayList<Sample> currentLinks = new ArrayList<Sample>(sample.getLinkedPatientSamples());
+		for (Sample other : currentLinks) {
+			sample.removeLinkedPatientSample(other);
+			other.removeLinkedPatientSample(sample);
+		}
+	}
+
+	public static void relinkByMRN(Sample sample, ArrayList<Sample> allSamples) {
+		clearLinkedPatientSamples(sample);
+		if (!sample.getMRN().equals("")) {
+			for (Sample other : allSamples) {
+				if (other == sample) {
+					continue;
+				}
+				if (sample.getMRN().equals(other.getMRN())) {
+					sample.addLinkedPatientSample(other);
+					other.addLinkedPatientSample(sample);
+				}
+			}
+		}
+	}
 	
 	public ArrayList<Sample> getLinkedPatientSamples() {
 		return patientSamples;

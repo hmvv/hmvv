@@ -508,12 +508,16 @@ public class SampleListFrame extends JPanel {
 	}
 
 	private void handleEditSampleClick() throws Exception{
-		Sample selected = getCurrentlySelectedSample();
-		//Sample freshSample = DatabaseCommands.refreshSampleFromDatabase(selected.sampleID);
-		EditSampleFrame editSample = new EditSampleFrame(parent, selected, tableModel.getAllSamples());
+		Sample selectedSample = getCurrentlySelectedSample();
+		String oldMRNBeforeRefresh = selectedSample.getMRN();
+		DatabaseCommands.refreshSampleFromDatabase(selectedSample);
+		if(!oldMRNBeforeRefresh.equals(selectedSample.getMRN())){
+			Sample.relinkByMRN(selectedSample, tableModel.getAllSamples());
+		}
+		EditSampleFrame editSample = new EditSampleFrame(parent, selectedSample, tableModel.getAllSamples());
 		editSample.setVisible(true);
 		RESPONSE_CODE responseCode = editSample.getResponseCode();
-		handleEditSampleResponse(selected, responseCode);
+		handleEditSampleResponse(selectedSample, responseCode);
 	}
 	
 

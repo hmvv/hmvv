@@ -338,10 +338,12 @@ public class EditSampleFrame extends JDialog {
 	}
 
 	private void updateSampleFromTextFields(){
-		String oldMRN = sample.getMRN();
 		String newMRN = textMRN.getText();
-		if (!oldMRN.equals(newMRN)){relinkSampleByMRN(oldMRN, newMRN);}
+		boolean mrnChanged = !sample.getMRN().equals(newMRN);
 		sample.setMRN(newMRN);
+		if (mrnChanged) {
+			Sample.relinkByMRN(sample, allSamples);
+		}
 		//sample.setMRN(textMRN.getText());
 		sample.setLastName(textLast.getText());
 		sample.setFirstName(textFirst.getText());
@@ -353,32 +355,6 @@ public class EditSampleFrame extends JDialog {
 		sample.setDiagnosis(textDiagnosis.getText());
 		sample.setNote(textNote.getText());
 	}
-
-	private void relinkSampleByMRN(String oldMRN, String newMRN) {
-		if (!oldMRN.equals("")) {
-			for (Sample otherSample : allSamples) {
-				if (otherSample == sample) {
-					continue;
-				}
-				if (otherSample.getMRN().equals(oldMRN)) {
-					sample.removeLinkedPatientSample(otherSample);
-					otherSample.removeLinkedPatientSample(sample);
-				}
-			}	
-			
-    }
-		if (!newMRN.equals("")) {
-			for (Sample otherSample : allSamples) {
-				if (otherSample == sample) {
-					continue;
-				}
-				if (otherSample.getMRN().equals(newMRN)) {
-					sample.addLinkedPatientSample(otherSample);
-					otherSample.addLinkedPatientSample(sample);
-				}
-			}
-		}
-    }
 
 	
 	//EditSampleFrame nees to be the ActionListener on these buttons.

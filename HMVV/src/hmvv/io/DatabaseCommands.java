@@ -165,8 +165,8 @@ public class DatabaseCommands {
 		return DatabaseCommands_Samples.getAllSamples();
 	}
 
-	public static Sample refreshSampleFromDatabase(int sampleID) throws Exception {
-		return DatabaseCommands_Samples.getSampleByID(sampleID);
+	public static Sample refreshSampleFromDatabase(Sample selectedSample) throws Exception {
+		return DatabaseCommands_Samples.refreshSampleData(selectedSample);
 	}	
 	
 	public static ExomeTumorMutationBurden getSampleTumorMutationBurden(TMBSample sample)throws Exception{
