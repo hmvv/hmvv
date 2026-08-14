@@ -263,31 +263,36 @@ public class DatabaseCommands_Samples {
 	}
 
 
-	static Sample getSampleByID(int sampleID) throws Exception {
+	static Sample refreshSampleData(Sample sample) throws Exception {
 
 		PreparedStatement ps = databaseConnection.prepareStatement(
-			"select s.sampleID, s.assay, s.instrument, s.mrn, s.runFolderName, s.lastName, s.firstName, " +
-			"s.orderNumber, s.pathNumber, s.tumorSource, s.tumorPercent, s.runID, s.sampleName, " +
-			"s.coverageID, s.callerID, s.runDate, s.patientHistory, s.bmDiagnosis, s.note, " +
-			"s.enteredBy, s.analyzedBy, t2.normalPairInstrument, t2.normalPairRunFolder, t2.normalSampleName " +
-			"from samples as s " +
-			"left join sampleNormalPair as t2 on s.sampleID = t2.sampleID " +
-			"where s.sampleID = ?"
+			"select mrn, lastName, firstName, orderNumber, pathNumber, tumorSource, " +
+        	"tumorPercent, patientHistory, bmDiagnosis, note " +
+        	"from samples where sampleID = ?"
 		);
 	
-		ps.setInt(1, sampleID);
+		ps.setInt(1, sample.sampleID);
 		ResultSet rs = ps.executeQuery();
 	
-		Sample sample = null;
 		if (rs.next()) {
-			sample = getSample(rs);
+
+			sample.setMRN(rs.getString("mrn"));
+			sample.setLastName(rs.getString("lastName"));
+			sample.setFirstName(rs.getString("firstName"));
+			sample.setOrderNumber(rs.getString("orderNumber"));
+			sample.setPathNumber(rs.getString("pathNumber"));
+			sample.setTumorSource(rs.getString("tumorSource"));
+			sample.setTumorPercent(rs.getString("tumorPercent"));
+			sample.setPatientHistory(rs.getString("patientHistory"));
+			sample.setDiagnosis(rs.getString("bmDiagnosis"));
+			sample.setNote(rs.getString("note"));
+
 		}
 
 		ps.close();
 
 		return sample;
 	}
-
 
 
 	private static ArrayList<Sample> getExceptionSamples(int sampleID , String sampleMRN ) throws Exception{
