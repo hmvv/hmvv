@@ -47,7 +47,7 @@ public class DatabaseCommands_Samples {
 		String url = "jdbc:mysql://"+SSHConnection.getForwardingHost()+"/";
 		String[] credentials = Configurations.READ_WRITE_CREDENTIALS;
 		Connection temp_databaseConnection = DriverManager.getConnection(url+Configurations.BCL2FASTQ_DATABASE_NAME+"?noAccessToProcedureBodies=true", credentials[0], credentials[1]);
-		String enterBcl2fastq = "insert into bcl_convert_status_dev (instrument, runFolder, enteredBy, source) values (?, ?, ?, 'CTL') on duplicate key update runFolder = ?, source = 'CTL'";
+		String enterBcl2fastq = "insert into bcl_convert_status (instrument, runFolder, enteredBy, source) values (?, ?, ?, 'CTL') on duplicate key update runFolder = ?, source = 'CTL'";
 		PreparedStatement pstEnterSample = temp_databaseConnection.prepareStatement(enterBcl2fastq);
 		pstEnterSample.setString(1, instrument.instrumentName);
 		pstEnterSample.setString(2, runFolder.runFolderName);
